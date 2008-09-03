@@ -4,6 +4,7 @@ import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import java.io.*;
 
 /**
  * Provides functionality to connect to and perform operations on the news database.
@@ -21,7 +22,7 @@ public class SQL {
 
     // Login credentials
     private static final String SQL_USER = "irc";
-    private static final String SQL_PASS = "TODO"; // TODO load from file
+    private static String SQL_PASS;
 
     private int affectedRows;
     private Object valueList[];
@@ -29,6 +30,14 @@ public class SQL {
     private Connection connection = null;
     private Statement statement = null;
     private ResultSet resultset = null;
+
+    public static void loadPassword() throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(new File("mysqlpw.txt")));
+        SQL_PASS = reader.readLine();
+        reader.close();
+        if(SQL_PASS.equals(""))
+            throw new Exception("No data extracted from MySQL password file!");
+    }
 
     public Object[] getValueList() {
         return valueList;

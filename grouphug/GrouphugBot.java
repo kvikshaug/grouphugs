@@ -99,8 +99,10 @@ public class GrouphugBot extends PircBot {
                 Thread.sleep(RECONNECT_TIME);
                 reconnect();
             }
-            catch (Exception e) {
+            catch (InterruptedException e) {
                 // do nothing; try again in specified time
+            } catch(Exception e) {
+                // TODO - handle these exceptions
             }
         }
     }
@@ -157,16 +159,18 @@ public class GrouphugBot extends PircBot {
      * @throws NickAlreadyInUseException - If our nick is already in use. TODO should be handled!
      */
     public static void main(String[] args) throws Exception {
-        // Now start our bot up.
+        // Load the SQL password from file
+        try {
+            SQL.loadPassword();
+        } catch(Exception e) {
+            System.err.println("Error: Could not load MySQL-password file");
+            e.printStackTrace();
+            return;
+        }
         GrouphugBot bot = new GrouphugBot();
-
         // Enable debugging output.
         bot.setVerbose(true);
-
-        // Connect to the IRC server.
         bot.connect(GrouphugBot.SERVER);
-
-        // Join the #pircbot channel.
         bot.joinChannel(GrouphugBot.CHANNEL);
 
     }
