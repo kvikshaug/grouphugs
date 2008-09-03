@@ -18,10 +18,10 @@ public class SQL {
 
     //MySQL host and db
     private static final String SQL_HOST = "127.0.0.1";
-    private static final String SQL_DB = "irc";
+    private static final String SQL_DB = "gh";
 
     // Login credentials
-    private static final String SQL_USER = "irc";
+    private static final String SQL_USER = "murray";
     private static String SQL_PASS;
 
     private int affectedRows;
