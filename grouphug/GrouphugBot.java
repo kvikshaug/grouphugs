@@ -41,6 +41,8 @@ public class GrouphugBot extends PircBot {
 
     public GrouphugBot() {
         this.setName(BOT_NAME);
+        System.setOut(stdOut);
+        System.setErr(stdOut);
     }
 
     /**
