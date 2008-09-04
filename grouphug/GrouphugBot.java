@@ -41,8 +41,6 @@ public class GrouphugBot extends PircBot {
 
     public GrouphugBot() {
         this.setName(BOT_NAME);
-        System.setOut(stdOut);
-        System.setErr(stdOut);
     }
 
     /**
@@ -73,6 +71,7 @@ public class GrouphugBot extends PircBot {
         if(message.equalsIgnoreCase("goosh"))
             sendMessage(CHANNEL, "http://youtube.com/watch?v=xrhLdDIQ5Kk");
 
+        stdOut.flush();
     }
 
     /**
@@ -156,6 +155,7 @@ public class GrouphugBot extends PircBot {
             if(!lines.get(i).equals(""))
                 this.sendMessage(GrouphugBot.CHANNEL, lines.get(i));
         }
+        stdOut.flush();
     }
 
     /**
@@ -234,5 +234,6 @@ public class GrouphugBot extends PircBot {
 
         // Join the channel
         bot.joinChannel(GrouphugBot.CHANNEL);
+        stdOut.flush();
     }
 }
