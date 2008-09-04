@@ -30,7 +30,7 @@ import java.io.FileOutputStream;
  */
 public class GrouphugBot extends PircBot {
 
-    protected static final String CHANNEL = "#grouphugs";     // The main channel
+    protected static final String CHANNEL = "#grouphugers";     // The main channel
     protected static final String SERVER = "irc.homelien.no"; // The main IRC server
     protected static final String BOT_NAME = "gh";            // The bot's nick
     protected static final int MAX_LINE_CHARS = 420;          // The number of characters upon which lines are splitted
