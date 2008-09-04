@@ -3,9 +3,7 @@ package grouphug;
 import org.jibble.pircbot.*;
 
 import java.util.ArrayList;
-import java.io.PrintStream;
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
+import java.io.*;
 
 /**
  * GrouphugBot.java
@@ -33,8 +31,13 @@ public class GrouphugBot extends PircBot {
     protected static final String CHANNEL = "#grouphugers";     // The main channel
     protected static final String SERVER = "irc.homelien.no"; // The main IRC server
     protected static final String BOT_NAME = "gh";            // The bot's nick
+    protected static final String BOT_ALT_NAME = "hugger";    // Alternative nick
     protected static final int MAX_LINE_CHARS = 420;          // The number of characters upon which lines are splitted
     protected static final int RECONNECT_TIME = 15000;        // How often to try to reconnect to the server, in ms
+
+    protected static File logfile = new File("log-current");  // The file to log all messages to
+    protected static PrintStream stdOut;                      // The standard output
+    protected static PrintStream stdErr;                      // The standard error-output
 
     public GrouphugBot() {
         this.setName(BOT_NAME);
@@ -161,30 +164,68 @@ public class GrouphugBot extends PircBot {
      * @throws IrcException - unknown? TODO look into this
      * @throws NickAlreadyInUseException - If our nick is already in use. TODO should be handled!
      */
-    public static void main(String[] args) throws Exception {
-        // Redirect standard output to logfile -- bot also outputs here, will this work?
-        System.setOut(
-            new PrintStream(
-              new BufferedOutputStream(
-                new FileOutputStream("log-test"))));
-        System.setErr(new PrintStream(
-              new BufferedOutputStream(
-                new FileOutputStream("log-test"))));
+    public static void main(String[] args) {
+
+        // Redirect standard output to logfile
+        if(!logfile.exists()) {
+            try {
+                logfile.createNewFile();
+            } catch(IOException e) {
+                System.err.println("Fatal error: Unable to load or create logfile \"log-current\" in default dir!");
+                return;
+            }
+        }
+
+        try {
+            stdOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(logfile)));
+        } catch(FileNotFoundException e) {
+            System.err.println("Logfile should exist, but could not be found! Please check the code logic.");
+            return;
+        }
+        stdErr = stdOut;
+
+        System.setOut(stdOut);
+        System.setErr(stdErr);
 
         // Load the SQL password from file
         try {
             SQL.loadPassword();
         } catch(Exception e) {
-            System.err.println("Error: Could not load MySQL-password file");
+            System.err.println("Error: Could not load MySQL-password file.");
             e.printStackTrace();
             return;
         }
         GrouphugBot bot = new GrouphugBot();
+
         // Enable debugging output.
         bot.setVerbose(true);
-        bot.connect(GrouphugBot.SERVER);
+
+        // Try connecting to the server
+        try {
+            try {
+                bot.connect(GrouphugBot.SERVER);
+            } catch(NickAlreadyInUseException e) {
+                try {
+                    bot.setName(BOT_ALT_NAME);
+                    bot.connect(GrouphugBot.SERVER);
+                } catch(NickAlreadyInUseException ex) {
+                    System.err.println("Both suggested nicks are taken!");
+                    return;
+                }
+            }
+        } catch(IrcException e) {
+            System.err.println("Caught IrcException while connecting to server");
+            e.printStackTrace();
+        } catch(IOException e) {
+            System.err.println("Caught IOException while connecting to server");
+            e.printStackTrace();
+        }
+
+        // Join the channel
         bot.joinChannel(GrouphugBot.CHANNEL);
 
+        // Testing output
         System.out.println("test");
+        System.err.println("error-test");
     }
 }
