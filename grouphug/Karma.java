@@ -5,6 +5,7 @@ public class Karma {
     // TODO karmatop, karmabottom
 
     private static final String TRIGGER = "karma ";
+    private static final String KARMA_DB = "gh_karma";
 
     protected static void trigger(GrouphugBot bot, String message) {
 
@@ -45,9 +46,9 @@ public class Karma {
         // TODO assumes that null just means "not found"
         KarmaItem ki = find(name, sql);
         if(ki == null) {
-            sql.query("INSERT INTO karma (name, value) VALUES ('"+name+"', '"+karma+"');");
+            sql.query("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('"+name+"', '"+karma+"');");
         } else {
-            sql.query("UPDATE karma SET value='"+(ki.getKarma() + karma)+"' WHERE id='"+ki.getID()+"';");
+            sql.query("UPDATE "+KARMA_DB+" SET value='"+(ki.getKarma() + karma)+"' WHERE id='"+ki.getID()+"';");
         }
         sql.disconnect();
     }
@@ -69,7 +70,7 @@ public class Karma {
             }
         }
 
-        if(!sql.query("SELECT id, name, value FROM karma;")) {
+        if(!sql.query("SELECT id, name, value FROM "+KARMA_DB+";")) {
             System.err.println("Couldn't query SQL database!");
             return null;
         }
