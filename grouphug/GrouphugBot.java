@@ -182,5 +182,6 @@ public class GrouphugBot extends PircBot {
         bot.connect(GrouphugBot.SERVER);
         bot.joinChannel(GrouphugBot.CHANNEL);
 
+        System.out.println("test");
     }
 }
