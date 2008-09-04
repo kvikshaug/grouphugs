@@ -28,7 +28,7 @@ import java.io.*;
  */
 public class GrouphugBot extends PircBot {
 
-    protected static final String CHANNEL = "#grouphugers";     // The main channel
+    protected static final String CHANNEL = "#grouphugs";     // The main channel
     protected static final String SERVER = "irc.homelien.no"; // The main IRC server
     protected static final String BOT_NAME = "gh";            // The bot's nick
     protected static final String BOT_ALT_NAME = "hugger";    // Alternative nick
@@ -69,6 +69,8 @@ public class GrouphugBot extends PircBot {
             sendAction(CHANNEL, "picks up the soap");
         if(message.equalsIgnoreCase("goosh"))
             sendMessage(CHANNEL, "http://youtube.com/watch?v=xrhLdDIQ5Kk");
+        if(message.equalsIgnoreCase("fuck it"))
+            sendMessage(CHANNEL, "WE'LL DO IT LIVE!");
 
         stdOut.flush();
     }
