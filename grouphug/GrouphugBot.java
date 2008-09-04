@@ -187,10 +187,10 @@ public class GrouphugBot extends PircBot {
 
         System.out.println("Ok, setting stuff.");
 
-        System.setOut(stdOut);
-        System.setErr(stdErr);
+        //System.setOut(stdOut);
+        //System.setErr(stdErr);
 
-        System.out.println("STUFF HAS BEEN SET!");
+        System.out.println("STUFF HAS NOT BEEN SET!");
 
         // Load the SQL password from file
         try {
