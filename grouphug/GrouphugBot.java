@@ -3,6 +3,9 @@ package grouphug;
 import org.jibble.pircbot.*;
 
 import java.util.ArrayList;
+import java.io.PrintStream;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
 
 /**
  * GrouphugBot.java
@@ -159,6 +162,12 @@ public class GrouphugBot extends PircBot {
      * @throws NickAlreadyInUseException - If our nick is already in use. TODO should be handled!
      */
     public static void main(String[] args) throws Exception {
+        // Redirect standard output to logfile -- bot also outputs here, will this work?
+        System.setOut(
+            new PrintStream(
+              new BufferedOutputStream(
+                new FileOutputStream("log-current"))));
+
         // Load the SQL password from file
         try {
             SQL.loadPassword();
