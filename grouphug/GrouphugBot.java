@@ -35,7 +35,7 @@ public class GrouphugBot extends PircBot {
     protected static final int MAX_LINE_CHARS = 420;          // The number of characters upon which lines are splitted
     protected static final int RECONNECT_TIME = 15000;        // How often to try to reconnect to the server, in ms
 
-    protected static File logfile = new File("log-current");  // The file to log all messages to
+    protected static File logfile = new File("java-output");  // The file to log all messages to
     protected static PrintStream stdOut;                      // The standard output
     protected static PrintStream stdErr;                      // The standard error-output
 
@@ -187,10 +187,14 @@ public class GrouphugBot extends PircBot {
 
         System.out.println("Ok, setting stuff.");
 
-        //System.setOut(stdOut);
-        //System.setErr(stdErr);
+        System.setOut(stdOut);
+        System.setErr(stdOut);
 
-        System.out.println("STUFF HAS NOT BEEN SET!");
+        System.out.println("STUFF HAS NOW BEEN SET!");
+
+        // Testing output
+        System.out.println("test");
+        System.err.println("error-test");
 
         // Load the SQL password from file
         try {
@@ -228,9 +232,5 @@ public class GrouphugBot extends PircBot {
 
         // Join the channel
         bot.joinChannel(GrouphugBot.CHANNEL);
-
-        // Testing output
-        System.out.println("test");
-        System.err.println("error-test");
     }
 }
