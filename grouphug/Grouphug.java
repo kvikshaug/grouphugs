@@ -85,7 +85,7 @@ public class Grouphug {
             }
 
             urlConn.setConnectTimeout(CONN_TIMEOUT);
-            urlConn.setRequestProperty("User-Agent", "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)");
+            urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Trick google into thinking we're a proper browser. ;)
 
             BufferedReader google = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
 
