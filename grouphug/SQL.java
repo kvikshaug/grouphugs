@@ -18,7 +18,7 @@ public class SQL {
 
     //MySQL host and db
     private static final String SQL_HOST = "127.0.0.1";
-    private static final String SQL_DB = "gh";
+    private static final String SQL_DB = "murray";
 
     // Login credentials
     private static final String SQL_USER = "murray";
