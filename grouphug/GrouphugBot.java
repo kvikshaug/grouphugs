@@ -169,6 +169,7 @@ public class GrouphugBot extends PircBot {
         // Redirect standard output to logfile
         if(!logfile.exists()) {
             try {
+                System.out.println("Creating file.");
                 logfile.createNewFile();
             } catch(IOException e) {
                 System.err.println("Fatal error: Unable to load or create logfile \"log-current\" in default dir!");
@@ -183,6 +184,8 @@ public class GrouphugBot extends PircBot {
             return;
         }
         stdErr = stdOut;
+
+        System.out.println("Ok, setting stuff.");
 
         System.setOut(stdOut);
         System.setErr(stdErr);
