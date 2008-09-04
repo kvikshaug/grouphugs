@@ -166,7 +166,7 @@ public class GrouphugBot extends PircBot {
         System.setOut(
             new PrintStream(
               new BufferedOutputStream(
-                new FileOutputStream("log-current"))));
+                new FileOutputStream("log-test"))));
 
         // Load the SQL password from file
         try {
