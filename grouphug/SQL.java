@@ -31,12 +31,12 @@ public class SQL {
     private Statement statement = null;
     private ResultSet resultset = null;
 
-    public static void loadPassword() throws Exception {
+    public static void loadPassword() throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(new File("mysqlpw.txt")));
         SQL_PASS = reader.readLine();
         reader.close();
         if(SQL_PASS.equals(""))
-            throw new Exception("No data extracted from MySQL password file!");
+            throw new FileNotFoundException("No data extracted from MySQL password file!");
     }
 
     public Object[] getValueList() {

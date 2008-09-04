@@ -30,14 +30,13 @@ public class GrouphugBot extends PircBot {
 
     protected static final String CHANNEL = "#grouphugers";     // The main channel
     protected static final String SERVER = "irc.homelien.no"; // The main IRC server
-    protected static final String BOT_NAME = "ghh";            // The bot's nick
+    protected static final String BOT_NAME = "gh";            // The bot's nick
     protected static final String BOT_ALT_NAME = "hugger";    // Alternative nick
     protected static final int MAX_LINE_CHARS = 420;          // The number of characters upon which lines are splitted
     protected static final int RECONNECT_TIME = 15000;        // How often to try to reconnect to the server, in ms
 
-    protected static File logfile = new File("java-output");  // The file to log all messages to
+    protected static File logfile = new File("log-current");  // The file to log all messages to
     protected static PrintStream stdOut;                      // The standard output
-    protected static PrintStream stdErr;                      // The standard error-output
 
     public GrouphugBot() {
         this.setName(BOT_NAME);
@@ -162,56 +161,36 @@ public class GrouphugBot extends PircBot {
      * The main method, starting the bot, connecting to the server and joining its main channel.
      *
      * @param args - Command-line arguments
-     * @throws java.io.IOException - unknown? TODO look into this
-     * @throws IrcException - unknown? TODO look into this
-     * @throws NickAlreadyInUseException - If our nick is already in use. TODO should be handled!
      */
     public static void main(String[] args) {
 
         // Redirect standard output to logfile
-        if(!logfile.exists()) {
-            try {
-                System.out.println("Creating file.");
-                logfile.createNewFile();
-            } catch(IOException e) {
-                System.err.println("Fatal error: Unable to load or create logfile \"log-current\" in default dir!");
-                return;
-            }
-        }
-
         try {
+            logfile.createNewFile();
             stdOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(logfile)));
-        } catch(FileNotFoundException e) {
-            System.err.println("Logfile should exist, but could not be found! Please check the code logic.");
+            System.setOut(stdOut);
+            System.setErr(stdOut);
+        } catch(IOException e) {
+            System.err.println("Fatal error: Unable to load or create logfile \""+logfile.toString()+"\" in default dir.");
+            e.printStackTrace();
             return;
         }
-        stdErr = stdOut;
-
-        System.out.println("Ok, setting stuff.");
-
-        System.setOut(stdOut);
-        System.setErr(stdOut);
-
-        System.out.println("STUFF HAS NOW BEEN SET!");
-
-        // Testing output
-        System.out.println("test");
-        System.err.println("error-test");
 
         // Load the SQL password from file
         try {
             SQL.loadPassword();
-        } catch(Exception e) {
-            System.err.println("Error: Could not load MySQL-password file.");
+        } catch(IOException e) {
+            System.err.println("Fatal error: Could not load MySQL-password file.");
             e.printStackTrace();
             return;
         }
-        GrouphugBot bot = new GrouphugBot();
 
-        // Enable debugging output.
+        // Load up the bot and enable debugging output
+        GrouphugBot bot = new GrouphugBot();
         bot.setVerbose(true);
 
         // Try connecting to the server
+        // This looks kinda fugly, any better suggestions?
         try {
             try {
                 bot.connect(GrouphugBot.SERVER);
@@ -234,6 +213,5 @@ public class GrouphugBot extends PircBot {
 
         // Join the channel
         bot.joinChannel(GrouphugBot.CHANNEL);
-        stdOut.flush();
     }
 }
