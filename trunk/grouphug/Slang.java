@@ -50,7 +50,7 @@ public class Slang {
         if(includeExample)
             reply = si.getExample(); // TODO: if bug here, put \n in start of line (was removed because seemed unnecessary)
         else
-            reply = si.getWord()+" ("+si.getNumber()+" av "+Slang.slangCount+"): "+ si.getDefinition();
+            reply = si.getWord()+" ("+si.getNumber()+" of "+Slang.slangCount+"): "+ si.getDefinition();
 
         reply = reply.replace("&quot;", "\"");
         reply = reply.replace("&apos;", "'");
