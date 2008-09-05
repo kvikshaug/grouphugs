@@ -153,9 +153,12 @@ public class Grouphug {
             // HACK: Skip to the third content div - as the (currently) two newsitems also use this layout
             int i=0;
             while((line = gh.readLine()) != null) {
-                if(line.equals("  <div class=\"content\">") && i==2)
-                    break;
-                i++;
+                if(line.equals("  <div class=\"content\">")) {
+                    if(i==2)
+                        break;
+                    else
+                        i++;
+                }
             }
 
             System.out.println("OK");
