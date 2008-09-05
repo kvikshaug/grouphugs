@@ -52,7 +52,7 @@ public class Grouphug {
         try {
             return getConfession(new URL("http", "beta.grouphug.us", "/random?page=1"));
         } catch(MalformedURLException ex) {
-            System.err.println("grouphug.Grouphug confession error: MalformedURLException of hard-coded URL in function random()!");
+            System.err.println("Grouphug confession error: MalformedURLException of hard-coded URL in function random()!");
             return null;
         }
     }
@@ -61,7 +61,7 @@ public class Grouphug {
         try {
             return getConfession(new URL("http", "beta.grouphug.us", "/confessions/new"));
         } catch(MalformedURLException ex) {
-            System.err.println("grouphug.Grouphug confession error: MalformedURLException of hard-coded URL in function newest()!");
+            System.err.println("Grouphug confession error: MalformedURLException of hard-coded URL in function newest()!");
             return null;
         }
     }
@@ -150,9 +150,12 @@ public class Grouphug {
             BufferedReader gh = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
 
             // We dig down to the confession content
+            // HACK: Skip to the third content div - as the (currently) two newsitems also use this layout
+            int i=0;
             while((line = gh.readLine()) != null) {
-                if(line.equals("  <div class=\"content\">"))
+                if(line.equals("  <div class=\"content\">") && i==2)
                     break;
+                i++;
             }
 
             System.out.println("OK");
@@ -191,7 +194,7 @@ public class Grouphug {
 
             // trim - strip tags - remove " hugs" and parse int
             line = gh.readLine().trim().replaceAll("\\<.*?\\>","");
-            int i = 0;
+            i = 0;
             for(; line.charAt(i) != ' '; i++) {
                 if(i >= line.length()) {
                     System.err.println("Grouphug confession error: Couldn't find a space in expected no. of hugs-line!");
