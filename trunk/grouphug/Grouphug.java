@@ -9,13 +9,13 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 
 public class Grouphug {
-    // TODO: håndter timeouts, også for gh (ikke bare google) :p
+    // TODO: hï¿½ndter timeouts, ogsï¿½ for gh (ikke bare google) :p
 
     protected static final String TRIGGER = "!gh";
     private static final String KEYWORD_NEWEST = "-newest";
     private static final int CONN_TIMEOUT = 1000; // ms
     private static final int GH_CONN_TIMEOUT = 10000; // ms
-    private static String errorConfession = "I have nothing to confess atm, please try again later.";
+    private static String errorConfession = "I have nothing to confess at the moment, please try again later.";
 
     /**
      * This is called whenever a message is sent to the channel

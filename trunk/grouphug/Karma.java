@@ -22,15 +22,15 @@ public class Karma {
     private static void print(GrouphugBot bot, String name) {
         KarmaItem ki = find(name, null);
         if(ki == null) {
-            bot.sendMessage(name+" har nøytral karma");
+            bot.sendMessage(name+" has neutral karma.");
         } else {
             String karmaStr;
             if(ki.getKarma() == 0)
-                karmaStr = "nøytral";
+                karmaStr = "neutral";
             else
                 karmaStr = ""+ki.getKarma();
 
-            bot.sendMessage(name+" har "+karmaStr+" karma");
+            bot.sendMessage(name+" has "+karmaStr+" karma.");
         }
     }
 
@@ -38,7 +38,7 @@ public class Karma {
         SQL sql = new SQL();
         if(!sql.connect()) {
             System.err.println("Couldn't connect to the SQL database!");
-            bot.sendMessage("Sorry, SQL db barfa på meg :(");
+            bot.sendMessage("ERROR: Unable to connect to SQL database.");
             return;
         }
 
@@ -71,7 +71,7 @@ public class Karma {
         }
 
         if(!sql.query("SELECT id, name, value FROM "+KARMA_DB+";")) {
-            System.err.println("Couldn't query SQL database!");
+            System.err.println("ERROR: Unable to query SQL database.");
             return null;
         }
 
