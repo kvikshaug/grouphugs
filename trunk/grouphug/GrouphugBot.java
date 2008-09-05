@@ -71,6 +71,9 @@ public class GrouphugBot extends PircBot {
             sendMessage(CHANNEL, "http://youtube.com/watch?v=xrhLdDIQ5Kk");
         if(message.equalsIgnoreCase("fuck it"))
             sendMessage(CHANNEL, "WE'LL DO IT LIVE!");
+        if (message.equalsIgnoreCase("!insult")) {
+            sendMessage(CHANNEL, sender + ", you fail at life.");
+        }
 
         stdOut.flush();
     }
