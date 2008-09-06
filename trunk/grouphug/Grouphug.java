@@ -1,237 +1,221 @@
 package grouphug;
 
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.net.URLConnection;
-import java.net.SocketTimeoutException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
+import org.jibble.pircbot.*;
 
-public class Grouphug {
-    // TODO: h�ndter timeouts, ogs� for gh (ikke bare google) :p
+import java.util.ArrayList;
+import java.io.*;
 
-    protected static final String TRIGGER = "!gh";
-    private static final String KEYWORD_NEWEST = "-newest";
-    private static final int CONN_TIMEOUT = 1000; // ms
-    private static final int GH_CONN_TIMEOUT = 10000; // ms
-    private static String errorConfession = "I have nothing to confess at the moment, please try again later.";
+/**
+ * GrouphugBot.java
+ *
+ * A java-based IRC-bot created purely for entertainment purposes and as a personal excercise in design.
+ *
+ * Instead of describing the current design of the bot, which hardly can be called design at all, I will rather
+ * explain the vision for it:
+ *
+ * The bot is to be able to load function modules, that are triggered for each message sent to the bot's channel,
+ * and it is up to the modules to react to a message. The bot should never bother anyone unless it is clear that they
+ * want a response from it.
+ *
+ * As an example, the original function module was something that reacted on the trigger word "!gh" (may have changed),
+ * and on this request fetched a random grouphug confession from the http://grouphug.us/ site. Further functionality
+ * was added for searching for a specific confession topic, getting the newest confession, and so forth.
+ *
+ * The grouphug bot was originally started by Alex Kvikshaug and hopefully continued as an SVN project
+ * by the guys currently hanging in #grouphugs @ efnet.
+ *
+ * The bot extends the functionality of the well-designed PircBot, see http://www.jibble.org/
+ */
+public class Grouphug extends PircBot {
 
-    /**
-     * This is called whenever a message is sent to the channel
-     * @param bot - a reference to the bot
-     * @param message - The whole message, with arguments
-     */
-    protected static void trigger(GrouphugBot bot, String message) {
+    protected static final String CHANNEL = "#grouphugs";     // The main channel
+    protected static final String SERVER = "irc.homelien.no"; // The main IRC server
+    protected static final String BOT_NAME = "gh";            // The bot's nick
+    protected static final String BOT_ALT_NAME = "hugger";    // Alternative nick
+    protected static final int MAX_LINE_CHARS = 420;          // The number of characters upon which lines are splitted
+    protected static final int RECONNECT_TIME = 15000;        // How often to try to reconnect to the server, in ms
 
-        if(!message.startsWith(Grouphug.TRIGGER))
-            return;
+    protected static File logfile = new File("log-current");  // The file to log all messages to
+    protected static PrintStream stdOut;                      // The standard output
 
-        // Check if argument is provided
-        Confession conf;
-        if(message.contains(KEYWORD_NEWEST)) {
-            conf = newest();
-        }
-        else {
-            // check for search-words
-            if(!message.substring(TRIGGER.length()).trim().equals("")) {
-                conf = search(message.substring(TRIGGER.length()).trim());
-            }
-            else {
-                conf = random();
-            }
-        }
-
-        if(conf == null)
-            bot.sendMessage(errorConfession);
-        else
-            bot.sendMessage(conf.toString());
-    }
-
-    private static Confession random() {
-        try {
-            return getConfession(new URL("http", "beta.grouphug.us", "/random?page=1"));
-        } catch(MalformedURLException ex) {
-            System.err.println("Grouphug confession error: MalformedURLException of hard-coded URL in function random()!");
-            return null;
-        }
-    }
-
-    private static Confession newest() {
-        try {
-            return getConfession(new URL("http", "beta.grouphug.us", "/confessions/new"));
-        } catch(MalformedURLException ex) {
-            System.err.println("Grouphug confession error: MalformedURLException of hard-coded URL in function newest()!");
-            return null;
-        }
+    public Grouphug() {
+        this.setName(BOT_NAME);
     }
 
     /**
-     * Searches for a keyword in a confession. Returns null on failure. (Should rather throw a manual exception).
-     * @param query the keyword(s) to search for
-     * @return the first confession found with the keyword
+     * This method is called whenever a message is sent to a channel.
+     * This triggers all loaded modules and lets them react to the message.
+     *
+     * @param channel - The channel to which the message was sent.
+     * @param sender - The nick of the person who sent the message.
+     * @param login - The login of the person who sent the message.
+     * @param hostname - The hostname of the person who sent the message.
+     * @param message - The actual message sent to the channel.
      */
-    private static Confession search(String query) {
-        try {
-            query = query.replace(' ', '+');
-            System.out.print("Opening google connection... ");
+    protected void onMessage(String channel, String sender, String login, String hostname, String message) {
 
-            URLConnection urlConn;
-            try {
-                urlConn = new URL("http", "www.google.com", "/search?q="+query+"+site:grouphug.us/confessions/").openConnection();
-            } catch(MalformedURLException ex) {
-                System.err.println("Grouphug confession error: MalformedURLException in partially dynamic URL in search()!");
-                return null;
-            }
+        // For each "module", call the trigger-method with the sent message
+        // TODO: should include the sender nick? and the other parameters?
+        // TODO: should be using a foreach on some container containing loaded modules, instead of this
+        Confession.trigger(this, message);
+        Karma.trigger(this, message);
+        Slang.trigger(this, message);
 
-            urlConn.setConnectTimeout(CONN_TIMEOUT);
-            urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Trick google into thinking we're a proper browser. ;)
+        // A few hardcoded funnies
+        // TODO: make factoid? "idiot bot is <action>pisses all over $sender" -> saved in db, triggered by own module
+        if(message.equalsIgnoreCase("idiot bot"))
+            sendAction(CHANNEL, "pisses all over "+sender);
+        if(message.equalsIgnoreCase("homo bot"))
+            sendAction(CHANNEL, "picks up the soap");
+        if(message.equalsIgnoreCase("goosh"))
+            sendMessage(CHANNEL, "http://youtube.com/watch?v=xrhLdDIQ5Kk");
+        if(message.equalsIgnoreCase("fuck it"))
+            sendMessage(CHANNEL, "WE'LL DO IT LIVE!");
+        if (message.equalsIgnoreCase("!insult")) {
+            sendMessage(CHANNEL, sender + ", you fail at life.");
+        }
 
-            BufferedReader google = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
+        stdOut.flush();
+    }
 
-            System.out.println("OK");
-
-            // Find an URL to the search result
-            // HACK fugly jump to line 3 (should check for nullptr)
-            google.readLine();
-            google.readLine();
-            String line = google.readLine();
-
-            if(line == null)
-                return null;
-
-            int startIndex;
-            // TODO: why catch NPE here??
-            try {
-                startIndex = line.indexOf("<h2 class=r><a href=\"");
-            } catch(NullPointerException e) {
-                System.err.println("Grouphug confession error: Nullpointerexception at google search!");
-                return null;
-            }
-
-            // if -1, then the phrase wasn't found
-            if(startIndex == -1) {
-                return new Confession("No one has confessed about their "+query+" problem yet.\n", -1);
-            }
-
-            startIndex += 21; // because we search for "<h2 class=r><a href=\"" above, skip over that
-            int i = startIndex;
-            for(; line.charAt(i) != '"'; i++) {
-                if(i == line.length()) {
-                    System.err.println("Grouphug confession error: Couldn't find ending \" in hyperlink reference");
-                    return null;
-                }
-            }
-
-            return getConfession(new URL(line.substring(startIndex, i)));
-
-        } catch(IOException e) {
-            System.err.println("Grouphug confession error: IOException: "+e+"\n");
-            e.printStackTrace();
-            return null;
+    /**
+     * This method is called whenever someone (possibly us) is kicked from any of the channels that we are in.
+     * If we were kicked, try to rejoin with a sorry message.
+     *
+     * @param channel - The channel from which the recipient was kicked.
+     * @param kickerNick - The nick of the user who performed the kick.
+     * @param kickerLogin - The login of the user who performed the kick.
+     * @param kickerHostname - The hostname of the user who performed the kick.
+     * @param recipientNick - The unfortunate recipient of the kick.
+     * @param reason - The reason given by the user who performed the kick.
+     */
+    protected void onKick(String channel, String kickerNick, String kickerLogin, String kickerHostname, String recipientNick, String reason) {
+        if (recipientNick.equalsIgnoreCase(getNick())) {
+            joinChannel(channel);
+            sendMessage(CHANNEL, "sry :(");
         }
     }
 
     /**
-     * Gets a specified confession from grouphug.us
-     * @param url The URL of the grouphug confession - should be one specific confession URL
-     * @return the successfully fetched confession
+     * This method carries out the actions to be performed when the PircBot gets disconnected. This may happen if the
+     * PircBot quits from the server, or if the connection is unexpectedly lost.
+     * Disconnection from the IRC server is detected immediately if either we or the server close the connection
+     * normally. If the connection to the server is lost, but neither we nor the server have explicitly closed the
+     * connection, then it may take a few minutes to detect (this is commonly referred to as a "ping timeout").
      */
-    private static Confession getConfession(URL url) {
-        String line;
-        String confession = "";
-        int hugs;
-        try {
-
-            System.out.print("Opening grouphug connection... ");
-            URLConnection urlConn = url.openConnection();
-            urlConn.setConnectTimeout(GH_CONN_TIMEOUT);
-
-            BufferedReader gh = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
-
-            // We dig down to the confession content
-            // HACK: Skip to the third content div - as the (currently) two newsitems also use this layout
-            int i=0;
-            while((line = gh.readLine()) != null) {
-                if(line.equals("  <div class=\"content\">")) {
-                    if(i==2)
-                        break;
-                    else
-                        i++;
-                }
-            }
-
-            System.out.println("OK");
-
-            // check that the searches didn't fail
-            if(line == null) {
-                System.err.println("Grouphug confession error: Couldn't find confession content!");
-                return null;
-            }
-
-
-            // now we save all data until we reach the end
-            while((line = gh.readLine()) != null) {
-                if(line.equals("  </div>"))
-                    break;
-                confession += line.trim()+"\n";
-            }
-
-            // check that the searches didn't fail
-            if(line == null) {
-                System.err.println("Grouphug confession error: Couldn't find end of confession content!");
-                return null;
-            }
-
-            // find no. of hugs
-            while((line = gh.readLine()) != null) {
-                if(line.equals("    <div class=\"links\">"))
-                    break;
-            }
-
-            // check that the searches didn't fail
-            if(line == null) {
-                System.err.println("Grouphug confession error: Couldn't find no. of hugs content!");
-                return null;
-            }
-
-            // trim - strip tags - remove " hugs" and parse int
-            line = gh.readLine().trim().replaceAll("\\<.*?\\>","");
-            i = 0;
-            for(; line.charAt(i) != ' '; i++) {
-                if(i >= line.length()) {
-                    System.err.println("Grouphug confession error: Couldn't find a space in expected no. of hugs-line!");
-                    return null;
-                }
-            }
-            line = line.substring(0, i);
+    protected void onDisconnect() {
+        // Constantly try to reconnect
+        while (!isConnected()) {
             try {
-                hugs = Integer.parseInt(line);
+                Thread.sleep(RECONNECT_TIME);
+                reconnect();
+            } catch (InterruptedException e) {
+                // do nothing; try again in specified time
             } catch(Exception e) {
-                System.err.println("Grouphug confession error: Couldn't parse expected hugs int - line: "+line);
-                return null;
+                // TODO - handle these exceptions
             }
+        }
+    }
 
-        } catch(SocketTimeoutException e) {
-            System.err.println("Timeout");
-            return null;
-        } catch(IOException e) {
-            System.err.println("Grouphug confession error: IOException: "+e+"\n");
-            e.printStackTrace();
-            return null;
+    /**
+     * Sends a message to a channel or a private message to a user.
+     *
+     * The messages are splitted by maximum line number characters and by the newline character (\n), then
+     * each line is sent to the pircbot sendMessage function, which adds the lines to the outgoing message queue
+     * and sends them at the earliest possible opportunity.
+     *
+     * @param message - The message to send
+     */
+    protected void sendMessage(String message) {
+        // First create a list of the lines we will send separately.
+        ArrayList<String> lines = new ArrayList<String>();
+
+        // If the message is longer than max line chars, separate them
+        while(message.length() > Grouphug.MAX_LINE_CHARS) {
+            lines.add(message.substring(0, Grouphug.MAX_LINE_CHARS));
+            message = message.substring(Grouphug.MAX_LINE_CHARS);
+        }
+        lines.add(message);
+
+        // For each line, split all \n into new lines
+        // TODO: optimize; this line separator is quick n dirty
+        for(int i=0; i<lines.size(); i++) {
+            for(int j=0; j < lines.get(i).length(); j++) {
+                if(lines.get(i).charAt(j) == '\n') {
+                    lines.add((i+1), lines.get(i).substring(j+1));
+                    lines.set(i, lines.get(i).substring(0, j));
+                }
+            }
         }
 
-        confession = confession.replace("&nbsp;", " ");
-        confession = confession.replace("&#8216;", "'");
-        confession = confession.replace("&#8217;", "'");
-        confession = confession.replace("&#8220;", "\"");
-        confession = confession.replace("&#8221;", "\"");
-        confession = confession.replace("&#8230;", "...");
-        confession = confession.replace("&#8212;", " - ");
+        // TODO: if we for some reason are to send an ENORMOUS amount of lines, maybe we should throw an exception or
+        // TODO: something? or at least warn about the pending spam?
 
-        // strip tags
-        confession = confession.replaceAll("\\<.*?\\>","");
+        // Now, for each line we have in lines, send them to the channel
+        // NB: a for loop is preferred over the java 5 foreach (ask the guys in #java @ efnet for details) 
+        for(int i=0; i<lines.size(); i++) {
+            // Empty lines may appear, so we skip them
+            if(!lines.get(i).equals(""))
+                this.sendMessage(Grouphug.CHANNEL, lines.get(i));
+        }
+        stdOut.flush();
+    }
 
-        return new Confession(confession, hugs);
+    /**
+     * The main method, starting the bot, connecting to the server and joining its main channel.
+     *
+     * @param args - Command-line arguments
+     */
+    public static void main(String[] args) {
+
+        // Redirect standard output to logfile
+        try {
+            logfile.createNewFile();
+            stdOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(logfile)));
+            System.setOut(stdOut);
+            System.setErr(stdOut);
+        } catch(IOException e) {
+            System.err.println("Fatal error: Unable to load or create logfile \""+logfile.toString()+"\" in default dir.");
+            e.printStackTrace();
+            return;
+        }
+
+        // Load the SQL password from file
+        try {
+            SQL.loadPassword();
+        } catch(IOException e) {
+            System.err.println("Fatal error: Could not load MySQL-password file.");
+            e.printStackTrace();
+            return;
+        }
+
+        // Load up the bot and enable debugging output
+        Grouphug bot = new Grouphug();
+        bot.setVerbose(true);
+
+        // Try connecting to the server
+        // This looks kinda fugly, any better suggestions?
+        try {
+            try {
+                bot.connect(Grouphug.SERVER);
+            } catch(NickAlreadyInUseException e) {
+                try {
+                    bot.setName(BOT_ALT_NAME);
+                    bot.connect(Grouphug.SERVER);
+                } catch(NickAlreadyInUseException ex) {
+                    System.err.println("Both suggested nicks are taken!");
+                    return;
+                }
+            }
+        } catch(IrcException e) {
+            System.err.println("Caught IrcException while connecting to server");
+            e.printStackTrace();
+        } catch(IOException e) {
+            System.err.println("Caught IOException while connecting to server");
+            e.printStackTrace();
+        }
+
+        // Join the channel
+        bot.joinChannel(Grouphug.CHANNEL);
     }
 }

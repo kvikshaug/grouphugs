@@ -13,7 +13,7 @@ public class Slang {
 
     private static int slangCount = 0;
 
-    protected static void trigger(GrouphugBot bot, String message) {
+    protected static void trigger(Grouphug bot, String message) {
         if(!message.startsWith(TRIGGER_MAIN))
             return;
 
