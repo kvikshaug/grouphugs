@@ -6,14 +6,14 @@ import java.io.DataOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.InputStream;
 
-public class Slang {
+public class Slang implements GrouphugModule {
 
     private static final String TRIGGER_MAIN = "slang ";
     private static final String TRIGGER_EXAMPLE = "-ex ";
 
     private static int slangCount = 0;
 
-    protected static void trigger(Grouphug bot, String message) {
+    public void trigger(Grouphug bot, String channel, String sender, String login, String hostname, String message) {
         if(!message.startsWith(TRIGGER_MAIN))
             return;
 
@@ -27,13 +27,12 @@ public class Slang {
             text = message.substring(TRIGGER_MAIN.length());
         }
 
+        // Check if the line ends with a number - in which case a specified slangitem is to be extracted
         int number = -1;
         try {
             number = Integer.parseInt(message.substring(message.length() - 1, message.length()));
             text = text.substring(0, text.length()-1);
             number = Integer.parseInt(message.substring(message.length() - 2, message.length()));
-            text = text.substring(0, text.length()-1);
-            number = Integer.parseInt(message.substring(message.length() - 3, message.length()));
             text = text.substring(0, text.length()-1);
         } catch(NumberFormatException ex) {
             // do nothing - on intent; we check number later, if < 0 then bogus
@@ -58,7 +57,8 @@ public class Slang {
         bot.sendMessage(reply);
     }
 
-    private static SlangItem getSlang(String query, int number) {
+    // TODO: should not return null, but throw an exception, upon failure 
+    private SlangItem getSlang(String query, int number) {
         try {
             System.out.print("Connecting via soap to UD... ");
             URL u=new URL("http://api.urbandictionary.com/soap");
@@ -101,7 +101,8 @@ public class Slang {
         }
     }
 
-    private static SlangItem parseXML(String xml, int number) {
+    // TODO isn't this able to fail somewhere? throw exception?
+    private SlangItem parseXML(String xml, int number) {
 
         String wordXMLStart = "<word xsi:type=\"xsd:string\">", wordXMLEnd = "</word>";
         String definitionXMLStart = "<definition xsi:type=\"xsd:string\">", definitionXMLEnd = "</definition>";

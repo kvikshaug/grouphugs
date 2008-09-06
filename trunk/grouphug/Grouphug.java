@@ -38,6 +38,8 @@ public class Grouphug extends PircBot {
     protected static File logfile = new File("log-current");  // The file to log all messages to
     protected static PrintStream stdOut;                      // The standard output
 
+    private static ArrayList<GrouphugModule> modules;
+
     public Grouphug() {
         this.setName(BOT_NAME);
     }
@@ -55,11 +57,12 @@ public class Grouphug extends PircBot {
     protected void onMessage(String channel, String sender, String login, String hostname, String message) {
 
         // For each "module", call the trigger-method with the sent message
-        // TODO: should include the sender nick? and the other parameters?
-        // TODO: should be using a foreach on some container containing loaded modules, instead of this
         Confession.trigger(this, message);
         Karma.trigger(this, message);
-        Slang.trigger(this, message);
+        //Slang.trigger(this, message);
+        for(GrouphugModule m : modules) {
+            m.trigger(this, channel, sender, login, hostname, message);
+        }
 
         // A few hardcoded funnies
         // TODO: make factoid? "idiot bot is <action>pisses all over $sender" -> saved in db, triggered by own module
@@ -188,6 +191,10 @@ public class Grouphug extends PircBot {
             e.printStackTrace();
             return;
         }
+
+        // Load up modules
+        // TODO - should be done differently
+        modules.add(new Slang());
 
         // Load up the bot and enable debugging output
         Grouphug bot = new Grouphug();
