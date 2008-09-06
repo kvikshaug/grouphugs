@@ -57,9 +57,6 @@ public class Grouphug extends PircBot {
     protected void onMessage(String channel, String sender, String login, String hostname, String message) {
 
         // For each "module", call the trigger-method with the sent message
-        Confession.trigger(this, message);
-        Karma.trigger(this, message);
-        //Slang.trigger(this, message);
         for(GrouphugModule m : modules) {
             m.trigger(this, channel, sender, login, hostname, message);
         }
@@ -195,6 +192,8 @@ public class Grouphug extends PircBot {
         // Load up modules
         // TODO - should be done differently
         modules.add(new Slang());
+        modules.add(new Confession());
+        modules.add(new Karma());
 
         // Load up the bot and enable debugging output
         Grouphug bot = new Grouphug();

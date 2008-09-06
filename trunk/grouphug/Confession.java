@@ -8,7 +8,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
-public class Confession {
+public class Confession implements GrouphugModule {
     // TODO: h�ndter timeouts, ogs� for gh (ikke bare google) :p
 
     protected static final String TRIGGER = "!gh";
@@ -17,12 +17,7 @@ public class Confession {
     private static final int GH_CONN_TIMEOUT = 10000; // ms
     private static String errorConfession = "I have nothing to confess at the moment, please try again later.";
 
-    /**
-     * This is called whenever a message is sent to the channel
-     * @param bot - a reference to the bot
-     * @param message - The whole message, with arguments
-     */
-    protected static void trigger(Grouphug bot, String message) {
+    public void trigger(Grouphug bot, String channel, String sender, String login, String hostname, String message) {
 
         if(!message.startsWith(Confession.TRIGGER))
             return;
@@ -48,7 +43,7 @@ public class Confession {
             bot.sendMessage(conf.toString());
     }
 
-    private static ConfessionItem random() {
+    private ConfessionItem random() {
         try {
             return getConfession(new URL("http", "beta.grouphug.us", "/random?page=1"));
         } catch(MalformedURLException ex) {
@@ -57,7 +52,7 @@ public class Confession {
         }
     }
 
-    private static ConfessionItem newest() {
+    private ConfessionItem newest() {
         try {
             return getConfession(new URL("http", "beta.grouphug.us", "/confessions/new"));
         } catch(MalformedURLException ex) {
@@ -71,7 +66,7 @@ public class Confession {
      * @param query the keyword(s) to search for
      * @return the first confession found with the keyword
      */
-    private static ConfessionItem search(String query) {
+    private ConfessionItem search(String query) {
         try {
             query = query.replace(' ', '+');
             System.out.print("Opening google connection... ");
@@ -137,7 +132,7 @@ public class Confession {
      * @param url The URL of the grouphug confession - should be one specific confession URL
      * @return the successfully fetched confession
      */
-    private static ConfessionItem getConfession(URL url) {
+    private ConfessionItem getConfession(URL url) {
         String line;
         String confession = "";
         int hugs;

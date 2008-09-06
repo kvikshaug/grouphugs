@@ -1,13 +1,13 @@
 package grouphug;
 
-public class Karma {
+public class Karma implements GrouphugModule {
 
     // TODO karmatop, karmabottom
 
     private static final String TRIGGER = "karma ";
     private static final String KARMA_DB = "gh_karma";
 
-    protected static void trigger(Grouphug bot, String message) {
+    public void trigger(Grouphug bot, String channel, String sender, String login, String hostname, String message) {
 
         // First, check for triggers: keywords, ++, -- 
         if(message.startsWith(TRIGGER))
@@ -19,7 +19,7 @@ public class Karma {
 
     }
 
-    private static void print(Grouphug bot, String name) {
+    private void print(Grouphug bot, String name) {
         KarmaItem ki = find(name, null);
         if(ki == null) {
             bot.sendMessage(name+" has neutral karma.");
@@ -34,7 +34,7 @@ public class Karma {
         }
     }
 
-    private static void add(Grouphug bot, String name, int karma) {
+    private void add(Grouphug bot, String name, int karma) {
         SQL sql = new SQL();
         if(!sql.connect()) {
             System.err.println("Couldn't connect to the SQL database!");
@@ -59,7 +59,7 @@ public class Karma {
      * @param sql Optional SQL object. If nullpointed, a custom SQL connection is made, if not, the provided SQL object is used.
      * @return a KarmaItem-object of the item found in the DB, or null if no item was found or an error occured (TODO should rather throw an exception)
      */
-    private static KarmaItem find(String karma, SQL sql) {
+    private KarmaItem find(String karma, SQL sql) {
         boolean customSQL = false; // indicates if we have to manage our own sql connection
         if(sql == null) {
             customSQL = true;
