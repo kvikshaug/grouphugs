@@ -38,7 +38,7 @@ public class Grouphug extends PircBot {
     protected static File logfile = new File("log-current");  // The file to log all messages to
     protected static PrintStream stdOut;                      // The standard output
 
-    private static ArrayList<GrouphugModule> modules;
+    private static ArrayList<GrouphugModule> modules = new ArrayList<GrouphugModule>();
 
     public Grouphug() {
         this.setName(BOT_NAME);
@@ -175,8 +175,8 @@ public class Grouphug extends PircBot {
         try {
             logfile.createNewFile();
             stdOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(logfile)));
-            System.setOut(stdOut);
-            System.setErr(stdOut);
+            //System.setOut(stdOut);
+            //System.setErr(stdOut);
         } catch(IOException e) {
             System.err.println("Fatal error: Unable to load or create logfile \""+logfile.toString()+"\" in default dir.");
             e.printStackTrace();

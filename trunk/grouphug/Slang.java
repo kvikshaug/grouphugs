@@ -13,6 +13,9 @@ public class Slang implements GrouphugModule {
 
     private static int slangCount = 0;
 
+    public Slang() {
+    }
+
     public void trigger(Grouphug bot, String channel, String sender, String login, String hostname, String message) {
         if(!message.startsWith(TRIGGER_MAIN))
             return;
