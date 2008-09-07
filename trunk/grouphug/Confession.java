@@ -98,7 +98,7 @@ public class Confession implements GrouphugModule {
             int startIndex;
             // TODO: why catch NPE here??
             try {
-                startIndex = line.indexOf("<h2 class=r><a href=\"");
+                startIndex = line.indexOf("<h3 class=r><a href=\"");
             } catch(NullPointerException e) {
                 System.err.println("Grouphug confession error: Nullpointerexception at google search!");
                 return null;
