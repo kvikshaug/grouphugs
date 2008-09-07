@@ -7,6 +7,7 @@ package grouphug;
 public class SVNOutput implements GrouphugModule {
 
     public SVNOutput() {
+
         
     }
 
