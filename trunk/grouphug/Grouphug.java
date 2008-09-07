@@ -177,7 +177,7 @@ public class Grouphug extends PircBot {
         } catch(IOException e) {
             System.err.println("Fatal error: Unable to load or create logfile \""+logfile.toString()+"\" in default dir.");
             e.printStackTrace();
-            return;
+            System.exit(-1);
         }
 
         // Load the SQL password from file
@@ -186,18 +186,19 @@ public class Grouphug extends PircBot {
         } catch(IOException e) {
             System.err.println("Fatal error: Could not load MySQL-password file.");
             e.printStackTrace();
-            return;
+            System.exit(-1);
         }
+
+        // Load up the bot and enable debugging output
+        Grouphug bot = new Grouphug();
+        bot.setVerbose(true);
 
         // Load up modules
         // TODO - should be done differently
         modules.add(new Slang());
         modules.add(new Confession());
         modules.add(new Karma());
-
-        // Load up the bot and enable debugging output
-        Grouphug bot = new Grouphug();
-        bot.setVerbose(true);
+        SVNCommit.load(bot);
 
         // Try connecting to the server
         // This looks kinda fugly, any better suggestions?
