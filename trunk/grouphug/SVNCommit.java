@@ -29,6 +29,7 @@ import java.util.ArrayList;
  * When all data is sent, the client sends "KTHXBYE" and closes the connection.
  * This class parses the provided data and outputs it on the gh channel.
  */
+
 // TODO: maybe this shouldn't implement GHModule, since it's not triggered by trigger() ?
 public class SVNCommit implements GrouphugModule, Runnable {
 
@@ -171,7 +172,7 @@ public class SVNCommit implements GrouphugModule, Runnable {
         // Now, concatenate all the comment-lines
         String comment = "";
         for(; line < endLine; line++) {
-            comment += input.get(line);
+            comment += input.get(line)+"\n";
         }
 
         // We have all the data we wanted, so create and return the new commit-data
