@@ -182,7 +182,7 @@ public class Grouphug extends PircBot {
 
         // Load the SQL password from file
         try {
-            SQL.loadPassword();
+            SQL.loadPassword("mysqlpw.txt");
         } catch(IOException e) {
             System.err.println("Fatal error: Could not load MySQL-password file.");
             e.printStackTrace();

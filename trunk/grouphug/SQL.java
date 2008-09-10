@@ -10,19 +10,20 @@ import java.io.*;
  * Provides functionality to connect to and perform operations on the news database.
  */
 public class SQL {
-    public static final boolean DEBUG = true;
 
     private static final DateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     // JDBC Driver
     private static final String SQL_DRIVER = "org.gjt.mm.mysql.Driver";
 
-    //MySQL host and db
+    // MySQL host, db, login credentials
     private static final String SQL_HOST = "127.0.0.1";
     private static final String SQL_DB = "murray";
-
-    // Login credentials
     private static final String SQL_USER = "murray";
     private static String SQL_PASS;
+
+    // TODO review to which extenct this is actually happening
+    private boolean DEBUG; // True if we are to output extra debug information this is set in the constructor
 
     private int affectedRows;
     private Object valueList[];
@@ -31,12 +32,19 @@ public class SQL {
     private Statement statement = null;
     private ResultSet resultset = null;
 
-    public static void loadPassword() throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(new File("mysqlpw.txt")));
-        SQL_PASS = reader.readLine();
-        reader.close();
-        if(SQL_PASS.equals(""))
-            throw new FileNotFoundException("No data extracted from MySQL password file!");
+    /**
+     * Construct a new SQL object
+     */
+    public SQL() {
+        this.DEBUG = false;
+    }
+
+    /**
+     * Construct a new SQL object, specifying if debug output is wanted
+     * @param debug true if this SQL object should output extra debug information
+     */
+    public SQL(boolean debug) {
+        this.DEBUG = debug;
     }
 
     public Object[] getValueList() {
@@ -60,7 +68,7 @@ public class SQL {
     }
 
     /**
-     * Connects to the news database
+     * Connects to the specified database
      * @return boolean - true if connection is established, false otherwise.
      */
     public boolean connect() {
@@ -68,7 +76,7 @@ public class SQL {
         try {
             Class.forName(SQL_DRIVER);
         } catch (ClassNotFoundException e) {
-            System.err.println(" > ERROR: Unable to load grouphug.SQL driver: " + SQL_DRIVER);
+            System.err.println(" > ERROR: Unable to load SQL driver: " + SQL_DRIVER);
             if (DEBUG) { e.printStackTrace(); }
 
             return false;
@@ -183,10 +191,7 @@ public class SQL {
      * @return a String representation of the date and time <code>date</code> represents, in the SQL datetime format.
      */
     public static String dateToSQLDateTime(java.util.Date date) {
-        if(date == null)
-            return "NULL";
-        else
-            return "'"+SQL_DATE_FORMAT.format(date)+"'";
+        return SQL_DATE_FORMAT.format(date);
     }
 
     /**
@@ -194,17 +199,23 @@ public class SQL {
      * @param dateTime the SQL datetime string we want to convert.
      * @return a Date object that represents the SQL datetime defined in <code>dateTime</code>. Returns null if parsing
      *         somehow fails - if this happens, it is probably because the date format is wrong.
+     * @throws ParseException if the beginning of the specified string cannot be parsed.
      */
-    public static java.util.Date sqlDateTimeToDate(String dateTime) {
-        java.util.Date date = null;
+    public static java.util.Date sqlDateTimeToDate(String dateTime) throws ParseException {
+        return SQL_DATE_FORMAT.parse(dateTime);
+    }
 
-        if (dateTime != null) {
-            try {
-                date = SQL_DATE_FORMAT.parse(dateTime);
-            } catch (ParseException e) {
-                System.err.println(" > ERROR: Failed to parse grouphug.SQL datetime!");
-            }
-        }
-        return date;
+    /**
+     * Load up the SQL password from the first line of the specified textfile
+     * @param filename The name of the text
+     * @throws IOException if an I/O error occurs, if the file could not be found or if no text was
+     *         extracted from the file
+     */
+    public static void loadPassword(String filename) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(new File(filename)));
+        SQL_PASS = reader.readLine();
+        reader.close();
+        if(SQL_PASS.equals(""))
+            throw new FileNotFoundException("No data extracted from MySQL password file!");
     }
 }
