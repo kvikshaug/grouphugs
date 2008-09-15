@@ -30,19 +30,25 @@ public class Grouphug extends PircBot {
 
     protected static final String CHANNEL = "#grouphugs";     // The main channel
     protected static final String SERVER = "irc.homelien.no"; // The main IRC server
-    protected static final String BOT_NAME = "gh";            // The bot's nick
-    protected static final String BOT_ALT_NAME = "hugger";    // Alternative nick
-    protected static final int MAX_LINE_CHARS = 420;          // The number of characters upon which lines are splitted
-    protected static final int RECONNECT_TIME = 15000;        // How often to try to reconnect to the server, in ms
 
-    protected static File logfile = new File("log-current");  // The file to log all messages to
-    protected static PrintStream stdOut;                      // The standard output
+    // The number of characters upon which lines are splitted
+    protected static final int MAX_LINE_CHARS = 420;
 
+    // How often to try to reconnect to the server when disconnected, in ms
+    protected static final int RECONNECT_TIME = 15000;
+
+    // The file to log all messages to
+    protected static File logfile = new File("log-current");
+
+    // The standard outputstream
+    protected static PrintStream stdOut;
+
+    // A list over all loaded modules
     private static ArrayList<GrouphugModule> modules = new ArrayList<GrouphugModule>();
 
-    public Grouphug() {
-        this.setName(BOT_NAME);
-    }
+    // A list over all the nicknames we want
+    private static ArrayList<String> nicks = new ArrayList<String>();
+
 
     /**
      * This method is called whenever a message is sent to a channel.
@@ -71,9 +77,10 @@ public class Grouphug extends PircBot {
             sendMessage(CHANNEL, "http://youtube.com/watch?v=xrhLdDIQ5Kk");
         if(message.equalsIgnoreCase("fuck it"))
             sendMessage(CHANNEL, "WE'LL DO IT LIVE!");
-        if (message.equalsIgnoreCase("!insult")) {
+        if (message.equalsIgnoreCase("!insult"))
             sendMessage(CHANNEL, sender + ", you fail at life.");
-        }
+        if (message.equalsIgnoreCase("homos"))
+            sendMessage(CHANNEL, "homos are always mad");
 
         stdOut.flush();
     }
@@ -200,29 +207,43 @@ public class Grouphug extends PircBot {
         modules.add(new Karma());
         SVNCommit.load(bot);
 
+        // Save the nicks we will try
+        nicks.add("gh");
+        nicks.add("hugger");
+        nicks.add("klemZ");
+
+        // TODO create thread for polling back first nick if unavailable
+
         // Try connecting to the server
-        // This looks kinda fugly, any better suggestions?
-        try {
+        boolean connected = false;
+        boolean autoNick = false;
+        int nextNick = 0;
+        while(!connected) {
             try {
-                bot.connect(Grouphug.SERVER);
+                if(!autoNick)
+                    bot.setName(nicks.get(nextNick));
+                bot.connect("irc.homelien.no");
+                connected = true;
+            } catch(IndexOutOfBoundsException e) {
+                // We reached the end of the list, so enable autonickchange and retry
+                System.err.println("None of the specified nick(s) could be chosen, choosing automatically.");
+                bot.setAutoNickChange(true);
+                autoNick = true;
             } catch(NickAlreadyInUseException e) {
-                try {
-                    bot.setName(BOT_ALT_NAME);
-                    bot.connect(Grouphug.SERVER);
-                } catch(NickAlreadyInUseException ex) {
-                    System.err.println("Both suggested nicks are taken!");
-                    return;
-                }
+                // Nick was taken, try the next in the list
+                nextNick++;
+            } catch(IrcException e) {
+                // No idea how to handle this. So print the message and exit
+                System.err.println(e.getMessage());
+                System.exit(-1);
+            } catch(IOException e) {
+                // No idea how to handle this. So print the message and exit
+                System.err.println(e.getMessage());
+                System.exit(-1);
             }
-        } catch(IrcException e) {
-            System.err.println("Caught IrcException while connecting to server");
-            e.printStackTrace();
-        } catch(IOException e) {
-            System.err.println("Caught IOException while connecting to server");
-            e.printStackTrace();
         }
 
         // Join the channel
-        bot.joinChannel(Grouphug.CHANNEL);
+        bot.joinChannel(CHANNEL);
     }
 }

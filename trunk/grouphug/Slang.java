@@ -53,6 +53,7 @@ public class Slang implements GrouphugModule {
 
         reply = reply.replace("&quot;", "\"");
         reply = reply.replace("&apos;", "'");
+        reply = reply.replace("&amp;apos;", "'");
 
         bot.sendMessage(reply);
     }
