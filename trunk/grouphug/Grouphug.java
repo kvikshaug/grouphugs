@@ -171,10 +171,7 @@ public class Grouphug extends PircBot {
             }
         }
 
-        // TODO: if we for some reason are to send an ENORMOUS amount of lines, maybe we should throw an exception or
-        // TODO: something? or at least warn about the pending spam?
-
-        if(!spamOK && lines.size() > 3) {
+        if(!spamOK && lines.size() > 5) {
             sendMessage(Grouphug.CHANNEL, "This would spam the channel with "+lines.size()+" lines, start command with @ to override.");
             return;
         }
