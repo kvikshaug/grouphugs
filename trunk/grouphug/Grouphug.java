@@ -4,6 +4,12 @@ import org.jibble.pircbot.*;
 
 import java.util.ArrayList;
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CharacterCodingException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 
 /**
  * GrouphugBot.java
@@ -28,7 +34,12 @@ import java.io.*;
  */
 public class Grouphug extends PircBot {
 
-    protected static final String CHANNEL = "#grouphugs";     // The main channel
+    // With our server being iso-8859-1, we'll need to convert stuff into that. Stop whining, sunn
+    Charset charset = Charset.forName("ISO-8859-1");
+    CharsetDecoder decoder = charset.newDecoder();
+    CharsetEncoder encoder = charset.newEncoder();
+
+    protected static final String CHANNEL = "#grouphugers";     // The main channel
     protected static final String SERVER = "irc.homelien.no"; // The main IRC server
 
     // The number of characters upon which lines are splitted
@@ -159,11 +170,21 @@ public class Grouphug extends PircBot {
         // TODO: something? or at least warn about the pending spam?
 
         // Now, for each line we have in lines, send them to the channel
-        // NB: a for loop is preferred over the java 5 foreach (ask the guys in #java @ efnet for details) 
+        // NB: a for loop is preferred over the java 5 foreach (ask the guys in #java @ efnet for details)
+        String converted;
         for(int i=0; i<lines.size(); i++) {
             // Empty lines may appear, so we skip them
-            if(!lines.get(i).equals(""))
-                this.sendMessage(Grouphug.CHANNEL, lines.get(i));
+            if(!lines.get(i).equals("")) {
+                try {
+                    ByteBuffer bbuf = encoder.encode(CharBuffer.wrap(lines.get(i)));
+                    converted = decoder.decode(bbuf).toString();
+                    this.sendMessage(Grouphug.CHANNEL, converted);
+                } catch (CharacterCodingException e) {
+                    // Upon exception, just send the original line
+                    this.sendMessage(Grouphug.CHANNEL, lines.get(i));
+                }
+
+            }
         }
         stdOut.flush();
     }
