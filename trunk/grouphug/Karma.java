@@ -13,9 +13,9 @@ public class Karma implements GrouphugModule {
         if(message.startsWith(TRIGGER))
             print(bot, message.substring(TRIGGER.length()));
         else if(message.endsWith("++"))
-            add(bot, message.substring(0, message.length()-2), 1);
+            add(bot, sender, message.substring(0, message.length()-2), 1);
         else if(message.endsWith("--"))
-            add(bot, message.substring(0, message.length()-2), -1);
+            add(bot, sender, message.substring(0, message.length()-2), -1);
 
     }
 
@@ -34,7 +34,12 @@ public class Karma implements GrouphugModule {
         }
     }
 
-    private void add(Grouphug bot, String name, int karma) {
+    private void add(Grouphug bot, String sender, String name, int karma) {
+        if(name.equals(sender)) {
+            bot.sendMessage(sender, ", self karma is bad karma.");
+            return;
+        }
+          
         SQL sql = new SQL();
         if(!sql.connect()) {
             System.err.println("Couldn't connect to the SQL database!");
