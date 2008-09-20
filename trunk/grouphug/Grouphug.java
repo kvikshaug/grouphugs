@@ -4,12 +4,6 @@ import org.jibble.pircbot.*;
 
 import java.util.ArrayList;
 import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.CharacterCodingException;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 
 /**
  * GrouphugBot.java
@@ -34,11 +28,6 @@ import java.nio.CharBuffer;
  */
 public class Grouphug extends PircBot {
 
-    // With our server being iso-8859-1, we'll need to convert stuff into that. Stop whining, sunn
-    Charset charset = Charset.forName("ISO-8859-1");
-    CharsetDecoder decoder = charset.newDecoder();
-    CharsetEncoder encoder = charset.newEncoder();
-
     protected static final String CHANNEL = "#grouphugs";     // The main channel
     protected static final String SERVER = "irc.homelien.no"; // The main IRC server
 
@@ -60,6 +49,11 @@ public class Grouphug extends PircBot {
     // A list over all the nicknames we want
     private static ArrayList<String> nicks = new ArrayList<String>();
 
+    // TODO: this should be done differently
+    // A temporary static variable
+    private static boolean spamOK = false;
+
+
 
     /**
      * This method is called whenever a message is sent to a channel.
@@ -72,6 +66,16 @@ public class Grouphug extends PircBot {
      * @param message - The actual message sent to the channel.
      */
     protected void onMessage(String channel, String sender, String login, String hostname, String message) {
+
+        if(message.startsWith("@")) {
+            if(sender.contains("icc") || login.contains("icc")) {
+                sendMessage("icc, you are not allowed to surpass spam-commands.");
+                return;
+            }
+            spamOK = true;
+        } else {
+            spamOK = false;
+        }
 
         // For each "module", call the trigger-method with the sent message
         for(GrouphugModule m : modules) {
@@ -169,21 +173,16 @@ public class Grouphug extends PircBot {
         // TODO: if we for some reason are to send an ENORMOUS amount of lines, maybe we should throw an exception or
         // TODO: something? or at least warn about the pending spam?
 
-        // Now, for each line we have in lines, send them to the channel
-        // NB: a for loop is preferred over the java 5 foreach (ask the guys in #java @ efnet for details)
-        String converted;
-        for(int i=0; i<lines.size(); i++) {
-            // Empty lines may appear, so we skip them
-            if(!lines.get(i).equals("")) {
-                try {
-                    ByteBuffer bbuf = encoder.encode(CharBuffer.wrap(lines.get(i)));
-                    converted = decoder.decode(bbuf).toString();
-                    this.sendMessage(Grouphug.CHANNEL, converted);
-                } catch (CharacterCodingException e) {
-                    // Upon exception, just send the original line
-                    this.sendMessage(Grouphug.CHANNEL, lines.get(i));
-                }
+        if(!spamOK && lines.size() > 3) {
+            sendMessage(Grouphug.CHANNEL, "This would spam the channel with "+lines.size()+" lines, start command with @ to override.");
+            return;
+        }
 
+        // Now, for each line we have in lines, send them to the channel
+        for(String line : lines) {
+            // Empty lines may appear, so we skip them
+            if(!line.equals("")) {
+              this.sendMessage(Grouphug.CHANNEL, line);
             }
         }
         stdOut.flush();
