@@ -39,7 +39,7 @@ public class Grouphug extends PircBot {
     CharsetDecoder decoder = charset.newDecoder();
     CharsetEncoder encoder = charset.newEncoder();
 
-    protected static final String CHANNEL = "#grouphugers";     // The main channel
+    protected static final String CHANNEL = "#grouphugs";     // The main channel
     protected static final String SERVER = "irc.homelien.no"; // The main IRC server
 
     // The number of characters upon which lines are splitted
