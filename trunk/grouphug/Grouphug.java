@@ -51,7 +51,7 @@ public class Grouphug extends PircBot {
 
     // TODO: this should be done differently
     // A temporary static variable
-    private static boolean spamOK = false;
+    protected static boolean spamOK = false;
 
 
 

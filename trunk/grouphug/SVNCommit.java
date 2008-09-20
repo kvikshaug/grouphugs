@@ -105,6 +105,7 @@ public class SVNCommit implements GrouphugModule, Runnable {
                 SVNCommitItem data;
                 try {
                     data = parse(input);
+                    Grouphug.spamOK = true;
                     bot.sendMessage(data.toString());
                 } catch(Exception e) {
                     System.err.println("Error: Unable to parse input from SVNOutput listener!");
