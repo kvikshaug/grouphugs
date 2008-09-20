@@ -73,6 +73,7 @@ public class Grouphug extends PircBot {
                 return;
             }
             spamOK = true;
+            message = message.substring(1);
         } else {
             spamOK = false;
         }
