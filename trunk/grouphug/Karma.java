@@ -36,7 +36,7 @@ public class Karma implements GrouphugModule {
 
     private void add(Grouphug bot, String sender, String name, int karma) {
         if(name.equals(sender)) {
-            bot.sendMessage(sender, ", self karma is bad karma.");
+            bot.sendMessage(sender+", self karma is bad karma.");
             return;
         }
           
