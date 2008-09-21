@@ -54,6 +54,9 @@ public class Slang implements GrouphugModule {
         reply = reply.replace("&quot;", "\"");
         reply = reply.replace("&apos;", "'");
         reply = reply.replace("&amp;apos;", "'");
+        reply = reply.replace("&amp;quot;", "\"");
+        reply = reply.replace("&amp;lt;", "<");
+        reply = reply.replace("&amp;gt;", ">");
 
         bot.sendMessage(reply);
     }
