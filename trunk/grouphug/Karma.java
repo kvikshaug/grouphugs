@@ -87,6 +87,7 @@ public class Karma implements GrouphugModule {
     }
 
     private void showScore(Grouphug bot, boolean top) {
+        Grouphug.spamOK = true;
         SQL sql = new SQL();
         String reply;
         if(top)
@@ -100,13 +101,11 @@ public class Karma implements GrouphugModule {
                 query += "DESC ";
             query += "LIMIT "+LIMIT+";";
             sql.query(query);
-            int place = 0;
-            int last = 10000; // ingen karma vil ha 10k
+            int place = 1;
             while(sql.getNext()) {
                 Object[] values = sql.getValueList();
-                if((Integer)values[1] != last)
-                  place++;
-                reply += place+". "+values[0]+" ("+values[1]+")\n";
+                place++;
+                reply += (place++)+". "+values[0]+" ("+values[1]+")\n";
             }
             if(top)
                 reply += "May their lives be filled with sunlight and pink stuff.";    
@@ -117,6 +116,5 @@ public class Karma implements GrouphugModule {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             bot.sendMessage("Sorry, an SQL error occured.");
         }
-        Grouphug.spamOK = true;
     }
 }
