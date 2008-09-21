@@ -52,7 +52,12 @@ public class Karma implements GrouphugModule {
         SQL sql = new SQL();
         try {
             sql.connect();
-
+            // we sleep for a little while, in case the user is very fast - to avoid duplicate inserts
+            try {
+                Thread.sleep(600);
+            } catch(InterruptedException e) {
+                // interrupted, ok, just continue
+            }
             KarmaItem ki = find(name);
             if(ki == null) {
                 sql.query("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('"+name+"', '"+karma+"');");
@@ -104,7 +109,6 @@ public class Karma implements GrouphugModule {
             int place = 1;
             while(sql.getNext()) {
                 Object[] values = sql.getValueList();
-                place++;
                 reply += (place++)+". "+values[0]+" ("+values[1]+")\n";
             }
             if(top)
