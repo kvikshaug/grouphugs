@@ -13,16 +13,19 @@ public class Google implements GrouphugModule {
     private static final int CONN_TIMEOUT = 10000; // ms
 
     public void trigger(Grouphug bot, String channel, String sender, String login, String hostname, String message) {
+
+        if(!message.startsWith(TRIGGER))
+            return;
+
         URL url = null;
-        if(message.startsWith(TRIGGER)) {
-            try {
-                url = Google.search(message.substring(TRIGGER.length()));
-            } catch(IOException e) {
-                bot.sendMessage("The intartubes seems to be clogged up (IOException).");
-                System.err.println(e.getMessage()+"\n"+e.getCause());
-                return;
-            }
+        try {
+            url = Google.search(message.substring(TRIGGER.length()));
+        } catch(IOException e) {
+            bot.sendMessage("The intartubes seems to be clogged up (IOException).");
+            System.err.println(e.getMessage()+"\n"+e.getCause());
+            return;
         }
+
         if(url == null) {
             bot.sendMessage("No results for "+message.substring(TRIGGER.length())+".");
         } else {
