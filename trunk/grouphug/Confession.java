@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 
 public class Confession implements GrouphugModule {
-    // TODO: h�ndter timeouts, ogs� for gh (ikke bare google) :p
+    // TODO: håndter timeouts, også for gh (ikke bare google) :p
 
     protected static final String TRIGGER = "!gh";
     private static final String KEYWORD_NEWEST = "-newest";
@@ -68,6 +68,7 @@ public class Confession implements GrouphugModule {
      */
     private ConfessionItem search(String query) {
         try {
+            String orgQuery = query;
             query = query.replace(' ', '+');
             System.out.print("Opening google connection... ");
 
@@ -106,7 +107,7 @@ public class Confession implements GrouphugModule {
 
             // if -1, then the phrase wasn't found
             if(startIndex == -1) {
-                return new ConfessionItem("No one has confessed about their "+query+" problem yet.\n", -1);
+                return new ConfessionItem("No one has confessed about their "+orgQuery+" problem yet.\n", -1);
             }
 
             startIndex += 21; // because we search for "<h2 class=r><a href=\"" above, skip over that

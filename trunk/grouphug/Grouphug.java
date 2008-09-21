@@ -28,7 +28,7 @@ import java.io.*;
  */
 public class Grouphug extends PircBot {
 
-    protected static final String CHANNEL = "#grouphugs";     // The main channel
+    protected static final String CHANNEL = "#grouphugers";     // The main channel
     protected static final String SERVER = "irc.homelien.no"; // The main IRC server
 
     // The number of characters upon which lines are splitted
@@ -207,7 +207,7 @@ public class Grouphug extends PircBot {
 
         // Load the SQL password from file
         try {
-            SQL.loadPassword("mysqlpw.txt");
+            SQL.loadPassword("pw/hinux");
         } catch(IOException e) {
             System.err.println("Fatal error: Could not load MySQL-password file.");
             e.printStackTrace();
@@ -223,6 +223,8 @@ public class Grouphug extends PircBot {
         modules.add(new Slang());
         modules.add(new Confession());
         modules.add(new Karma());
+        modules.add(new Dinner());
+        Dinner.loadPassword();
         SVNCommit.load(bot);
 
         // Save the nicks we will try

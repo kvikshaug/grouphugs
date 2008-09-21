@@ -17,10 +17,10 @@ public class SQL {
     private static final String SQL_DRIVER = "org.gjt.mm.mysql.Driver";
 
     // MySQL host, db, login credentials
-    private static final String SQL_HOST = "127.0.0.1";
-    private static final String SQL_DB = "murray";
-    private static final String SQL_USER = "murray";
-    private static String SQL_PASS;
+    private static final String DEFAULT_SQL_HOST = "127.0.0.1";
+    private static final String DEFAULT_SQL_DB = "murray";
+    private static final String DEFAULT_SQL_USER = "murray";
+    private static String DEFAULT_SQL_PASSWORD;
 
     // TODO review to which extenct this is actually happening
     private boolean DEBUG; // True if we are to output extra debug information this is set in the constructor
@@ -68,10 +68,22 @@ public class SQL {
     }
 
     /**
-     * Connects to the specified database
-     * @return boolean - true if connection is established, false otherwise.
+     * Connects to the default database
+     * @return boolean - true if connection is established, false otherwise
      */
     public boolean connect() {
+        return connect(DEFAULT_SQL_HOST, DEFAULT_SQL_DB, DEFAULT_SQL_USER, DEFAULT_SQL_PASSWORD);
+    }
+
+    /**
+     * Connects to the specified database
+     * @param host - IP address or DNS of the host
+     * @param db - Name of the database to open
+     * @param user - Username used to authenticate
+     * @param password - Password used to authenticate
+     * @return boolean - true if connection is established, false otherwise.
+     */
+    public boolean connect(String host, String db, String user, String password) {
         // Load the JDBC driver
         try {
             Class.forName(SQL_DRIVER);
@@ -85,7 +97,7 @@ public class SQL {
         // Connect to DB
         try {
             connection = DriverManager.getConnection
-                    ( "jdbc:mysql://" + SQL_HOST + '/' + SQL_DB, SQL_USER, SQL_PASS);
+                    ( "jdbc:mysql://" + host + '/' + db, user, password);
 
             statement = connection.createStatement();
         } catch (SQLException e) {
@@ -213,9 +225,9 @@ public class SQL {
      */
     public static void loadPassword(String filename) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(new File(filename)));
-        SQL_PASS = reader.readLine();
+        DEFAULT_SQL_PASSWORD = reader.readLine();
         reader.close();
-        if(SQL_PASS.equals(""))
+        if(DEFAULT_SQL_PASSWORD.equals(""))
             throw new FileNotFoundException("No data extracted from MySQL password file!");
     }
 }

@@ -43,7 +43,7 @@ public class Karma implements GrouphugModule {
         SQL sql = new SQL();
         if(!sql.connect()) {
             System.err.println("Couldn't connect to the SQL database!");
-            bot.sendMessage("ERROR: Unable to connect to SQL database.");
+            bot.sendMessage("Sorry, couldn't connect to the SQL db.");
             return;
         }
 
