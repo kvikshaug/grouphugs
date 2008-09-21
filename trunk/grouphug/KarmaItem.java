@@ -23,4 +23,11 @@ public class KarmaItem {
         this.field = field;
         this.karma = karma;
     }
+
+    public String toString() {
+        if(karma == 0)
+            return "neutral";
+        else
+            return ""+karma;
+    }
 }

@@ -8,22 +8,43 @@ import java.io.*;
 
 /**
  * Provides functionality to connect to and perform operations on the news database.
+ * Typical usage:
+ *
+ * SQL sql = new SQL();
+ * try {
+ *     sql.connect(SQL_HOST, SQL_DB, SQL_USER, SQL_PASSWORD);
+ *     sql.query("SELECT some_row, another_row FROM table;");
+ *     while(sql.getNext()) {
+ *       Object[] values = sql.getValueList();
+ *       // values[0] will contain the data of some_row, values[1] from another_row, etc.
+ *       String text = (String)values[0];
+ *       useSomeMethodOn(text);
+ *       // ....
+ *     }
+ * } catch(SQLSyntaxErrorException e) {
+ *   // Handle the event of an SQLSyntaxErrorException, often caused by the programmer
+ * } catch(SQLException e) {
+ *   // Handle the event of an SQLException, happens mostly when connection or authentication fails
+ * } finally {
+ *   sql.disconnect();
+ * }
+ *
+ * You can of course split the code in several try/catch blocks, in order to separate
+ * a connection error from other errors.
+ *
+ * Thinking of this, actually, a SQLConnectionError should be thrown instead of a generic
+ * SQLException! But that is not up to this class, but rather, mysql-jdbc. Hmm. 
+ *
  */
 public class SQL {
 
     private static final DateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    // JDBC Driver
-    private static final String SQL_DRIVER = "org.gjt.mm.mysql.Driver";
 
     // MySQL host, db, login credentials
     private static final String DEFAULT_SQL_HOST = "127.0.0.1";
     private static final String DEFAULT_SQL_DB = "murray";
     private static final String DEFAULT_SQL_USER = "murray";
     private static String DEFAULT_SQL_PASSWORD;
-
-    // TODO review to which extenct this is actually happening
-    private boolean DEBUG; // True if we are to output extra debug information this is set in the constructor
 
     private int affectedRows;
     private Object valueList[];
@@ -33,18 +54,15 @@ public class SQL {
     private ResultSet resultset = null;
 
     /**
-     * Construct a new SQL object
+     * Constructs a new SQL object
      */
     public SQL() {
-        this.DEBUG = false;
-    }
-
-    /**
-     * Construct a new SQL object, specifying if debug output is wanted
-     * @param debug true if this SQL object should output extra debug information
-     */
-    public SQL(boolean debug) {
-        this.DEBUG = debug;
+        try {
+            Class.forName("org.gjt.mm.mysql.Driver");
+        } catch(ClassNotFoundException e) {
+            System.err.println("Fatal error: The mysql-jdbc driver could not be found!");
+            System.exit(-1);
+        }
     }
 
     public Object[] getValueList() {
@@ -69,10 +87,10 @@ public class SQL {
 
     /**
      * Connects to the default database
-     * @return boolean - true if connection is established, false otherwise
+     * @throws SQLException - if we were unable to connect to the database
      */
-    public boolean connect() {
-        return connect(DEFAULT_SQL_HOST, DEFAULT_SQL_DB, DEFAULT_SQL_USER, DEFAULT_SQL_PASSWORD);
+    public void connect() throws SQLException {
+        connect(DEFAULT_SQL_HOST, DEFAULT_SQL_DB, DEFAULT_SQL_USER, DEFAULT_SQL_PASSWORD);
     }
 
     /**
@@ -81,32 +99,11 @@ public class SQL {
      * @param db - Name of the database to open
      * @param user - Username used to authenticate
      * @param password - Password used to authenticate
-     * @return boolean - true if connection is established, false otherwise.
+     * @throws SQLException - if we were unable to connect to the database
      */
-    public boolean connect(String host, String db, String user, String password) {
-        // Load the JDBC driver
-        try {
-            Class.forName(SQL_DRIVER);
-        } catch (ClassNotFoundException e) {
-            System.err.println(" > ERROR: Unable to load SQL driver: " + SQL_DRIVER);
-            if (DEBUG) { e.printStackTrace(); }
-
-            return false;
-        }
-
-        // Connect to DB
-        try {
-            connection = DriverManager.getConnection
-                    ( "jdbc:mysql://" + host + '/' + db, user, password);
-
-            statement = connection.createStatement();
-        } catch (SQLException e) {
-            System.err.println(" > ERROR: Unable to connect to database!");
-            if (DEBUG) { e.printStackTrace(); }
-            return false;
-        }
-
-        return true;
+    public void connect(String host, String db, String user, String password) throws SQLException {
+        connection = DriverManager.getConnection ("jdbc:mysql://" + host + '/' + db, user, password);
+        statement = connection.createStatement();
     }
 
     /**
@@ -143,57 +140,35 @@ public class SQL {
     /**
      * Performs a SQL query on the database
      * @param query - the SQL query to send to the database
-     * @return boolean - returns true if the query was successful, false otherwise
+     * @throws SQLSyntaxErrorException - if there was a syntax error in the query
+     * @throws SQLException - if the query failed
      */
-    public boolean query(String query) {
-        try {
-            // if execute() returns true, the query was a SELECT statement, so we want to retrieve the result set
-            if (statement.execute(query)) {
-                resultset = statement.getResultSet();
-                valueList = new Object[resultset.getMetaData().getColumnCount()];
-            }
-            // if execute() returns false, the query was either an UPDATE, INSERT or DELETE statement, so we retrieve
-            // the number of rows affected by the
-            else {
-                affectedRows = statement.getUpdateCount();
-            }
-
-        } catch (SQLSyntaxErrorException e) {
-            // if we have an error in our grouphug.SQL syntax, let us know!
-            System.err.println(e.getMessage());
-
-            return false;
-
-        } catch (SQLException e) {
-            System.err.println(" > ERROR: Failed to execute query on DB!");
-            if (DEBUG) { e.printStackTrace(); }
-            return false;
+    public void query(String query) throws SQLException {
+        // if execute() returns true, the query was a SELECT statement, so we want to retrieve the result set
+        if (statement.execute(query)) {
+            resultset = statement.getResultSet();
+            valueList = new Object[resultset.getMetaData().getColumnCount()];
         }
-
-        return true;
+        // if execute() returns false, the query was either an UPDATE, INSERT or DELETE statement,
+        // so we retrieve the number of rows affected
+        else {
+            affectedRows = statement.getUpdateCount();
+        }
     }
 
     /**
-     * Iterates trough the rows in the result set, saving the values for each coloumn in the row in valueList - accessible
-     * by getValueList.
+     * Iterates trough the rows in the result set, saving the values for each coloumn
+     * in the row in valueList - accessible by getValueList.
      * @return boolean - returns false if there are no more rows, true otherwise.
+     * @throws SQLException - if an SQLException occurs
      */
-    public boolean getNext() {
-
-        try {
-            if(!resultset.next()) {
-                return false;
-            }
-            for(int i = 1; i <= resultset.getMetaData().getColumnCount(); i++) {
-                valueList[i-1] = resultset.getObject(i);
-            }
-
-
-        } catch (SQLException e) {
+    public boolean getNext() throws SQLException {
+        if(!resultset.next()) {
             return false;
         }
-
-
+        for(int i = 1; i <= resultset.getMetaData().getColumnCount(); i++) {
+            valueList[i-1] = resultset.getObject(i);
+        }
         return true;
     }
 

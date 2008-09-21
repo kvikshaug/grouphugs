@@ -1,5 +1,7 @@
 package grouphug;
 
+import java.sql.SQLException;
+
 public class Karma implements GrouphugModule {
 
     // TODO karmatop, karmabottom
@@ -20,18 +22,18 @@ public class Karma implements GrouphugModule {
     }
 
     private void print(Grouphug bot, String name) {
-        KarmaItem ki = find(name, null);
-        if(ki == null) {
-            bot.sendMessage(name+" has neutral karma.");
-        } else {
-            String karmaStr;
-            if(ki.getKarma() == 0)
-                karmaStr = "neutral";
-            else
-                karmaStr = ""+ki.getKarma();
-
-            bot.sendMessage(name+" has "+karmaStr+" karma.");
+        KarmaItem ki;
+        try {
+            ki = find(name);
+        } catch(SQLException e) {
+            System.err.println(" > SQL Exception: "+e.getMessage());
+            bot.sendMessage(name+" has probably bad karma, because an SQL error occured.");
+            return;
         }
+        if(ki == null)
+            bot.sendMessage(name+" has neutral karma.");
+        else
+            bot.sendMessage(name+" has "+ki+" karma.");
     }
 
     private void add(Grouphug bot, String sender, String name, int karma) {
@@ -41,52 +43,38 @@ public class Karma implements GrouphugModule {
         }
           
         SQL sql = new SQL();
-        if(!sql.connect()) {
-            System.err.println("Couldn't connect to the SQL database!");
-            bot.sendMessage("Sorry, couldn't connect to the SQL db.");
-            return;
-        }
+        try {
+            sql.connect();
 
-        // TODO fugly fugly hack; can also be null on errors :( even tho we use this method's sql connection
-        // TODO assumes that null just means "not found"
-        KarmaItem ki = find(name, sql);
-        if(ki == null) {
-            sql.query("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('"+name+"', '"+karma+"');");
-        } else {
-            sql.query("UPDATE "+KARMA_DB+" SET value='"+(ki.getKarma() + karma)+"' WHERE id='"+ki.getID()+"';");
+            KarmaItem ki = find(name);
+            if(ki == null) {
+                sql.query("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('"+name+"', '"+karma+"');");
+            } else {
+                sql.query("UPDATE "+KARMA_DB+" SET value='"+(ki.getKarma() + karma)+"' WHERE id='"+ki.getID()+"';");
+            }
+        } catch(SQLException e) {
+            System.err.println(" > SQL Exception: "+e.getMessage());
+            bot.sendMessage("Sorry, an SQL error occurred.");
+        } finally {
+            sql.disconnect();
         }
-        sql.disconnect();
     }
 
     /**
      * Finds a karma-item in the DB based on its name. Returns null if no item is found.
      * @param karma The karma string to search for in the DB
-     * @param sql Optional SQL object. If nullpointed, a custom SQL connection is made, if not, the provided SQL object is used.
-     * @return a KarmaItem-object of the item found in the DB, or null if no item was found or an error occured (TODO should rather throw an exception)
+     * @return a KarmaItem-object of the item found in the DB, or null if no item was found
+     * @throws SQLException - if an SQL error occured
      */
-    private KarmaItem find(String karma, SQL sql) {
-        boolean customSQL = false; // indicates if we have to manage our own sql connection
-        if(sql == null) {
-            customSQL = true;
-            sql = new SQL();
-            if(!sql.connect()) {
-                System.err.println("Couldn't connect to the SQL database!");
-                return null;
-            }
-        }
-
-        if(!sql.query("SELECT id, name, value FROM "+KARMA_DB+";")) {
-            System.err.println("ERROR: Unable to query SQL database.");
-            return null;
-        }
-
-        while(sql.getNext()) {
-            Object[] values = sql.getValueList();
-            if((values[1]).equals(karma)) {
-                if(customSQL)
-                    sql.disconnect();
-                return new KarmaItem((Integer)values[0], (String)values[1], (Integer)values[2]);
-            }
+    private KarmaItem find(String karma) throws SQLException {
+        SQL sql = new SQL();
+        sql.connect();
+        sql.query("SELECT id, name, value FROM "+KARMA_DB+";");
+        sql.getNext();
+        Object[] values = sql.getValueList();
+        sql.disconnect();
+        if((values[1]).equals(karma)) {
+            return new KarmaItem((Integer)values[0], (String)values[1], (Integer)values[2]);
         }
         return null;
     }

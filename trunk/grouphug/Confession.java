@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 
 public class Confession implements GrouphugModule {
-    // TODO: håndter timeouts, også for gh (ikke bare google) :p
+    // TODO: handle timeouts
 
     protected static final String TRIGGER = "!gh";
     private static final String KEYWORD_NEWEST = "-newest";

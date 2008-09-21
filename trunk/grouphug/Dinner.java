@@ -2,6 +2,7 @@ package grouphug;
 
 import java.io.*;
 import java.util.GregorianCalendar;
+import java.sql.SQLException;
 
 public class Dinner implements GrouphugModule {
 
@@ -25,16 +26,23 @@ public class Dinner implements GrouphugModule {
             return;
 
         if(!pwOk) {
-            bot.sendMessage("Couldn't fetch SQL password from file.");
+            bot.sendMessage("Couldn't fetch SQL password from file, please fix and reload the module.");
             return;
         }
 
         // Fetch the data
         SQL sql = new SQL();
-        sql.connect(SQL_HOST, SQL_DB, SQL_USER, SQL_PASSWORD);
-        sql.query("SELECT middag_dato, middag_mandag, middag_tirsdag, middag_onsdag, middag_torsdag, middag_fredag FROM narvikdata;");
+        try {
+            sql.connect(SQL_HOST, SQL_DB, SQL_USER, SQL_PASSWORD);
+            sql.query("SELECT middag_dato, middag_mandag, middag_tirsdag, middag_onsdag, middag_torsdag, middag_fredag FROM narvikdata;");
+            sql.getNext();
+        } catch(SQLException e) {
+            System.err.println(" > SQL Exception: "+e.getMessage());
+            bot.sendMessage("Sorry, an SQL error occurred.");
+            sql.disconnect();
+            return;
+        }
 
-        sql.getNext();
         Object[] values = sql.getValueList();
 
         values[0] = replaceHTML((String)values[0]);
@@ -43,6 +51,8 @@ public class Dinner implements GrouphugModule {
         values[3] = replaceHTML((String)values[3]);
         values[4] = replaceHTML((String)values[4]);
         values[5] = replaceHTML((String)values[5]);
+
+        sql.disconnect();
 
         // Figure out what day is wanted; default being today's day
         WeekDay wantedDay;
