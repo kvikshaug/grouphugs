@@ -4,9 +4,12 @@ import java.sql.SQLException;
 
 public class Karma implements GrouphugModule {
 
-    // TODO karmatop, karmabottom
-
     private static final String TRIGGER = "karma ";
+    private static final String TRIGGER_TOP = "karmatop";
+    private static final String TRIGGER_BOTTOM = "karmabottom";
+
+    private static final int LIMIT = 5; // how many items to show in karmatop/karmabottom
+
     private static final String KARMA_DB = "gh_karma";
 
     public void trigger(Grouphug bot, String channel, String sender, String login, String hostname, String message) {
@@ -14,6 +17,10 @@ public class Karma implements GrouphugModule {
         // First, check for triggers: keywords, ++, -- 
         if(message.startsWith(TRIGGER))
             print(bot, message.substring(TRIGGER.length()));
+        else if(message.equals(TRIGGER_TOP))
+            showScore(bot, true);
+        else if(message.equals(TRIGGER_BOTTOM))
+            showScore(bot, false);
         else if(message.endsWith("++"))
             add(bot, sender, message.substring(0, message.length()-2), 1);
         else if(message.endsWith("--"))
@@ -26,7 +33,7 @@ public class Karma implements GrouphugModule {
         try {
             ki = find(name);
         } catch(SQLException e) {
-            System.err.println(" > SQL Exception: "+e.getMessage());
+            System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             bot.sendMessage(name+" has probably bad karma, because an SQL error occured.");
             return;
         }
@@ -53,7 +60,7 @@ public class Karma implements GrouphugModule {
                 sql.query("UPDATE "+KARMA_DB+" SET value='"+(ki.getKarma() + karma)+"' WHERE id='"+ki.getID()+"';");
             }
         } catch(SQLException e) {
-            System.err.println(" > SQL Exception: "+e.getMessage());
+            System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             bot.sendMessage("Sorry, an SQL error occurred.");
         } finally {
             sql.disconnect();
@@ -77,5 +84,39 @@ public class Karma implements GrouphugModule {
             return new KarmaItem((Integer)values[0], (String)values[1], (Integer)values[2]);
         }
         return null;
+    }
+
+    private void showScore(Grouphug bot, boolean top) {
+        SQL sql = new SQL();
+        String reply;
+        if(top)
+            reply = "Top five karma winners:\n";
+        else
+            reply = "Bottom five karma losers:\n";
+        try {
+            sql.connect();
+            String query = "SELECT name, value FROM "+KARMA_DB+" ORDER BY value ";
+            if(top)
+                query += "DESC ";
+            query += "LIMIT "+LIMIT+";";
+            sql.query(query);
+            int place = 0;
+            int last = 10000; // ingen karma vil ha 10k
+            while(sql.getNext()) {
+                Object[] values = sql.getValueList();
+                if((Integer)values[1] != last)
+                  place++;
+                reply += place+". "+values[0]+" ("+values[1]+")\n";
+            }
+            if(top)
+                reply += "May their lives be filled with sunlight and pink stuff.";    
+            else
+                reply += "May they burn forever in the pits of "+ Grouphug.CHANNEL+".";
+            bot.sendMessage(reply);
+        } catch(SQLException e) {
+            System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
+            bot.sendMessage("Sorry, an SQL error occured.");
+        }
+        Grouphug.spamOK = true;
     }
 }

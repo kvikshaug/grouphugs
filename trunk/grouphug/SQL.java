@@ -7,7 +7,7 @@ import java.text.ParseException;
 import java.io.*;
 
 /**
- * Provides functionality to connect to and perform operations on the news database.
+ * Provides functionality to connect to and perform operations on an SQL database.
  * Typical usage:
  *
  * SQL sql = new SQL();

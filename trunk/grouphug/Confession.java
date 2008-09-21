@@ -10,6 +10,7 @@ import java.io.IOException;
 
 public class Confession implements GrouphugModule {
     // TODO: handle timeouts
+    // TODO: make google into own !google module, and use that from here
 
     protected static final String TRIGGER = "!gh";
     private static final String KEYWORD_NEWEST = "-newest";

@@ -37,7 +37,7 @@ public class Dinner implements GrouphugModule {
             sql.query("SELECT middag_dato, middag_mandag, middag_tirsdag, middag_onsdag, middag_torsdag, middag_fredag FROM narvikdata;");
             sql.getNext();
         } catch(SQLException e) {
-            System.err.println(" > SQL Exception: "+e.getMessage());
+            System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             bot.sendMessage("Sorry, an SQL error occurred.");
             sql.disconnect();
             return;
