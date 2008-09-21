@@ -9,13 +9,11 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 
 public class Confession implements GrouphugModule {
-    // TODO: handle timeouts
-    // TODO: make google into own !google module, and use that from here
+    // TODO: reverify that timeouts are handled properly
 
     protected static final String TRIGGER = "!gh";
     private static final String KEYWORD_NEWEST = "-newest";
-    private static final int CONN_TIMEOUT = 1000; // ms
-    private static final int GH_CONN_TIMEOUT = 10000; // ms
+    private static final int CONN_TIMEOUT = 10000; // ms
     private static String errorConfession = "I have nothing to confess at the moment, please try again later.";
 
     public void trigger(Grouphug bot, String channel, String sender, String login, String hostname, String message) {
@@ -62,71 +60,23 @@ public class Confession implements GrouphugModule {
         }
     }
 
+    // TODO - this should not "invent" a new ConfessionItem in order to provide an error message.
     /**
-     * Searches for a keyword in a confession. Returns null on failure. (Should rather throw a manual exception).
+     * Searches for a keyword in a confession.
      * @param query the keyword(s) to search for
      * @return the first confession found with the keyword
      */
     private ConfessionItem search(String query) {
+        URL confessionURL;
         try {
-            String orgQuery = query;
-            query = query.replace(' ', '+');
-            System.out.print("Opening google connection... ");
-
-            URLConnection urlConn;
-            try {
-                urlConn = new URL("http", "www.google.com", "/search?q="+query+"+site:grouphug.us/confessions/").openConnection();
-            } catch(MalformedURLException ex) {
-                System.err.println("Grouphug confession error: MalformedURLException in partially dynamic URL in search()!");
-                return null;
-            }
-
-            urlConn.setConnectTimeout(CONN_TIMEOUT);
-            urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Trick google into thinking we're a proper browser. ;)
-
-            BufferedReader google = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
-
-            System.out.println("OK");
-
-            // Find an URL to the search result
-            // HACK fugly jump to line 3 (should check for nullptr)
-            google.readLine();
-            google.readLine();
-            String line = google.readLine();
-
-            if(line == null)
-                return null;
-
-            int startIndex;
-            // TODO: why catch NPE here??
-            try {
-                startIndex = line.indexOf("<h3 class=r><a href=\"");
-            } catch(NullPointerException e) {
-                System.err.println("Grouphug confession error: Nullpointerexception at google search!");
-                return null;
-            }
-
-            // if -1, then the phrase wasn't found
-            if(startIndex == -1) {
-                return new ConfessionItem("No one has confessed about their "+orgQuery+" problem yet.\n", -1);
-            }
-
-            startIndex += 21; // because we search for "<h2 class=r><a href=\"" above, skip over that
-            int i = startIndex;
-            for(; line.charAt(i) != '"'; i++) {
-                if(i == line.length()) {
-                    System.err.println("Grouphug confession error: Couldn't find ending \" in hyperlink reference");
-                    return null;
-                }
-            }
-
-            return getConfession(new URL(line.substring(startIndex, i)));
-
+            confessionURL = Google.search(query+"+site:grouphug.us/confessions/");
         } catch(IOException e) {
-            System.err.println("Grouphug confession error: IOException: "+e+"\n");
-            e.printStackTrace();
-            return null;
+            return new ConfessionItem("Google wouldn't let me search for "+query+" problems.\n", -1);
         }
+        if(confessionURL == null)
+            return new ConfessionItem("No one has confessed about their "+query+" problem yet.\n", -1);
+        else
+            return getConfession(confessionURL);
     }
 
     /**
@@ -142,7 +92,7 @@ public class Confession implements GrouphugModule {
 
             System.out.print("Opening grouphug connection... ");
             URLConnection urlConn = url.openConnection();
-            urlConn.setConnectTimeout(GH_CONN_TIMEOUT);
+            urlConn.setConnectTimeout(CONN_TIMEOUT);
 
             BufferedReader gh = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
 

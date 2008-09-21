@@ -49,8 +49,7 @@ public class Grouphug extends PircBot {
     // A list over all the nicknames we want
     private static ArrayList<String> nicks = new ArrayList<String>();
 
-    // TODO: this should be done differently
-    // A temporary static variable
+    // Used to specify if it is ok to spam a large message to the channel 
     protected static boolean spamOK = false;
 
 
@@ -224,6 +223,7 @@ public class Grouphug extends PircBot {
         modules.add(new Confession());
         modules.add(new Karma());
         modules.add(new Dinner());
+        modules.add(new Google());
         Dinner.loadPassword();
         SVNCommit.load(bot);
 
