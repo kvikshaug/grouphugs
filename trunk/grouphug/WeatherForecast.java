@@ -21,7 +21,7 @@ public class WeatherForecast implements GrouphugModule {
         str = str.replace("</em>", "");
         str = str.replace("</p>", "");
         str = str.replace("<br />", "\n");
-        str = str.replace("&deg;", "?"); // this is the degree in iso-8859-1 encoding...
+        str = str.replace("&deg;", "°");
         return str;
     }
 
