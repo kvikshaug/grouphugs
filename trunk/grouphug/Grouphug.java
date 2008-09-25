@@ -27,7 +27,7 @@ import java.io.*;
  * The bot extends the functionality of the well-designed PircBot, see http://www.jibble.org/
  */
 public class Grouphug extends PircBot {
-
+    // 
     protected static final String CHANNEL = "#grouphugs";     // The main channel
     protected static final String SERVER = "irc.homelien.no"; // The main IRC server
 
@@ -222,9 +222,11 @@ public class Grouphug extends PircBot {
         modules.add(new Slang());
         modules.add(new Confession());
         modules.add(new Karma());
-        modules.add(new Dinner());
         modules.add(new Google());
+        modules.add(new Dinner());
+        modules.add(new WeatherForecast());
         Dinner.loadPassword();
+        WeatherForecast.loadPassword();
         SVNCommit.load(bot);
 
         // Save the nicks we will try
