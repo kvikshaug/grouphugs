@@ -1,6 +1,6 @@
 package grouphug;
 
-public class KarmaItem {
+class KarmaItem {
 
     private int ID;
     private String field;

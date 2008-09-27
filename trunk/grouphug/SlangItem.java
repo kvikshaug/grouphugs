@@ -1,6 +1,6 @@
 package grouphug;
 
-public class SlangItem {
+class SlangItem {
 
     private int number;
     private String word;

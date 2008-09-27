@@ -2,7 +2,7 @@ package grouphug;
 
 import java.util.ArrayList;
 
-public class SVNCommitItem {
+class SVNCommitItem {
 
     private int revision;
     private String user;

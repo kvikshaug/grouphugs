@@ -2,8 +2,9 @@ package grouphug;
 
 import java.sql.SQLException;
 
-public class Karma implements GrouphugModule {
+class Karma implements GrouphugModule {
 
+    private static Grouphug bot;
     private static final String TRIGGER = "karma ";
     private static final String TRIGGER_TOP = "karmatop";
     private static final String TRIGGER_BOTTOM = "karmabottom";
@@ -12,40 +13,56 @@ public class Karma implements GrouphugModule {
 
     private static final String KARMA_DB = "gh_karma";
 
-    public void trigger(Grouphug bot, String channel, String sender, String login, String hostname, String message) {
+    public Karma(Grouphug bot) {
+        Karma.bot = bot;
+    }
+
+    public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
+        bot.sendMessage(sender, "Karma: Increase, decrease, or show an objects karma.");
+        bot.sendMessage(sender, " - Trigger 1: " + Grouphug.MAIN_TRIGGER + Karma.TRIGGER + "<object>");
+        bot.sendMessage(sender, " - Trigger 2: <object>++");
+        bot.sendMessage(sender, " - Trigger 3: <object>--");
+        bot.sendMessage(sender, " - Trigger 4: " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP);
+        bot.sendMessage(sender, " - Trigger 5: " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM);
+    }
+
+    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
+        if(message.endsWith("++"))
+            add(sender, message.substring(0, message.length()-2), 1);
+        else if(message.endsWith("--"))
+            add(sender, message.substring(0, message.length()-2), -1);
+    }
+
+    public void trigger(String channel, String sender, String login, String hostname, String message) {
 
         // First, check for triggers: keywords, ++, -- 
         if(message.startsWith(TRIGGER))
-            print(bot, message.substring(TRIGGER.length()));
+            print(message.substring(TRIGGER.length()));
         else if(message.equals(TRIGGER_TOP))
-            showScore(bot, true);
+            showScore(true);
         else if(message.equals(TRIGGER_BOTTOM))
-            showScore(bot, false);
-        else if(message.endsWith("++"))
-            add(bot, sender, message.substring(0, message.length()-2), 1);
-        else if(message.endsWith("--"))
-            add(bot, sender, message.substring(0, message.length()-2), -1);
+            showScore(false);
 
     }
 
-    private void print(Grouphug bot, String name) {
+    private void print(String name) {
         KarmaItem ki;
         try {
             ki = find(name);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.sendMessage(name+" has probably bad karma, because an SQL error occured.");
+            bot.sendMessage(name+" has probably bad karma, because an SQL error occured.", false);
             return;
         }
         if(ki == null)
-            bot.sendMessage(name+" has neutral karma.");
+            bot.sendMessage(name+" has neutral karma.", false);
         else
-            bot.sendMessage(name+" has "+ki+" karma.");
+            bot.sendMessage(name+" has "+ki+" karma.", false);
     }
 
-    private void add(Grouphug bot, String sender, String name, int karma) {
+    private void add(String sender, String name, int karma) {
         if(name.equals(sender)) {
-            bot.sendMessage(sender+", self karma is bad karma.");
+            bot.sendMessage(sender+", self karma is bad karma.", false);
             return;
         }
           
@@ -66,7 +83,7 @@ public class Karma implements GrouphugModule {
             }
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.sendMessage("Sorry, an SQL error occurred.");
+            bot.sendMessage("Sorry, an SQL error occurred.", false);
         } finally {
             sql.disconnect();
         }
@@ -91,8 +108,7 @@ public class Karma implements GrouphugModule {
         return null;
     }
 
-    private void showScore(Grouphug bot, boolean top) {
-        Grouphug.spamOK = true;
+    private void showScore(boolean top) {
         SQL sql = new SQL();
         String reply;
         if(top)
@@ -115,10 +131,10 @@ public class Karma implements GrouphugModule {
                 reply += "May their lives be filled with sunlight and pink stuff.";    
             else
                 reply += "May they burn forever in the pits of "+ Grouphug.CHANNEL+".";
-            bot.sendMessage(reply);
+            bot.sendMessage(reply, false);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.sendMessage("Sorry, an SQL error occured.");
+            bot.sendMessage("Sorry, an SQL error occured.", false);
         }
     }
 }

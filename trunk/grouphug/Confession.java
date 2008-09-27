@@ -8,15 +8,31 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
-public class Confession implements GrouphugModule {
+class Confession implements GrouphugModule {
     // TODO: reverify that timeouts are handled properly
 
-    protected static final String TRIGGER = "!gh";
+    private static Grouphug bot;
+    private static final String TRIGGER = "gh";
     private static final String KEYWORD_NEWEST = "-newest";
     private static final int CONN_TIMEOUT = 10000; // ms
     private static String errorConfession = "I have nothing to confess at the moment, please try again later.";
 
-    public void trigger(Grouphug bot, String channel, String sender, String login, String hostname, String message) {
+    public Confession(Grouphug bot) {
+        Confession.bot = bot;
+    }
+
+    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
+        // do nothing
+    }
+
+    public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
+        bot.sendMessage(sender, "Confession: Outputs a confession, random or by search.");
+        bot.sendMessage(sender, " - Trigger 1: "+Grouphug.MAIN_TRIGGER+Confession.TRIGGER);
+        bot.sendMessage(sender, " - Trigger 2: "+Grouphug.MAIN_TRIGGER+Confession.TRIGGER +" <searchword(s)>");
+
+    }
+
+    public void trigger(String channel, String sender, String login, String hostname, String message) {
 
         if(!message.startsWith(Confession.TRIGGER))
             return;
@@ -37,9 +53,9 @@ public class Confession implements GrouphugModule {
         }
 
         if(conf == null)
-            bot.sendMessage(errorConfession);
+            bot.sendMessage(errorConfession, false);
         else
-            bot.sendMessage(conf.toString());
+            bot.sendMessage(conf.toString(), true);
     }
 
     private ConfessionItem random() {

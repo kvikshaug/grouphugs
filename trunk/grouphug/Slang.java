@@ -6,14 +6,30 @@ import java.io.DataOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.InputStream;
 
-public class Slang implements GrouphugModule {
+class Slang implements GrouphugModule {
 
+    private static Grouphug bot;
     private static final String TRIGGER_MAIN = "slang ";
     private static final String TRIGGER_EXAMPLE = "-ex ";
 
     private static int slangCount = 0;
 
-    public void trigger(Grouphug bot, String channel, String sender, String login, String hostname, String message) {
+    Slang(Grouphug bot) {
+        Slang.bot = bot;
+    }
+
+    public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
+        bot.sendMessage(sender, "Slang: Define an expression.");
+        bot.sendMessage(sender, " - Trigger 1: " + Grouphug.MAIN_TRIGGER + Slang.TRIGGER_MAIN + "<expr>");
+        bot.sendMessage(sender, " - Trigger 2: " + Grouphug.MAIN_TRIGGER + Slang.TRIGGER_MAIN + "<expr> <number>");
+        bot.sendMessage(sender, " - Trigger 3: " + Grouphug.MAIN_TRIGGER + Slang.TRIGGER_MAIN + Slang.TRIGGER_EXAMPLE + "<expr>");
+    }
+
+    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
+        // do nothing
+    }
+
+    public void trigger(String channel, String sender, String login, String hostname, String message) {
         if(!message.startsWith(TRIGGER_MAIN))
             return;
 
@@ -58,7 +74,7 @@ public class Slang implements GrouphugModule {
         reply = reply.replace("&amp;lt;", "<");
         reply = reply.replace("&amp;gt;", ">");
 
-        bot.sendMessage(reply);
+        bot.sendMessage(reply, true);
     }
 
     // TODO: should not return null, but throw an exception, upon failure 

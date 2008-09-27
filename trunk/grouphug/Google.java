@@ -7,12 +7,26 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
-public class Google implements GrouphugModule {
+class Google implements GrouphugModule {
 
-    private static final String TRIGGER = "!google ";
+    private static Grouphug bot;
+    private static final String TRIGGER = "google ";
     private static final int CONN_TIMEOUT = 10000; // ms
 
-    public void trigger(Grouphug bot, String channel, String sender, String login, String hostname, String message) {
+    public Google(Grouphug bot) {
+        Google.bot = bot;
+    }
+
+    public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
+        bot.sendMessage(sender, "Google search:");
+        bot.sendMessage(sender, " - Trigger: "+Grouphug.MAIN_TRIGGER+Google.TRIGGER +"<searchword(s)>");
+    }
+
+    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
+        // do nothing
+    }
+
+    public void trigger(String channel, String sender, String login, String hostname, String message) {
 
         if(!message.startsWith(TRIGGER))
             return;
@@ -21,15 +35,15 @@ public class Google implements GrouphugModule {
         try {
             url = Google.search(message.substring(TRIGGER.length()));
         } catch(IOException e) {
-            bot.sendMessage("The intartubes seems to be clogged up (IOException).");
+            bot.sendMessage("The intartubes seems to be clogged up (IOException).", false);
             System.err.println(e.getMessage()+"\n"+e.getCause());
             return;
         }
 
         if(url == null) {
-            bot.sendMessage("No results for "+message.substring(TRIGGER.length())+".");
+            bot.sendMessage("No results for "+message.substring(TRIGGER.length())+".", false);
         } else {
-            bot.sendMessage(url.toString());
+            bot.sendMessage(url.toString(), false);
         }
     }
 

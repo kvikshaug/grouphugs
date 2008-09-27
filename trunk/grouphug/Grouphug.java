@@ -28,20 +28,20 @@ import java.io.*;
  */
 public class Grouphug extends PircBot {
     // 
-    protected static final String CHANNEL = "#grouphugs";     // The main channel
-    protected static final String SERVER = "irc.homelien.no"; // The main IRC server
+    static final String CHANNEL = "#grouphugs";     // The main channel
+    static final String SERVER = "irc.homelien.no"; // The main IRC server
 
     // The number of characters upon which lines are splitted
-    protected static final int MAX_LINE_CHARS = 420;
+    private static final int MAX_LINE_CHARS = 420;
 
     // How often to try to reconnect to the server when disconnected, in ms
-    protected static final int RECONNECT_TIME = 15000;
+    private static final int RECONNECT_TIME = 15000;
 
     // The file to log all messages to
-    protected static File logfile = new File("log-current");
+    private static File logfile = new File("log-current");
 
     // The standard outputstream
-    protected static PrintStream stdOut;
+    private static PrintStream stdOut;
 
     // A list over all loaded modules
     private static ArrayList<GrouphugModule> modules = new ArrayList<GrouphugModule>();
@@ -50,7 +50,11 @@ public class Grouphug extends PircBot {
     private static ArrayList<String> nicks = new ArrayList<String>();
 
     // Used to specify if it is ok to spam a large message to the channel 
-    protected static boolean spamOK = false;
+    static boolean spamOK = false;
+
+    // The trigger characters (as Strings since startsWith takes String)
+    static String MAIN_TRIGGER = "!";
+    static String SPAM_TRIGGER = "@";
 
 
 
@@ -66,22 +70,6 @@ public class Grouphug extends PircBot {
      */
     protected void onMessage(String channel, String sender, String login, String hostname, String message) {
 
-        if(message.startsWith("@")) {
-            if(sender.contains("icc") || login.contains("icc")) {
-                sendMessage("icc, you are not allowed to surpass spam-commands.");
-                return;
-            }
-            spamOK = true;
-            message = message.substring(1);
-        } else {
-            spamOK = false;
-        }
-
-        // For each "module", call the trigger-method with the sent message
-        for(GrouphugModule m : modules) {
-            m.trigger(this, channel, sender, login, hostname, message);
-        }
-
         // A few hardcoded funnies
         // TODO: make factoid? "idiot bot is <action>pisses all over $sender" -> saved in db, triggered by own module
         if(message.equalsIgnoreCase("idiot bot"))
@@ -96,6 +84,37 @@ public class Grouphug extends PircBot {
             sendMessage(CHANNEL, sender + ", you fail at life.");
         if (message.equalsIgnoreCase("homos"))
             sendMessage(CHANNEL, "homos are always mad");
+
+
+        if(message.startsWith(MAIN_TRIGGER + "help")) {
+            sendMessage(CHANNEL, sender+", check pm");
+            sendMessage(sender, "Currently implemented modules on "+this.getName()+":");
+            sendMessage(sender, "---");
+            for(GrouphugModule m : modules) {
+                m.helpTrigger(channel, sender, login, hostname, message);
+            }
+        }
+        else if(message.startsWith(MAIN_TRIGGER) || message.startsWith(SPAM_TRIGGER)) {
+            if(message.startsWith(MAIN_TRIGGER)) {
+                spamOK = false;
+            } else {
+                if(sender.contains("icc") || login.contains("icc")) {
+                    sendMessage(CHANNEL, "icc, you are not allowed to surpass spam-commands.");
+                    return;
+                }
+                spamOK = true;
+            }
+
+            // For each module, call the trigger-method with the sent message
+            for(GrouphugModule m : modules) {
+                m.trigger(channel, sender, login, hostname, message.substring(1));
+            }
+        } else {
+            for(GrouphugModule m : modules) {
+                m.specialTrigger(channel, sender, login, hostname, message.substring(1));
+            }
+        }
+
 
         stdOut.flush();
     }
@@ -147,8 +166,9 @@ public class Grouphug extends PircBot {
      * and sends them at the earliest possible opportunity.
      *
      * @param message - The message to send
+     * @param verifySpam - true if verifying that spamming is ok before sending large messages
      */
-    protected void sendMessage(String message) {
+    protected void sendMessage(String message, boolean verifySpam) {
         // First create a list of the lines we will send separately.
         ArrayList<String> lines = new ArrayList<String>();
 
@@ -170,8 +190,8 @@ public class Grouphug extends PircBot {
             }
         }
 
-        if(!spamOK && lines.size() > 5) {
-            sendMessage(Grouphug.CHANNEL, "This would spam the channel with "+lines.size()+" lines, start command with @ to override.");
+        if(verifySpam && !spamOK && lines.size() > 5) {
+            sendMessage(Grouphug.CHANNEL, "This would spam the channel with "+lines.size()+" lines, replace "+MAIN_TRIGGER+" with "+SPAM_TRIGGER+" to override.");
             return;
         }
 
@@ -196,8 +216,8 @@ public class Grouphug extends PircBot {
         try {
             logfile.createNewFile();
             stdOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(logfile)));
-            System.setOut(stdOut);
-            System.setErr(stdOut);
+            //System.setOut(stdOut);
+            //System.setErr(stdOut);
         } catch(IOException e) {
             System.err.println("Fatal error: Unable to load or create logfile \""+logfile.toString()+"\" in default dir.");
             e.printStackTrace();
@@ -209,7 +229,10 @@ public class Grouphug extends PircBot {
             SQL.loadPassword("pw/hinux");
         } catch(IOException e) {
             System.err.println("Fatal error: Could not load MySQL-password file.");
+            System.err.println(e.getMessage());
+            System.err.println(e.getCause());
             e.printStackTrace();
+            stdOut.flush();
             System.exit(-1);
         }
 
@@ -219,12 +242,12 @@ public class Grouphug extends PircBot {
 
         // Load up modules
         // TODO - should be done differently
-        modules.add(new Slang());
-        modules.add(new Confession());
-        modules.add(new Karma());
-        modules.add(new Google());
-        modules.add(new Dinner());
-        modules.add(new WeatherForecast());
+        modules.add(new Slang(bot));
+        modules.add(new Confession(bot));
+        modules.add(new Karma(bot));
+        modules.add(new Google(bot));
+        modules.add(new Dinner(bot));
+        modules.add(new WeatherForecast(bot));
         Dinner.loadPassword();
         WeatherForecast.loadPassword();
         SVNCommit.load(bot);
@@ -244,7 +267,7 @@ public class Grouphug extends PircBot {
             try {
                 if(!autoNick)
                     bot.setName(nicks.get(nextNick));
-                bot.connect("irc.homelien.no");
+                bot.connect(SERVER);
                 connected = true;
             } catch(IndexOutOfBoundsException e) {
                 // We reached the end of the list, so enable autonickchange and retry
@@ -257,10 +280,12 @@ public class Grouphug extends PircBot {
             } catch(IrcException e) {
                 // No idea how to handle this. So print the message and exit
                 System.err.println(e.getMessage());
+                stdOut.flush();
                 System.exit(-1);
             } catch(IOException e) {
                 // No idea how to handle this. So print the message and exit
                 System.err.println(e.getMessage());
+                stdOut.flush();
                 System.exit(-1);
             }
         }

@@ -1,6 +1,6 @@
 package grouphug;
 
-public enum WeekDay {
+enum WeekDay {
     ALL,
     MONDAY,
     TUESDAY,

@@ -4,7 +4,7 @@ package grouphug;
  * This object is a confession from grouphug.us
  * Contains a String of the confession, and an int of the no. of hugs
  */
-public class ConfessionItem {
+class ConfessionItem {
 
     private String confession;
     private int hugs;

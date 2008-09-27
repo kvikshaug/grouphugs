@@ -30,8 +30,7 @@ import java.util.ArrayList;
  * This class parses the provided data and outputs it on the gh channel.
  */
 
-// TODO: maybe this shouldn't implement GHModule, since it's not triggered by trigger() ?
-public class SVNCommit implements GrouphugModule, Runnable {
+class SVNCommit implements Runnable {
 
     public static boolean run; // should be set to false when we want to stop this thread.
     private static final int MAX_FAILS = 3; // Max no. of fails allowed by the listener before aborting
@@ -43,10 +42,6 @@ public class SVNCommit implements GrouphugModule, Runnable {
         SVNCommit.bot = bot;
         run = true;
         new Thread(new SVNCommit()).start();
-    }
-
-    public void trigger(Grouphug bot, String channel, String sender, String login, String hostname, String message) {
-        // do nothing
     }
 
     public void run() {
@@ -105,8 +100,7 @@ public class SVNCommit implements GrouphugModule, Runnable {
                 SVNCommitItem data;
                 try {
                     data = parse(input);
-                    Grouphug.spamOK = true;
-                    bot.sendMessage(data.toString());
+                    bot.sendMessage(data.toString(), false);
                 } catch(Exception e) {
                     System.err.println("Error: Unable to parse input from SVNOutput listener!");
                     e.printStackTrace();

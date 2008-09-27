@@ -1,6 +1,6 @@
 package grouphug;
 
-public class SVNCommitItemFile {
+class SVNCommitItemFile {
 
     private char modification;
     private String filename;
