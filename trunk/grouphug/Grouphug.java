@@ -28,7 +28,7 @@ import java.io.*;
  */
 public class Grouphug extends PircBot {
     // 
-    static final String CHANNEL = "#grouphugs";     // The main channel
+    static final String CHANNEL = "#grouphugers";     // The main channel
     static final String SERVER = "irc.homelien.no"; // The main IRC server
 
     // The number of characters upon which lines are splitted
@@ -216,8 +216,8 @@ public class Grouphug extends PircBot {
         try {
             logfile.createNewFile();
             stdOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(logfile)));
-            //System.setOut(stdOut);
-            //System.setErr(stdOut);
+            System.setOut(stdOut);
+            System.setErr(stdOut);
         } catch(IOException e) {
             System.err.println("Fatal error: Unable to load or create logfile \""+logfile.toString()+"\" in default dir.");
             e.printStackTrace();
