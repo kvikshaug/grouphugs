@@ -28,7 +28,7 @@ import java.io.*;
  */
 public class Grouphug extends PircBot {
     // 
-    static final String CHANNEL = "#grouphugers";     // The main channel
+    static final String CHANNEL = "#grouphugs";     // The main channel
     static final String SERVER = "irc.homelien.no"; // The main IRC server
 
     // The number of characters upon which lines are splitted
