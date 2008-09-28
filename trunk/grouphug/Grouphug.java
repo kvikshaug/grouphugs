@@ -111,7 +111,7 @@ public class Grouphug extends PircBot {
             }
         } else {
             for(GrouphugModule m : modules) {
-                m.specialTrigger(channel, sender, login, hostname, message.substring(1));
+                m.specialTrigger(channel, sender, login, hostname, message);
             }
         }
 
