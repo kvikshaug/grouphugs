@@ -54,10 +54,14 @@ class Karma implements GrouphugModule {
             bot.sendMessage(name+" has probably bad karma, because an SQL error occured.", false);
             return;
         }
-        if(ki == null)
+        if(ki == null) {
             bot.sendMessage(name+" has neutral karma.", false);
-        else
+            bot.sendMessage("dbg: ki was null", false);
+        }
+        else {
+            bot.sendMessage("dbg: ki was 0", false);
             bot.sendMessage(name+" has "+ki+" karma.", false);
+        }
     }
 
     private void add(String sender, String name, int karma) {
@@ -102,7 +106,9 @@ class Karma implements GrouphugModule {
         sql.getNext();
         Object[] values = sql.getValueList();
         sql.disconnect();
+        bot.sendMessage("dbg: comparing "+values[1]+" to "+karma, false);
         if((values[1]).equals(karma)) {
+            bot.sendMessage("dbg: equals = true, returning new ki", false);
             return new KarmaItem((Integer)values[0], (String)values[1], (Integer)values[2]);
         }
         return null;
