@@ -54,14 +54,10 @@ class Karma implements GrouphugModule {
             bot.sendMessage(name+" has probably bad karma, because an SQL error occured.", false);
             return;
         }
-        if(ki == null) {
+        if(ki == null)
             bot.sendMessage(name+" has neutral karma.", false);
-            bot.sendMessage("dbg: ki was null", false);
-        }
-        else {
-            bot.sendMessage("dbg: ki was 0", false);
+        else
             bot.sendMessage(name+" has "+ki+" karma.", false);
-        }
     }
 
     private void add(String sender, String name, int karma) {
@@ -80,11 +76,10 @@ class Karma implements GrouphugModule {
                 // interrupted, ok, just continue
             }
             KarmaItem ki = find(name);
-            if(ki == null) {
+            if(ki == null)
                 sql.query("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('"+name+"', '"+karma+"');");
-            } else {
+            else
                 sql.query("UPDATE "+KARMA_DB+" SET value='"+(ki.getKarma() + karma)+"' WHERE id='"+ki.getID()+"';");
-            }
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             bot.sendMessage("Sorry, an SQL error occurred.", false);
@@ -102,13 +97,11 @@ class Karma implements GrouphugModule {
     private KarmaItem find(String karma) throws SQLException {
         SQL sql = new SQL();
         sql.connect();
-        sql.query("SELECT id, name, value FROM "+KARMA_DB+";");
+        sql.query("SELECT id, name, value FROM "+KARMA_DB+" WHERE name='"+karma+"';");
         sql.getNext();
         Object[] values = sql.getValueList();
         sql.disconnect();
-        bot.sendMessage("dbg: comparing "+values[1]+" to "+karma, false);
         if((values[1]).equals(karma)) {
-            bot.sendMessage("dbg: equals = true, returning new ki", false);
             return new KarmaItem((Integer)values[0], (String)values[1], (Integer)values[2]);
         }
         return null;
