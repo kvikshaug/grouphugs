@@ -19,18 +19,18 @@ class Dinner implements GrouphugModule {
     }
 
     private String replaceHTML(String str) {
-        str = str.replace("&oslash;", "ø");
-        str = str.replace("&aring;", "å");
-        str = str.replace("&aelig;", "æ");
+        str = str.replace("&oslash;", "ï¿½");
+        str = str.replace("&aring;", "ï¿½");
+        str = str.replace("&aelig;", "ï¿½");
         str = str.replace("&quot;", "\"");
         return str;
     }
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
-        bot.sendMessage(sender, "Dinner: Shows what's for dinner at HiN.");
-        bot.sendMessage(sender, " - Trigger 1: "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER);
-        bot.sendMessage(sender, " - Trigger 2: "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +"<weekday>");
-        bot.sendMessage(sender, " - Trigger 3: "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +"all");
+        bot.sendNotice(sender, "Dinner: Shows what's for dinner at HiN.");
+        bot.sendNotice(sender, " - Trigger 1: "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER);
+        bot.sendNotice(sender, " - Trigger 2: "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +"<weekday>");
+        bot.sendNotice(sender, " - Trigger 3: "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +"all");
     }
     
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {

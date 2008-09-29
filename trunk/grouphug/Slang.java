@@ -19,10 +19,10 @@ class Slang implements GrouphugModule {
     }
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
-        bot.sendMessage(sender, "Slang: Define an expression.");
-        bot.sendMessage(sender, " - Trigger 1: " + Grouphug.MAIN_TRIGGER + Slang.TRIGGER_MAIN + "<expr>");
-        bot.sendMessage(sender, " - Trigger 2: " + Grouphug.MAIN_TRIGGER + Slang.TRIGGER_MAIN + "<expr> <number>");
-        bot.sendMessage(sender, " - Trigger 3: " + Grouphug.MAIN_TRIGGER + Slang.TRIGGER_MAIN + Slang.TRIGGER_EXAMPLE + "<expr>");
+        bot.sendNotice(sender, "Slang: Define an expression.");
+        bot.sendNotice(sender, " - Trigger 1: " + Grouphug.MAIN_TRIGGER + Slang.TRIGGER_MAIN + "<expr>");
+        bot.sendNotice(sender, " - Trigger 2: " + Grouphug.MAIN_TRIGGER + Slang.TRIGGER_MAIN + "<expr> <number>");
+        bot.sendNotice(sender, " - Trigger 3: " + Grouphug.MAIN_TRIGGER + Slang.TRIGGER_MAIN + Slang.TRIGGER_EXAMPLE + "<expr>");
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {

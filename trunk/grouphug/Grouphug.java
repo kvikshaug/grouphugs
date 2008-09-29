@@ -87,9 +87,9 @@ public class Grouphug extends PircBot {
 
 
         if(message.startsWith(MAIN_TRIGGER + "help")) {
-            sendMessage(CHANNEL, sender+", check pm");
-            sendMessage(sender, "Currently implemented modules on "+this.getName()+":");
-            sendMessage(sender, "---");
+            sendNotice(CHANNEL, sender+", check pm");
+            sendNotice(sender, "Currently implemented modules on "+this.getName()+":");
+            sendNotice(sender, "---");
             for(GrouphugModule m : modules) {
                 m.helpTrigger(channel, sender, login, hostname, message);
             }

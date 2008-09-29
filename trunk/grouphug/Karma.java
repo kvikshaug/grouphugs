@@ -18,12 +18,12 @@ class Karma implements GrouphugModule {
     }
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
-        bot.sendMessage(sender, "Karma: Increase, decrease, or show an objects karma.");
-        bot.sendMessage(sender, " - Trigger 1: " + Grouphug.MAIN_TRIGGER + Karma.TRIGGER + "<object>");
-        bot.sendMessage(sender, " - Trigger 2: <object>++");
-        bot.sendMessage(sender, " - Trigger 3: <object>--");
-        bot.sendMessage(sender, " - Trigger 4: " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP);
-        bot.sendMessage(sender, " - Trigger 5: " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM);
+        bot.sendNotice(sender, "Karma: Increase, decrease, or show an objects karma.");
+        bot.sendNotice(sender, " - Trigger 1: " + Grouphug.MAIN_TRIGGER + Karma.TRIGGER + "<object>");
+        bot.sendNotice(sender, " - Trigger 2: <object>++");
+        bot.sendNotice(sender, " - Trigger 3: <object>--");
+        bot.sendNotice(sender, " - Trigger 4: " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP);
+        bot.sendNotice(sender, " - Trigger 5: " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM);
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
