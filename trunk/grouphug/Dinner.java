@@ -19,9 +19,9 @@ class Dinner implements GrouphugModule {
     }
 
     private String replaceHTML(String str) {
-        str = str.replace("&oslash;", "�");
-        str = str.replace("&aring;", "�");
-        str = str.replace("&aelig;", "�");
+        str = str.replace("&oslash;", "ø");
+        str = str.replace("&aring;", "å");
+        str = str.replace("&aelig;", "æ");
         str = str.replace("&quot;", "\"");
         return str;
     }

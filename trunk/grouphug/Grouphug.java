@@ -240,7 +240,7 @@ public class Grouphug extends PircBot {
         bot.setVerbose(true);
 
         // Tell the bot to use ISO8859-15
-        String encoding="ISO8859-1";
+        String encoding="ISO8859-15";
         try
         {
             bot.setEncoding(encoding);
