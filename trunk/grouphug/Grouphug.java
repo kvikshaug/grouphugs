@@ -239,6 +239,17 @@ public class Grouphug extends PircBot {
         Grouphug bot = new Grouphug();
         bot.setVerbose(true);
 
+        // Tell the bot to use ISO8859-15
+        String encoding="ISO8859-15";
+        try
+        {
+            bot.setEncoding(encoding);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            bot.sendMessage(Grouphug.CHANNEL, "Failed to set character encoding " + encoding);
+        }
+
         // Load up modules
         // TODO - should be done differently
         modules.add(new Slang(bot));
