@@ -56,10 +56,10 @@ class WeatherForecast implements GrouphugModule {
     }
 
     private String fixOutput(String str) {
-        str = str.replace("&deg;", "°");
-        str = str.replace("&oslash;", "ø");
-        str = str.replace("&aring;", "å");
-        str = str.replace("&aelig;", "æ");
+        str = str.replace("&deg;", "Â°");
+        str = str.replace("&oslash;", "Ã¸");
+        str = str.replace("&aring;", "Ã¥");
+        str = str.replace("&aelig;", "Ã¦");
         str = str.replace("&quot;", "\"");
         str = str.replace("<p><em>", "");
         str = str.replace("</em>", "");
