@@ -7,7 +7,7 @@ import java.sql.SQLException;
 class Dinner implements GrouphugModule {
 
     private static Grouphug bot;
-    private static final String TRIGGER = "dinner ";
+    private static final String TRIGGER = "dinner";
     private static final String SQL_HOST = "heiatufte.net";
     private static final String SQL_DB = "narvikdata";
     private static final String SQL_USER = "narvikdata";
@@ -19,18 +19,18 @@ class Dinner implements GrouphugModule {
     }
 
     private String replaceHTML(String str) {
-        str = str.replace("&oslash;", "Ã¸");
-        str = str.replace("&aring;", "Ã¥");
-        str = str.replace("&aelig;", "Ã¦");
+        str = str.replace("&oslash;", "ø¸");
+        str = str.replace("&aring;", "å");
+        str = str.replace("&aelig;", "æ");
         str = str.replace("&quot;", "\"");
         return str;
     }
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
         bot.sendNotice(sender, "Dinner: Shows what's for dinner at HiN.");
-        bot.sendNotice(sender, " - Trigger 1: "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER);
-        bot.sendNotice(sender, " - Trigger 2: "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +"<weekday>");
-        bot.sendNotice(sender, " - Trigger 3: "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +"all");
+        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER);
+        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +" <weekday>");
+        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +" all");
     }
     
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {

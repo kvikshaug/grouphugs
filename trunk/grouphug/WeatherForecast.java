@@ -19,7 +19,7 @@ class WeatherForecast implements GrouphugModule {
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
         bot.sendNotice(sender, "WeatherForecast: General forecast for Narvik tomorrow.");
-        bot.sendNotice(sender, " - Trigger: " + Grouphug.MAIN_TRIGGER + WeatherForecast.TRIGGER);
+        bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + WeatherForecast.TRIGGER);
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
@@ -56,10 +56,10 @@ class WeatherForecast implements GrouphugModule {
     }
 
     private String fixOutput(String str) {
-        str = str.replace("&deg;", "Â°");
-        str = str.replace("&oslash;", "Ã¸");
-        str = str.replace("&aring;", "Ã¥");
-        str = str.replace("&aelig;", "Ã¦");
+        str = str.replace("&deg;", "°");
+        str = str.replace("&oslash;", "ø");
+        str = str.replace("&aring;", "å");
+        str = str.replace("&aelig;", "æ");
         str = str.replace("&quot;", "\"");
         str = str.replace("<p><em>", "");
         str = str.replace("</em>", "");

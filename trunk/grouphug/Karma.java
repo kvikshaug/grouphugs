@@ -19,11 +19,11 @@ class Karma implements GrouphugModule {
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
         bot.sendNotice(sender, "Karma: Increase, decrease, or show an objects karma.");
-        bot.sendNotice(sender, " - Trigger 1: " + Grouphug.MAIN_TRIGGER + Karma.TRIGGER + "<object>");
-        bot.sendNotice(sender, " - Trigger 2: <object>++");
-        bot.sendNotice(sender, " - Trigger 3: <object>--");
-        bot.sendNotice(sender, " - Trigger 4: " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP);
-        bot.sendNotice(sender, " - Trigger 5: " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM);
+        bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + Karma.TRIGGER + "<object>");
+        bot.sendNotice(sender, "  <object>++");
+        bot.sendNotice(sender, "  <object>--");
+        bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP);
+        bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM);
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
@@ -98,13 +98,12 @@ class Karma implements GrouphugModule {
         SQL sql = new SQL();
         sql.connect();
         sql.query("SELECT id, name, value FROM "+KARMA_DB+" WHERE name='"+karma+"';");
-        sql.getNext();
+        if(!sql.getNext()) {
+            return null;
+        }
         Object[] values = sql.getValueList();
         sql.disconnect();
-        if((values[1]).equals(karma)) {
-            return new KarmaItem((Integer)values[0], (String)values[1], (Integer)values[2]);
-        }
-        return null;
+        return new KarmaItem((Integer)values[0], (String)values[1], (Integer)values[2]);
     }
 
     private void showScore(boolean top) {

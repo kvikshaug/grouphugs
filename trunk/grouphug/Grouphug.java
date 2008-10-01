@@ -241,13 +241,11 @@ public class Grouphug extends PircBot {
         bot.setVerbose(true);
 
         // Tell the bot to use ISO8859-15
-        try
-        {
+        try {
             bot.setEncoding(ENCODING);
         }
-        catch (UnsupportedEncodingException e)
-        {
-            bot.sendMessage(Grouphug.CHANNEL, "Failed to set character encoding " + encoding);
+        catch (UnsupportedEncodingException e) {
+            bot.sendMessage(Grouphug.CHANNEL, "Failed to set character encoding " + ENCODING);
         }
 
         // Load up modules

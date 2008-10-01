@@ -19,7 +19,7 @@ class Google implements GrouphugModule {
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
         bot.sendNotice(sender, "Google search:");
-        bot.sendNotice(sender, " - Trigger: "+Grouphug.MAIN_TRIGGER+Google.TRIGGER +"<searchword(s)>");
+        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Google.TRIGGER +"<searchword(s)>");
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
