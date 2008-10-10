@@ -113,11 +113,11 @@ class Confession implements GrouphugModule {
             BufferedReader gh = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
 
             // We dig down to the confession content
-            // HACK: Skip to the third content div - as the (currently) two newsitems also use this layout
+            // HACK: Skip to the third content div - as the (currently) three newsitems also use this layout
             int i=0;
             while((line = gh.readLine()) != null) {
                 if(line.equals("  <div class=\"content\">")) {
-                    if(i==2)
+                    if(i==3)
                         break;
                     else
                         i++;

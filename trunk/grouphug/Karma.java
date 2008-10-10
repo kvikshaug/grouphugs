@@ -27,9 +27,9 @@ class Karma implements GrouphugModule {
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-        if(message.endsWith("++"))
+        if(message.endsWith("++") || message.endsWith("++;"))
             add(sender, message.substring(0, message.length()-2), 1);
-        else if(message.endsWith("--"))
+        else if(message.endsWith("--") || message.endsWith("--;"))
             add(sender, message.substring(0, message.length()-2), -1);
     }
 
