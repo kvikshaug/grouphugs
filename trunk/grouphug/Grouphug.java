@@ -172,13 +172,6 @@ public class Grouphug extends PircBot {
         // First create a list of the lines we will send separately.
         ArrayList<String> lines = new ArrayList<String>();
 
-        // If the message is longer than max line chars, separate them
-        while(message.length() > Grouphug.MAX_LINE_CHARS) {
-            lines.add(message.substring(0, Grouphug.MAX_LINE_CHARS));
-            message = message.substring(Grouphug.MAX_LINE_CHARS);
-        }
-        lines.add(message);
-
         // For each line, split all \n into new lines
         // TODO: optimize; this line separator is quick n dirty
         for(int i=0; i<lines.size(); i++) {
@@ -189,6 +182,13 @@ public class Grouphug extends PircBot {
                 }
             }
         }
+
+        // If the message is longer than max line chars, separate them
+        while(message.length() > Grouphug.MAX_LINE_CHARS) {
+            lines.add(message.substring(0, Grouphug.MAX_LINE_CHARS));
+            message = message.substring(Grouphug.MAX_LINE_CHARS);
+        }
+        lines.add(message);
 
         if(verifySpam && !spamOK && lines.size() > 5) {
             sendMessage(Grouphug.CHANNEL, "This would spam the channel with "+lines.size()+" lines, replace "+MAIN_TRIGGER+" with "+SPAM_TRIGGER+" to override.");
