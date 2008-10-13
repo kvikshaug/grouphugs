@@ -35,6 +35,9 @@ public class Grouphug extends PircBot {
     // The number of characters upon which lines are splitted
     private static final int MAX_LINE_CHARS = 420;
 
+    // How many lines we can send to the channel in one go without needing spam-trigger
+    private static final int MAX_SPAM_LINES = 5;
+
     // How often to try to reconnect to the server when disconnected, in ms
     private static final int RECONNECT_TIME = 15000;
 
@@ -169,39 +172,50 @@ public class Grouphug extends PircBot {
      * @param verifySpam - true if verifying that spamming is ok before sending large messages
      */
     protected void sendMessage(String message, boolean verifySpam) {
+
         // First create a list of the lines we will send separately.
         ArrayList<String> lines = new ArrayList<String>();
 
-        // For each line, split all \n into new lines
-        // TODO: optimize; this line separator is quick n dirty
-        for(int i=0; i<lines.size(); i++) {
-            for(int j=0; j < lines.get(i).length(); j++) {
-                if(lines.get(i).charAt(j) == '\n') {
-                    lines.add((i+1), lines.get(i).substring(j+1));
-                    lines.set(i, lines.get(i).substring(0, j));
-                }
-            }
-        }
+        // This will be used for searching.
+        int index;
 
-        // If the message is longer than max line chars, separate them
-        while(message.length() > Grouphug.MAX_LINE_CHARS) {
-            lines.add(message.substring(0, Grouphug.MAX_LINE_CHARS));
-            message = message.substring(Grouphug.MAX_LINE_CHARS);
+        // Remove all carriage returns.
+        for(index = message.indexOf('\r'); index != -1; index = message.indexOf('\r'))
+            message = message.substring(0, index) + message.substring(index + 1);
+
+        // Split all \n into different lines
+        for(index = message.indexOf('\n'); index != -1; index = message.indexOf('\n')) {
+            lines.add(message.substring(0, index));
+            message = message.substring(index + 1);
         }
         lines.add(message);
 
-        if(verifySpam && !spamOK && lines.size() > 5) {
+        // If the message is longer than max line chars, separate them
+        for(int i = 0; i<lines.size(); i++) {
+            while(lines.get(i).length() > Grouphug.MAX_LINE_CHARS) {
+                String line = lines.get(i);
+                lines.remove(i);
+                lines.add(i, line.substring(0, Grouphug.MAX_LINE_CHARS));
+                lines.add(i+1, line.substring(Grouphug.MAX_LINE_CHARS));
+            }
+        }
+
+        // Remove all empty lines
+        for(int i = 0; i<lines.size(); i++) {
+            if(lines.get(i).equals(""))
+                lines.remove(i);
+        }
+
+        // Now check if we are spamming the channel, and stop if the spam-trigger isn't used
+        if(verifySpam && !spamOK && lines.size() > MAX_SPAM_LINES) {
             sendMessage(Grouphug.CHANNEL, "This would spam the channel with "+lines.size()+" lines, replace "+MAIN_TRIGGER+" with "+SPAM_TRIGGER+" to override.");
             return;
         }
 
-        // Now, for each line we have in lines, send them to the channel
-        for(String line : lines) {
-            // Empty lines may appear, so we skip them
-            if(!line.equals("")) {
-              this.sendMessage(Grouphug.CHANNEL, line);
-            }
-        }
+        // Finally send all the lines to the channel
+        for(String line : lines)
+            this.sendMessage(Grouphug.CHANNEL, line);
+
         stdOut.flush();
     }
 
