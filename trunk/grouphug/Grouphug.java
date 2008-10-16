@@ -33,7 +33,7 @@ public class Grouphug extends PircBot {
     static final String ENCODING = "ISO8859-15"; // Character encoding to use when communicating with the IRC server.
 
     // The number of characters upon which lines are splitted
-    private static final int MAX_LINE_CHARS = 420;
+    private static final int MAX_LINE_CHARS = 510; // 512 seems to be max, including \r\n
 
     // How many lines we can send to the channel in one go without needing spam-trigger
     private static final int MAX_SPAM_LINES = 5;
@@ -264,12 +264,13 @@ public class Grouphug extends PircBot {
 
         // Load up modules
         // TODO - should be done differently
-        modules.add(new Slang(bot));
         modules.add(new Confession(bot));
+        modules.add(new Slang(bot));
         modules.add(new Karma(bot));
         modules.add(new Google(bot));
         modules.add(new Dinner(bot));
         modules.add(new WeatherForecast(bot));
+        modules.add(new Define(bot));
         Dinner.loadPassword();
         WeatherForecast.loadPassword();
         SVNCommit.load(bot);

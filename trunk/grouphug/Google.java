@@ -35,7 +35,7 @@ class Google implements GrouphugModule {
         try {
             url = Google.search(message.substring(TRIGGER.length()));
         } catch(IOException e) {
-            bot.sendMessage("The intartubes seems to be clogged up (IOException).", false);
+            bot.sendMessage("Sorry, the intartubes seems to be clogged up (IOException)", false);
             System.err.println(e.getMessage()+"\n"+e.getCause());
             return;
         }
@@ -76,13 +76,14 @@ class Google implements GrouphugModule {
         if(line == null)
             return null;
 
-        int startIndex = line.indexOf("<h3 class=r><a href=\"");
+        String parseSearch = "<h3 class=r><a href=\"";
+        int startIndex = line.indexOf(parseSearch);
 
-        // if -1, then the phrase wasn't found
+        // if -1, then the phrase wasn't found - should return error here, not "not found"
         if(startIndex == -1)
             return null;
 
-        startIndex += 21; // because we search for "<h2 class=r><a href=\"" above, skip over that
+        startIndex += parseSearch.length();
         int i = startIndex;
         for(; line.charAt(i) != '"'; i++) {
             if(i == line.length()) {
