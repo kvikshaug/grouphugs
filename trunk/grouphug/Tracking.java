@@ -67,7 +67,7 @@ class Tracking implements GrouphugModule {
         // phear teh ugly hax <3
         String curLine = " ";
         status = 0;
-        output = ""
+        output = "";
         while (status <= 5){
             curLine = posten.readLine();
             String errorSearch = "SporingUserControl_ErrorMessage";
