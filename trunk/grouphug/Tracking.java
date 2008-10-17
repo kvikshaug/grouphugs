@@ -19,7 +19,7 @@ class Tracking implements GrouphugModule {
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
         bot.sendNotice(sender, "Posten.no package tracking:");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Google.TRIGGER +"<package id / kollinr>");
+        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Tracker.TRIGGER +"<package id / kollinr>");
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
@@ -66,8 +66,8 @@ class Tracking implements GrouphugModule {
         
         // phear teh ugly hax <3
         String curLine = " ";
-        status = 0;
-        output = "";
+        int status = 0;
+        String output = "";
         while (status < 5){
             curLine = posten.readLine();
             if (curLine == null) 
