@@ -271,7 +271,7 @@ public class Grouphug extends PircBot {
         modules.add(new Dinner(bot));
         modules.add(new WeatherForecast(bot));
         modules.add(new Define(bot));
-        modules.add(new Tracker(bot));
+        modules.add(new Tracking(bot));
         Dinner.loadPassword();
         WeatherForecast.loadPassword();
         SVNCommit.load(bot);
