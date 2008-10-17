@@ -68,8 +68,10 @@ class Tracking implements GrouphugModule {
         String curLine = " ";
         status = 0;
         output = "";
-        while (status <= 5){
+        while (status < 5){
             curLine = posten.readLine();
+            if (curLine == null) 
+                return null;
             String errorSearch = "SporingUserControl_ErrorMessage";
             int errorIndex = curLine.indexOf(errorSearch);
             
