@@ -285,7 +285,6 @@ public class Grouphug extends PircBot {
         modules.add(new Define(bot));
         modules.add(new Tracking(bot));
         modules.add(new Cinema(bot));
-        modules.add(new Phonebook(bot));
         Grouphug.loadGrimstuxPassword();
         SVNCommit.load(bot);
 
