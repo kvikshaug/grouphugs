@@ -49,13 +49,19 @@ class Karma implements GrouphugModule {
         str = str.replace("&aelig;", "æ");
         str = str.replace("&oslash;", "ø");
         str = str.replace("&aring;", "å");
+        str = str.replace("&AElig;", "Æ");
+        str = str.replace("&Oslash;", "Ø");
+        str = str.replace("&Aring;", "Å");
         return str;
     }
 
     private String norwegianCharsToHtmlEntities(String str) {
-        str = str.replace("æ", "&aelig;");
-        str = str.replace("ø", "&oslash;");
-        str = str.replace("å", "&aring;");
+        str = str.replace("ÃŠ", "&aelig;");
+        str = str.replace("Ãž", "&oslash;");
+        str = str.replace("Ã¥", "&aring;");
+        str = str.replace("Ã\u0086", "&AElig;");
+        str = str.replace("Ã\u0098", "&Oslash;");
+        str = str.replace("Ã\u0085", "&Aring;");
         return str;
     }
 
