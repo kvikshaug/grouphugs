@@ -33,7 +33,7 @@ public class Grouphug extends PircBot {
     // 
     static final String CHANNEL = "#grouphugs";     // The main channel
     static final String SERVER = "irc.homelien.no"; // The main IRC server
-    static final String ENCODING = "ISO8859-15"; // Character encoding to use when communicating with the IRC server.
+    static final String ENCODING = "ISO8859-15";    // Character encoding to use when communicating with the IRC server.
 
     // The number of characters upon which lines are splitted
     private static final int MAX_LINE_CHARS = 510; // 512 seems to be max, including \r\n

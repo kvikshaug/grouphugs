@@ -27,7 +27,7 @@ class Cinema implements GrouphugModule {
     }
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
-        bot.sendNotice(sender, "Cinema: Display upcoming film at Narvik Cinema");
+        bot.sendNotice(sender, "Cinema: Display upcoming movies at Narvik Cinema");
         bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Cinema.TRIGGER);
         bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Cinema.TRIGGER +" <nr of films>");
         bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Cinema.TRIGGER +" all");
