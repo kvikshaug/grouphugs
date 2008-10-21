@@ -58,35 +58,18 @@ class Karma implements GrouphugModule {
     }
 
     private String norwegianCharsToHtmlEntities(String str) {
-        String line = "The string "+str+" in numbers: ";
-        char[] charray = str.toCharArray();
-        for(char c : charray) {
-            line += " - "+((int)c);
-        }
-        bot.sendMessage(line, false);
-        
-        String tempstr = str;
-        char[] ae = new char[2];
-        ae[0] = (char)195;
-        ae[1] = (char)352;
-
-        String aetest = new String(ae);
-
-        bot.sendMessage("manually created iso-string: "+aetest, false);
-
         str = str.replace("æ", "&aelig;");
         str = str.replace("ø", "&oslash;");
         str = str.replace("å", "&aring;");
         str = str.replace("Æ", "&AElig;");
         str = str.replace("Ø", "&Oslash;");
         str = str.replace("Å", "&Aring;");
-        str = str.replace(aetest, "&aelig;");
-        str = str.replace("Ãž", "&oslash;");
-        str = str.replace("Ã¥", "&aring;");
+        str = str.replace(new String(new char[] { (char)195, (char)352 }), "&aelig;");
+        str = str.replace(new String(new char[] { (char)195, (char)382 }), "&oslash;");
+        str = str.replace(new String(new char[] { (char)195, (char)165 }), "&aring;");
         str = str.replace("Ã\u0086", "&AElig;");
         str = str.replace("Ã\u0098", "&Oslash;");
         str = str.replace("Ã\u0085", "&Aring;");
-        bot.sendMessage("String went through htmlentity conversion, before: "+tempstr+", after: "+str, false);
         return str;
     }
 
