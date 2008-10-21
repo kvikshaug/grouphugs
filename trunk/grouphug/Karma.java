@@ -53,7 +53,6 @@ class Karma implements GrouphugModule {
         str = str.replace("&AElig;", "Æ");
         str = str.replace("&Oslash;", "Ø");
         str = str.replace("&Aring;", "Å");
-        bot.sendMessage("String went through reverse conversion, before: "+tempstr+", after: "+str, false);
         return str;
     }
 
