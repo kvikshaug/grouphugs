@@ -3,24 +3,24 @@ package grouphug;
 class KarmaItem {
 
     private int ID;
-    private String field;
+    private String name;
     private int karma;
 
     public int getID() {
         return ID;
     }
 
-    public String getField() {
-        return field;
+    public String getName() {
+        return name;
     }
 
     public int getKarma() {
         return karma;
     }
 
-    public KarmaItem(int ID, String field, int karma) {
+    public KarmaItem(int ID, String name, int karma) {
         this.ID = ID;
-        this.field = field;
+        this.name = name;
         this.karma = karma;
     }
 

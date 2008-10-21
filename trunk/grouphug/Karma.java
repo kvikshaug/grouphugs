@@ -56,6 +56,12 @@ class Karma implements GrouphugModule {
     }
 
     private String norwegianCharsToHtmlEntities(String str) {
+        str = str.replace("æ", "&aelig;");
+        str = str.replace("ø", "&oslash;");
+        str = str.replace("å", "&aring;");
+        str = str.replace("Æ", "&AElig;");
+        str = str.replace("Ø", "&Oslash;");
+        str = str.replace("Å", "&Aring;");
         str = str.replace("ÃŠ", "&aelig;");
         str = str.replace("Ãž", "&oslash;");
         str = str.replace("Ã¥", "&aring;");
@@ -78,7 +84,7 @@ class Karma implements GrouphugModule {
         if(ki == null)
             bot.sendMessage(name+" has neutral karma.", false);
         else
-            bot.sendMessage(name+" has "+ki+" karma.", false);
+            bot.sendMessage(ki.getName()+" has "+ki.getKarma()+" karma.", false);
     }
 
     private void add(String sender, String name, int karma) {
@@ -87,8 +93,6 @@ class Karma implements GrouphugModule {
             return;
         }
 
-        String sqlName = norwegianCharsToHtmlEntities(name);
-          
         SQL sql = new SQL();
         try {
             sql.connect();
@@ -98,9 +102,9 @@ class Karma implements GrouphugModule {
             } catch(InterruptedException e) {
                 // interrupted, ok, just continue
             }
-            KarmaItem ki = find(sqlName);
+            KarmaItem ki = find(name);
             if(ki == null)
-                sql.query("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('"+sqlName+"', '"+karma+"');");
+                sql.query("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('"+name+"', '"+karma+"');");
             else
                 sql.query("UPDATE "+KARMA_DB+" SET value='"+(ki.getKarma() + karma)+"' WHERE id='"+ki.getID()+"';");
         } catch(SQLException e) {
