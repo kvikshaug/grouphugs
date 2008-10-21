@@ -93,6 +93,8 @@ class Karma implements GrouphugModule {
             return;
         }
 
+        String sqlName = norwegianCharsToHtmlEntities(name);
+
         SQL sql = new SQL();
         try {
             sql.connect();
@@ -102,9 +104,9 @@ class Karma implements GrouphugModule {
             } catch(InterruptedException e) {
                 // interrupted, ok, just continue
             }
-            KarmaItem ki = find(name);
+            KarmaItem ki = find(sqlName);
             if(ki == null)
-                sql.query("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('"+name+"', '"+karma+"');");
+                sql.query("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('"+sqlName+"', '"+karma+"');");
             else
                 sql.query("UPDATE "+KARMA_DB+" SET value='"+(ki.getKarma() + karma)+"' WHERE id='"+ki.getID()+"';");
         } catch(SQLException e) {
