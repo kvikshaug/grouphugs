@@ -71,6 +71,9 @@ class Karma implements GrouphugModule {
         ae[1] = (char)352;
 
         String aetest = ae.toString();
+
+        bot.sendMessage("manually created iso-string: "+aetest, false);
+
         str = str.replace("æ", "&aelig;");
         str = str.replace("ø", "&oslash;");
         str = str.replace("å", "&aring;");
