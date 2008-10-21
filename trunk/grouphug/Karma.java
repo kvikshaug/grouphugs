@@ -58,6 +58,13 @@ class Karma implements GrouphugModule {
     }
 
     private String norwegianCharsToHtmlEntities(String str) {
+        String line = "The string "+str+" in numbers: ";
+        char[] charray = str.toCharArray();
+        for(char c : charray) {
+            line += " - "+((int)c);
+        }
+        bot.sendMessage(line, false);
+        
         String tempstr = str;
         char[] ae = new char[2];
         ae[0] = (char)195;
