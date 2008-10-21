@@ -45,10 +45,25 @@ class Karma implements GrouphugModule {
 
     }
 
+    private String htmlEntitiesToNorwegianChars(String str) {
+        str = str.replace("&aelig;", "æ");
+        str = str.replace("&oslash;", "ø");
+        str = str.replace("&aring;", "å");
+        return str;
+    }
+
+    private String norwegianCharsToHtmlEntities(String str) {
+        str = str.replace("æ", "&aelig;");
+        str = str.replace("ø", "&oslash;");
+        str = str.replace("å", "&aring;");
+        return str;
+    }
+
     private void print(String name) {
+        String sqlName = norwegianCharsToHtmlEntities(name);
         KarmaItem ki;
         try {
-            ki = find(name);
+            ki = find(sqlName);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             bot.sendMessage(name+" has probably bad karma, because an SQL error occured.", false);
@@ -103,7 +118,7 @@ class Karma implements GrouphugModule {
         }
         Object[] values = sql.getValueList();
         sql.disconnect();
-        return new KarmaItem((Integer)values[0], (String)values[1], (Integer)values[2]);
+        return new KarmaItem((Integer)values[0], htmlEntitiesToNorwegianChars((String)values[1]), (Integer)values[2]);
     }
 
     private void showScore(boolean top) {
@@ -123,7 +138,7 @@ class Karma implements GrouphugModule {
             int place = 1;
             while(sql.getNext()) {
                 Object[] values = sql.getValueList();
-                reply += (place++)+". "+values[0]+" ("+values[1]+")\n";
+                reply += (place++)+". "+htmlEntitiesToNorwegianChars((String)values[0])+" ("+values[1]+")\n";
             }
             if(top)
                 reply += "May their lives be filled with sunlight and pink stuff.";    

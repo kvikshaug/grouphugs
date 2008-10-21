@@ -1,6 +1,5 @@
 package grouphug;
 
-import java.io.*;
 import java.util.GregorianCalendar;
 import java.sql.SQLException;
 
@@ -33,7 +32,7 @@ class Dinner implements GrouphugModule {
         bot.sendNotice(sender, "Dinner: Shows what's for dinner at HiN.");
         bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER);
         bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +" <ukedag>");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +" alle");
+        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +" all");
     }
     
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
@@ -75,7 +74,7 @@ class Dinner implements GrouphugModule {
 
         // Figure out what day is wanted; default being today's day
         WeekDay wantedDay;
-        if(message.endsWith("alle"))
+        if(message.endsWith("all"))
             wantedDay = WeekDay.ALL;
         else if(message.endsWith("mandag"))
             wantedDay = WeekDay.MONDAY;
