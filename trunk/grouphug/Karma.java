@@ -70,7 +70,7 @@ class Karma implements GrouphugModule {
         ae[0] = (char)195;
         ae[1] = (char)352;
 
-        String aetest = ae.toString();
+        String aetest = new String(ae);
 
         bot.sendMessage("manually created iso-string: "+aetest, false);
 
