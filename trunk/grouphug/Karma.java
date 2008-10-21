@@ -46,16 +46,19 @@ class Karma implements GrouphugModule {
     }
 
     private String htmlEntitiesToNorwegianChars(String str) {
+        String tempstr = str;
         str = str.replace("&aelig;", "æ");
         str = str.replace("&oslash;", "ø");
         str = str.replace("&aring;", "å");
         str = str.replace("&AElig;", "Æ");
         str = str.replace("&Oslash;", "Ø");
         str = str.replace("&Aring;", "Å");
+        bot.sendMessage("String went through reverse conversion, before: "+tempstr+", after: "+str, false);
         return str;
     }
 
     private String norwegianCharsToHtmlEntities(String str) {
+        String tempstr = str;
         str = str.replace("æ", "&aelig;");
         str = str.replace("ø", "&oslash;");
         str = str.replace("å", "&aring;");
@@ -68,6 +71,7 @@ class Karma implements GrouphugModule {
         str = str.replace("Ã\u0086", "&AElig;");
         str = str.replace("Ã\u0098", "&Oslash;");
         str = str.replace("Ã\u0085", "&Aring;");
+        bot.sendMessage("String went through htmlentity conversion, before: "+tempstr+", after: "+str, false);
         return str;
     }
 
