@@ -67,7 +67,7 @@ class Phonebook implements GrouphugModule {
         String curLine = " ";
         int status = 0;
         String output = "";
-        while (1){
+        while (status < 2){
             curLine = gulesider.readLine();
             if (curLine == null) 
                 return null;
