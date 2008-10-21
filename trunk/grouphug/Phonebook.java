@@ -95,7 +95,7 @@ class Phonebook implements GrouphugModule {
                 }
             }
         }
-        
+        return null;
 
     }
 }
