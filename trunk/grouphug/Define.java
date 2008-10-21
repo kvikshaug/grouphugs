@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-public class Define implements GrouphugModule {
+class Define implements GrouphugModule {
 
     private static Grouphug bot;
     private static final String TRIGGER = "define ";
@@ -46,6 +46,7 @@ public class Define implements GrouphugModule {
         } else {
             answer = answer.replace("&quot;", "\"");
             answer = answer.replace("&apos;", "'");
+            answer = answer.replace("&#39;", "'");
             bot.sendMessage(answer, false);
         }
     }
@@ -59,7 +60,7 @@ public class Define implements GrouphugModule {
         try {
             urlConn = new URL("http", "www.google.com", "/search?q=define:"+query+"").openConnection();
         } catch(MalformedURLException ex) {
-            System.err.println("Grouphug confession error: MalformedURLException in partially dynamic URL in search()!");
+            System.err.println("Define search error: MalformedURLException in partially dynamic URL in search()!");
             return null;
         }
 
@@ -86,7 +87,7 @@ public class Define implements GrouphugModule {
             int i = startIndex;
             for(; line.charAt(i) != '<'; i++) {
                 if(i == line.length()) {
-                    throw new IOException("Grouphug confession error: Couldn't find ending < in definition");
+                    throw new IOException("Define search error: Couldn't find ending < in definition");
                 }
             }
             return line.substring(startIndex, i);

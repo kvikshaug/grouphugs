@@ -184,6 +184,7 @@ class Confession implements GrouphugModule {
             return null;
         }
 
+        confession = confession.replace("&amp;", "&");
         confession = confession.replace("&nbsp;", " ");
         confession = confession.replace("&#8216;", "'");
         confession = confession.replace("&#8217;", "'");

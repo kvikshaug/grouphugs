@@ -26,9 +26,12 @@ import java.io.*;
  *
  * The bot extends the functionality of the well-designed PircBot, see http://www.jibble.org/
  */
+
+// TODO - write a websiteconnection-class - for easier use - and to avoid copypasta code (Google/Define/Tracking)
+
 public class Grouphug extends PircBot {
     // 
-    static final String CHANNEL = "#grouphugs";     // The main channel
+    static final String CHANNEL = "#grouphugers";     // The main channel
     static final String SERVER = "irc.homelien.no"; // The main IRC server
     static final String ENCODING = "ISO8859-15"; // Character encoding to use when communicating with the IRC server.
 
@@ -82,12 +85,20 @@ public class Grouphug extends PircBot {
             sendAction(CHANNEL, "picks up the soap");
         if(message.equalsIgnoreCase("goosh"))
             sendMessage(CHANNEL, "http://youtube.com/watch?v=xrhLdDIQ5Kk");
+        if(message.equalsIgnoreCase("don't drop the soap"))
+            sendMessage(CHANNEL, "http://youtube.com/watch?v=ZO7-QJGVdM4");
         if(message.equalsIgnoreCase("fuck it"))
             sendMessage(CHANNEL, "WE'LL DO IT LIVE!");
         if (message.equalsIgnoreCase("!insult"))
             sendMessage(CHANNEL, sender + ", you fail at life.");
         if (message.equalsIgnoreCase("homos"))
             sendMessage(CHANNEL, "homos are always mad");
+        if (message.equalsIgnoreCase("i shot a man in reno"))
+            sendMessage(CHANNEL, "just to watch him die");
+        if (message.equalsIgnoreCase("right round"))
+            sendMessage(CHANNEL, "http://www.meatspin.com/");
+        if (message.equalsIgnoreCase("eeeeeidle eidle eeeeee"))
+            sendMessage(CHANNEL, "http://www.youtube.com/watch?v=q0x4Kw_y4fg");
 
 
         if(message.startsWith(MAIN_TRIGGER + "help")) {
@@ -102,7 +113,7 @@ public class Grouphug extends PircBot {
                 spamOK = false;
             } else {
                 if(sender.contains("icc") || login.contains("icc")) {
-                    sendMessage(CHANNEL, "icc, you are not allowed to surpass spam-commands.");
+                    sendMessage(CHANNEL, "icc, you are not allowed to use the spam trigger.");
                     return;
                 }
                 spamOK = true;
@@ -148,6 +159,7 @@ public class Grouphug extends PircBot {
      * connection, then it may take a few minutes to detect (this is commonly referred to as a "ping timeout").
      */
     protected void onDisconnect() {
+        // TODO - move the connection routine in main() to own method, and run that from here too
         // Constantly try to reconnect
         while (!isConnected()) {
             try {
@@ -208,7 +220,7 @@ public class Grouphug extends PircBot {
 
         // Now check if we are spamming the channel, and stop if the spam-trigger isn't used
         if(verifySpam && !spamOK && lines.size() > MAX_SPAM_LINES) {
-            sendMessage(Grouphug.CHANNEL, "This would spam the channel with "+lines.size()+" lines, replace "+MAIN_TRIGGER+" with "+SPAM_TRIGGER+" to override.");
+            sendMessage(Grouphug.CHANNEL, "This would spam the channel with "+lines.size()+" lines, replace "+MAIN_TRIGGER+" with "+SPAM_TRIGGER+" if you really want that.");
             return;
         }
 
@@ -255,12 +267,15 @@ public class Grouphug extends PircBot {
         bot.setVerbose(true);
 
         // Tell the bot to use ISO8859-15
+        // Does this really help? Trying to comment it out, set it back if encoding fucks up.
+        /*
         try {
             bot.setEncoding(ENCODING);
         }
         catch (UnsupportedEncodingException e) {
             bot.sendMessage(Grouphug.CHANNEL, "Failed to set character encoding " + ENCODING);
         }
+        */
 
         // Load up modules
         // TODO - should be done differently
@@ -272,8 +287,8 @@ public class Grouphug extends PircBot {
         modules.add(new WeatherForecast(bot));
         modules.add(new Define(bot));
         modules.add(new Tracking(bot));
-        Dinner.loadPassword();
-        WeatherForecast.loadPassword();
+        modules.add(new Cinema(bot));
+        Grouphug.loadGrimstuxPassword();
         SVNCommit.load(bot);
 
         // Save the nicks we will try
@@ -316,5 +331,22 @@ public class Grouphug extends PircBot {
 
         // Join the channel
         bot.joinChannel(CHANNEL);
+    }
+
+    public static void loadGrimstuxPassword() {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(new File("pw/narvikdata")));
+            String pw = reader.readLine();
+            reader.close();
+
+            if(pw.equals(""))
+              throw new FileNotFoundException("No data extracted from MySQL password file!");
+
+            Dinner.SQL_PASSWORD = pw;
+            Cinema.SQL_PASSWORD = pw;
+            WeatherForecast.SQL_PASSWORD = pw;
+        } catch(IOException e) {
+            // Do nothing - SQL_PASSWORD will be empty, and we will detect the error upon usage
+        }
     }
 }

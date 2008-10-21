@@ -10,8 +10,7 @@ class WeatherForecast implements GrouphugModule {
     private static final String SQL_HOST = "heiatufte.net";
     private static final String SQL_DB = "narvikdata";
     private static final String SQL_USER = "narvikdata";
-    private static String SQL_PASSWORD;
-    private static boolean pwOk = false;
+    protected static String SQL_PASSWORD = "";
 
     WeatherForecast(Grouphug bot) {
         WeatherForecast.bot = bot;
@@ -30,7 +29,7 @@ class WeatherForecast implements GrouphugModule {
         if(!message.startsWith(WeatherForecast.TRIGGER))
             return;
 
-        if(!pwOk) {
+        if(SQL_PASSWORD.equals("")) {
             bot.sendMessage("Couldn't fetch SQL password from file, please fix and reload the module.", false);
             return;
         }
@@ -66,20 +65,5 @@ class WeatherForecast implements GrouphugModule {
         str = str.replace("</p>", "");
         str = str.replace("<br />", "\n");
         return str;
-    }
-
-
-    // TODO - this method, and other parts of this file, is copy/paste from Dinner.java, revise and rewrite!
-    public static void loadPassword() {
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(new File("pw/narvikdata")));
-            SQL_PASSWORD = reader.readLine();
-            reader.close();
-            if(SQL_PASSWORD.equals(""))
-                throw new FileNotFoundException("No data extracted from MySQL password file!");
-            pwOk = true;
-        } catch(IOException e) {
-            // Do nothing - pwOk will be false
-        }
     }
 }

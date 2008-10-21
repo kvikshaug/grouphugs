@@ -52,7 +52,7 @@ class Slang implements GrouphugModule {
             number = Integer.parseInt(message.substring(message.length() - 2, message.length()));
             text = text.substring(0, text.length()-1);
         } catch(NumberFormatException ex) {
-            // do nothing - on intent; we check number later, if < 0 then bogus
+            // do nothing - if the number hasn't been set, we know it didn't work
         }
 
         text = text.trim();

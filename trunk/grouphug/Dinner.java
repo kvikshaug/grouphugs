@@ -7,12 +7,12 @@ import java.sql.SQLException;
 class Dinner implements GrouphugModule {
 
     private static Grouphug bot;
-    private static final String TRIGGER = "dinner";
+    private static final String TRIGGER = "middag";
+    private static final String TRIGGER_DEPRECATED = "dinner";
     private static final String SQL_HOST = "heiatufte.net";
     private static final String SQL_DB = "narvikdata";
     private static final String SQL_USER = "narvikdata";
-    private static String SQL_PASSWORD;
-    private static boolean pwOk = false;
+    protected static String SQL_PASSWORD = "";
 
     public Dinner(Grouphug bot) {
         Dinner.bot = bot;
@@ -23,14 +23,17 @@ class Dinner implements GrouphugModule {
         str = str.replace("&aring;", "å");
         str = str.replace("&aelig;", "æ");
         str = str.replace("&quot;", "\"");
+        str = str.replace("<br />", " - ");
+        str = str.replace("<br>", " - ");
+        str = str.replace("&amp;", "&");
         return str;
     }
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
         bot.sendNotice(sender, "Dinner: Shows what's for dinner at HiN.");
         bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER);
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +" <weekday>");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +" all");
+        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +" <ukedag>");
+        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +" alle");
     }
     
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
@@ -38,10 +41,10 @@ class Dinner implements GrouphugModule {
     }
 
     public void trigger(String channel, String sender, String login, String hostname, String message) {
-        if(!message.startsWith(Dinner.TRIGGER))
+        if(!message.startsWith(Dinner.TRIGGER) && !message.startsWith(Dinner.TRIGGER_DEPRECATED))
             return;
 
-        if(!pwOk) {
+        if(SQL_PASSWORD.equals("")) {
             bot.sendMessage("Couldn't fetch SQL password from file, please fix and reload the module.", false);
             return;
         }
@@ -72,17 +75,17 @@ class Dinner implements GrouphugModule {
 
         // Figure out what day is wanted; default being today's day
         WeekDay wantedDay;
-        if(message.endsWith("all"))
+        if(message.endsWith("alle"))
             wantedDay = WeekDay.ALL;
-        else if(message.endsWith("monday"))
+        else if(message.endsWith("mandag"))
             wantedDay = WeekDay.MONDAY;
-        else if(message.endsWith("tuesday"))
+        else if(message.endsWith("tirsdag"))
             wantedDay = WeekDay.TUESDAY;
-        else if(message.endsWith("wednesday"))
+        else if(message.endsWith("onsdag"))
             wantedDay = WeekDay.WEDNESDAY;
-        else if(message.endsWith("thursday"))
+        else if(message.endsWith("torsdag"))
             wantedDay = WeekDay.THURSDAY;
-        else if(message.endsWith("friday"))
+        else if(message.endsWith("freday"))
             wantedDay = WeekDay.FRIDAY;
         else {
             switch(new GregorianCalendar().get(GregorianCalendar.DAY_OF_WEEK)) {
@@ -114,18 +117,5 @@ class Dinner implements GrouphugModule {
         if(wantedDay == WeekDay.FRIDAY || wantedDay == WeekDay.ALL)
             bot.sendMessage("Fredag: "+values[5], false);
 
-    }
-
-    public static void loadPassword() {
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(new File("pw/narvikdata")));
-            SQL_PASSWORD = reader.readLine();
-            reader.close();
-            if(SQL_PASSWORD.equals(""))
-                throw new FileNotFoundException("No data extracted from MySQL password file!");
-            pwOk = true;
-        } catch(IOException e) {
-            // Do nothing - pwOk will be false
-        }
     }
 }

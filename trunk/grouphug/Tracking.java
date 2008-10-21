@@ -53,7 +53,7 @@ class Tracking implements GrouphugModule {
         try {
             urlConn = new URL("http", "sporing.posten.no", "/Sporing/KMSporingInternett.aspx?ShipmentNumber="+query+"").openConnection();
         } catch(MalformedURLException ex) {
-            System.err.println("Grouphug confession error: MalformedURLException in partially dynamic URL in search()!");
+            System.err.println("Tracking search error: MalformedURLException in partially dynamic URL in search()!");
             return null;
         }
 

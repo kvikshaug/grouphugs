@@ -56,7 +56,7 @@ class Google implements GrouphugModule {
         try {
             urlConn = new URL("http", "www.google.com", "/search?q="+query+"").openConnection();
         } catch(MalformedURLException ex) {
-            System.err.println("Grouphug confession error: MalformedURLException in partially dynamic URL in search()!");
+            System.err.println("Google search error: MalformedURLException in partially dynamic URL in search()!");
             return null;
         }
 
@@ -87,7 +87,7 @@ class Google implements GrouphugModule {
         int i = startIndex;
         for(; line.charAt(i) != '"'; i++) {
             if(i == line.length()) {
-                throw new IOException("Grouphug confession error: Couldn't find ending \" in hyperlink reference");
+                throw new IOException("Google search error: Couldn't find ending \" in hyperlink reference");
             }
         }
         return new URL(line.substring(startIndex, i));
