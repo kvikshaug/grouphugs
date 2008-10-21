@@ -105,10 +105,14 @@ class Karma implements GrouphugModule {
                 // interrupted, ok, just continue
             }
             KarmaItem ki = find(sqlName);
-            if(ki == null)
+            if(ki == null) {
+                bot.sendMessage("Didn't find it, creating "+sqlName+" with "+karma+" karma", false);
                 sql.query("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('"+sqlName+"', '"+karma+"');");
-            else
+            }
+            else {
+                bot.sendMessage("Found an item called "+ki.getName()+", increasing from "+ki.getKarma()+" to "+(ki.getKarma()+1)+".", false);
                 sql.query("UPDATE "+KARMA_DB+" SET value='"+(ki.getKarma() + karma)+"' WHERE id='"+ki.getID()+"';");
+            }
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             bot.sendMessage("Sorry, an SQL error occurred.", false);
@@ -124,6 +128,7 @@ class Karma implements GrouphugModule {
      * @throws SQLException - if an SQL error occured
      */
     private KarmaItem find(String karma) throws SQLException {
+        bot.sendMessage("Searching for "+karma, false);
         SQL sql = new SQL();
         sql.connect();
         sql.query("SELECT id, name, value FROM "+KARMA_DB+" WHERE name='"+karma+"';");
