@@ -46,7 +46,6 @@ class Karma implements GrouphugModule {
     }
 
     private String htmlEntitiesToNorwegianChars(String str) {
-        String tempstr = str;
         str = str.replace("&aelig;", "æ");
         str = str.replace("&oslash;", "ø");
         str = str.replace("&aring;", "å");
