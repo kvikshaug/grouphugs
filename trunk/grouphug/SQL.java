@@ -43,7 +43,8 @@ public class SQL {
     // MySQL host, db, login credentials
     private static final String DEFAULT_SQL_HOST = "127.0.0.1";
     private static final String DEFAULT_SQL_DB = "murray";
-    private static final String DEFAULT_SQL_USER = "murray";
+//    private static final String DEFAULT_SQL_USER = "murray";
+    private static final String DEFAULT_SQL_USER = "gh";
     private static String DEFAULT_SQL_PASSWORD;
 
     private int affectedRows;
