@@ -81,7 +81,7 @@ class Phonebook implements GrouphugModule {
             {
                 String resultSearch = "oppfnavn";
                 int resultIndex = curLine.indexOf(resultSearch);
-                output = gulesider.readLino().trim() + " , ";
+                output = gulesider.readLine().trim() + " , ";
                 if (resultIndex != -1)
                     status = 1;
             }
