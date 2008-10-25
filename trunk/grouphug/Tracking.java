@@ -49,7 +49,7 @@ class Tracking implements GrouphugModule {
 
     public static String search(String query) throws IOException {
         //trim any surrounding spaces
-        query.trim();
+        query = query.trim();
 
         URLConnection urlConn;
         try {
