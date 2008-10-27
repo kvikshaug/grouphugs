@@ -285,6 +285,7 @@ public class Grouphug extends PircBot {
         modules.add(new Define(bot));
         modules.add(new Tracking(bot));
         modules.add(new Cinema(bot));
+        modules.add(new IMDb(bot));
         Grouphug.loadGrimstuxPassword();
         SVNCommit.load(bot);
 
@@ -345,5 +346,29 @@ public class Grouphug extends PircBot {
         } catch(IOException e) {
             // Do nothing - SQL_PASSWORD will be empty, and we will detect the error upon usage
         }
+    }
+
+    /**
+     * Convert HTML entities to their respective characters
+     * @param str The unconverted string
+     * @return The converted string
+     */
+    public static String entitiesToChars(String str) {
+        // some of these may mix each other up, but just fix it when a bug is discovered
+        str = str.replace("&amp;", "&");
+        str = str.replace("&nbsp;", " ");
+        str = str.replace("&#8216;", "'");
+        str = str.replace("&#8217;", "'");
+        str = str.replace("&#8220;", "\"");
+        str = str.replace("&#8221;", "\"");
+        str = str.replace("&#8230;", "...");
+        str = str.replace("&#8212;", " - ");
+        str = str.replace("&quot;", "\"");
+        str = str.replace("&apos;", "'");
+        str = str.replace("&amp;apos;", "'");
+        str = str.replace("&amp;quot;", "\"");
+        str = str.replace("&amp;lt;", "<");
+        str = str.replace("&amp;gt;", ">");
+        return str;
     }
 }

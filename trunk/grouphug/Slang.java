@@ -80,12 +80,7 @@ class Slang implements GrouphugModule {
         else
             reply = si.getWord()+" ("+si.getNumber()+" of "+Slang.slangCount+"): "+ si.getDefinition();
 
-        reply = reply.replace("&quot;", "\"");
-        reply = reply.replace("&apos;", "'");
-        reply = reply.replace("&amp;apos;", "'");
-        reply = reply.replace("&amp;quot;", "\"");
-        reply = reply.replace("&amp;lt;", "<");
-        reply = reply.replace("&amp;gt;", ">");
+        reply = Grouphug.entitiesToChars(reply);
 
         bot.sendMessage(reply, true);
     }

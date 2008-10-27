@@ -36,7 +36,7 @@ interface GrouphugModule {
      * SuperModule 1.1 - Does Super Magic Upon Request
      *  - Trigger: !super
      *
-     * NOTE: This is to be sent in PM! 
+     * NOTE: This is to be sent in notice! 
      *
      * @param channel - The channel to which the message was sent.
      * @param sender - The nick of the person who sent the message.

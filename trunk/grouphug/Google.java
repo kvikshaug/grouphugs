@@ -47,10 +47,10 @@ class Google implements GrouphugModule {
         }
     }
 
+    // TODO this shouldn't return null when it doesn't find anything, but throw an exception or something! fix!
     public static URL search(String query) throws IOException {
 
         query = query.replace(' ', '+');
-        System.out.print("Opening google connection... ");
 
         URLConnection urlConn;
         try {
@@ -64,8 +64,6 @@ class Google implements GrouphugModule {
         urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Trick google into thinking we're a proper browser. ;)
 
         BufferedReader google = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
-
-        System.out.println("OK");
 
         // Find an URL to the search result
         // HACK fugly jump to line 3 (should check for nullptr)

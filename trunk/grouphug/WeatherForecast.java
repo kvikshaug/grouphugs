@@ -1,6 +1,5 @@
 package grouphug;
 
-import java.io.*;
 import java.sql.SQLException;
 
 class WeatherForecast implements GrouphugModule {

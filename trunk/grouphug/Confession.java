@@ -184,14 +184,7 @@ class Confession implements GrouphugModule {
             return null;
         }
 
-        confession = confession.replace("&amp;", "&");
-        confession = confession.replace("&nbsp;", " ");
-        confession = confession.replace("&#8216;", "'");
-        confession = confession.replace("&#8217;", "'");
-        confession = confession.replace("&#8220;", "\"");
-        confession = confession.replace("&#8221;", "\"");
-        confession = confession.replace("&#8230;", "...");
-        confession = confession.replace("&#8212;", " - ");
+        confession = Grouphug.entitiesToChars(confession);
 
         // strip tags
         confession = confession.replaceAll("\\<.*?\\>","");
