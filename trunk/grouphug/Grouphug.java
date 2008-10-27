@@ -377,14 +377,7 @@ public class Grouphug extends PircBot {
      * @param str The unconverted string
      * @return The attempted converted string
      */
-    public static String fixEncoding(Grouphug bot, String str) {
-
-        char[] charray = new char[10000];
-        charray = str.toCharArray();
-
-        for(char c : charray) {
-            System.out.println(c+" : "+(int)c);
-        }
+    public static String fixEncoding(String str) {
 
         // lowercase iso-8859-1 encoded
         str = str.replace(new String(new char[] { (char)195, (char)352 }), "æ");
