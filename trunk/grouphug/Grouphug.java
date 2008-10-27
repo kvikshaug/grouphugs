@@ -377,7 +377,15 @@ public class Grouphug extends PircBot {
      * @param str The unconverted string
      * @return The attempted converted string
      */
-    public static String fixEncoding(String str) {
+    public static String fixEncoding(Grouphug bot, String str) {
+
+        int index = 0;
+        index = str.indexOf((char)195+"");
+        if(index != -1) {
+            char next = str.charAt(index+1);
+            bot.sendMessage("Found char 195 at "+index+", next char is "+((int)next), false);
+        }
+        
         // lowercase iso-8859-1 encoded
         str = str.replace(new String(new char[] { (char)195, (char)352 }), "æ");
         str = str.replace(new String(new char[] { (char)195, (char)382 }), "ø");
