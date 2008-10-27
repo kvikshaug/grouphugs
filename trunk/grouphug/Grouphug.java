@@ -379,13 +379,13 @@ public class Grouphug extends PircBot {
      */
     public static String fixEncoding(Grouphug bot, String str) {
 
-        int index = 0;
-        index = str.indexOf((char)195+"");
-        if(index != -1) {
-            char next = str.charAt(index+1);
-            bot.sendMessage("Found char 195 at "+index+", next char is "+((int)next), false);
+        char[] charray = new char[10000];
+        charray = str.toCharArray();
+
+        for(char c : charray) {
+            System.out.println(c+" : "+(int)c);
         }
-        
+
         // lowercase iso-8859-1 encoded
         str = str.replace(new String(new char[] { (char)195, (char)352 }), "æ");
         str = str.replace(new String(new char[] { (char)195, (char)382 }), "ø");
