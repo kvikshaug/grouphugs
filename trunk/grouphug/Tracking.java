@@ -59,6 +59,7 @@ class Tracking implements GrouphugModule {
             return null;
         }
 
+        bot.sendMessage("sporing.posten.no has encoding "+urlConn.getContentEncoding(), false);
         urlConn.setConnectTimeout(CONN_TIMEOUT);
         urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Trick google into thinking we're a proper browser. ;)
 

@@ -398,12 +398,9 @@ public class Grouphug extends PircBot {
 
         // not exactly sure what this is - supposed to be utf-8, not sure what happens really
         // not sure of the char values for Æ and Å, these are commented out, enable them when this gets applicable
-        //str = str.replace(new String(new char[] { (char)195, (char)???}), "&AElig");
+        //str = str.replace(new String(new char[] { (char)195, (char)???}), "&AElig;");
         str = str.replace(new String(new char[] { (char)195, (char)732}), "Ø");
-        //str = str.replace(new String(new char[] { (char)195, (char)???}), "&Aring");
-
-        // hack
-        str = str.replace(new String(new char[] { (char)65535, (char)65535}), "Ø");
+        //str = str.replace(new String(new char[] { (char)195, (char)???}), "&Aring;");
 
         return str;
     }
