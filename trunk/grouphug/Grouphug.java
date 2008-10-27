@@ -401,6 +401,10 @@ public class Grouphug extends PircBot {
         //str = str.replace(new String(new char[] { (char)195, (char)???}), "&AElig");
         str = str.replace(new String(new char[] { (char)195, (char)732}), "Ø");
         //str = str.replace(new String(new char[] { (char)195, (char)???}), "&Aring");
+
+        // hack
+        str = str.replace(new String(new char[] { (char)65535, (char)65535}), "Ø");
+
         return str;
     }
 }
