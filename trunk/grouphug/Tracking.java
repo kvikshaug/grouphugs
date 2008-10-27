@@ -50,23 +50,16 @@ class Tracking implements GrouphugModule {
     public static String search(String query) throws IOException {
         //trim any surrounding spaces
         query = query.trim();
+        query = query.replace(" ", "");
 
         URLConnection urlConn;
-        try {
-            urlConn = new URL("http", "sporing.posten.no", "/Sporing/KMSporingInternett.aspx?ShipmentNumber="+query+"").openConnection();
-        } catch(MalformedURLException ex) {
-            System.err.println("Tracking search error: MalformedURLException in partially dynamic URL in search()!");
-            return null;
-        }
+        urlConn = new URL("http", "sporing.posten.no", "/Sporing/KMSporingInternett.aspx?ShipmentNumber="+query).openConnection();
 
-        bot.sendMessage("sporing.posten.no has encoding "+urlConn.getContentEncoding(), false);
         urlConn.setConnectTimeout(CONN_TIMEOUT);
         urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Trick google into thinking we're a proper browser. ;)
 
-        BufferedReader posten = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
+        BufferedReader posten = new BufferedReader(new InputStreamReader(urlConn.getInputStream(), "UTF-8"));
 
-        System.out.println("OK");
-        
         // phear teh ugly hax <3
         String curLine = " ";
         int status = 0;
