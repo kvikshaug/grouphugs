@@ -97,7 +97,6 @@ class Tracking implements GrouphugModule {
                 }
             }
         }
-        return output;
-
+        return Grouphug.fixEncoding(output);
     }
 }
