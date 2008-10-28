@@ -91,6 +91,6 @@ class Tracking implements GrouphugModule {
                 }
             }
         }
-        return output;
+        return output.replace("<br />", " - ");
     }
 }
