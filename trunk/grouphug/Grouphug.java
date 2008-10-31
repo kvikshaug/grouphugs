@@ -56,7 +56,7 @@ public class Grouphug extends PircBot {
     private static ArrayList<GrouphugModule> modules = new ArrayList<GrouphugModule>();
 
     // A list over all the nicknames we want
-    private static ArrayList<String> nicks = new ArrayList<String>();
+    protected static ArrayList<String> nicks = new ArrayList<String>();
 
     // Used to specify if it is ok to spam a large message to the channel 
     static boolean spamOK = false;
@@ -104,7 +104,7 @@ public class Grouphug extends PircBot {
 
 
         if(message.startsWith(MAIN_TRIGGER + "help")) {
-            sendNotice(sender, "Currently implemented modules on "+this.getName()+":");
+            sendNotice(sender, "Currently implemented modules on "+this.getNick()+":");
             sendNotice(sender, "---");
             for(GrouphugModule m : modules) {
                 m.helpTrigger(channel, sender, login, hostname, message);
@@ -161,18 +161,20 @@ public class Grouphug extends PircBot {
      * connection, then it may take a few minutes to detect (this is commonly referred to as a "ping timeout").
      */
     protected void onDisconnect() {
-        // TODO - move the connection routine in main() to own method, and run that from here too
-        // Constantly try to reconnect
-        while (!isConnected()) {
-            try {
-                Thread.sleep(RECONNECT_TIME);
-                reconnect();
-            } catch (InterruptedException e) {
-                // do nothing; try again in specified time
-            } catch(Exception e) {
-                // TODO - handle these exceptions
-            }
+        try {
+            Grouphug.connect(this, true);
+        } catch(IrcException e) {
+            // No idea how to handle this. So print the message and exit
+            System.err.println(e.getMessage());
+            stdOut.flush();
+            System.exit(-1);
+        } catch(IOException e) {
+            // No idea how to handle this. So print the message and exit
+            System.err.println(e.getMessage());
+            stdOut.flush();
+            System.exit(-1);
         }
+        this.joinChannel(Grouphug.CHANNEL);
     }
 
     /**
@@ -230,6 +232,7 @@ public class Grouphug extends PircBot {
         for(String line : lines)
             this.sendMessage(Grouphug.CHANNEL, line);
 
+        this.sendMessage(Grouphug.CHANNEL, this.getNick()+" <- nick name -> "+this.getName());
         stdOut.flush();
     }
 
@@ -291,47 +294,67 @@ public class Grouphug extends PircBot {
         Grouphug.loadGrimstuxPassword();
         SVNCommit.load(bot);
 
-        // Save the nicks we will try
+        // Save the nicks we want, in prioritized order
         nicks.add("gh");
         nicks.add("hugger");
         nicks.add("klemZ");
 
-        // TODO create thread for polling back first nick if unavailable
-
-        // Try connecting to the server
-        boolean connected = false;
-        boolean autoNick = false;
-        int nextNick = 0;
-        while(!connected) {
-            try {
-                if(!autoNick)
-                    bot.setName(nicks.get(nextNick));
-                bot.connect(SERVER);
-                connected = true;
-            } catch(IndexOutOfBoundsException e) {
-                // We reached the end of the list, so enable autonickchange and retry
-                System.err.println("None of the specified nick(s) could be chosen, choosing automatically.");
-                bot.setAutoNickChange(true);
-                autoNick = true;
-            } catch(NickAlreadyInUseException e) {
-                // Nick was taken, try the next in the list
-                nextNick++;
-            } catch(IrcException e) {
-                // No idea how to handle this. So print the message and exit
-                System.err.println(e.getMessage());
-                stdOut.flush();
-                System.exit(-1);
-            } catch(IOException e) {
-                // No idea how to handle this. So print the message and exit
-                System.err.println(e.getMessage());
-                stdOut.flush();
-                System.exit(-1);
-            }
+        try {
+            connect(bot, false);
+        } catch(IrcException e) {
+            // No idea how to handle this. So print the message and exit
+            System.err.println(e.getMessage());
+            stdOut.flush();
+            System.exit(-1);
+        } catch(IOException e) {
+            // No idea how to handle this. So print the message and exit
+            System.err.println(e.getMessage());
+            stdOut.flush();
+            System.exit(-1);
         }
+
+        // start a thread for polling back our first nick if unavailable
+        NickPoller.load(bot);
 
         // Join the channel
         bot.joinChannel(CHANNEL);
     }
+
+    /**
+     * connect tries to connect the specified bot to the specified server, using the static nicklist
+     *
+     * @param bot The bot object that will try to connect
+     * @param reconnecting true if we have lost a connection and are reconnecting to that
+     * @throws IOException when this occurs in the pircbot connect(String) method
+     * @throws IrcException when this occurs in the pircbot connect(String) method
+     */
+    private static void connect(Grouphug bot, boolean reconnecting) throws IOException, IrcException {
+        int nextNick = 0;
+        bot.setName(nicks.get(nextNick++));
+        while(!bot.isConnected()) {
+            try {
+                if(reconnecting) {
+                    Thread.sleep(RECONNECT_TIME);
+                    bot.reconnect();
+                } else {
+                    bot.connect(Grouphug.SERVER);
+                }
+            } catch(NickAlreadyInUseException e) {
+                // Nick was taken
+                if(nextNick > nicks.size()-1) {
+                    // If we've tried all the nicks, enable autonickchange
+                    System.err.println("None of the specified nick(s) could be chosen, choosing automatically.");
+                    bot.setAutoNickChange(true);
+                } else {
+                    // If not, try the next one
+                    bot.setName(nicks.get(nextNick++));
+                }
+            } catch(InterruptedException e) {
+                // do nothing, just try again once interrupted
+            }
+        }
+    }
+
 
     public static void loadGrimstuxPassword() {
         try {

@@ -37,7 +37,7 @@ class SVNCommit implements Runnable {
 
     private static Grouphug bot;
 
-    public static void load(Grouphug bot) {
+    protected static void load(Grouphug bot) {
         // Create and start a thread
         SVNCommit.bot = bot;
         run = true;
@@ -51,9 +51,7 @@ class SVNCommit implements Runnable {
         PrintWriter out;
         BufferedReader in;
 
-        while(true) {
-            if(!run)
-                break;
+        while(run) {
 
             if(fails >= MAX_FAILS) {
                 System.err.println("SVNOutput listener failed more than 3 times, aborting.");
@@ -113,7 +111,8 @@ class SVNCommit implements Runnable {
                     Thread.sleep(5000); // sleep for 5 seconds before retrying
                 } catch(InterruptedException ex) {
                     // do nothing; just continue
-                }            } catch(NullPointerException e) {
+                }
+            } catch(NullPointerException e) {
                 System.err.println("Nullpointer exception catched in the SVNOutput listener, restarting socket.");
             } finally {
                 out = null;
