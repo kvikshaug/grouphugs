@@ -36,7 +36,9 @@ public class Grouphug extends PircBot {
     static final String ENCODING = "ISO8859-15";    // Character encoding to use when communicating with the IRC server.
 
     // The number of characters upon which lines are splitted
-    private static final int MAX_LINE_CHARS = 510; // 512 seems to be max, including \r\n
+    // Note that the 512 max limit includes the channel name, \r\n, and probably some other stuff.
+    // maxing out on 450 seems to be a reasonable amount, both ways.
+    private static final int MAX_LINE_CHARS = 450;
 
     // How many lines we can send to the channel in one go without needing spam-trigger
     private static final int MAX_SPAM_LINES = 5;
@@ -197,18 +199,18 @@ public class Grouphug extends PircBot {
 
         // Split all \n into different lines
         for(index = message.indexOf('\n'); index != -1; index = message.indexOf('\n')) {
-            lines.add(message.substring(0, index));
+            lines.add(message.substring(0, index).trim());
             message = message.substring(index + 1);
         }
-        lines.add(message);
+        lines.add(message.trim());
 
         // If the message is longer than max line chars, separate them
         for(int i = 0; i<lines.size(); i++) {
             while(lines.get(i).length() > Grouphug.MAX_LINE_CHARS) {
                 String line = lines.get(i);
                 lines.remove(i);
-                lines.add(i, line.substring(0, Grouphug.MAX_LINE_CHARS));
-                lines.add(i+1, line.substring(Grouphug.MAX_LINE_CHARS));
+                lines.add(i, line.substring(0, Grouphug.MAX_LINE_CHARS).trim());
+                lines.add(i+1, line.substring(Grouphug.MAX_LINE_CHARS).trim());
             }
         }
 
