@@ -232,7 +232,6 @@ public class Grouphug extends PircBot {
         for(String line : lines)
             this.sendMessage(Grouphug.CHANNEL, line);
 
-        this.sendMessage(Grouphug.CHANNEL, this.getNick()+" <- nick name -> "+this.getName());
         stdOut.flush();
     }
 
