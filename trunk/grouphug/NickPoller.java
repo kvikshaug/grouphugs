@@ -30,12 +30,14 @@ class NickPoller implements Runnable {
 
         // At startup, we should check if we already have the most wanted nick,
         // and don't need to start this algorithm at all
-        if(bot.getNick().equals(Grouphug.nicks.get(0)))
+        if(bot.getNick().equals(Grouphug.nicks.get(0))) {
+            System.out.println("Nickpoller: Already have highest prioritized nick, stopping thread.");
             run = false;
+        } else {
+            System.out.println("Nickpoller: Will try to reclaim highest prioritized nick every "+(RETRY_TIME / 60 / 1000)+" minutes.");
+        }
 
         while(run) {
-
-            System.out.println("Trying to change nick from "+bot.getNick()+":");
 
             // First we wait a pretty long time between each try - we don't want the server
             // to think we're spamming it with nickchanges
@@ -44,6 +46,8 @@ class NickPoller implements Runnable {
             } catch(InterruptedException e) {
                 // do nothing, just try again at once
             }
+
+            System.out.println("Trying to change nick from "+bot.getNick()+":");
 
             // Figure out which nick in the nicklist we have
             int currentNick;
