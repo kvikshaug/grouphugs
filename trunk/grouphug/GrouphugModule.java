@@ -1,6 +1,6 @@
 package grouphug;
 
-interface GrouphugModule {
+public interface GrouphugModule {
 
     /**
      * This method is called by the bot when someone sends a chat line that starts with the trigger command.

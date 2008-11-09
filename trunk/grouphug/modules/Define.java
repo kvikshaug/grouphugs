@@ -1,4 +1,7 @@
-package grouphug;
+package grouphug.modules;
+
+import grouphug.GrouphugModule;
+import grouphug.Grouphug;
 
 import java.net.URL;
 import java.net.URLConnection;
@@ -7,7 +10,7 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-class Define implements GrouphugModule {
+public class Define implements GrouphugModule {
 
     private static Grouphug bot;
     private static final String TRIGGER = "define ";
@@ -31,7 +34,7 @@ class Define implements GrouphugModule {
         if(!message.startsWith(TRIGGER))
             return;
 
-        String answer = null;
+        String answer;
 
         try {
             answer = Define.search(message.substring(TRIGGER.length()));

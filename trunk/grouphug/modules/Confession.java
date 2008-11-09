@@ -1,4 +1,7 @@
-package grouphug;
+package grouphug.modules;
+
+import grouphug.GrouphugModule;
+import grouphug.Grouphug;
 
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -8,7 +11,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
-class Confession implements GrouphugModule {
+public class Confession implements GrouphugModule {
     // TODO: reverify that timeouts are handled properly
 
     private static Grouphug bot;
@@ -191,4 +194,37 @@ class Confession implements GrouphugModule {
 
         return new ConfessionItem(confession, hugs);
     }
+
+    /**
+     * This object is a confession from grouphug.us
+     * Contains a String of the confession, and an int of the no. of hugs
+     */
+    private static class ConfessionItem {
+
+        private String confession;
+        private int hugs;
+
+        public String getConfession() {
+            return confession;
+        }
+
+        public int getHugs() {
+            return hugs;
+        }
+
+        public ConfessionItem(String confession, int hugs) {
+            this.confession = confession;
+            this.hugs = hugs;
+        }
+
+        public String toString() {
+            if(hugs == -1)
+                return confession;
+                // TODO: test this: need to cut last char?
+                //return confession.substring(0, confession.length()-1); // substring because last char is \n
+            else
+                return confession+hugs+" klemz";
+        }
+    }
+    
 }

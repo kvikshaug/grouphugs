@@ -172,4 +172,44 @@ class SVNCommit implements Runnable {
         // We have all the data we wanted, so create and return the new commit-data
         return new SVNCommitItem(revision, username, files, comment);
     }
+
+    private static class SVNCommitItem {
+
+        private int revision;
+        private String user;
+        private ArrayList<SVNCommitItemFile> files;
+        private String comment;
+
+        public SVNCommitItem(int revision, String user, ArrayList<SVNCommitItemFile> files, String comment) {
+            this.revision = revision;
+            this.user = user;
+            this.files = files;
+            this.comment = comment;
+        }
+
+        public String toString() {
+            String returnStr = "gh svn @ r"+revision+" : "+user;
+            for(SVNCommitItemFile file : files) {
+                returnStr += "\n"+file;
+            }
+            returnStr += "\n"+comment;
+            return returnStr;
+        }
+    }
+
+    private static class SVNCommitItemFile {
+
+        private char modification;
+        private String filename;
+
+        public SVNCommitItemFile(char modification, String filename) {
+            this.modification = modification;
+            this.filename = filename;
+        }
+
+        public String toString() {
+            return " - "+modification+" "+filename;
+        }
+    }
+
 }

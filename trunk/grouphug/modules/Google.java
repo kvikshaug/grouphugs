@@ -1,4 +1,7 @@
-package grouphug;
+package grouphug.modules;
+
+import grouphug.GrouphugModule;
+import grouphug.Grouphug;
 
 import java.net.URL;
 import java.net.URLConnection;
@@ -7,7 +10,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
-class Google implements GrouphugModule {
+public class Google implements GrouphugModule {
 
     private static Grouphug bot;
     private static final String TRIGGER = "google ";
@@ -31,7 +34,7 @@ class Google implements GrouphugModule {
         if(!message.startsWith(TRIGGER))
             return;
 
-        URL url = null;
+        URL url;
         try {
             url = Google.search(message.substring(TRIGGER.length()));
         } catch(IOException e) {

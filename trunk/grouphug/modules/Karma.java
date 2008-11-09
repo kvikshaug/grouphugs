@@ -1,8 +1,12 @@
-package grouphug;
+package grouphug.modules;
+
+import grouphug.GrouphugModule;
+import grouphug.Grouphug;
+import grouphug.SQL;
 
 import java.sql.SQLException;
 
-class Karma implements GrouphugModule {
+public class Karma implements GrouphugModule {
 
     private static Grouphug bot;
     private static final String TRIGGER = "karma ";
@@ -159,4 +163,37 @@ class Karma implements GrouphugModule {
             bot.sendMessage("Sorry, an SQL error occured.", false);
         }
     }
+
+    private static class KarmaItem {
+
+        private int ID;
+        private String name;
+        private int karma;
+
+        public int getID() {
+            return ID;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getKarma() {
+            return karma;
+        }
+
+        public KarmaItem(int ID, String name, int karma) {
+            this.ID = ID;
+            this.name = name;
+            this.karma = karma;
+        }
+
+        public String toString() {
+            if(karma == 0)
+                return "neutral";
+            else
+                return ""+karma;
+        }
+    }
+
 }

@@ -1,4 +1,7 @@
-package grouphug;
+package grouphug.modules;
+
+import grouphug.GrouphugModule;
+import grouphug.Grouphug;
 
 import java.net.URL;
 import java.net.URLConnection;
@@ -7,7 +10,7 @@ import java.io.BufferedOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 
-class Slang implements GrouphugModule {
+public class Slang implements GrouphugModule {
 
     private static Grouphug bot;
     private static final String TRIGGER_MAIN = "slang ";
@@ -15,7 +18,7 @@ class Slang implements GrouphugModule {
 
     private static int slangCount = 0;
 
-    Slang(Grouphug bot) {
+    public Slang(Grouphug bot) {
         Slang.bot = bot;
     }
 
@@ -86,7 +89,6 @@ class Slang implements GrouphugModule {
     }
 
     private String getSlangXML(String query) throws IOException {
-        System.out.print("Connecting via soap to UD... ");
         URL u=new URL("http://api.urbandictionary.com/soap");
         URLConnection conn=u.openConnection();
         conn.setDoOutput(true);
@@ -113,7 +115,6 @@ class Slang implements GrouphugModule {
             }
         }
         is.close();
-        System.out.println("OK");
         if(buffer.length == bytesRead) {
             return new String(buffer);
         } else {

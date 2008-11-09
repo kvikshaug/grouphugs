@@ -1,4 +1,4 @@
-package grouphug;
+package grouphug.modules;
 
 class SlangItem {
 

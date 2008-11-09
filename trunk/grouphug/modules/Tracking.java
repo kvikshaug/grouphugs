@@ -1,13 +1,15 @@
-package grouphug;
+package grouphug.modules;
+
+import grouphug.GrouphugModule;
+import grouphug.Grouphug;
 
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.MalformedURLException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
-class Tracking implements GrouphugModule {
+public class Tracking implements GrouphugModule {
     
     private static Grouphug bot;
     private static final String TRIGGER = "track ";
@@ -31,7 +33,7 @@ class Tracking implements GrouphugModule {
         if(!message.startsWith(TRIGGER))
             return;
 
-        String tracked = null;
+        String tracked;
         try {
             tracked = Tracking.search(message.substring(TRIGGER.length()));
         } catch(IOException e) {
@@ -61,7 +63,7 @@ class Tracking implements GrouphugModule {
         BufferedReader posten = new BufferedReader(new InputStreamReader(urlConn.getInputStream(), "UTF-8"));
 
         // phear teh ugly hax <3
-        String curLine = " ";
+        String curLine;
         int status = 0;
         String output = "";
         while (status < 5){

@@ -1,17 +1,21 @@
-package grouphug;
+package grouphug.modules;
+
+import grouphug.GrouphugModule;
+import grouphug.Grouphug;
+import grouphug.SQL;
 
 import java.sql.SQLException;
 
-class WeatherForecast implements GrouphugModule {
+public class WeatherForecast implements GrouphugModule {
 
     private static Grouphug bot;
     private static final String TRIGGER = "weather";
     private static final String SQL_HOST = "heiatufte.net";
     private static final String SQL_DB = "narvikdata";
     private static final String SQL_USER = "narvikdata";
-    protected static String SQL_PASSWORD = "";
+    public static String SQL_PASSWORD = "";
 
-    WeatherForecast(Grouphug bot) {
+    public WeatherForecast(Grouphug bot) {
         WeatherForecast.bot = bot;
     }
 

@@ -1,6 +1,7 @@
 package grouphug;
 
 import org.jibble.pircbot.*;
+import grouphug.modules.*;
 
 import java.util.ArrayList;
 import java.io.*;
@@ -28,10 +29,13 @@ import java.io.*;
  */
 
 // TODO - write a websiteconnection-class - for easier use - and to avoid copypasta code (Google/Define/Tracking)
+// TODO - bash for #grouphugs
+// TODO - tlf module
+// TODO - review access modifiers everywhere according to the new 'modules' package
 
 public class Grouphug extends PircBot {
     // 
-    static final String CHANNEL = "#grouphugs";     // The main channel
+    public static final String CHANNEL = "#grouphugs";     // The main channel
     static final String SERVER = "irc.homelien.no"; // The main IRC server
     static final String ENCODING = "ISO8859-15";    // Character encoding to use when communicating with the IRC server.
 
@@ -62,8 +66,8 @@ public class Grouphug extends PircBot {
     static boolean spamOK = false;
 
     // The trigger characters (as Strings since startsWith takes String)
-    static String MAIN_TRIGGER = "!";
-    static String SPAM_TRIGGER = "@";
+    public static String MAIN_TRIGGER = "!";
+    public static String SPAM_TRIGGER = "@";
 
 
 
@@ -187,7 +191,7 @@ public class Grouphug extends PircBot {
      * @param message - The message to send
      * @param verifySpam - true if verifying that spamming is ok before sending large messages
      */
-    protected void sendMessage(String message, boolean verifySpam) {
+    public void sendMessage(String message, boolean verifySpam) {
 
         // First create a list of the lines we will send separately.
         ArrayList<String> lines = new ArrayList<String>();
@@ -279,7 +283,7 @@ public class Grouphug extends PircBot {
         }
 
         // Load up modules
-        // TODO - should be done differently
+        // TODO - should be done differently?
         modules.add(new Confession(bot));
         modules.add(new Slang(bot));
         modules.add(new Karma(bot));

@@ -1,10 +1,14 @@
-package grouphug;
+package grouphug.modules;
+
+import grouphug.GrouphugModule;
+import grouphug.Grouphug;
+import grouphug.SQL;
 
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-class Cinema implements GrouphugModule {
+public class Cinema implements GrouphugModule {
 
     private static Grouphug bot;
     private static final String TRIGGER = "kino";
@@ -12,7 +16,7 @@ class Cinema implements GrouphugModule {
     private static final String SQL_DB = "narvikdata";
     private static final String SQL_USER = "narvikdata";
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("d.M E HH:mm");
-    protected static String SQL_PASSWORD = "";
+    public static String SQL_PASSWORD = "";
 
     public Cinema(Grouphug bot) {
         Cinema.bot = bot;

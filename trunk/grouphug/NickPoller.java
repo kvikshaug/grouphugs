@@ -35,6 +35,8 @@ class NickPoller implements Runnable {
 
         while(run) {
 
+            System.out.println("Trying to change nick from "+bot.getNick()+":");
+
             // First we wait a pretty long time between each try - we don't want the server
             // to think we're spamming it with nickchanges
             try {
@@ -51,6 +53,8 @@ class NickPoller implements Runnable {
             // Try to change the nick to one of the more wanted ones in the nicklist
             for(int newNick = 0; newNick < currentNick && newNick < Grouphug.nicks.size(); newNick++) {
 
+                System.out.print("  -> "+Grouphug.nicks.get(newNick)+" ... ");
+
                 // First try a nickchange
                 bot.changeNick(Grouphug.nicks.get(newNick));
 
@@ -63,6 +67,7 @@ class NickPoller implements Runnable {
 
                 // And check if the change was successful
                 if(bot.getNick().equals(Grouphug.nicks.get(newNick))) {
+                    System.out.println("got it!");
                     if(newNick == 0) {
                         // Nice, we got the nick we wanted the most! stop the thread and exit :)
                         run = false;
@@ -73,6 +78,7 @@ class NickPoller implements Runnable {
                         break;
                     }
                 }
+                System.out.println("failed, nick is probably taken.");
                 // If not, try again with the next nick in the list
             }
             // If we reach this point (and run is true), we weren't able to change to the
