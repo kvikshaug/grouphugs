@@ -113,12 +113,12 @@ public class Grouphug extends PircBot {
             for(GrouphugModule m : modules) {
                 m.trigger(channel, sender, login, hostname, message.substring(1));
             }
-        // If the message didn't start with a special trigger, run the specialTrigger() method for special
-        // modules who might want to react on normal messages
-        } else {
-            for(GrouphugModule m : modules) {
-                m.specialTrigger(channel, sender, login, hostname, message);
-            }
+        }
+
+        // run the specialTrigger() method for special modules who might want to
+        // react on messages without trigger
+        for(GrouphugModule m : modules) {
+            m.specialTrigger(channel, sender, login, hostname, message);
         }
 
         // Let's do a logfile flush when someone sends a message..
