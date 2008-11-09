@@ -27,7 +27,7 @@ public class Define implements GrouphugModule {
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
         bot.sendNotice(sender, "Define: Use google to give a proper definition of a word.");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Define.TRIGGER +"<keyword>");
+        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<keyword>");
     }
 
     public void trigger(String channel, String sender, String login, String hostname, String message) {

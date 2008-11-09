@@ -30,8 +30,8 @@ public class Confession implements GrouphugModule {
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
         bot.sendNotice(sender, "Confession: Outputs a confession, random or by search.");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Confession.TRIGGER);
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Confession.TRIGGER +" <searchword(s)>");
+        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
+        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <searchword(s)>");
 
     }
 

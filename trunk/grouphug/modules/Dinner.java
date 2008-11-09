@@ -35,9 +35,9 @@ public class Dinner implements GrouphugModule {
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
         bot.sendNotice(sender, "Dinner: Shows what's for dinner at HiN.");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER);
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +" <ukedag>");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Dinner.TRIGGER +" all");
+        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
+        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <ukedag>");
+        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" all");
     }
     
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {

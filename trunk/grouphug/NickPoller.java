@@ -7,7 +7,7 @@ package grouphug;
 class NickPoller implements Runnable {
 
     // How long we wait between each time we try to recapture our nick
-    private static int RETRY_TIME = 2 * 60 * 1000; // in ms - every 2nd minute, should be pretty reasonable?
+    private static int RETRY_TIME = 3 * 60 * 1000; // in ms - every 3 minutes, should be pretty reasonable?
 
     // How long we wait for the confirmation of a nickchange before we check if the change was successful 
     private static int CONFIRMATION_WAIT_TIME = 2000; // in ms
@@ -30,11 +30,10 @@ class NickPoller implements Runnable {
 
         // At startup, we should check if we already have the most wanted nick,
         // and don't need to start this algorithm at all
+        // (Should this check be done before even starting the load() method ?)
         if(bot.getNick().equals(Grouphug.nicks.get(0))) {
-            System.out.println("Nickpoller: Already have highest prioritized nick, stopping thread.");
+            System.out.println("Nickpoller: Already have main nick, stopping thread.");
             run = false;
-        } else {
-            System.out.println("Nickpoller: Will try to reclaim highest prioritized nick every "+(RETRY_TIME / 60 / 1000)+" minutes.");
         }
 
         while(run) {
@@ -47,8 +46,6 @@ class NickPoller implements Runnable {
                 // do nothing, just try again at once
             }
 
-            System.out.println("Trying to change nick from "+bot.getNick()+":");
-
             // Figure out which nick in the nicklist we have
             int currentNick;
             if((currentNick = Grouphug.nicks.indexOf(bot.getNick())) == -1)
@@ -56,8 +53,6 @@ class NickPoller implements Runnable {
 
             // Try to change the nick to one of the more wanted ones in the nicklist
             for(int newNick = 0; newNick < currentNick && newNick < Grouphug.nicks.size(); newNick++) {
-
-                System.out.print("  -> "+Grouphug.nicks.get(newNick)+" ... ");
 
                 // First try a nickchange
                 bot.changeNick(Grouphug.nicks.get(newNick));
@@ -71,9 +66,9 @@ class NickPoller implements Runnable {
 
                 // And check if the change was successful
                 if(bot.getNick().equals(Grouphug.nicks.get(newNick))) {
-                    System.out.println("got it!");
                     if(newNick == 0) {
                         // Nice, we got the nick we wanted the most! stop the thread and exit :)
+                        System.out.println("Nickpoller: Got main nick! Stopping thread.");
                         run = false;
                         break;
                     } else {
@@ -82,7 +77,6 @@ class NickPoller implements Runnable {
                         break;
                     }
                 }
-                System.out.println("failed, nick is probably taken.");
                 // If not, try again with the next nick in the list
             }
             // If we reach this point (and run is true), we weren't able to change to the

@@ -21,7 +21,7 @@ public class Tracking implements GrouphugModule {
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
         bot.sendNotice(sender, "Posten.no package tracking:");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+Tracking.TRIGGER +"<package id / kollinr>");
+        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<package id / kollinr>");
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {

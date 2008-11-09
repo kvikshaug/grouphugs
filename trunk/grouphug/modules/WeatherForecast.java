@@ -21,7 +21,7 @@ public class WeatherForecast implements GrouphugModule {
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
         bot.sendNotice(sender, "WeatherForecast: General forecast for Narvik tomorrow.");
-        bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + WeatherForecast.TRIGGER);
+        bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER);
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {

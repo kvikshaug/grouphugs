@@ -28,16 +28,21 @@ import java.io.*;
  * The bot extends the functionality of the well-designed PircBot, see http://www.jibble.org/
  */
 
-// TODO - write a websiteconnection-class - for easier use - and to avoid copypasta code (Google/Define/Tracking)
+// TODO - write a websiteconnection-class - for easier use - and to avoid copypasta code (Google/Define/Tracking/Confession)
 // TODO - bash for #grouphugs
 // TODO - tlf module
 // TODO - review access modifiers everywhere according to the new 'modules' package
+// TODO - current logfile flushes are kind of fugly
 
 public class Grouphug extends PircBot {
-    // 
-    public static final String CHANNEL = "#grouphugs";     // The main channel
+
+    static final String CHANNEL = "#grouphugs";     // The main channel
     static final String SERVER = "irc.homelien.no"; // The main IRC server
     static final String ENCODING = "ISO8859-15";    // Character encoding to use when communicating with the IRC server.
+
+    public static String getChannel() {
+        return CHANNEL;
+    }
 
     // The number of characters upon which lines are splitted
     // Note that the 512 max limit includes the channel name, \r\n, and probably some other stuff.
@@ -83,30 +88,7 @@ public class Grouphug extends PircBot {
      */
     protected void onMessage(String channel, String sender, String login, String hostname, String message) {
 
-        // A few hardcoded funnies
-        // TODO: make factoid? "idiot bot is <action>pisses all over $sender" -> saved in db, triggered by own module
-        if(message.equalsIgnoreCase("idiot bot"))
-            sendAction(CHANNEL, "pisses all over "+sender);
-        if(message.equalsIgnoreCase("homo bot"))
-            sendAction(CHANNEL, "picks up the soap");
-        if(message.equalsIgnoreCase("goosh"))
-            sendMessage(CHANNEL, "http://youtube.com/watch?v=xrhLdDIQ5Kk");
-        if(message.equalsIgnoreCase("don't drop the soap"))
-            sendMessage(CHANNEL, "http://youtube.com/watch?v=ZO7-QJGVdM4");
-        if(message.equalsIgnoreCase("fuck it"))
-            sendMessage(CHANNEL, "WE'LL DO IT LIVE!");
-        if (message.equalsIgnoreCase("!insult"))
-            sendMessage(CHANNEL, sender + ", you fail at life.");
-        if (message.equalsIgnoreCase("homos"))
-            sendMessage(CHANNEL, "homos are always mad");
-        if (message.equalsIgnoreCase("i shot a man in reno"))
-            sendMessage(CHANNEL, "just to watch him die");
-        if (message.equalsIgnoreCase("right round"))
-            sendMessage(CHANNEL, "http://www.meatspin.com/");
-        if (message.equalsIgnoreCase("eeeeeidle eidle eeeeee"))
-            sendMessage(CHANNEL, "http://www.youtube.com/watch?v=q0x4Kw_y4fg");
-
-
+        // First, check for the universal help-trigger
         if(message.startsWith(MAIN_TRIGGER + "help")) {
             sendNotice(sender, "Currently implemented modules on "+this.getNick()+":");
             sendNotice(sender, "---");
@@ -114,7 +96,9 @@ public class Grouphug extends PircBot {
                 m.helpTrigger(channel, sender, login, hostname, message);
             }
         }
+        // Then, check if the message starts with a normal or spam-trigger
         else if(message.startsWith(MAIN_TRIGGER) || message.startsWith(SPAM_TRIGGER)) {
+            // Check if spam has been triggered
             if(message.startsWith(MAIN_TRIGGER)) {
                 spamOK = false;
             } else {
@@ -129,13 +113,15 @@ public class Grouphug extends PircBot {
             for(GrouphugModule m : modules) {
                 m.trigger(channel, sender, login, hostname, message.substring(1));
             }
+        // If the message didn't start with a special trigger, run the specialTrigger() method for special
+        // modules who might want to react on normal messages
         } else {
             for(GrouphugModule m : modules) {
                 m.specialTrigger(channel, sender, login, hostname, message);
             }
         }
 
-
+        // Let's do a logfile flush when someone sends a message..
         stdOut.flush();
     }
 
@@ -236,6 +222,13 @@ public class Grouphug extends PircBot {
         for(String line : lines)
             this.sendMessage(Grouphug.CHANNEL, line);
 
+        // Let's do a logfile flush when we've sent data to the server..
+        stdOut.flush();
+    }
+
+    // Let's do a logfile flush after every server ping..
+    protected void onServerPing(String response) {
+        super.onServerPing(response);
         stdOut.flush();
     }
 
@@ -294,6 +287,7 @@ public class Grouphug extends PircBot {
         modules.add(new Tracking(bot));
         modules.add(new Cinema(bot));
         modules.add(new IMDb(bot));
+        modules.add(new Factoid(bot));
         Grouphug.loadGrimstuxPassword();
         SVNCommit.load(bot);
 
@@ -397,6 +391,8 @@ public class Grouphug extends PircBot {
         str = str.replace("&amp;quot;", "\"");
         str = str.replace("&amp;lt;", "<");
         str = str.replace("&amp;gt;", ">");
+        str = str.replace("&#34;", "\"");
+        str = str.replace("&#39;", "'");
         return str;
     }
 

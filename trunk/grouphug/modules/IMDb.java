@@ -21,7 +21,7 @@ public class IMDb implements GrouphugModule {
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
         bot.sendNotice(sender, "IMDb: Show IMDb info for a movie");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+IMDb.TRIGGER +"<movie name>");
+        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<movie name>");
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
@@ -72,7 +72,7 @@ public class IMDb implements GrouphugModule {
             // A bit of copy-pasta and wtf's in here, enjoy :)
             while((line = imdb.readLine()) != null) {
                 if(line.startsWith(titleString)) {
-                    title = line.substring(line.indexOf(">") + 1, line.substring(1).indexOf("<")+1);
+                    title = Grouphug.entitiesToChars(line.substring(line.indexOf(">") + 1, line.substring(1).indexOf("<")+1));
                 }
                 if(line.trim().equals(scoreString)) {
                     line = imdb.readLine();
@@ -87,7 +87,7 @@ public class IMDb implements GrouphugModule {
                     if(ind != -1) {
                         tagline = tagline.substring(0, ind).trim();
                     }
-                    tagline = " - "+tagline.replace(" | ", "");
+                    tagline = Grouphug.entitiesToChars(" - "+tagline.replace("|", " "));
                 }
                 if(line.startsWith(plotString)) {
                     plot = imdb.readLine().trim();
@@ -95,7 +95,7 @@ public class IMDb implements GrouphugModule {
                     if(ind != -1) {
                         plot = plot.substring(0, ind).trim();
                     }
-                    plot = plot.replace(" | ", "");
+                    plot = Grouphug.entitiesToChars(plot.replace("|", " "));
                 }
                 if(line.startsWith(commentString)) {
                     commentTitle = imdb.readLine().trim();
@@ -103,7 +103,7 @@ public class IMDb implements GrouphugModule {
                     if(ind != -1) {
                         commentTitle = commentTitle.substring(0, ind).trim();
                     }
-                    commentTitle = commentTitle.replace(" | ", "");
+                    commentTitle = Grouphug.entitiesToChars(commentTitle.replace("|", " "));
                 }
             }
 
@@ -114,10 +114,10 @@ public class IMDb implements GrouphugModule {
             bot.sendMessage("The IMDb site layout may have changed, I was unable to parse it.", false);
             return;
         } catch(MalformedURLException ex) {
-            bot.sendMessage("Wtf just happened. I caught a MalformedURLException.", false);
+            bot.sendMessage("Wtf just happened? I caught a MalformedURLException.", false);
             return;
         } catch(IOException ex) {
-            bot.sendMessage("Sorry, the intartubes seem to be clogged up. (IOException)", false);
+            bot.sendMessage("Sorry, the intartubes seem to be clogged up.", false);
             return;
         }
 

@@ -23,7 +23,7 @@ public class Karma implements GrouphugModule {
 
     public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
         bot.sendNotice(sender, "Karma: Increase, decrease, or show an objects karma.");
-        bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + Karma.TRIGGER + "<object>");
+        bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<object>");
         bot.sendNotice(sender, "  <object>++");
         bot.sendNotice(sender, "  <object>--");
         bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP);
@@ -156,7 +156,7 @@ public class Karma implements GrouphugModule {
             if(top)
                 reply += "May their lives be filled with sunlight and pink stuff.";    
             else
-                reply += "May they burn forever in the pits of "+ Grouphug.CHANNEL+".";
+                reply += "May they burn forever in the pits of "+ Grouphug.getChannel()+".";
             bot.sendMessage(reply, false);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
