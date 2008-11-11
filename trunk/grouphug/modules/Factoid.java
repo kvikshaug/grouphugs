@@ -114,7 +114,7 @@ public class Factoid implements GrouphugModule {
         } else if(message.startsWith(TRIGGER)) {
             FactoidItem factoid;
             String trigger = message.substring(TRIGGER.length());
-            if((factoid = find(trigger)) != null) {
+            if((factoid = find(trigger, false)) != null) {
                 bot.sendMessage("Factoid: [ trigger = "+factoid.getTrigger()+" ] [ reply = "+factoid.getReply()+" ] [ author = "+factoid.getAuthor()+" ]", false);
             } else {
                 bot.sendMessage(sender+", I do not know of this "+trigger+" that you speak of.", false);
@@ -128,7 +128,7 @@ public class Factoid implements GrouphugModule {
     // this is run for every message sent to the channel - it checks if the line matches any factoid
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
         FactoidItem factoid;
-        if((factoid = find(message)) != null) {
+        if((factoid = find(message, true)) != null) {
             factoid.send(sender);
         }
     }
@@ -143,7 +143,7 @@ public class Factoid implements GrouphugModule {
      */
     private boolean add(boolean message, String trigger, String reply, String author) {
 
-        if(find(trigger) != null) {
+        if(find(trigger, false) != null) {
             return false;
         }
 
@@ -172,7 +172,7 @@ public class Factoid implements GrouphugModule {
      */
     private boolean del(String trigger) {
         FactoidItem factoid;
-        if((factoid = find(trigger)) != null) {
+        if((factoid = find(trigger, false)) != null) {
             // First remove it from the SQL db
             SQL sql = new SQL();
             try {
@@ -202,12 +202,18 @@ public class Factoid implements GrouphugModule {
     /**
      * Tries to find a factoid in local memory
      * @param trigger The trigger string of the factoid to search for
+     * @param regex true if a regex should be used to find the trigger, false if it should be exact search
      * @return The found FactoidItem, or null if no item was found
      */
-    private FactoidItem find(String trigger) {
+    private FactoidItem find(String trigger, boolean regex) {
         for(FactoidItem factoid : factoids) {
-            if(factoid.getTrigger().equals(trigger))
-                return factoid;
+            if(regex) {
+                if(factoid.trigger(trigger))
+                    return factoid;
+            } else {
+                if(factoid.getTrigger().equals(trigger))
+                    return factoid;
+            }
         }
         return null;
     }
