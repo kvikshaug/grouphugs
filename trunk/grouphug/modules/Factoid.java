@@ -206,7 +206,7 @@ public class Factoid implements GrouphugModule {
      */
     private FactoidItem find(String trigger) {
         for(FactoidItem factoid : factoids) {
-            if(factoid.trigger(trigger))
+            if(factoid.getTrigger().equals(trigger))
                 return factoid;
         }
         return null;
