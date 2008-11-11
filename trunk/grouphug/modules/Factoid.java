@@ -66,10 +66,13 @@ public class Factoid implements GrouphugModule {
         bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER+TRIGGER_RANDOM);
     }
 
+    // Remember that this is only run on the TRIGGER (!factoid at the time of writing) (
     public void trigger(String channel, String sender, String login, String hostname, String message) {
 
+        // If trying to ADD a NEW factoid
         if(message.startsWith(TRIGGER+TRIGGER_ADD)) {
 
+            // First parse the line to find the trigger, reply, and if it's a message or action
             String line = message.substring(TRIGGER.length()+TRIGGER_ADD.length());
 
             boolean replyMessage;
@@ -84,23 +87,30 @@ public class Factoid implements GrouphugModule {
                 trigger = line.substring(0, line.indexOf(SEPARATOR_ACTION));
                 reply = line.substring(line.indexOf(SEPARATOR_ACTION) + SEPARATOR_ACTION.length());
             } else {
+                // If it's neither a message nor an action
                 bot.sendMessage("What? Don't give me that nonsense, "+sender+".", false);
                 return;
             }
 
+            // add() returns true if the factoid is added, or false if the trigger is already taken
             if(add(replyMessage, trigger, reply, sender)) {
                 bot.sendMessage("OK, "+sender+".", false);
             } else {
                 bot.sendMessage("But, "+sender+", "+trigger+".", false);
             }
 
+        // Not trying to ADD a new factoid, so check if we're trying to REMOVE one
         } else if(message.startsWith(TRIGGER+TRIGGER_DEL)) {
+            // Parse the line, and try to remove it - del() returns true if it's removed,
+            // false if there is no such trigger
             String trigger = message.substring(TRIGGER.length()+TRIGGER_DEL.length());
             if(del(trigger)) {
                 bot.sendMessage("I no longer know of this "+trigger+" that you speak of.", false);
             } else {
                 bot.sendMessage(sender+", I can't remember "+trigger+" in the first place.", false);
             }
+
+        // Ok, neither ADDing nor REMOVING, so check if we're just trying to see data about a factoid
         } else if(message.startsWith(TRIGGER)) {
             FactoidItem factoid;
             String trigger = message.substring(TRIGGER.length());
@@ -109,11 +119,13 @@ public class Factoid implements GrouphugModule {
             } else {
                 bot.sendMessage(sender+", I do not know of this "+trigger+" that you speak of.", false);
             }
+        // The last triggered alternative would be the trigger for getting a random factoid
         } else if(message.startsWith(TRIGGER_RANDOM)) {
             factoids.get(random.nextInt(factoids.size())).send(sender);
         }
     }
 
+    // this is run for every message sent to the channel - it checks if the line matches any factoid
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
         FactoidItem factoid;
         if((factoid = find(message)) != null) {
@@ -231,7 +243,7 @@ public class Factoid implements GrouphugModule {
         }
 
         private boolean trigger(String message) {
-            return trigger.equals(message);
+            return trigger.matches(message.replace("*", ".*"));
         }
 
         /**
