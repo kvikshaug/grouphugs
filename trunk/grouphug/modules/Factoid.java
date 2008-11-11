@@ -243,14 +243,7 @@ public class Factoid implements GrouphugModule {
         }
 
         private boolean trigger(String message) {
-            bot.sendMessage("Matching "+message+" against "+message.replace("*", ".*"), false);
-            if(trigger.matches(message.replace("*", ".*"))) {
-                bot.sendMessage(" -> true", false);
-                return true;
-            } else {
-                bot.sendMessage(" -> false", false);
-                return false;
-            }
+            return message.matches(trigger.replace("*", ".*"));
         }
 
         /**
