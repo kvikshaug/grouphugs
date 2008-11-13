@@ -310,9 +310,6 @@ public class Grouphug extends PircBot {
             System.exit(-1);
         }
 
-        // start a thread for polling back our first nick if unavailable
-        NickPoller.load(bot);
-
         // Join the channel
         bot.joinChannel(CHANNEL);
     }
@@ -350,6 +347,8 @@ public class Grouphug extends PircBot {
                 // do nothing, just try again once interrupted
             }
         }
+        // start a thread for polling back our first nick if unavailable
+        NickPoller.load(bot);
     }
 
 

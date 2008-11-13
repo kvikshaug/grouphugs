@@ -13,17 +13,27 @@ class NickPoller implements Runnable {
     private static int CONFIRMATION_WAIT_TIME = 2000; // in ms
 
     private static Grouphug bot;
-    public static boolean run; // should be set to false when we want to stop this thread.
+    private static NickPoller pollerThread;
+
+    public boolean run; // should be set to false when we want to stop this thread.
 
     /**
-     * Creates and starts a thread which attempts
+     * Creates and starts a thread which attempts to recapture the most wanted nicks in the nicklist
+     * If there already is a thread running; it is stopped
      * @param bot The bot
      */
     protected static void load(Grouphug bot) {
-        // Create and start a thread
         NickPoller.bot = bot;
+
+        if(pollerThread != null)
+            pollerThread.run = false;
+
+        pollerThread = new NickPoller();
+        new Thread(pollerThread).start();
+    }
+
+    public NickPoller() {
         run = true;
-        new Thread(new NickPoller()).start();
     }
 
     public void run() {
