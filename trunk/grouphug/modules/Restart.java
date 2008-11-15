@@ -4,6 +4,8 @@ import grouphug.GrouphugModule;
 import grouphug.Grouphug;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.BufferedWriter;
 
 public class Restart implements GrouphugModule {
 
@@ -38,7 +40,11 @@ public class Restart implements GrouphugModule {
     public void trigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER) || message.equals(TRIGGER_ALT)) {
             try {
-                Runtime.getRuntime().exec("/home/DT2006/murray/gh/updategh.sh &");
+                Process child = Runtime.getRuntime().exec("/bin/sh");
+                BufferedWriter outCommand = new BufferedWriter(new
+                OutputStreamWriter(child.getOutputStream()));
+                outCommand.write("/home/DT2006/murray/gh/updategh.sh");
+                outCommand.flush();
             } catch (IOException e) {
                 bot.sendMessage("Looks like HiNux barfed on me, caught IOException while trying to restart.", false);
                 System.err.println("Caught IOException while trying to restart the bot:");
