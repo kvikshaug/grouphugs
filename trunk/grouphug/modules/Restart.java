@@ -44,6 +44,7 @@ public class Restart implements GrouphugModule {
                 BufferedWriter outCommand = new BufferedWriter(new
                 OutputStreamWriter(child.getOutputStream()));
                 outCommand.write("/home/DT2006/murray/gh/updategh.sh");
+                outCommand.newLine();
                 outCommand.flush();
             } catch (IOException e) {
                 bot.sendMessage("Looks like HiNux barfed on me, caught IOException while trying to restart.", false);
