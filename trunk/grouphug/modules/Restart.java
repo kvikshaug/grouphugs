@@ -38,7 +38,7 @@ public class Restart implements GrouphugModule {
     public void trigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER) || message.equals(TRIGGER_ALT)) {
             try {
-                Runtime.getRuntime().exec("/home/DT2006/murray/gh/updategh.sh");
+                Runtime.getRuntime().exec("/home/DT2006/murray/gh/updategh.sh &");
             } catch (IOException e) {
                 bot.sendMessage("Looks like HiNux barfed on me, caught IOException while trying to restart.", false);
                 System.err.println("Caught IOException while trying to restart the bot:");
