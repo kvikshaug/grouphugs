@@ -170,7 +170,7 @@ public class Factoid implements GrouphugModule {
     // this is run for every message sent to the channel - it checks if the line matches any factoid
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
 
-        if ((lastAddedTime - System.nanoTime()) < 100 ) {
+        if ((System.nanoTime() - lastAddedTime) < 100 ) {
             return; // HACK to avoid specialTrigger being called on the same line used to add the trigger in the first place
         }
 
