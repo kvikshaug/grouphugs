@@ -293,6 +293,7 @@ public class Grouphug extends PircBot {
 
         // Save the nicks we want, in prioritized order
         nicks.add("gh");
+        nicks.add("gh`");
         nicks.add("hugger");
         nicks.add("klemZ");
 
