@@ -41,6 +41,8 @@ public class Factoid implements GrouphugModule {
 
     private static Random random = new Random(System.nanoTime());
 
+    private long lastAddedTime; // HACK to avoid specialTrigger() being called on the same line
+
     public Factoid(Grouphug bot) {
         Factoid.bot = bot;
 
@@ -89,7 +91,6 @@ public class Factoid implements GrouphugModule {
         return false;
     }
 
-    long lastAddedTime;
 
     // Remember that this is only run on a line starting with the Grouphug.MAIN_TRIGGER (! at the time of writing) (
     public void trigger(String channel, String sender, String login, String hostname, String message) {
