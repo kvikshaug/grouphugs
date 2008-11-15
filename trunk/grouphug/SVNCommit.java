@@ -114,11 +114,6 @@ class SVNCommit implements Runnable {
                 }
             } catch(NullPointerException e) {
                 System.err.println("Nullpointer exception catched in the SVNOutput listener, restarting socket.");
-            } finally {
-                out = null;
-                in = null;
-                serverSocket = null;
-                clientSocket = null;
             }
         }
     }

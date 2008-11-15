@@ -25,6 +25,8 @@ public class Factoid implements GrouphugModule {
     private static Grouphug bot;
     private ArrayList<FactoidItem> factoids = new ArrayList<FactoidItem>();
 
+    private static final String TRIGGER_HELP = "factoid";
+
     private static final String TRIGGER_MAIN = "factoid ";
     private static final String TRIGGER_RANDOM = "randomfactoid";
 
@@ -61,13 +63,30 @@ public class Factoid implements GrouphugModule {
         }
     }
 
-    public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
-        // TODO - uhm, definition of <> here is inverse of in other modules, that's not very good
-        bot.sendNotice(sender, "Factoid: Make me respond upon triggers.");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + TRIGGER_MAIN_ADD +"trigger <say> reply");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + TRIGGER_MAIN_DEL +"trigger");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN +"trigger");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN +TRIGGER_RANDOM);
+    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
+        return TRIGGER_HELP;
+    }
+
+    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+        if(message.equals(TRIGGER_HELP)) {
+            bot.sendNotice(sender, "Factoid: Make me say or do (message or action) \"reply\" when someone says \"trigger\".");
+            bot.sendNotice(sender, "Old methods:");
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + TRIGGER_MAIN_ADD + "trigger <say> reply");
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + TRIGGER_MAIN_ADD + "trigger <do> reply");
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + TRIGGER_MAIN_DEL + "trigger");
+            bot.sendNotice(sender, "A new, easier version:");
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+  TRIGGER_SHORT_ADD + "trigger <say> reply");
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+  TRIGGER_SHORT_ADD + "trigger <do> reply");
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+  TRIGGER_SHORT_DEL + "trigger");
+            bot.sendNotice(sender, "Other triggers, to view info, or get a random factoid:");
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + "trigger");
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_RANDOM);
+            bot.sendNotice(sender, "Note 1: The string \"$sender\" will be replaced with the nick of the one triggering the factoid.");
+            bot.sendNotice(sender, "Note 2: A star (*) can be any string of characters.");
+            bot.sendNotice(sender, "Note 3: Regex can be used, but 1) remember that * is replaced with .* and 2) this will probably change very soon.");
+            return true;
+        }
+        return false;
     }
 
     // Remember that this is only run on a line starting with the Grouphug.MAIN_TRIGGER (! at the time of writing) (
@@ -108,15 +127,16 @@ public class Factoid implements GrouphugModule {
                 bot.sendMessage("But, "+sender+", "+trigger+".", false);
             }
 
+        }
         // Not trying to ADD a new factoid, so check if we're trying to REMOVE one
-        } else if(message.startsWith(TRIGGER_MAIN + TRIGGER_MAIN_DEL) || message.startsWith(TRIGGER_SHORT_DEL)) {
+        else if(message.startsWith(TRIGGER_MAIN + TRIGGER_MAIN_DEL) || message.startsWith(TRIGGER_SHORT_DEL)) {
 
             // Parse the line, based on what kind of trigger that was used
             String trigger;
             if(message.startsWith(TRIGGER_MAIN + TRIGGER_MAIN_DEL))
                 trigger = message.substring(TRIGGER_MAIN.length()+ TRIGGER_MAIN_DEL.length());
             else
-                trigger = message.substring(TRIGGER_SHORT_DEL.length());    
+                trigger = message.substring(TRIGGER_SHORT_DEL.length());
 
             // and try to remove it - del() returns true if it's removed, false if there is no such trigger
             if(del(trigger)) {
@@ -125,8 +145,9 @@ public class Factoid implements GrouphugModule {
                 bot.sendMessage(sender+", I can't remember "+trigger+" in the first place.", false);
             }
 
+        }
         // Ok, neither ADDing nor REMOVING, so check if we're just trying to see data about a factoid
-        } else if(message.startsWith(TRIGGER_MAIN)) {
+        else if(message.startsWith(TRIGGER_MAIN)) {
             FactoidItem factoid;
             String trigger = message.substring(TRIGGER_MAIN.length());
             if((factoid = find(trigger, false)) != null) {
@@ -135,8 +156,9 @@ public class Factoid implements GrouphugModule {
                 bot.sendMessage(sender+", I do not know of this "+trigger+" that you speak of.", false);
             }
 
+        }
         // The last triggered alternative would be the trigger for getting a random factoid
-        } else if(message.startsWith(TRIGGER_RANDOM)) {
+        else if(message.startsWith(TRIGGER_RANDOM)) {
             factoids.get(random.nextInt(factoids.size())).send(sender);
         }
     }

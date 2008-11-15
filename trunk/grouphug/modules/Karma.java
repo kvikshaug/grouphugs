@@ -9,6 +9,7 @@ import java.sql.SQLException;
 public class Karma implements GrouphugModule {
 
     private static Grouphug bot;
+    private static final String TRIGGER_HELP = "karma";
     private static final String TRIGGER = "karma ";
     private static final String TRIGGER_TOP = "karmatop";
     private static final String TRIGGER_BOTTOM = "karmabottom";
@@ -21,13 +22,21 @@ public class Karma implements GrouphugModule {
         Karma.bot = bot;
     }
 
-    public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
-        bot.sendNotice(sender, "Karma: Increase, decrease, or show an objects karma.");
-        bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<object>");
-        bot.sendNotice(sender, "  <object>++");
-        bot.sendNotice(sender, "  <object>--");
-        bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP);
-        bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM);
+    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
+        return TRIGGER_HELP;
+    }
+
+    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+        if(message.equals(TRIGGER_HELP)) {
+            bot.sendNotice(sender, "Karma: Increase, decrease, or show an objects karma.");
+            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<object>");
+            bot.sendNotice(sender, "  <object>++");
+            bot.sendNotice(sender, "  <object>--");
+            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP);
+            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM);
+            return true;
+        }
+        return false;
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
@@ -154,7 +163,7 @@ public class Karma implements GrouphugModule {
                 reply += (place++)+". "+htmlEntitiesToNorwegianChars((String)values[0])+" ("+values[1]+")\n";
             }
             if(top)
-                reply += "May their lives be filled with sunlight and pink stuff.";    
+                reply += "May their lives be filled with sunlight and pink stuff.";
             else
                 reply += "May they burn forever in the pits of "+ Grouphug.getChannel()+".";
             bot.sendMessage(reply, false);

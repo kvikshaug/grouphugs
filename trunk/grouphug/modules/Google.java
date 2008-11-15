@@ -14,15 +14,24 @@ public class Google implements GrouphugModule {
 
     private static Grouphug bot;
     private static final String TRIGGER = "google ";
+    private static final String TRIGGER_HELP = "google";
     private static final int CONN_TIMEOUT = 10000; // ms
 
     public Google(Grouphug bot) {
         Google.bot = bot;
     }
 
-    public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
-        bot.sendNotice(sender, "Google search:");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<searchword(s)>");
+    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
+        return TRIGGER_HELP;
+    }
+
+    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+        if(message.equals(TRIGGER_HELP)) {
+            bot.sendNotice(sender, "Google search:");
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<searchword(s)>");
+            return true;
+        }
+        return false;
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {

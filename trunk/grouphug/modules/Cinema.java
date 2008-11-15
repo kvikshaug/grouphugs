@@ -12,6 +12,7 @@ public class Cinema implements GrouphugModule {
 
     private static Grouphug bot;
     private static final String TRIGGER = "kino";
+    private static final String TRIGGER_HELP = "cinema";
     private static final String SQL_HOST = "heiatufte.net";
     private static final String SQL_DB = "narvikdata";
     private static final String SQL_USER = "narvikdata";
@@ -30,12 +31,21 @@ public class Cinema implements GrouphugModule {
         return str;
     }
 
-    public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
-        bot.sendNotice(sender, "Cinema: Display upcoming movies at Narvik Cinema");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <nr of films>");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" all");
+    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
+        return TRIGGER_HELP;
     }
+
+    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+        if(message.equals(TRIGGER_HELP)) {
+            bot.sendNotice(sender, "Cinema module: Display upcoming movies at Narvik Cinema");
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <nr of films>");
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" all");
+            return true;
+        }
+        return false;
+    }
+
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
         // do nothing

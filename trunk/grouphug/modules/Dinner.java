@@ -13,6 +13,7 @@ public class Dinner implements GrouphugModule {
     private static Grouphug bot;
     private static final String TRIGGER = "middag";
     private static final String TRIGGER_DEPRECATED = "dinner";
+    private static final String TRIGGER_HELP = "dinner";
     private static final String SQL_HOST = "heiatufte.net";
     private static final String SQL_DB = "narvikdata";
     private static final String SQL_USER = "narvikdata";
@@ -33,13 +34,21 @@ public class Dinner implements GrouphugModule {
         return str;
     }
 
-    public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
-        bot.sendNotice(sender, "Dinner: Shows what's for dinner at HiN.");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <ukedag>");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" all");
+    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
+        return TRIGGER_HELP;
     }
-    
+
+    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+        if(message.equals(TRIGGER_HELP)) {
+            bot.sendNotice(sender, "Dinner: Shows what's for dinner at HiN.");
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <ukedag>");
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" all");
+            return true;
+        }
+        return false;
+    }
+
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
         // do nothing
     }

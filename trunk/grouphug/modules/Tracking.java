@@ -10,18 +10,27 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 
 public class Tracking implements GrouphugModule {
-    
+
     private static Grouphug bot;
     private static final String TRIGGER = "track ";
+    private static final String TRIGGER_HELP = "tracking";
     private static final int CONN_TIMEOUT = 10000; // ms
 
     public Tracking(Grouphug bot) {
         Tracking.bot = bot;
     }
 
-    public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
-        bot.sendNotice(sender, "Posten.no package tracking:");
-        bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<package id / kollinr>");
+    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
+        return TRIGGER_HELP;
+    }
+
+    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+        if(message.equals(TRIGGER_HELP)) {
+            bot.sendNotice(sender, "Posten.no package tracking:");
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<package id / kollinr>");
+            return true;
+        }
+        return false;
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
@@ -68,22 +77,22 @@ public class Tracking implements GrouphugModule {
         String output = "";
         while (status < 5){
             curLine = posten.readLine();
-            if (curLine == null) 
+            if (curLine == null)
                 return null;
             String errorSearch = "SporingUserControl_ErrorMessage";
             int errorIndex = curLine.indexOf(errorSearch);
-            
+
             if(errorIndex != -1)
                 return null;
 
-            if (status == 0) 
+            if (status == 0)
             {
                 String resultSearch = "TH colspan=";
                 int resultIndex = curLine.indexOf(resultSearch);
                 if (resultIndex != -1)
                     status = 1;
             }
-            else {            
+            else {
                 String resultSearch = "<td>";
                 int resultIndex = curLine.indexOf(resultSearch);
                 if (resultIndex != -1)

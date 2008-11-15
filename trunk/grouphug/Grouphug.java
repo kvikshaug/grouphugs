@@ -71,10 +71,10 @@ public class Grouphug extends PircBot {
     static boolean spamOK = false;
 
     // The trigger characters (as Strings since startsWith takes String)
-    public static String MAIN_TRIGGER = "!";
-    public static String SPAM_TRIGGER = "@";
+    public static final String MAIN_TRIGGER = "!";
+    public static final String SPAM_TRIGGER = "@";
 
-
+    private static final String HELP_TRIGGER = "help";
 
     /**
      * This method is called whenever a message is sent to a channel.
@@ -86,18 +86,14 @@ public class Grouphug extends PircBot {
      * @param hostname - The hostname of the person who sent the message.
      * @param message - The actual message sent to the channel.
      */
+    @Override
     protected void onMessage(String channel, String sender, String login, String hostname, String message) {
 
-        // First, check for the universal help-trigger
-        if(message.startsWith(MAIN_TRIGGER + "help")) {
-            sendNotice(sender, "Currently implemented modules on "+this.getNick()+":");
-            sendNotice(sender, "---");
-            for(GrouphugModule m : modules) {
-                m.helpTrigger(channel, sender, login, hostname, message);
-            }
-        }
+        // First check for help trigger
+        checkForHelpTrigger(channel, sender, login, hostname, message);
+
         // Then, check if the message starts with a normal or spam-trigger
-        else if(message.startsWith(MAIN_TRIGGER) || message.startsWith(SPAM_TRIGGER)) {
+        if(message.startsWith(MAIN_TRIGGER) || message.startsWith(SPAM_TRIGGER)) {
             // Check if spam has been triggered
             if(message.startsWith(MAIN_TRIGGER)) {
                 spamOK = false;
@@ -125,6 +121,40 @@ public class Grouphug extends PircBot {
         stdOut.flush();
     }
 
+    @Override
+    protected void onPrivateMessage(String sender, String login, String hostname, String message) {
+        // Help triggers will also activate in PM
+        checkForHelpTrigger(null, sender, login, hostname, message);
+    }
+
+    private void checkForHelpTrigger(String channel, String sender, String login, String hostname, String message) {
+        // First, check for the universal normal help-trigger
+        if(message.equals(MAIN_TRIGGER + HELP_TRIGGER)) {
+            // Remember that if the line is > MAX_LINE_CHARS, it will *automatically* be split
+            // over several lines in the sendMessage() method, so we don't have to do that here
+            sendNotice(sender, "Currently implemented modules on "+this.getNick()+":");
+            String helpString = "";
+            for(GrouphugModule m : modules) {
+                helpString += ", ";
+                helpString += m.helpMainTrigger(channel, sender, login, hostname, message);
+            }
+            // Remove the first comma
+            helpString = helpString.substring(2);
+            sendNotice(sender, helpString);
+            sendNotice(sender, "Use \"!help <module>\" for more specific info. This will also work in PM.");
+        }
+        // if not, check if help is triggered with a special module
+        else if(message.startsWith(MAIN_TRIGGER+HELP_TRIGGER+" ")) {
+            boolean replied = false;
+            for(GrouphugModule m : modules) {
+                if(m.helpSpecialTrigger(channel, sender, login, hostname, message.substring(MAIN_TRIGGER.length() + HELP_TRIGGER.length() + 1)))
+                    replied = true;
+            }
+            if(!replied)
+                sendMessage("No one has implemented a "+message.substring(MAIN_TRIGGER.length() + HELP_TRIGGER.length() + 1)+" module yet.", false);
+        }
+    }
+
     /**
      * This method is called whenever someone (possibly us) is kicked from any of the channels that we are in.
      * If we were kicked, try to rejoin with a sorry message.
@@ -136,6 +166,7 @@ public class Grouphug extends PircBot {
      * @param recipientNick - The unfortunate recipient of the kick.
      * @param reason - The reason given by the user who performed the kick.
      */
+    @Override
     protected void onKick(String channel, String kickerNick, String kickerLogin, String kickerHostname, String recipientNick, String reason) {
         if (recipientNick.equalsIgnoreCase(getNick())) {
             joinChannel(channel);
@@ -150,6 +181,7 @@ public class Grouphug extends PircBot {
      * normally. If the connection to the server is lost, but neither we nor the server have explicitly closed the
      * connection, then it may take a few minutes to detect (this is commonly referred to as a "ping timeout").
      */
+    @Override
     protected void onDisconnect() {
         try {
             Grouphug.connect(this, true);
@@ -219,14 +251,16 @@ public class Grouphug extends PircBot {
         }
 
         // Finally send all the lines to the channel
-        for(String line : lines)
+        for(String line : lines) {
             this.sendMessage(Grouphug.CHANNEL, line);
+        }
 
         // Let's do a logfile flush when we've sent data to the server..
         stdOut.flush();
     }
 
     // Let's do a logfile flush after every server ping..
+    @Override
     protected void onServerPing(String response) {
         super.onServerPing(response);
         stdOut.flush();

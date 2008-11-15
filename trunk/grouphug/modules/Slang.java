@@ -13,6 +13,7 @@ import java.io.IOException;
 public class Slang implements GrouphugModule {
 
     private static Grouphug bot;
+    private static final String TRIGGER_HELP = "slang";
     private static final String TRIGGER_MAIN = "slang ";
     private static final String TRIGGER_EXAMPLE = "-ex ";
 
@@ -22,11 +23,19 @@ public class Slang implements GrouphugModule {
         Slang.bot = bot;
     }
 
-    public void helpTrigger(String channel, String sender, String login, String hostname, String message) {
-        bot.sendNotice(sender, "Slang: Define an expression in slang terms.");
-        bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + "<expr>");
-        bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + "<expr> <number>");
-        bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + Slang.TRIGGER_EXAMPLE + "<expr>");
+    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
+        return TRIGGER_HELP;
+    }
+
+    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+        if(message.equals(TRIGGER_HELP)) {
+            bot.sendNotice(sender, "Slang: Define an expression in slang terms.");
+            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + "<expr>");
+            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + "<expr> <number>");
+            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + Slang.TRIGGER_EXAMPLE + "<expr>");
+            return true;
+        }
+        return false;
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
