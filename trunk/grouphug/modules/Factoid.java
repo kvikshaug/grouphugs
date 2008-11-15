@@ -89,6 +89,8 @@ public class Factoid implements GrouphugModule {
         return false;
     }
 
+    long lastAddedTime;
+
     // Remember that this is only run on a line starting with the Grouphug.MAIN_TRIGGER (! at the time of writing) (
     public void trigger(String channel, String sender, String login, String hostname, String message) {
 
@@ -123,6 +125,8 @@ public class Factoid implements GrouphugModule {
             // add() returns true if the factoid is added, or false if the trigger is already taken
             if(add(replyMessage, trigger, reply, sender)) {
                 bot.sendMessage("OK, "+sender+".", false);
+
+                lastAddedTime = System.nanoTime(); // HACK to avoid specialTrigger() being called on the same line
             } else {
                 bot.sendMessage("But, "+sender+", "+trigger+".", false);
             }
@@ -165,6 +169,11 @@ public class Factoid implements GrouphugModule {
 
     // this is run for every message sent to the channel - it checks if the line matches any factoid
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
+
+        if ((lastAddedTime - System.nanoTime()) < 100 ) {
+            return; // HACK to avoid specialTrigger being called on the same line used to add the trigger in the first place
+        }
+
         FactoidItem factoid;
         if((factoid = find(message, true)) != null) {
             factoid.send(sender);
