@@ -72,34 +72,42 @@ public class Factoid implements GrouphugModule {
 
     // Remember that this is only run on a line starting with the Grouphug.MAIN_TRIGGER (! at the time of writing) (
     public void trigger(String channel, String sender, String login, String hostname, String message) {
-
+        System.out.println("Trigger being run, message: "+message);
         // If trying to ADD a NEW factoid (with the main trigger !factoid <on> or the shorttrigger !on)
         if(message.startsWith(TRIGGER_MAIN + TRIGGER_MAIN_ADD) || message.startsWith(TRIGGER_SHORT_ADD)) {
-
+            System.out.println("Got here...");
             // First parse the line to find the trigger, reply, and if it's a message or action
             // Do this based on what kind of trigger that was used
             String line;
-            if(message.startsWith(TRIGGER_MAIN + TRIGGER_MAIN_ADD))
+            if(message.startsWith(TRIGGER_MAIN + TRIGGER_MAIN_ADD)) {
+                System.out.println("Choosing first...");
                 line = message.substring(TRIGGER_MAIN.length()+TRIGGER_MAIN_ADD.length());
-            else
+            }
+            else {
+                System.out.println("Choosing second...");
                 line = message.substring(TRIGGER_SHORT_ADD.length());
+            }
 
             boolean replyMessage;
             String trigger, reply;
 
             if(line.contains(SEPARATOR_MESSAGE)) {
+                System.out.println("Found sep_mes");
                 replyMessage = true;
                 trigger = line.substring(0, line.indexOf(SEPARATOR_MESSAGE));
                 reply = line.substring(line.indexOf(SEPARATOR_MESSAGE) + SEPARATOR_MESSAGE.length());
             } else if(line.contains(SEPARATOR_ACTION)) {
+                System.out.println("Found sep_act");
                 replyMessage = false;
                 trigger = line.substring(0, line.indexOf(SEPARATOR_ACTION));
                 reply = line.substring(line.indexOf(SEPARATOR_ACTION) + SEPARATOR_ACTION.length());
             } else {
+                System.out.println("Found nothing");
                 // If it's neither a message nor an action
                 bot.sendMessage("What? Don't give me that nonsense, "+sender+".", false);
                 return;
             }
+            System.out.println("Ready for add()");
 
             // add() returns true if the factoid is added, or false if the trigger is already taken
             if(add(replyMessage, trigger, reply, sender)) {
