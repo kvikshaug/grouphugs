@@ -98,6 +98,7 @@ public class Slang implements GrouphugModule {
     }
 
     private String getSlangXML(String query) throws IOException {
+        query = query.replace("&", "&amp;");
         URL u=new URL("http://api.urbandictionary.com/soap");
         URLConnection conn=u.openConnection();
         conn.setDoOutput(true);
@@ -129,7 +130,7 @@ public class Slang implements GrouphugModule {
         } else {
             byte[] response = new byte[bytesRead];
             System.arraycopy(buffer, 0, response, 0, bytesRead);
-            return new String(buffer);
+            return new String(buffer).replace("&amp;", "&");
         }
     }
 

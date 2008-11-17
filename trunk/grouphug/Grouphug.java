@@ -410,7 +410,6 @@ public class Grouphug extends PircBot {
      * @return The converted string
      */
     public static String entitiesToChars(String str) {
-        // some of these may mix each other up, but just fix it when a bug is discovered
         str = str.replace("&amp;", "&");
         str = str.replace("&nbsp;", " ");
         str = str.replace("&#8216;", "'");
@@ -421,10 +420,8 @@ public class Grouphug extends PircBot {
         str = str.replace("&#8212;", " - ");
         str = str.replace("&quot;", "\"");
         str = str.replace("&apos;", "'");
-        str = str.replace("&amp;apos;", "'");
-        str = str.replace("&amp;quot;", "\"");
-        str = str.replace("&amp;lt;", "<");
-        str = str.replace("&amp;gt;", ">");
+        str = str.replace("&lt;", "<");
+        str = str.replace("&gt;", ">");
         str = str.replace("&#34;", "\"");
         str = str.replace("&#39;", "'");
         return str;
