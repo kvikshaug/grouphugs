@@ -28,7 +28,7 @@ import java.io.*;
  * The bot extends the functionality of the well-designed PircBot, see http://www.jibble.org/
  */
 
-// TODO - write a websiteconnection-class - for easier use - and to avoid copypasta code (Google/Define/Tracking/Confession)
+// TODO - write a websiteconnection-class - for easier use - and to avoid copypasta code (Google/GoogleFight/Define/Tracking/Confession)
 // TODO - bash for #grouphugs
 // TODO - tlf module
 // TODO - review access modifiers everywhere according to the new 'modules' package
@@ -36,10 +36,10 @@ import java.io.*;
 
 public class Grouphug extends PircBot {
 
-    static final String CHANNEL = "#grouphugs";     // The main channel
-    static final String SERVER = "irc.homelien.no"; // The main IRC server
-    static final String ENCODING = "ISO8859-15";    // Character encoding to use when communicating with the IRC server.
-
+    static final String CHANNEL = "#grouphugs";          // The main channel
+    static final String SERVER = "2001:840:0:1000:1::1"; // The main IRC server
+    static final String ENCODING = "ISO8859-15";         // Character encoding to use when communicating with the IRC server.
+                                                    
     public static String getChannel() {
         return CHANNEL;
     }
@@ -73,8 +73,7 @@ public class Grouphug extends PircBot {
     // The trigger characters (as Strings since startsWith takes String)
     public static final String MAIN_TRIGGER = "!";
     public static final String SPAM_TRIGGER = "@";
-
-    private static final String HELP_TRIGGER = "help";
+    public static final String HELP_TRIGGER = "help";
 
     /**
      * This method is called whenever a message is sent to a channel.
@@ -322,6 +321,7 @@ public class Grouphug extends PircBot {
         modules.add(new Cinema(bot));
         modules.add(new IMDb(bot));
         modules.add(new Factoid(bot));
+        modules.add(new GoogleFight(bot));
         Grouphug.loadGrimstuxPassword();
         SVNCommit.load(bot);
 

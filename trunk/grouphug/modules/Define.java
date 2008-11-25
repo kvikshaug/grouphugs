@@ -54,14 +54,10 @@ public class Define implements GrouphugModule {
             return;
         }
 
-        if(answer == null) {
+        if(answer == null)
             bot.sendMessage("No definition found for "+message.substring(TRIGGER.length())+".", false);
-        } else {
-            answer = answer.replace("&quot;", "\"");
-            answer = answer.replace("&apos;", "'");
-            answer = answer.replace("&#39;", "'");
-            bot.sendMessage(answer, false);
-        }
+        else
+            bot.sendMessage(Grouphug.entitiesToChars(answer), false);
     }
 
     public static String search(String query) throws IOException {

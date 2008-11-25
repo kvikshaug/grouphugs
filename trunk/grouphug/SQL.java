@@ -37,6 +37,7 @@ import java.io.*;
  *
  */
 public class SQL {
+    // TODO defend against sql injection
 
     private static final DateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
