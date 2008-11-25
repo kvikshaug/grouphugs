@@ -36,9 +36,9 @@ import java.io.*;
 
 public class Grouphug extends PircBot {
 
-    static final String CHANNEL = "#grouphugs";          // The main channel
-    static final String SERVER = "2001:840:0:1000:1::1"; // The main IRC server
-    static final String ENCODING = "ISO8859-15";         // Character encoding to use when communicating with the IRC server.
+    static final String CHANNEL = "#grouphugs";     // The main channel
+    static final String SERVER = "irc.homelien.no"; // The main IRC server
+    static final String ENCODING = "ISO8859-15";    // Character encoding to use when communicating with the IRC server.
                                                     
     public static String getChannel() {
         return CHANNEL;
