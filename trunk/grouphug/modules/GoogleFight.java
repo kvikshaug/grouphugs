@@ -14,6 +14,7 @@ public class GoogleFight implements GrouphugModule {
 
     private static Grouphug bot;
     private static final String TRIGGER = "gfight ";
+    private static final String TRIGGER_ALT = "gf ";
     private static final String TRIGGER_HELP = "googlefight";
     private static final String TRIGGER_VS = " <vs> ";
     private static final int CONN_TIMEOUT = 10000; // ms
@@ -30,6 +31,7 @@ public class GoogleFight implements GrouphugModule {
         if(message.equals(TRIGGER_HELP)) {
             bot.sendNotice(sender, "Google fight:");
             bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER + "<1st search>" + TRIGGER_VS + "<2nd search>");
+            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER_ALT + "<1st search>" + TRIGGER_VS + "<2nd search>");
             return true;
         }
         return false;
@@ -41,16 +43,23 @@ public class GoogleFight implements GrouphugModule {
 
     public void trigger(String channel, String sender, String login, String hostname, String message) {
 
-        if(!message.startsWith(TRIGGER))
+        String line;
+        if(message.startsWith(TRIGGER)) {
+            line = message.substring(TRIGGER.length());
+        } else if(message.startsWith(TRIGGER_ALT)) {
+            line = message.substring(TRIGGER_ALT.length());
+        } else {
             return;
+        }
+
 
         if(!message.contains(TRIGGER_VS)) {
             bot.sendMessage(sender+", try "+Grouphug.MAIN_TRIGGER+Grouphug.HELP_TRIGGER+" "+TRIGGER_HELP, false);
             return;
         }
 
-        String query1 = message.substring(TRIGGER.length(), message.indexOf(TRIGGER_VS));
-        String query2 = message.substring(message.indexOf(TRIGGER_VS) + TRIGGER_VS.length());
+        String query1 = line.substring(0, line.indexOf(TRIGGER_VS));
+        String query2 = line.substring(line.indexOf(TRIGGER_VS) + TRIGGER_VS.length());
 
         try {
             String hits1 = search(query1);
