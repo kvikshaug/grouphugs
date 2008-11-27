@@ -76,7 +76,7 @@ public class Bofh implements GrouphugModule
      */
     public void trigger(String channel, String sender, String login, String hostname, String message)
     {
-        String reply = null;
+        String reply = "debug";
         if (message.startsWith(RANDOM_TRIGGER))
         {
             reply = getRandomExcuse();
