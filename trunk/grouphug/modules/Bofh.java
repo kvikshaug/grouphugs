@@ -45,6 +45,7 @@ public class Bofh implements GrouphugModule
             while(sql.getNext())
             {
                 excuses.add("BOFH excuse #" + i + ": " +sql.getValueList()[0]);
+                i++;
             }
             excuses.trimToSize();
         }
