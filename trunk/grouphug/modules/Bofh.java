@@ -27,25 +27,31 @@ public class Bofh implements GrouphugModule
     {
         bot = grouphug;
         r = new Random(System.nanoTime());
-        initExcuses();
+        //initExcuses();
+        excuses = new ArrayList<String>(4);
+        excuses.add("foo");
+        excuses.add("bar");
+        excuses.add("baz");
+        excuses.add("quez");
     }
 
     private void initExcuses()
     {
         SQL sql = new SQL();
+        excuses = new ArrayList<String>(500); // there's just short of 500 rows in the db at the moment.
 
         try
         {
+
             sql.connect();
             sql.query("SELECT `excuse` FROM gh_bofh;");
-            Object[] valueList = sql.getValueList();
 
-            excuses = new ArrayList<String>(valueList.length);
-            for (Object o : valueList)
+            int i = 1;
+            while(sql.getNext())
             {
-                excuses.add((String)o);
+                excuses.add("BOFH excuse #" + i + ": " +sql.getValueList()[0]);
             }
-
+            excuses.trimToSize();
         }
         catch (SQLSyntaxErrorException ssee)
         {
