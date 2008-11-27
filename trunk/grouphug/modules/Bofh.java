@@ -18,7 +18,7 @@ import java.sql.SQLSyntaxErrorException;
  */
 public class Bofh implements GrouphugModule
 {
-    private static final String RANDOM_TRIGGER = "!bofh";
+    private static final String RANDOM_TRIGGER = "bofh";
     private static Grouphug bot;
     Random r;
     private ArrayList<String> excuses;
