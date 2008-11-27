@@ -322,6 +322,7 @@ public class Grouphug extends PircBot {
         modules.add(new IMDb(bot));
         modules.add(new Factoid(bot));
         modules.add(new GoogleFight(bot));
+        modules.add(new Bofh(bot));
         Grouphug.loadGrimstuxPassword();
         SVNCommit.load(bot);
 
