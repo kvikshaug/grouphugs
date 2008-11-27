@@ -27,12 +27,7 @@ public class Bofh implements GrouphugModule
     {
         bot = grouphug;
         r = new Random(System.nanoTime());
-        //initExcuses();
-        excuses = new ArrayList<String>(4);
-        excuses.add("foo");
-        excuses.add("bar");
-        excuses.add("baz");
-        excuses.add("quez");
+        initExcuses();
     }
 
     private void initExcuses()
@@ -82,7 +77,7 @@ public class Bofh implements GrouphugModule
      */
     public void trigger(String channel, String sender, String login, String hostname, String message)
     {
-        String reply = "debug";
+        String reply = null;
         if (message.startsWith(RANDOM_TRIGGER))
         {
             reply = getRandomExcuse();
