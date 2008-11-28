@@ -19,18 +19,24 @@ import java.sql.SQLSyntaxErrorException;
 public class Bofh implements GrouphugModule
 {
     private static final String RANDOM_TRIGGER = "bofh";
+    private static final String SPECIFIC_TRIGGER = RANDOM_TRIGGER + " ";
     public static final String HELP_TRIGGER = RANDOM_TRIGGER;
     private static Grouphug bot;
-    Random r;
+
+    private Random random;
     private ArrayList<String> excuses;
 
     public Bofh(Grouphug grouphug)
     {
         bot = grouphug;
-        r = new Random(System.nanoTime());
+        random = new Random(System.nanoTime());
         initExcuses();
     }
 
+    /**
+     * Initializes the excuses arraylist by fetching all rows from the database and filling the arraylist with their
+     * contents
+     */
     private void initExcuses()
     {
         SQL sql = new SQL();
@@ -38,7 +44,6 @@ public class Bofh implements GrouphugModule
 
         try
         {
-
             sql.connect();
             sql.query("SELECT `excuse` FROM gh_bofh;");
 
@@ -49,8 +54,6 @@ public class Bofh implements GrouphugModule
                 i++;
             }
             excuses.trimToSize();
-
-            sql.disconnect();
         }
         catch (SQLSyntaxErrorException ssee)
         {
@@ -60,13 +63,12 @@ public class Bofh implements GrouphugModule
         {
             System.err.println("BOFH startup: SQL exception - MySQL said: " + se);
         }
+        finally
+        {
+            sql.disconnect();
+        }
 
         assert (excuses != null) : "BOFH startup: Init failed!";
-    }
-
-    private String getRandomExcuse()
-    {
-        return excuses.get(r.nextInt(excuses.size()));
     }
 
     /**
@@ -82,11 +84,25 @@ public class Bofh implements GrouphugModule
     public void trigger(String channel, String sender, String login, String hostname, String message)
     {
         String reply = null;
-        if (message.startsWith(RANDOM_TRIGGER))
+        if (message.startsWith(SPECIFIC_TRIGGER))
         {
-            reply = getRandomExcuse();
+            try
+            {
+                int number  = Integer.parseInt(message.substring(SPECIFIC_TRIGGER.length()));
+                if (number < 1 || number > excuses.size())
+                    reply = "Invalid number. Valid numbers are 1-" + excuses.size();                
+                else
+                    reply = excuses.get(number+1); // 0-indexed, hence the +1.
+            }
+            catch (NumberFormatException nfe)
+            {
+                reply = "That's not a number, is it now?";
+            }
         }
-        
+        else if (message.startsWith(RANDOM_TRIGGER))
+        {
+            reply = excuses.get(random.nextInt(excuses.size()));
+        }
         if (reply != null)
             bot.sendMessage(reply, false);
     }
@@ -95,9 +111,6 @@ public class Bofh implements GrouphugModule
      * This is called when the user is believed to ask for general help about the bot.
      * All modules should return a small string stripped for whitespace, containing a lowercase-representation
      * of its name, that could be used with the special help trigger, to get more specific help of the module.
-     * <p/>
-     * Example: If the bot's name is SuperModule, the string could be "super", so that on "!help super", this
-     * bot would reply with how the supermodule is used.
      *
      * @param channel  - The channel to which the message was sent.
      * @param sender   - The nick of the person who sent the message.
@@ -121,12 +134,6 @@ public class Bofh implements GrouphugModule
      * The module should parse the message, and if it includes the trigger that would be sent back in the
      * helpMainTrigger method, then this module should reply, with notices in pm to the sender,
      * all info about how this module is used, under the presumtion that this is the only module replying.
-     * Example output:
-     * <p/>
-     * SuperModule 1.1 - Does Super Magic Upon Request
-     * - Triggered by: !super
-     * - Alternative trigger: !superduper
-     * (More info..?)
      *
      * @param channel  - The channel to which the message was sent.
      * @param sender   - The nick of the person who sent the message.
@@ -142,6 +149,7 @@ public class Bofh implements GrouphugModule
             bot.sendNotice(sender, "BOFH - Fend off lusers with Bastard Operator From Hell excuses for their system \"problems\".");
             bot.sendNotice(sender, "Usage:");
             bot.sendNotice(sender, Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " returns a random excuse.");
+            bot.sendNotice(sender, Grouphug.MAIN_TRIGGER + SPECIFIC_TRIGGER + "anumber returns an excuse by number.");
             return true;
         }
 
