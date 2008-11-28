@@ -6,6 +6,7 @@ import grouphug.SQL;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.regex.Pattern;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 
@@ -19,7 +20,7 @@ import java.sql.SQLSyntaxErrorException;
 public class Bofh implements GrouphugModule
 {
     private static final String RANDOM_TRIGGER = "bofh";
-    private static final String SPECIFIC_TRIGGER = RANDOM_TRIGGER + " ";
+    private static final String SPECIFIC_TRIGGER = RANDOM_TRIGGER + " \\d+";
     public static final String HELP_TRIGGER = RANDOM_TRIGGER;
     private static Grouphug bot;
 
@@ -84,13 +85,16 @@ public class Bofh implements GrouphugModule
     public void trigger(String channel, String sender, String login, String hostname, String message)
     {
         String reply = null;
-        if (message.startsWith(SPECIFIC_TRIGGER))
+        // check for specific trigger first.
+        if (message.matches(SPECIFIC_TRIGGER))
         {
             try
             {
-                int number  = Integer.parseInt(message.substring(SPECIFIC_TRIGGER.length()));
+                // RANDOM_TRIGGER.length() + 1 to account for the extra space character before the number in SPECIAL_TRIGGER
+                int number  = Integer.parseInt(message.substring(RANDOM_TRIGGER.length() + 1));
+
                 if (number < 1 || number > excuses.size())
-                    reply = "Invalid number. Valid numbers are 1-" + excuses.size();                
+                    reply = "Invalid number. Valid numbers are 1-" + excuses.size() + ".";
                 else
                     reply = excuses.get(number-1); // 0-indexed, hence the -1.
             }
@@ -149,7 +153,7 @@ public class Bofh implements GrouphugModule
             bot.sendNotice(sender, "BOFH - Fend off lusers with Bastard Operator From Hell excuses for their system \"problems\".");
             bot.sendNotice(sender, "Usage:");
             bot.sendNotice(sender, Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " returns a random excuse.");
-            bot.sendNotice(sender, Grouphug.MAIN_TRIGGER + SPECIFIC_TRIGGER + "anumber returns an excuse by number.");
+            bot.sendNotice(sender, Grouphug.MAIN_TRIGGER + SPECIFIC_TRIGGER + " returns an excuse by number. (\\d+ means any digit, 1-n times)");
             return true;
         }
 
