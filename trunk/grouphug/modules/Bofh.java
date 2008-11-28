@@ -92,7 +92,7 @@ public class Bofh implements GrouphugModule
                 if (number < 1 || number > excuses.size())
                     reply = "Invalid number. Valid numbers are 1-" + excuses.size();                
                 else
-                    reply = excuses.get(number+1); // 0-indexed, hence the +1.
+                    reply = excuses.get(number-1); // 0-indexed, hence the -1.
             }
             catch (NumberFormatException nfe)
             {
