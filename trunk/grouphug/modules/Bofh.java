@@ -6,7 +6,6 @@ import grouphug.SQL;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.regex.Pattern;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 
@@ -103,7 +102,7 @@ public class Bofh implements GrouphugModule
                 reply = "That's not a number, is it now?";
             }
         }
-        else if (message.startsWith(RANDOM_TRIGGER))
+        else if (message.matches(RANDOM_TRIGGER))
         {
             reply = excuses.get(random.nextInt(excuses.size()));
         }
