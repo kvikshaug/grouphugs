@@ -19,6 +19,7 @@ import java.sql.SQLSyntaxErrorException;
 public class Bofh implements GrouphugModule
 {
     private static final String RANDOM_TRIGGER = "bofh";
+    public static final String HELP_TRIGGER = RANDOM_TRIGGER;
     private static Grouphug bot;
     Random r;
     private ArrayList<String> excuses;
@@ -105,21 +106,9 @@ public class Bofh implements GrouphugModule
      */
     public String helpMainTrigger(String channel, String sender, String login, String hostname, String message)
     {
-        return "Hepl?";
+        return "bofh";
     }
 
-    /**
-     * This method is similar to the <code>trigger</code> method, but is called when the chat line contains
-     * no specific trigger command. The module may still choose to parse this, e.g. the karma module fetching
-     * up sentences ending with ++/--, but be careful as an important part of this bot is not to bother anyone
-     * unless specifically requested.
-     *
-     * @param channel  - The channel to which the message was sent.
-     * @param sender   - The nick of the person who sent the message.
-     * @param login    - The login of the person who sent the message.
-     * @param hostname - The hostname of the person who sent the message.
-     * @param message  - The actual message sent to the channel.
-     */
     public void specialTrigger(String channel, String sender, String login, String hostname, String message)
     {
         // We're not using this.
@@ -146,6 +135,14 @@ public class Bofh implements GrouphugModule
      */
     public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message)
     {
-        return false; // We're not using this.
+        if (message.equals(HELP_TRIGGER))
+        {
+            bot.sendNotice(sender, "BOFH - Fend off lusers with Bastard Operator From Hell excuses for their system \"problems\".");
+            bot.sendNotice(sender, "Usage:");
+            bot.sendNotice(sender, Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " returns a random excuse.");
+            return true;
+        }
+
+        return false;
     }
 }
