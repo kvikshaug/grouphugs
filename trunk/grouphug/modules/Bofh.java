@@ -49,6 +49,8 @@ public class Bofh implements GrouphugModule
                 i++;
             }
             excuses.trimToSize();
+
+            sql.disconnect();
         }
         catch (SQLSyntaxErrorException ssee)
         {
