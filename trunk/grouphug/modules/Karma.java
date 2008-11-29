@@ -15,7 +15,7 @@ public class Karma implements GrouphugModule {
     private static final String TRIGGER = "karma ";
     private static final String TRIGGER_TOP = "karmatop";
     private static final String TRIGGER_BOTTOM = "karmabottom";
-    private static final String TRIGGER_RESET = "!reset";
+    private static final String TRIGGER_RESET = "!karmareset";
 
     private static final int LIMIT = 5; // how many items to show in karmatop/karmabottom
 
@@ -37,7 +37,7 @@ public class Karma implements GrouphugModule {
             bot.sendNotice(sender, "  <object>--");
             bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP);
             bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM);
-            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<object> "+ TRIGGER_RESET);
+            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_RESET + "<object>");
             return true;
         }
         return false;
@@ -55,14 +55,14 @@ public class Karma implements GrouphugModule {
     public void trigger(String channel, String sender, String login, String hostname, String message) {
 
         // First, check for triggers: keywords, ++, --
-    	if(message.startsWith(TRIGGER) && message.endsWith(TRIGGER_RESET))
-    		add(sender, message.substring(6, message.length()-6), 0);
-    	else if(message.startsWith(TRIGGER))
+    	if(message.startsWith(TRIGGER))
             print(message.substring(TRIGGER.length()));
         else if(message.equals(TRIGGER_TOP))
             showScore(true);
         else if(message.equals(TRIGGER_BOTTOM))
             showScore(false);
+        else if(message.startsWith(TRIGGER_RESET))
+        	add(sender, message.substring(11, message.length()), 0);
 
     }
 
