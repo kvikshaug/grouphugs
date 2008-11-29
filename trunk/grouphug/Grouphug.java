@@ -88,6 +88,16 @@ public class Grouphug extends PircBot {
     @Override
     protected void onMessage(String channel, String sender, String login, String hostname, String message) {
 
+        // Very first thing we do is check if we're rebooting
+        if(message.equals("!reboot")) {
+            try {
+                Runtime.getRuntime().exec("fork(sh /home/DT2006/murray/gh/updategh.sh)");
+            } catch(IOException ex) {
+                System.err.println(ex);
+            }
+            return;
+        }
+
         // First check for help trigger
         checkForHelpTrigger(channel, sender, login, hostname, message);
 
