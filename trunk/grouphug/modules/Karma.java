@@ -47,14 +47,14 @@ public class Karma implements GrouphugModule {
         else if(message.endsWith("--") || message.endsWith("--;"))
             add(sender, message.substring(0, message.length()-2), -1);
         else if(message.endsWith("reset"))
-        	add(sender, message.substring(0, message.length()-5, 0);
+        	add(sender, message.substring(0, message.length()-5), 0);
     }
 
     public void trigger(String channel, String sender, String login, String hostname, String message) {
 
         // First, check for triggers: keywords, ++, --
     	if(message.startsWith(TRIGGER) && message.endsWith("reset"))
-    		add(sender, message.substring(6, message.length()-6, 0);
+    		add(sender, message.substring(6, message.length()-6), 0);
     	else if(message.startsWith(TRIGGER))
             print(message.substring(TRIGGER.length()));
         else if(message.equals(TRIGGER_TOP))
