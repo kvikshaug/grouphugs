@@ -174,6 +174,22 @@ public class Grouphug extends PircBot {
         }
     }
 
+
+    /**
+     * This method is called whenever someone (possibly us) joins a channel which we are on.
+     * What we do is hug them :) <3
+     *
+     * @param channel - The channel which somebody joined.
+     * @param sender - The nick of the user who joined the channel.
+     * @param login - The login of the user who joined the channel.
+     * @param hostname - The hostname of the user who joined the channel.
+     */
+    @Override
+    protected void onJoin(String channel, String sender, String login, String hostname) {
+        if(!sender.equals(getNick()))
+            sendAction(CHANNEL, "hugs "+sender);
+    }
+
     /**
      * This method is called when we receive a user list from the server after joining a channel.
      * Shortly after joining a channel, the IRC server sends a list of all users in that channel. The PircBot collects this information and calls this method as soon as it has the full list.
