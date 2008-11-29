@@ -131,6 +131,7 @@ public class Grouphug extends PircBot {
         if(message.equals(MAIN_TRIGGER + HELP_TRIGGER)) {
             // Remember that if the line is > MAX_LINE_CHARS, it will *automatically* be split
             // over several lines in the sendMessage() method, so we don't have to do that here
+            // On second thought, we use sendNotice() here, so forget that. We'll have to do that here when the time comes.
             sendNotice(sender, "Currently implemented modules on "+this.getNick()+":");
             String helpString = "";
             for(GrouphugModule m : modules) {
@@ -171,6 +172,30 @@ public class Grouphug extends PircBot {
             joinChannel(channel);
             sendMessage(CHANNEL, "sry :(");
         }
+    }
+
+    /**
+     * This method is called when we receive a user list from the server after joining a channel.
+     * Shortly after joining a channel, the IRC server sends a list of all users in that channel. The PircBot collects this information and calls this method as soon as it has the full list.
+     * To obtain the nick of each user in the channel, call the getNick() method on each User object in the array.
+     * At a later time, you may call the getUsers method to obtain an up to date list of the users in the channel.
+     *
+     * @param channel - The name of the channel.
+     * @param users - An array of User objects belonging to this channel.
+     */
+    @Override
+    protected void onUserList(String channel, User[] users) {
+        String nicks = "";
+        for(User u : users) {
+            if(!u.getNick().equals(getNick()))
+                nicks += ", "+u.getNick();
+        }
+        nicks = nicks.substring(2);
+        if(nicks.contains(", ")) {
+            String org = nicks;
+            nicks = org.substring(0, org.lastIndexOf(", ")) + " and " + org.substring(org.lastIndexOf(", ") + 2);
+        }
+        sendAction(Grouphug.CHANNEL, "hugs "+nicks);
     }
 
     /**
