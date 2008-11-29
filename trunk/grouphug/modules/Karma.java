@@ -37,7 +37,7 @@ public class Karma implements GrouphugModule {
             bot.sendNotice(sender, "  <object>--");
             bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP);
             bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM);
-            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_RESET + "<object>");
+            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_RESET + " <object>");
             return true;
         }
         return false;
