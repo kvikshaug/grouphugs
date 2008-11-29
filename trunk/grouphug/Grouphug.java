@@ -91,7 +91,7 @@ public class Grouphug extends PircBot {
         // Very first thing we do is check if we're rebooting
         if(message.equals("!reboot")) {
             try {
-                Runtime.getRuntime().exec("fork(sh /home/DT2006/murray/gh/updategh.sh)");
+                Runtime.getRuntime().exec("fork (sh /home/DT2006/murray/gh/updategh.sh)");
             } catch(IOException ex) {
                 System.err.println(ex);
             }
