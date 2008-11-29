@@ -15,7 +15,7 @@ public class Karma implements GrouphugModule {
     private static final String TRIGGER = "karma ";
     private static final String TRIGGER_TOP = "karmatop";
     private static final String TRIGGER_BOTTOM = "karmabottom";
-    private static final String TRIGGER_RESET = "!karmareset";
+    private static final String TRIGGER_RESET = "karmareset";
 
     private static final int LIMIT = 5; // how many items to show in karmatop/karmabottom
 
