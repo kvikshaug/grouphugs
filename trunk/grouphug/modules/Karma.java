@@ -6,8 +6,6 @@ import grouphug.SQL;
 
 import java.sql.SQLException;
 
-import com.sun.corba.se.impl.protocol.giopmsgheaders.Message;
-
 public class Karma implements GrouphugModule {
 
     private static Grouphug bot;
@@ -16,6 +14,7 @@ public class Karma implements GrouphugModule {
     private static final String TRIGGER_TOP = "karmatop";
     private static final String TRIGGER_BOTTOM = "karmabottom";
     private static final String TRIGGER_RESET = "karmareset";
+    private static final boolean CAN_RESET = false;
 
     private static final int LIMIT = 5; // how many items to show in karmatop/karmabottom
 
@@ -37,7 +36,7 @@ public class Karma implements GrouphugModule {
             bot.sendNotice(sender, "  <object>--");
             bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP);
             bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM);
-            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_RESET + " <object>");
+            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_RESET + " <object>" + " if reseting is enabled");
             return true;
         }
         return false;
@@ -48,8 +47,6 @@ public class Karma implements GrouphugModule {
             add(sender, message.substring(0, message.length()-2), 1);
         else if(message.endsWith("--") || message.endsWith("--;"))
             add(sender, message.substring(0, message.length()-2), -1);
-        else if(message.endsWith("reset"))
-        	add(sender, message.substring(0, message.length()-5), 0);
     }
 
     public void trigger(String channel, String sender, String login, String hostname, String message) {
@@ -61,7 +58,7 @@ public class Karma implements GrouphugModule {
             showScore(true);
         else if(message.equals(TRIGGER_BOTTOM))
             showScore(false);
-        else if(message.startsWith(TRIGGER_RESET))
+        else if(message.startsWith(TRIGGER_RESET) && CAN_RESET)
         	add(sender, message.substring(11, message.length()), 0);
 
     }
