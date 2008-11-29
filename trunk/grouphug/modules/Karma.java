@@ -6,6 +6,8 @@ import grouphug.SQL;
 
 import java.sql.SQLException;
 
+import com.sun.corba.se.impl.protocol.giopmsgheaders.Message;
+
 public class Karma implements GrouphugModule {
 
     private static Grouphug bot;
@@ -44,12 +46,16 @@ public class Karma implements GrouphugModule {
             add(sender, message.substring(0, message.length()-2), 1);
         else if(message.endsWith("--") || message.endsWith("--;"))
             add(sender, message.substring(0, message.length()-2), -1);
+        else if(message.endsWith("reset"))
+        	add(sender, message.substring(0, message.length()-5, 0);
     }
 
     public void trigger(String channel, String sender, String login, String hostname, String message) {
 
-        // First, check for triggers: keywords, ++, -- 
-        if(message.startsWith(TRIGGER))
+        // First, check for triggers: keywords, ++, --
+    	if(message.startsWith(TRIGGER) && message.endsWith("reset"))
+    		add(sender, message.substring(6, message.length()-6, 0);
+    	else if(message.startsWith(TRIGGER))
             print(message.substring(TRIGGER.length()));
         else if(message.equals(TRIGGER_TOP))
             showScore(true);
@@ -115,6 +121,8 @@ public class Karma implements GrouphugModule {
             KarmaItem ki = find(sqlName);
             if(ki == null)
                 sql.query("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('"+sqlName+"', '"+karma+"');");
+            else if(karma == 0)
+                sql.query("UPDATE "+KARMA_DB+" SET value='"+karma+"' WHERE id='"+ki.getID()+"';");
             else
                 sql.query("UPDATE "+KARMA_DB+" SET value='"+(ki.getKarma() + karma)+"' WHERE id='"+ki.getID()+"';");
         } catch(SQLException e) {
