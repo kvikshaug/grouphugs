@@ -21,6 +21,9 @@ public class Confession implements GrouphugModule {
     private static final int CONN_TIMEOUT = 10000; // ms
     private static String errorConfession = "I have nothing to confess at the moment, please try again later.";
 
+    // HACK this needs to be changed according to how many newsitems http://grouphug.us/ has. Se HACK tag further down.
+    private static final int NO_OF_NEWSITEMS = 3;
+
     public Confession(Grouphug bot) {
         Confession.bot = bot;
     }
@@ -124,11 +127,11 @@ public class Confession implements GrouphugModule {
             BufferedReader gh = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
 
             // We dig down to the confession content
-            // HACK: Skip to the fourth content div - as the (currently) four newsitems also use this layout
+            // HACK: Skip to the x'th content div - as the (currently) x newsitems also use this layout
             int i=0;
             while((line = gh.readLine()) != null) {
                 if(line.equals("  <div class=\"content\">")) {
-                    if(i==4)
+                    if(i==NO_OF_NEWSITEMS)
                         break;
                     else
                         i++;
