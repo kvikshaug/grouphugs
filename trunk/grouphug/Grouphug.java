@@ -91,7 +91,7 @@ public class Grouphug extends PircBot {
         // Very first thing we do is check if we're rebooting
         if(message.equals("!reboot")) {
             try {
-                Runtime.getRuntime().exec("wget -q http://hinux.hin.no/~murray/gh/?reboot > /dev/null");
+                Runtime.getRuntime().exec("wget -qO - http://hinux.hin.no/~murray/gh/?reboot > /dev/null 2>&1");
             } catch(IOException ex) {
                 System.err.println(ex);
             }
