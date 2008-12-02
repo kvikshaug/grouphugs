@@ -91,7 +91,7 @@ public class Grouphug extends PircBot {
         // Very first thing we do is check if we're rebooting
         if(message.equals("!reboot")) {
             try {
-                Runtime.getRuntime().exec("wget -qO http://hinux.hin.no/~murray/gh/?reboot > /dev/null");
+                Runtime.getRuntime().exec("wget -q http://hinux.hin.no/~murray/gh/?reboot > /dev/null");
             } catch(IOException ex) {
                 System.err.println(ex);
             }
@@ -211,6 +211,7 @@ public class Grouphug extends PircBot {
      */
     @Override
     protected void onUserList(String channel, User[] users) {
+        /*
         String nicks = "";
         for(User u : users) {
             if(!u.getNick().equals(getNick()))
@@ -222,6 +223,7 @@ public class Grouphug extends PircBot {
             nicks = org.substring(0, org.lastIndexOf(", ")) + " and " + org.substring(org.lastIndexOf(", ") + 2);
         }
         sendAction(Grouphug.CHANNEL, "hugs "+nicks);
+        */
     }
 
     /**
