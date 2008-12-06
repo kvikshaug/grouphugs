@@ -88,6 +88,10 @@ public class Grouphug extends PircBot {
     @Override
     protected void onMessage(String channel, String sender, String login, String hostname, String message) {
 
+    	
+    	//Very very first thing we do is add the number of words a person says
+    	//TODO fix DB in WordCount
+    	//words.addWords(sender, message);
         // Very first thing we do is check if we're rebooting
         if(message.equals("!reboot")) {
             try {
@@ -376,6 +380,9 @@ public class Grouphug extends PircBot {
         modules.add(new Factoid(bot));
         modules.add(new GoogleFight(bot));
         modules.add(new Bofh(bot));
+        //Sorry for breaking the flow
+        WordCount words = new WordCount
+        modules.add(words);
         Grouphug.loadGrimstuxPassword();
         SVNCommit.load(bot);
 
