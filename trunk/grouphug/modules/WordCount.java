@@ -21,7 +21,7 @@ public class WordCount implements GrouphugModule {
 		
 	
 		try{
-			sql.connect;
+			sql.connect();
 			sql.query("SELECT id, nick, count FROM "+WORDS_DB+" WHERE nick='"+sender+"';");
 			
 			
