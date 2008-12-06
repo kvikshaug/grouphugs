@@ -50,10 +50,10 @@ public class WordCount implements GrouphugModule {
 		//laterz
 	}
 	public String helpMainTrigger(String channel, String sender, String login, String hostname, String message){
-        //Not now
+        return;
     }
-	 public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message){
-		 //Bah
-	 }
+	public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message){
+		return;
+	}
 			
 }
