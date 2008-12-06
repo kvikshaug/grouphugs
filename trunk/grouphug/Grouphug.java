@@ -381,7 +381,7 @@ public class Grouphug extends PircBot {
         modules.add(new GoogleFight(bot));
         modules.add(new Bofh(bot));
         //Sorry for breaking the flow
-        WordCount words = new WordCount;
+        WordCount words = new WordCount(bot);
         modules.add(words);
         Grouphug.loadGrimstuxPassword();
         SVNCommit.load(bot);
