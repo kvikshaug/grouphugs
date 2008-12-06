@@ -1,6 +1,9 @@
 package grouphug.modules;
 
 import java.sql.SQLException;
+import grouphug.GrouphugModule;
+import grouphug.Grouphug;
+import grouphug.SQL;
 
 
 public class WordCount implements GrouphugModule {
