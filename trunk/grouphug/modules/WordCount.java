@@ -52,6 +52,8 @@ public class WordCount implements GrouphugModule {
 	public String helpMainTrigger(String channel, String sender, String login, String hostname, String message){
         //Not now
     }
-	
+	 public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message){
+		 //Bah
+	 }
 			
 }
