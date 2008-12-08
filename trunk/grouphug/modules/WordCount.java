@@ -11,9 +11,12 @@ public class WordCount implements GrouphugModule {
 
     private static final String DEFAULT_SQL_HOST = "127.0.0.1";
     private static final String DEFAULT_SQL_USER = "gh";
-    private final String TRIGGER_HELP = "wordcount";
-	private final String TRIGGER = "wordcount ";
-	private final String WORDS_DB= "gh_words";
+    private static final String TRIGGER_HELP = "wordcount";
+	private static final String TRIGGER = "wordcount ";
+	private static final String WORDS_DB= "gh_words";
+    private static final String TRIGGER_TOP = "wordcounttop";
+    private static final String TRIGGER_BOTTOM = "wordcountbottom";
+    private static final int LIMIT = 5;
 
 	
     public WordCount(Grouphug bot) {
@@ -50,26 +53,14 @@ public class WordCount implements GrouphugModule {
 		addWords(sender, message);
 	}
 	public void trigger(String channel, String sender, String login, String hostname, String message){
-        SQL sql = new SQL();
-		String nick = message.substring(10, message.length());
-        try{
-			sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, null);
-			sql.query("SELECT id, nick, words FROM "+WORDS_DB+" WHERE nick='"+nick+"';");
-
-
-			if(!sql.getNext()) {
-				bot.sendMessage(nick + " doesn't have any words counted.", false);
-			}else{
-				Object[] values = sql.getValueList();
-				bot.sendMessage(nick + " has said "+values[2]+ " words.", false);
-			}
-
-		}catch(SQLException e) {
-            System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.sendMessage("Sorry, an SQL error occured.", false);
-		}finally {
-            sql.disconnect();
+        if(message.startsWith(TRIGGER)){
+            print(message);
         }
+        else if(message.equals(TRIGGER_TOP))
+            showScore(true);
+        else if(message.equals(TRIGGER_BOTTOM))
+            showScore(false);
+
 
 	}
 	public String helpMainTrigger(String channel, String sender, String login, String hostname, String message){
@@ -82,5 +73,60 @@ public class WordCount implements GrouphugModule {
         }
         return true;
 	}
-			
+
+    private void showScore(boolean top) {
+        SQL sql = new SQL();
+        String reply;
+        if(top)
+            reply = "The biggest losers are:\n";
+        else
+            reply = "The laziest idlers are:\n";
+        try {
+            sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, null);
+            String query = ("SELECT id, nick, words FROM "+WORDS_DB+" ORDER BY words ");
+            if(top)
+                query += "DESC ";
+            query += "LIMIT "+LIMIT+";";
+            sql.query(query);
+            int place = 1;
+            while(sql.getNext()) {
+                Object[] values = sql.getValueList();
+                reply += (place++)+". "+ values[1]+ " ("+values[2]+")\n";
+            }
+            if(top)
+                reply += "I think they are going to need a new keyboard soon.";
+            else
+                reply += "Lazy bastards...";
+            bot.sendMessage(reply, false);
+        } catch(SQLException e) {
+            System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
+            bot.sendMessage("Sorry, an SQL error occured.", false);
+        }finally {
+            sql.disconnect();
+        }
+    }
+
+    private void print(String message){
+        SQL sql = new SQL();
+        String nick = message.substring(10, message.length());
+        try{
+            sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, null);
+            sql.query("SELECT id, nick, words FROM "+WORDS_DB+" WHERE nick='"+nick+"';");
+
+
+            if(!sql.getNext()) {
+                bot.sendMessage(nick + " doesn't have any words counted.", false);
+            }else{
+                Object[] values = sql.getValueList();
+                bot.sendMessage(nick + " has said "+values[2]+ " words.", false);
+            }
+
+        }catch(SQLException e) {
+            System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
+            bot.sendMessage("Sorry, an SQL error occured.", false);
+        }finally {
+            sql.disconnect();
+        }
+
+    }
 }
