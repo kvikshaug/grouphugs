@@ -25,6 +25,9 @@ public class WordCount implements GrouphugModule {
 	
 	public void addWords(String sender, String message){
 		SQL sql = new SQL();
+
+        //Sunn cheats
+        message = message.replaceAll("  ", "");
 		String[] words = message.split(" ");
 		int count = words.length;
 		
