@@ -35,7 +35,7 @@ public class WordCount implements GrouphugModule {
 				sql.query("INSERT INTO "+WORDS_DB+" (nick, words) VALUES ('"+sender+"', '"+count+"');");
 			}else{
 				Object[] values = sql.getValueList();
-				sql.query("UPDATE "+WORDS_DB+" SET count='"+((Integer)values[2] + count)+"' WHERE id='"+values[0]+"';");
+				sql.query("UPDATE "+WORDS_DB+" SET count='"+((Long)values[2] + count)+"' WHERE id='"+values[0]+"';");
 			}
 
 		}catch(SQLException e) {
