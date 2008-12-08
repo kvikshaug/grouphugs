@@ -99,10 +99,16 @@ public class SQL {
      * @param host - IP address or DNS of the host
      * @param db - Name of the database to open
      * @param user - Username used to authenticate
-     * @param password - Password used to authenticate
+     * @param password - Password used to authenticate - if null, use default password.
      * @throws SQLException - if we were unable to connect to the database
      */
     public void connect(String host, String db, String user, String password) throws SQLException {
+
+        if (password == null)
+        {
+            password = DEFAULT_SQL_PASSWORD;
+        }
+
         connection = DriverManager.getConnection ("jdbc:mysql://" + host + '/' + db, user, password);
         statement = connection.createStatement();
     }
