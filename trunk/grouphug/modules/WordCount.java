@@ -28,7 +28,7 @@ public class WordCount implements GrouphugModule {
 	
 		try{
 			sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, null);
-			sql.query("SELECT id, nick, count FROM "+WORDS_DB+" WHERE nick='"+sender+"';");
+			sql.query("SELECT id, nick, words FROM "+WORDS_DB+" WHERE nick='"+sender+"';");
 			
 			
 			if(!sql.getNext()) {
@@ -54,7 +54,7 @@ public class WordCount implements GrouphugModule {
 		String nick = message.substring(10, message.length());
         try{
 			sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, null);
-			sql.query("SELECT id, nick, count FROM "+WORDS_DB+" WHERE nick='"+nick+"';");
+			sql.query("SELECT id, nick, words FROM "+WORDS_DB+" WHERE nick='"+nick+"';");
 
 
 			if(!sql.getNext()) {
