@@ -73,13 +73,14 @@ public class WordCount implements GrouphugModule {
 
 	}
 	public String helpMainTrigger(String channel, String sender, String login, String hostname, String message){
-        if(message.equals(TRIGGER_HELP)) {
+        return TRIGGER_HELP;
+    }
+	public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message){
+		if(message.equals(TRIGGER_HELP)) {
             bot.sendNotice(sender, "Counts the number of words a person has said");
             bot.sendNotice(sender, "To check how many words someone has said, use " +Grouphug.MAIN_TRIGGER + TRIGGER + "<nick>" );
         }
-    }
-	public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message){
-		return false;
+        return true;
 	}
 			
 }
