@@ -52,13 +52,13 @@ public class WordCount implements GrouphugModule {
                 long existingLines = 0;
                 bot.sendMessage("Starting words extraction", false);
                 try {
-                    existingWords = ((Integer)values[1]);
+                    existingWords = ((Long)values[1]);
                 } catch(ClassCastException ex) {
                     bot.sendMessage("Caught WORDS CCE: "+ex, false);
                 }
                 bot.sendMessage("Starting lines extraction", false);
                 try {
-                    existingLines = ((Integer)values[2]);
+                    existingLines = ((Long)values[2]);
                 } catch(ClassCastException ex) {
                     bot.sendMessage("Caught LINES CCE: "+ex, false);
                 }
