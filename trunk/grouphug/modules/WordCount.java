@@ -37,16 +37,17 @@ public class WordCount implements GrouphugModule {
 		SQL sql = new SQL();
 
         //Sunn cheats
-        //message = message.replaceAll("  ", "");
-        //int newWords = message.split(" ").length;
-        Matcher matcher = REGEX.matcher(message);
+        message = message.replaceAll("  ", "");
+        int newWordsOldMethod = message.split(" ").length;
 
-        int newWords = 1; // we're counting word delimiters, the actual word count is delimiters+1
+        Matcher matcher = REGEX.matcher(message);
+        int newWordsNewMethod = 1; // we're counting word delimiters, the actual word count is delimiters+1
         while(matcher.find()) {
-            newWords++;
+            newWordsNewMethod++;
         }
 
-        bot.sendMessage("wc: "+newWords, false);
+        bot.sendMessage("old method: "+newWordsOldMethod+", new method: "+newWordsNewMethod, false);
+        int newWords = newWordsOldMethod;
 
 
 		try{
