@@ -191,8 +191,7 @@ public class SQL {
     /**
      * Converts a SQL datetime string to a java.util.Date object.
      * @param dateTime the SQL datetime string we want to convert.
-     * @return a Date object that represents the SQL datetime defined in <code>dateTime</code>. Returns null if parsing
-     *         somehow fails - if this happens, it is probably because the date format is wrong.
+     * @return a Date object that represents the SQL datetime defined in <code>dateTime</code>.
      * @throws ParseException if the beginning of the specified string cannot be parsed.
      */
     public static java.util.Date sqlDateTimeToDate(String dateTime) throws ParseException {
