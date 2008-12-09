@@ -120,7 +120,7 @@ public class WordCount implements GrouphugModule {
                 long words = ((Long)values[2]);
                 long lines = ((Long)values[3]);
                 double wpl = (double)words / (double)lines;
-                Date since = new Date(((Timestamp)values[4]).getTime());
+                Date since = new Date(((Timestamp)values[3]).getTime());
                 reply += (place++)+". "+ values[1]+ " ("+words+" words, "+lines+" lines, "+
                         (new DecimalFormat("0.0")).format(wpl)+
                         " wpl) since "+df.format(since)+"\n";
@@ -152,7 +152,7 @@ public class WordCount implements GrouphugModule {
                 Object[] values = sql.getValueList();
                 long words = ((Long)values[2]);
                 long lines = ((Long)values[3]);
-                Date since = new Date(((Timestamp)values[4]).getTime());
+                Date since = new Date(((Timestamp)values[3]).getTime());
                 double wpl = (double)words / (double)lines;
 
                 bot.sendMessage(nick + " has uttered "+words+ " words in "+lines+" lines ("+
