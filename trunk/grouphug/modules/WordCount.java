@@ -109,7 +109,7 @@ public class WordCount implements GrouphugModule {
             reply = "The laziest idlers are:\n";
         try {
             sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, null);
-            String query = ("SELECT id, nick, words, `lines` FROM "+WORDS_DB+" ORDER BY words ");
+            String query = ("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" ORDER BY words ");
             if(top)
                 query += "DESC ";
             query += "LIMIT "+LIMIT+";";
@@ -120,7 +120,7 @@ public class WordCount implements GrouphugModule {
                 long words = ((Long)values[2]);
                 long lines = ((Long)values[3]);
                 double wpl = (double)words / (double)lines;
-                Date since = new Date(((Timestamp)values[3]).getTime());
+                Date since = new Date(((Timestamp)values[4]).getTime());
                 reply += (place++)+". "+ values[1]+ " ("+words+" words, "+lines+" lines, "+
                         (new DecimalFormat("0.0")).format(wpl)+
                         " wpl) since "+df.format(since)+"\n";
@@ -152,7 +152,7 @@ public class WordCount implements GrouphugModule {
                 Object[] values = sql.getValueList();
                 long words = ((Long)values[2]);
                 long lines = ((Long)values[3]);
-                Date since = new Date(((Timestamp)values[3]).getTime());
+                Date since = new Date(((Timestamp)values[4]).getTime());
                 double wpl = (double)words / (double)lines;
 
                 bot.sendMessage(nick + " has uttered "+words+ " words in "+lines+" lines ("+
