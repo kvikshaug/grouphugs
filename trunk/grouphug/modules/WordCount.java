@@ -30,8 +30,7 @@ public class WordCount implements GrouphugModule {
 
         //Sunn cheats
         message = message.replaceAll("  ", "");
-		String[] words = message.split(" ");
-		int count = words.length;
+		int newWords = message.split(" ").length;
 		
 	
 		try{
@@ -40,10 +39,12 @@ public class WordCount implements GrouphugModule {
 			
 			
 			if(!sql.getNext()) {
-				sql.query("INSERT INTO "+WORDS_DB+" (nick, words, `lines`) VALUES ('"+sender+"', '"+count+"', '1');");
+				sql.query("INSERT INTO "+WORDS_DB+" (nick, words, `lines`) VALUES ('"+sender+"', '"+newWords+"', '1');");
 			}else{
 				Object[] values = sql.getValueList();
-				sql.query("UPDATE "+WORDS_DB+" SET words='"+((Long)values[1] + count)+"', `lines`='"+((Integer)values[2] + 1)+"' WHERE id='"+values[0]+"';");
+                long existingWords = ((Long)values[1]);
+                long existingLines = ((Long)values[2]);
+				sql.query("UPDATE "+WORDS_DB+" SET words='"+(existingWords + newWords)+"', `lines`='"+(existingLines + 1)+"' WHERE id='"+values[0]+"';");
 			}
 
 		}catch(SQLException e) {
@@ -96,8 +97,11 @@ public class WordCount implements GrouphugModule {
             int place = 1;
             while(sql.getNext()) {
                 Object[] values = sql.getValueList();
-                reply += (place++)+". "+ values[1]+ " ("+values[2]+" words, "+values[3]+" lines, "+
-                        (new DecimalFormat("0.0")).format((Long)values[2]/(Long)values[3])+
+                long words = ((Long)values[2]);
+                long lines = ((Long)values[3]);
+                long wpl = words / lines;
+                reply += (place++)+". "+ values[1]+ " ("+words+" words, "+lines+" lines, "+
+                        (new DecimalFormat("0.0")).format(wpl)+
                         " wpl)\n";
             }
             if(top)
@@ -125,8 +129,12 @@ public class WordCount implements GrouphugModule {
                 bot.sendMessage(nick + " doesn't have any words counted.", false);
             }else{
                 Object[] values = sql.getValueList();
-                bot.sendMessage(nick + " has uttered "+values[2]+ " words in "+values[3]+" lines ("+
-                        (new DecimalFormat("0.0")).format((Long)values[2]/(Long)values[3])+
+                long words = ((Long)values[2]);
+                long lines = ((Long)values[3]);
+                long wpl = words / lines;
+
+                bot.sendMessage(nick + " has uttered "+words+ " words in "+lines+" lines ("+
+                        (new DecimalFormat("0.0")).format(wpl)+
                         " wpl)", false);
             }
 
