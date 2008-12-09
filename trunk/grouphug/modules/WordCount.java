@@ -1,6 +1,7 @@
 package grouphug.modules;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -107,14 +108,7 @@ public class WordCount implements GrouphugModule {
                 long words = ((Long)values[2]);
                 long lines = ((Long)values[3]);
                 double wpl = (double)words / (double)lines;
-                Date since;
-                try {
-                    since = SQL.sqlDateTimeToDate((String)values[4]);
-                } catch(ParseException ex) {
-                    System.err.println("ParseException: "+ex);
-                    bot.sendMessage("Oops, i jizzed in my pants.", false);
-                    return;
-                }
+                Date since = new Date(((Timestamp)values[4]).getTime());
                 reply += (place++)+". "+ values[1]+ " ("+words+" words, "+lines+" lines, "+
                         (new DecimalFormat("0.0")).format(wpl)+
                         " wpl) since "+df.format(since)+"\n";
@@ -146,14 +140,7 @@ public class WordCount implements GrouphugModule {
                 Object[] values = sql.getValueList();
                 long words = ((Long)values[2]);
                 long lines = ((Long)values[3]);
-                Date since;
-                try {
-                    since = SQL.sqlDateTimeToDate((String)values[4]);
-                } catch(ParseException ex) {
-                    System.err.println("ParseException: "+ex);
-                    bot.sendMessage("Oops, i jizzed in my pants.", false);
-                    return;
-                }
+                Date since = new Date(((Timestamp)values[4]).getTime());
                 double wpl = (double)words / (double)lines;
 
                 bot.sendMessage(nick + " has uttered "+words+ " words in "+lines+" lines ("+
