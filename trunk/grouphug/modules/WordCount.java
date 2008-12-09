@@ -43,19 +43,26 @@ public class WordCount implements GrouphugModule {
 			
 			
 			if(!sql.getNext()) {
+                bot.sendMessage("Inserting new user '"+sender+"'", false);
 				sql.query("INSERT INTO "+WORDS_DB+" (nick, words, `lines`) VALUES ('"+sender+"', '"+newWords+"', '1');");
 			}else{
                 bot.sendMessage("Found user "+sender+", inserting", false);
 				Object[] values = sql.getValueList();
                 long existingWords = 0;
                 long existingLines = 0;
-                bot.sendMessage("Starting extraction", false);
+                bot.sendMessage("Starting words extraction", false);
                 try {
-                    existingWords = ((Long)values[1]);
-                    existingLines = ((Long)values[2]);
+                    existingWords = ((Integer)values[1]);
                 } catch(ClassCastException ex) {
-                    bot.sendMessage("Caught CCE: "+ex, false);
+                    bot.sendMessage("Caught WORDS CCE: "+ex, false);
                 }
+                bot.sendMessage("Starting lines extraction", false);
+                try {
+                    existingLines = ((Integer)values[2]);
+                } catch(ClassCastException ex) {
+                    bot.sendMessage("Caught LINES CCE: "+ex, false);
+                }
+
 				sql.query("UPDATE "+WORDS_DB+" SET words='"+(existingWords + newWords)+"', `lines`='"+(existingLines + 1)+"' WHERE id='"+values[0]+"';");
 			}
 
