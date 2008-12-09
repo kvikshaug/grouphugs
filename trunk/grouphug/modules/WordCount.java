@@ -99,7 +99,7 @@ public class WordCount implements GrouphugModule {
                 Object[] values = sql.getValueList();
                 long words = ((Long)values[2]);
                 long lines = ((Long)values[3]);
-                long wpl = words / lines;
+                double wpl = (double)words / (double)lines;
                 reply += (place++)+". "+ values[1]+ " ("+words+" words, "+lines+" lines, "+
                         (new DecimalFormat("0.0")).format(wpl)+
                         " wpl)\n";
@@ -131,7 +131,7 @@ public class WordCount implements GrouphugModule {
                 Object[] values = sql.getValueList();
                 long words = ((Long)values[2]);
                 long lines = ((Long)values[3]);
-                long wpl = words / lines;
+                double wpl = (double)words / (double)lines;
 
                 bot.sendMessage(nick + " has uttered "+words+ " words in "+lines+" lines ("+
                         (new DecimalFormat("0.0")).format(wpl)+
