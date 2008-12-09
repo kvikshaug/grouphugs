@@ -1,7 +1,11 @@
 package grouphug.modules;
 
 import java.sql.SQLException;
+import java.util.Date;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import grouphug.GrouphugModule;
 import grouphug.Grouphug;
@@ -19,6 +23,7 @@ public class WordCount implements GrouphugModule {
     private static final String TRIGGER_TOP = "wordcounttop";
     private static final String TRIGGER_BOTTOM = "wordcountbottom";
     private static final int LIMIT = 5;
+    private static final DateFormat df = new SimpleDateFormat("dd. MMMMM");
 
 	
     public WordCount(Grouphug bot) {
@@ -39,7 +44,7 @@ public class WordCount implements GrouphugModule {
 			
 			
 			if(!sql.getNext()) {
-				sql.query("INSERT INTO "+WORDS_DB+" (nick, words, `lines`) VALUES ('"+sender+"', '"+newWords+"', '1');");
+				sql.query("INSERT INTO "+WORDS_DB+" (nick, words, `lines`, since) VALUES ('"+sender+"', '"+newWords+"', '1', '"+SQL.dateToSQLDateTime(new Date())+"');");
 			}else{
 				Object[] values = sql.getValueList();
                 long existingWords = ((Long)values[1]);
@@ -80,6 +85,8 @@ public class WordCount implements GrouphugModule {
         return true;
 	}
 
+    // TODO some duplicated code in the following two methods, can this be simplified ?
+
     private void showScore(boolean top) {
         SQL sql = new SQL();
         String reply;
@@ -100,9 +107,17 @@ public class WordCount implements GrouphugModule {
                 long words = ((Long)values[2]);
                 long lines = ((Long)values[3]);
                 double wpl = (double)words / (double)lines;
+                Date since;
+                try {
+                    since = SQL.sqlDateTimeToDate((String)values[4]);
+                } catch(ParseException ex) {
+                    System.err.println("ParseException: "+ex);
+                    bot.sendMessage("Oops, i jizzed in my pants.", false);
+                    return;
+                }
                 reply += (place++)+". "+ values[1]+ " ("+words+" words, "+lines+" lines, "+
                         (new DecimalFormat("0.0")).format(wpl)+
-                        " wpl)\n";
+                        " wpl) since "+df.format(since)+"\n";
             }
             if(top)
                 reply += "I think they are going to need a new keyboard soon.";
@@ -122,7 +137,7 @@ public class WordCount implements GrouphugModule {
         String nick = message.substring(10, message.length());
         try{
             sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, null);
-            sql.query("SELECT id, nick, words, `lines` FROM "+WORDS_DB+" WHERE nick='"+nick+"';");
+            sql.query("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick='"+nick+"';");
 
 
             if(!sql.getNext()) {
@@ -131,11 +146,19 @@ public class WordCount implements GrouphugModule {
                 Object[] values = sql.getValueList();
                 long words = ((Long)values[2]);
                 long lines = ((Long)values[3]);
+                Date since;
+                try {
+                    since = SQL.sqlDateTimeToDate((String)values[4]);
+                } catch(ParseException ex) {
+                    System.err.println("ParseException: "+ex);
+                    bot.sendMessage("Oops, i jizzed in my pants.", false);
+                    return;
+                }
                 double wpl = (double)words / (double)lines;
 
                 bot.sendMessage(nick + " has uttered "+words+ " words in "+lines+" lines ("+
                         (new DecimalFormat("0.0")).format(wpl)+
-                        " wpl)", false);
+                        " wpl) since "+df.format(since), false);
             }
 
         }catch(SQLException e) {
