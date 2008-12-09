@@ -3,8 +3,6 @@ package grouphug.modules;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.text.DecimalFormat;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -26,7 +24,7 @@ public class WordCount implements GrouphugModule {
     private static final String TRIGGER_BOTTOM = "wordcountbottom";
     private static final int LIMIT = 5;
     private static final DateFormat df = new SimpleDateFormat("dd. MMMMM");
-    private static final Pattern REGEX = Pattern.compile("\\W+");
+    //private static final Pattern REGEX = Pattern.compile("\\W+");
 
 	
     public WordCount(Grouphug bot) {
@@ -36,17 +34,20 @@ public class WordCount implements GrouphugModule {
 	public void addWords(String sender, String message){
 		SQL sql = new SQL();
 
+        // TODO fix hack?
         //Sunn cheats
         message = message.replaceAll("  ", "");
         int newWordsOldMethod = message.split(" ").length;
 
+        /*
         Matcher matcher = REGEX.matcher(message);
         int newWordsNewMethod = 1; // we're counting word delimiters, the actual word count is delimiters+1
         while(matcher.find()) {
             newWordsNewMethod++;
         }
+        */
 
-        bot.sendMessage("old method: "+newWordsOldMethod+", new method: "+newWordsNewMethod, false);
+        //bot.sendMessage("old method: "+newWordsOldMethod+", new method: "+newWordsNewMethod, false);
         int newWords = newWordsOldMethod;
 
 
