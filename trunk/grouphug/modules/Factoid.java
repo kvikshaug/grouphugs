@@ -1,6 +1,6 @@
 package grouphug.modules;
 
-import grouphug.GrouphugModule;
+import grouphug.modules.GrouphugModule;
 import grouphug.Grouphug;
 import grouphug.SQL;
 
@@ -309,7 +309,7 @@ public class Factoid implements GrouphugModule {
                 bot.sendMessage(getReply().replace("$sender", sender), true);
             } else {
                 // TODO - action evades spam, and all the local sendMessage routines
-                bot.sendAction(Grouphug.getChannel(), getReply().replace("$sender", sender));
+                bot.sendAction(Grouphug.CHANNEL, getReply().replace("$sender", sender));
             }
         }
     }

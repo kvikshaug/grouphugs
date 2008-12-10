@@ -15,7 +15,10 @@ class NickPoller implements Runnable {
     private static Grouphug bot;
     private static NickPoller pollerThread;
 
-    public boolean run; // should be set to false when we want to stop this thread.
+    private boolean run = true; // should be set to false when we want to stop this thread.
+    public void stop() {
+        run = false;
+    }
 
     /**
      * Creates and starts a thread which attempts to recapture the most wanted nicks in the nicklist
@@ -30,10 +33,6 @@ class NickPoller implements Runnable {
 
         pollerThread = new NickPoller();
         new Thread(pollerThread).start();
-    }
-
-    public NickPoller() {
-        run = true;
     }
 
     public void run() {

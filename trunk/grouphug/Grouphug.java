@@ -31,18 +31,23 @@ import java.io.*;
 // TODO - write a websiteconnection-class - for easier use - and to avoid copypasta code (Google/GoogleFight/Define/Tracking/Confession)
 // TODO - bash for #grouphugs
 // TODO - tlf module
-// TODO - review access modifiers everywhere according to the new 'modules' package
-// TODO - current logfile flushes are kind of fugly
 
 public class Grouphug extends PircBot {
 
-    static final String CHANNEL = "#grouphugs";     // The main channel
-    static final String SERVER = "irc.homelien.no"; // The main IRC server
-    static final String ENCODING = "ISO8859-15";    // Character encoding to use when communicating with the IRC server.
+    // Channel and server
+    public static final String CHANNEL = "#grouphugs";
+    public static final String SERVER = "irc.homelien.no";
+
+    // Character encoding to use when communicating with the IRC server.
+    public static final String ENCODING = "ISO8859-15";
                                                     
-    public static String getChannel() {
-        return CHANNEL;
-    }
+    // The trigger characters (as Strings since startsWith takes String)
+    public static final String MAIN_TRIGGER = "!";
+    public static final String SPAM_TRIGGER = "@";
+    public static final String HELP_TRIGGER = "help";
+
+    // A list over all the nicknames we want
+    protected static ArrayList<String> nicks = new ArrayList<String>();
 
     // The number of characters upon which lines are splitted
     // Note that the 512 max limit includes the channel name, \r\n, and probably some other stuff.
@@ -64,16 +69,9 @@ public class Grouphug extends PircBot {
     // A list over all loaded modules
     private static ArrayList<GrouphugModule> modules = new ArrayList<GrouphugModule>();
 
-    // A list over all the nicknames we want
-    protected static ArrayList<String> nicks = new ArrayList<String>();
+    // Used to specify if it is ok to spam a large message to the channel
+    private static boolean spamOK = false;
 
-    // Used to specify if it is ok to spam a large message to the channel 
-    static boolean spamOK = false;
-
-    // The trigger characters (as Strings since startsWith takes String)
-    public static final String MAIN_TRIGGER = "!";
-    public static final String SPAM_TRIGGER = "@";
-    public static final String HELP_TRIGGER = "help";
 
     /**
      * This method is called whenever a message is sent to a channel.
@@ -88,10 +86,6 @@ public class Grouphug extends PircBot {
     @Override
     protected void onMessage(String channel, String sender, String login, String hostname, String message) {
 
-    	
-    	//Very very first thing we do is add the number of words a person says
-    	//TODO fix DB in WordCount
-    	//words.addWords(sender, message);
         // Very first thing we do is check if we're rebooting
         if(message.equals("!reboot")) {
             try {
@@ -129,9 +123,6 @@ public class Grouphug extends PircBot {
         for(GrouphugModule m : modules) {
             m.specialTrigger(channel, sender, login, hostname, message);
         }
-
-        // Let's do a logfile flush when someone sends a message..
-        stdOut.flush();
     }
 
     @Override
@@ -310,24 +301,15 @@ public class Grouphug extends PircBot {
         for(String line : lines) {
             this.sendMessage(Grouphug.CHANNEL, line);
         }
-
-        // Let's do a logfile flush when we've sent data to the server..
-        stdOut.flush();
-    }
-
-    // Let's do a logfile flush after every server ping..
-    @Override
-    protected void onServerPing(String response) {
-        super.onServerPing(response);
-        stdOut.flush();
     }
 
     /**
      * The main method, starting the bot, connecting to the server and joining its main channel.
      *
-     * @param args - Command-line arguments
+     * @param args Command-line arguments, unused
+     * @throws UnsupportedEncodingException very rarely since the encoding is almost never changed
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnsupportedEncodingException {
 
         // Redirect standard output to logfile
         try {
@@ -353,17 +335,10 @@ public class Grouphug extends PircBot {
             System.exit(-1);
         }
 
-        // Load up the bot and enable debugging output
+        // Load up the bot, enable debugging output, and specify encoding
         Grouphug bot = new Grouphug();
         bot.setVerbose(true);
-
-        // Tell the bot to use ISO8859-15
-        try {
-            bot.setEncoding(ENCODING);
-        }
-        catch (UnsupportedEncodingException e) {
-            bot.sendMessage(Grouphug.CHANNEL, "Failed to set character encoding " + ENCODING);
-        }
+        bot.setEncoding(ENCODING);
 
         // Load up modules
         // TODO - should be done differently?
@@ -383,6 +358,9 @@ public class Grouphug extends PircBot {
         modules.add(new WordCount(bot));
         Grouphug.loadGrimstuxPassword();
         SVNCommit.load(bot);
+
+        // Start a logfile flusher thread
+        new Thread(new LogFlusher(bot)).start();
 
         // Save the nicks we want, in prioritized order
         //nicks.add("gh");
@@ -445,8 +423,7 @@ public class Grouphug extends PircBot {
         NickPoller.load(bot);
     }
 
-
-    public static void loadGrimstuxPassword() {
+    private static void loadGrimstuxPassword() {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(new File("pw/narvikdata")));
             String pw = reader.readLine();
@@ -461,6 +438,13 @@ public class Grouphug extends PircBot {
         } catch(IOException e) {
             // Do nothing - SQL_PASSWORD will be empty, and we will detect the error upon usage
         }
+    }
+
+    /**
+     * Flushes the stdout buffer to the logfile
+     */
+    protected void flushLogs() {
+        stdOut.flush();
     }
 
     /**

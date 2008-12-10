@@ -1,6 +1,6 @@
 package grouphug.modules;
 
-import grouphug.GrouphugModule;
+import grouphug.modules.GrouphugModule;
 import grouphug.Grouphug;
 import grouphug.SQL;
 
@@ -172,7 +172,7 @@ public class Karma implements GrouphugModule {
             if(top)
                 reply += "May their lives be filled with sunlight and pink stuff.";
             else
-                reply += "May they burn forever in the pits of "+ Grouphug.getChannel()+".";
+                reply += "May they burn forever in the pits of "+ Grouphug.CHANNEL+".";
             bot.sendMessage(reply, false);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());

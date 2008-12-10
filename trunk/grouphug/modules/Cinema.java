@@ -1,6 +1,5 @@
 package grouphug.modules;
 
-import grouphug.GrouphugModule;
 import grouphug.Grouphug;
 import grouphug.SQL;
 

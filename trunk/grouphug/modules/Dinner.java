@@ -1,6 +1,6 @@
 package grouphug.modules;
 
-import grouphug.GrouphugModule;
+import grouphug.modules.GrouphugModule;
 import grouphug.Grouphug;
 import grouphug.SQL;
 import grouphug.WeekDay;

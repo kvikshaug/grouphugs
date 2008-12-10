@@ -7,7 +7,6 @@ import java.text.DecimalFormat;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import grouphug.GrouphugModule;
 import grouphug.Grouphug;
 import grouphug.SQL;
 
