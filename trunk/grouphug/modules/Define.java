@@ -77,7 +77,7 @@ public class Define implements GrouphugModule {
         // Search for some hardcoded stuff to try to parse a definition. this is fugly
         String line;
         int startIndex;
-        String parseSearch = "<ul type=\"disc\"><font size=-1><li>";
+        String parseSearch = "<ul type=\"disc\" class=std><li>";
         while((line = google.readLine()) != null) {
             startIndex = line.indexOf(parseSearch);
 
