@@ -380,7 +380,7 @@ public class Grouphug extends PircBot {
             try {
                 clazz = loadModule(s);
                 modules.add((GrouphugModule)clazz.newInstance());
-                System.out.println("(Loader): "+s+" : Reloaded OK");
+                System.out.println("(Loader): "+s+".class : Reloaded OK");
             } catch (InstantiationException e) {
                 System.err.println("(Loader): "+s+".class : Failed reload!");
                 System.err.println(e);

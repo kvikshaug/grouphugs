@@ -32,6 +32,9 @@ public class WeatherForecast implements GrouphugModule {
     }
 
     public void trigger(String channel, String sender, String login, String hostname, String message) {
+        if(message.equals("test")) {
+            Grouphug.getInstance().sendMessage("IT WORKS! :D ", false);
+        }
         if(!message.startsWith(WeatherForecast.TRIGGER))
             return;
 
