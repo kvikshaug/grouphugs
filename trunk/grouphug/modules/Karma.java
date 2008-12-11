@@ -1,6 +1,5 @@
 package grouphug.modules;
 
-import grouphug.modules.GrouphugModule;
 import grouphug.Grouphug;
 import grouphug.SQL;
 
@@ -8,7 +7,6 @@ import java.sql.SQLException;
 
 public class Karma implements GrouphugModule {
 
-    private static Grouphug bot;
     private static final String TRIGGER_HELP = "karma";
     private static final String TRIGGER = "karma ";
     private static final String TRIGGER_TOP = "karmatop";
@@ -20,23 +18,19 @@ public class Karma implements GrouphugModule {
 
     private static final String KARMA_DB = "gh_karma";
 
-    public Karma(Grouphug bot) {
-        Karma.bot = bot;
-    }
-
     public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
         return TRIGGER_HELP;
     }
 
     public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            bot.sendNotice(sender, "Karma: Increase, decrease, or show an objects karma.");
-            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<object>");
-            bot.sendNotice(sender, "  <object>++");
-            bot.sendNotice(sender, "  <object>--");
-            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP);
-            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM);
-            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_RESET + " <object>" + " if reseting is enabled");
+            Grouphug.getInstance().sendNotice(sender, "Karma: Increase, decrease, or show an objects karma.");
+            Grouphug.getInstance().sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<object>");
+            Grouphug.getInstance().sendNotice(sender, "  <object>++");
+            Grouphug.getInstance().sendNotice(sender, "  <object>--");
+            Grouphug.getInstance().sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP);
+            Grouphug.getInstance().sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM);
+            Grouphug.getInstance().sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_RESET + " <object>" + " if reseting is enabled");
             return true;
         }
         return false;
@@ -91,18 +85,18 @@ public class Karma implements GrouphugModule {
             ki = find(sqlName);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.sendMessage(name+" has probably bad karma, because an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage(name+" has probably bad karma, because an SQL error occured.", false);
             return;
         }
         if(ki == null)
-            bot.sendMessage(name+" has neutral karma.", false);
+            Grouphug.getInstance().sendMessage(name+" has neutral karma.", false);
         else
-            bot.sendMessage(ki.getName()+" has "+ki.getKarma()+" karma.", false);
+            Grouphug.getInstance().sendMessage(ki.getName()+" has "+ki.getKarma()+" karma.", false);
     }
 
     private void add(String sender, String name, int karma) {
         if(name.equals(sender)) {
-            bot.sendMessage(sender+", self karma is bad karma.", false);
+            Grouphug.getInstance().sendMessage(sender+", self karma is bad karma.", false);
             return;
         }
 
@@ -126,7 +120,7 @@ public class Karma implements GrouphugModule {
                 sql.query("UPDATE "+KARMA_DB+" SET value='"+(ki.getKarma() + karma)+"' WHERE id='"+ki.getID()+"';");
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.sendMessage("Sorry, an SQL error occurred.", false);
+            Grouphug.getInstance().sendMessage("Sorry, an SQL error occurred.", false);
         } finally {
             sql.disconnect();
         }
@@ -173,10 +167,10 @@ public class Karma implements GrouphugModule {
                 reply += "May their lives be filled with sunlight and pink stuff.";
             else
                 reply += "May they burn forever in the pits of "+ Grouphug.CHANNEL+".";
-            bot.sendMessage(reply, false);
+            Grouphug.getInstance().sendMessage(reply, false);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.sendMessage("Sorry, an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
         }
     }
 

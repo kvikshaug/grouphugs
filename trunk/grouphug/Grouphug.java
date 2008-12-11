@@ -1,36 +1,51 @@
 package grouphug;
 
 import org.jibble.pircbot.*;
-import grouphug.modules.*;
+import grouphug.modules.GrouphugModule;
+import grouphug.util.PasswordManager;
 
 import java.util.ArrayList;
 import java.io.*;
+import java.net.URL;
+import java.net.MalformedURLException;
+import java.net.URLClassLoader;
 
 /**
- * GrouphugBot.java
+ * Grouphug
  *
  * A java-based IRC-bot created purely for entertainment purposes and as a personal excercise in design.
  *
- * Instead of describing the current design of the bot, which hardly can be called design at all, I will rather
- * explain the vision for it:
+ * This bot manages a list of modules that may make the bot react up certain triggers or messages sent to
+ * the channel this bot resides on. It contains functionality for preventing spam, splitting lines and more.
  *
- * The bot is to be able to load function modules, that are triggered for each message sent to the bot's channel,
- * and it is up to the modules to react to a message. The bot should never bother anyone unless it is clear that they
- * want a response from it.
+ * The modules are dynamically loaded - the demands for a module is simple:
+ * - It must exist in the grouphug.modules package
+ * - It must implement the grouphug.modules.GrouphugModule interface
+ * - Its constructor must take no parameters (because of dynamic loading)
+ * Any module filling these demands will be loaded and accessed as any other upon trigger calls.
  *
- * As an example, the original function module was something that reacted on the trigger word "!gh" (may have changed),
- * and on this request fetched a random grouphug confession from the http://grouphug.us/ site. Further functionality
- * was added for searching for a specific confession topic, getting the newest confession, and so forth.
+ * Some important concepts for the bot:
+ * - It should never bother anyone unless it is clear that they want a response from it.
+ * - It should never be unclear what a command or module does or intends to do. From a single !help trigger,
+ *   a user should be able to dig down in detail and find out every interaction he/she is able to make to the bot,
+ *   and what to be expected in return.
  *
- * The grouphug bot was originally started by Alex Kvikshaug and hopefully continued as an SVN project
- * by the guys currently hanging in #grouphugs @ efnet.
+ * Certain functionality is closely tied to the linux account it currently runs on, and shell scripts,
+ * website access and the like located on that account.
+ *
+ * A future vision for the bot will be to changed the design to be event-based, an own event for each
+ * overriden method (onMessage, onKick etc.). This is currently under development and anyone are free
+ * to contribute at this stage.
+ *
+ * The grouphug bot was originally started by Alex Kvikshaug and continued as
+ * an SVN project by the guys currently hanging in #grouphugs @ efnet.
  *
  * The bot extends the functionality of the well-designed PircBot, see http://www.jibble.org/
  */
 
-// TODO - write a websiteconnection-class - for easier use - and to avoid copypasta code (Google/GoogleFight/Define/Tracking/Confession)
-// TODO - bash for #grouphugs
-// TODO - tlf module
+// TODO - use sunn's grouphug.utils.Web on: Google/GoogleFight/Define/Tracking/Confession
+// TODO - bash for #grouphugs ?
+// TODO - tlf module ?
 
 public class Grouphug extends PircBot {
 
@@ -40,7 +55,7 @@ public class Grouphug extends PircBot {
 
     // Character encoding to use when communicating with the IRC server.
     public static final String ENCODING = "ISO8859-15";
-                                                    
+
     // The trigger characters (as Strings since startsWith takes String)
     public static final String MAIN_TRIGGER = "!";
     public static final String SPAM_TRIGGER = "@";
@@ -72,6 +87,12 @@ public class Grouphug extends PircBot {
     // Used to specify if it is ok to spam a large message to the channel
     private static boolean spamOK = false;
 
+    // A static reference and getter to our bot
+    private static Grouphug bot;
+    public static Grouphug getInstance() {
+        return bot;
+    }
+
 
     /**
      * This method is called whenever a message is sent to a channel.
@@ -86,13 +107,32 @@ public class Grouphug extends PircBot {
     @Override
     protected void onMessage(String channel, String sender, String login, String hostname, String message) {
 
-        // Very first thing we do is check if we're rebooting
+        // Rebooting?
         if(message.equals("!reboot")) {
             try {
                 Runtime.getRuntime().exec("wget -qO - http://hinux.hin.no/~murray/gh/?reboot > /dev/null 2>&1");
             } catch(IOException ex) {
                 System.err.println(ex);
             }
+            return;
+        }
+
+        // Reloading?
+        if(message.equals("!reload")) {
+            try {
+                Runtime.getRuntime().exec("/home/DT2006/murray/gh/reload.sh").waitFor();
+            } catch(IOException ex) {
+                System.err.println(ex);
+                bot.sendMessage("Sorry, HiNux seems to have clogging problems, I caught in IOException.", false);
+                return;
+            } catch(InterruptedException ex) {
+                System.err.println("WARNING: I was interrupted before the compilation was done! NOT reloading modules.");
+                System.err.println(ex);
+                bot.sendMessage("I tried, but was interrupted! Hmpf.", false);
+                return;
+            }
+            reloadModules();
+            bot.sendMessage("Reloaded modules OK.", false);
             return;
         }
 
@@ -132,6 +172,7 @@ public class Grouphug extends PircBot {
     }
 
     private void checkForHelpTrigger(String channel, String sender, String login, String hostname, String message) {
+        // TODO tell about !reboot and !reload in help
         // First, check for the universal normal help-trigger
         if(message.equals(MAIN_TRIGGER + HELP_TRIGGER)) {
             // Remember that if the line is > MAX_LINE_CHARS, it will *automatically* be split
@@ -304,6 +345,73 @@ public class Grouphug extends PircBot {
     }
 
     /**
+     * Clears all loaded modules, and runs the loadModules() method
+     */
+    private static void reloadModules() {
+        modules.clear();
+        loadModules();
+    }
+
+    /**
+     * Loads up all the modules in the modules package (skipping anything not ending with ".class",
+     * containing a '$'-char and the GrouphugModule.class file)
+     */
+    private static void loadModules() {
+        File file = new File("grouphug/modules/");
+        for(String s : file.list()) {
+            if(s.equals("GrouphugModule.class")) {
+                System.out.println("Skipping "+s);
+                continue;
+            }
+            if(s.contains("$")) {
+                System.out.println("Skipping "+s);
+                continue;
+            }
+            if(!s.endsWith(".class")) {
+                System.out.println("Skipping "+s);
+                continue;
+            }
+            s = s.substring(0, s.length()-6); // strip ".class"
+            System.out.println(s);
+            Class clazz;
+            try {
+                clazz = loadModule(s);
+                modules.add((GrouphugModule)clazz.newInstance());
+            } catch (InstantiationException e) {
+                System.err.println("Failed to reload "+s+".class: "+e);
+            } catch (IllegalAccessException e) {
+                System.err.println("Failed to reload "+s+".class: "+e);
+            } catch(ClassNotFoundException e) {
+                System.err.println("Failed to reload "+s+".class: "+e);
+            }
+        }
+    }
+
+    /**
+     * Reloads the specified GrouphugModule class into memory
+     *
+     * @param moduleName the Class name of the module to reload
+     * @return the reloaded class
+     * @throws ClassNotFoundException if the class was not found
+     */
+    private static Class loadModule(String moduleName) throws ClassNotFoundException {
+
+        // Get the directory (URL) of the reloadable class
+        URL[] urls = null;
+        try {
+            // Convert the file object to a URL
+            File dir = new File(System.getProperty("user.dir")+File.pathSeparator+"grouphug"+File.pathSeparator+"modules");
+            URL url = dir.toURI().toURL();
+            urls = new URL[]{url};
+        } catch (MalformedURLException e) {
+            // this won't happen
+        }
+
+        // Create a new class loader, load the class, and return it
+        return new URLClassLoader(urls).loadClass("grouphug.modules."+moduleName);
+    }
+
+    /**
      * The main method, starting the bot, connecting to the server and joining its main channel.
      *
      * @param args Command-line arguments, unused
@@ -323,44 +431,20 @@ public class Grouphug extends PircBot {
             System.exit(-1);
         }
 
-        // Load the SQL password from file
-        try {
-            SQL.loadPassword("pw/hinux");
-        } catch(IOException e) {
-            System.err.println("Fatal error: Could not load MySQL-password file.");
-            System.err.println(e.getMessage());
-            System.err.println(e.getCause());
-            e.printStackTrace();
-            stdOut.flush();
-            System.exit(-1);
+        // Load the SQL passwords from default files
+        if(!PasswordManager.loadPasswords()) {
+            System.err.println("WARNING: I was unable to load one or more of the expected password files.\n" +
+                    "I will try to continue, but modules dependant upon SQL may barf when they try to connect.");
         }
 
         // Load up the bot, enable debugging output, and specify encoding
-        Grouphug bot = new Grouphug();
+        Grouphug.bot = new Grouphug();
         bot.setVerbose(true);
         bot.setEncoding(ENCODING);
 
-        // Load up modules
-        // TODO - should be done differently?
-        modules.add(new Confession(bot));
-        modules.add(new Slang(bot));
-        modules.add(new Karma(bot));
-        modules.add(new Google(bot));
-        modules.add(new Dinner(bot));
-        modules.add(new WeatherForecast(bot));
-        modules.add(new Define(bot));
-        modules.add(new Tracking(bot));
-        modules.add(new Cinema(bot));
-        modules.add(new IMDb(bot));
-        modules.add(new Factoid(bot));
-        modules.add(new GoogleFight(bot));
-        modules.add(new Bofh(bot));
-        modules.add(new WordCount(bot));
-        modules.add(new URLCatcher(bot));
-        Grouphug.loadGrimstuxPassword();
+        // Load up modules and threads
+        loadModules();
         SVNCommit.load(bot);
-
-        // Start a logfile flusher thread
         new Thread(new LogFlusher(bot)).start();
 
         // Save the nicks we want, in prioritized order
@@ -422,23 +506,6 @@ public class Grouphug extends PircBot {
         }
         // start a thread for polling back our first nick if unavailable
         NickPoller.load(bot);
-    }
-
-    private static void loadGrimstuxPassword() {
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(new File("pw/narvikdata")));
-            String pw = reader.readLine();
-            reader.close();
-
-            if(pw.equals(""))
-              throw new FileNotFoundException("No data extracted from MySQL password file!");
-
-            Dinner.SQL_PASSWORD = pw;
-            Cinema.SQL_PASSWORD = pw;
-            WeatherForecast.SQL_PASSWORD = pw;
-        } catch(IOException e) {
-            // Do nothing - SQL_PASSWORD will be empty, and we will detect the error upon usage
-        }
     }
 
     /**

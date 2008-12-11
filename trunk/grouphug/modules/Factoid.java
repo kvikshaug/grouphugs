@@ -1,6 +1,5 @@
 package grouphug.modules;
 
-import grouphug.modules.GrouphugModule;
 import grouphug.Grouphug;
 import grouphug.SQL;
 
@@ -22,7 +21,6 @@ public class Factoid implements GrouphugModule {
     // TODO - dynamic reply, with username, more?
     // TODO - more details of factiod ? time ?
 
-    private static Grouphug bot;
     private ArrayList<FactoidItem> factoids = new ArrayList<FactoidItem>();
 
     private static final String TRIGGER_HELP = "factoid";
@@ -43,9 +41,7 @@ public class Factoid implements GrouphugModule {
 
     private long lastAddedTime; // HACK to avoid specialTrigger() being called on the same line
 
-    public Factoid(Grouphug bot) {
-        Factoid.bot = bot;
-
+    public Factoid() {
         // Load up all existing factoids from sql
         SQL sql = new SQL();
         try {
@@ -71,21 +67,21 @@ public class Factoid implements GrouphugModule {
 
     public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            bot.sendNotice(sender, "Factoid: Make me say or do (message or action) \"reply\" when someone says \"trigger\".");
-            bot.sendNotice(sender, "Old methods:");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + TRIGGER_MAIN_ADD + "trigger <say> reply");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + TRIGGER_MAIN_ADD + "trigger <do> reply");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + TRIGGER_MAIN_DEL + "trigger");
-            bot.sendNotice(sender, "A new, easier version:");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+  TRIGGER_SHORT_ADD + "trigger <say> reply");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+  TRIGGER_SHORT_ADD + "trigger <do> reply");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+  TRIGGER_SHORT_DEL + "trigger");
-            bot.sendNotice(sender, "Other triggers, to view info, or get a random factoid:");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + "trigger");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_RANDOM);
-            bot.sendNotice(sender, "Note 1: The string \"$sender\" will be replaced with the nick of the one triggering the factoid.");
-            bot.sendNotice(sender, "Note 2: A star (*) can be any string of characters.");
-            bot.sendNotice(sender, "Note 3: Regex can be used, but 1) remember that * is replaced with .* and 2) this will probably change very soon.");
+            Grouphug.getInstance().sendNotice(sender, "Factoid: Make me say or do (message or action) \"reply\" when someone says \"trigger\".");
+            Grouphug.getInstance().sendNotice(sender, "Old methods:");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + TRIGGER_MAIN_ADD + "trigger <say> reply");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + TRIGGER_MAIN_ADD + "trigger <do> reply");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + TRIGGER_MAIN_DEL + "trigger");
+            Grouphug.getInstance().sendNotice(sender, "A new, easier version:");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+  TRIGGER_SHORT_ADD + "trigger <say> reply");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+  TRIGGER_SHORT_ADD + "trigger <do> reply");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+  TRIGGER_SHORT_DEL + "trigger");
+            Grouphug.getInstance().sendNotice(sender, "Other triggers, to view info, or get a random factoid:");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + "trigger");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_RANDOM);
+            Grouphug.getInstance().sendNotice(sender, "Note 1: The string \"$sender\" will be replaced with the nick of the one triggering the factoid.");
+            Grouphug.getInstance().sendNotice(sender, "Note 2: A star (*) can be any string of characters.");
+            Grouphug.getInstance().sendNotice(sender, "Note 3: Regex can be used, but 1) remember that * is replaced with .* and 2) this will probably change very soon.");
             return true;
         }
         return false;
@@ -119,17 +115,17 @@ public class Factoid implements GrouphugModule {
                 reply = line.substring(line.indexOf(SEPARATOR_ACTION) + SEPARATOR_ACTION.length());
             } else {
                 // If it's neither a message nor an action
-                bot.sendMessage("What? Don't give me that nonsense, "+sender+".", false);
+                Grouphug.getInstance().sendMessage("What? Don't give me that nonsense, "+sender+".", false);
                 return;
             }
 
             // add() returns true if the factoid is added, or false if the trigger is already taken
             if(add(replyMessage, trigger, reply, sender)) {
-                bot.sendMessage("OK, "+sender+".", false);
+                Grouphug.getInstance().sendMessage("OK, "+sender+".", false);
 
                 lastAddedTime = System.nanoTime(); // HACK to avoid specialTrigger() being called on the same line
             } else {
-                bot.sendMessage("But, "+sender+", "+trigger+".", false);
+                Grouphug.getInstance().sendMessage("But, "+sender+", "+trigger+".", false);
             }
 
         }
@@ -145,9 +141,9 @@ public class Factoid implements GrouphugModule {
 
             // and try to remove it - del() returns true if it's removed, false if there is no such trigger
             if(del(trigger)) {
-                bot.sendMessage("I no longer know of this "+trigger+" that you speak of.", false);
+                Grouphug.getInstance().sendMessage("I no longer know of this "+trigger+" that you speak of.", false);
             } else {
-                bot.sendMessage(sender+", I can't remember "+trigger+" in the first place.", false);
+                Grouphug.getInstance().sendMessage(sender+", I can't remember "+trigger+" in the first place.", false);
             }
 
         }
@@ -156,9 +152,9 @@ public class Factoid implements GrouphugModule {
             FactoidItem factoid;
             String trigger = message.substring(TRIGGER_MAIN.length());
             if((factoid = find(trigger, false)) != null) {
-                bot.sendMessage("Factoid: [ trigger = "+factoid.getTrigger()+" ] [ reply = "+factoid.getReply()+" ] [ author = "+factoid.getAuthor()+" ]", false);
+                Grouphug.getInstance().sendMessage("Factoid: [ trigger = "+factoid.getTrigger()+" ] [ reply = "+factoid.getReply()+" ] [ author = "+factoid.getAuthor()+" ]", false);
             } else {
-                bot.sendMessage(sender+", I do not know of this "+trigger+" that you speak of.", false);
+                Grouphug.getInstance().sendMessage(sender+", I do not know of this "+trigger+" that you speak of.", false);
             }
 
         }
@@ -228,7 +224,7 @@ public class Factoid implements GrouphugModule {
                 sql.query("DELETE FROM gh_factoid WHERE `trigger` = '"+trigger+"';");
                 if(sql.getAffectedRows() == 0) {
                     System.err.println("Factoid deletion warning: Item was found in local arraylist, but not in SQL DB!");
-                    bot.sendMessage("OMG inconsistency; I have the factoid in memory but not in the SQL db.", false);
+                    Grouphug.getInstance().sendMessage("OMG inconsistency; I have the factoid in memory but not in the SQL db.", false);
                     return false;
                 }
             } catch(SQLSyntaxErrorException e) {
@@ -306,10 +302,10 @@ public class Factoid implements GrouphugModule {
          */
         private void send(String sender) {
             if(isMessage()) {
-                bot.sendMessage(getReply().replace("$sender", sender), true);
+                Grouphug.getInstance().sendMessage(getReply().replace("$sender", sender), true);
             } else {
                 // TODO - action evades spam, and all the local sendMessage routines
-                bot.sendAction(Grouphug.CHANNEL, getReply().replace("$sender", sender));
+                Grouphug.getInstance().sendAction(Grouphug.CHANNEL, getReply().replace("$sender", sender));
             }
         }
     }

@@ -20,14 +20,12 @@ public class Bofh implements GrouphugModule
     private static final String RANDOM_TRIGGER = "bofh";
     private static final String SPECIFIC_TRIGGER = RANDOM_TRIGGER + " \\d+";
     public static final String HELP_TRIGGER = RANDOM_TRIGGER;
-    private static Grouphug bot;
 
     private Random random;
     private ArrayList<String> excuses;
 
-    public Bofh(Grouphug grouphug)
+    public Bofh()
     {
-        bot = grouphug;
         random = new Random(System.nanoTime());
         initExcuses();
     }
@@ -106,7 +104,7 @@ public class Bofh implements GrouphugModule
             reply = excuses.get(random.nextInt(excuses.size()));
         }
         if (reply != null)
-            bot.sendMessage(reply, false);
+            Grouphug.getInstance().sendMessage(reply, false);
     }
 
     /**
@@ -148,10 +146,10 @@ public class Bofh implements GrouphugModule
     {
         if (message.equals(HELP_TRIGGER))
         {
-            bot.sendNotice(sender, "BOFH - Fend off lusers with Bastard Operator From Hell excuses for their system \"problems\".");
-            bot.sendNotice(sender, "Usage:");
-            bot.sendNotice(sender, Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " returns a random excuse.");
-            bot.sendNotice(sender, Grouphug.MAIN_TRIGGER + SPECIFIC_TRIGGER + " returns an excuse by number. (\\d+ means any digit, 1-n times)");
+            Grouphug.getInstance().sendNotice(sender, "BOFH - Fend off lusers with Bastard Operator From Hell excuses for their system \"problems\".");
+            Grouphug.getInstance().sendNotice(sender, "Usage:");
+            Grouphug.getInstance().sendNotice(sender, Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " returns a random excuse.");
+            Grouphug.getInstance().sendNotice(sender, Grouphug.MAIN_TRIGGER + SPECIFIC_TRIGGER + " returns an excuse by number. (\\d+ means any digit, 1-n times)");
             return true;
         }
 

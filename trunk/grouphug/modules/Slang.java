@@ -11,16 +11,11 @@ import java.io.IOException;
 
 public class Slang implements GrouphugModule {
 
-    private static Grouphug bot;
     private static final String TRIGGER_HELP = "slang";
     private static final String TRIGGER_MAIN = "slang ";
     private static final String TRIGGER_EXAMPLE = "-ex ";
 
     private static int slangCount = 0;
-
-    public Slang(Grouphug bot) {
-        Slang.bot = bot;
-    }
 
     public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
         return TRIGGER_HELP;
@@ -28,10 +23,10 @@ public class Slang implements GrouphugModule {
 
     public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            bot.sendNotice(sender, "Slang: Define an expression in slang terms.");
-            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + "<expr>");
-            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + "<expr> <number>");
-            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + Slang.TRIGGER_EXAMPLE + "<expr>");
+            Grouphug.getInstance().sendNotice(sender, "Slang: Define an expression in slang terms.");
+            Grouphug.getInstance().sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + "<expr>");
+            Grouphug.getInstance().sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + "<expr> <number>");
+            Grouphug.getInstance().sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + Slang.TRIGGER_EXAMPLE + "<expr>");
             return true;
         }
         return false;
@@ -75,13 +70,13 @@ public class Slang implements GrouphugModule {
         try {
             si = parseXML(getSlangXML(text), number);
         } catch(IOException e) {
-            bot.sendMessage("Sorry, the intartubes seems to be clogged up (IOException)", false);
+            Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)", false);
             System.err.println(e);
             return;
         } catch(Exception e) {
             // TODO small hack (better than the previous one): A general Exception is only thrown
             // TODO by us when no slang was found
-            bot.sendMessage("No slang found for "+text+".", false);
+            Grouphug.getInstance().sendMessage("No slang found for "+text+".", false);
             return;
         }
 
@@ -93,7 +88,7 @@ public class Slang implements GrouphugModule {
 
         reply = Grouphug.entitiesToChars(reply);
 
-        bot.sendMessage(reply, true);
+        Grouphug.getInstance().sendMessage(reply, true);
     }
 
     private String getSlangXML(String query) throws IOException {

@@ -1,27 +1,21 @@
 package grouphug.modules;
 
-import grouphug.modules.GrouphugModule;
 import grouphug.Grouphug;
 import grouphug.SQL;
 import grouphug.WeekDay;
+import grouphug.util.PasswordManager;
 
 import java.util.GregorianCalendar;
 import java.sql.SQLException;
 
 public class Dinner implements GrouphugModule {
 
-    private static Grouphug bot;
     private static final String TRIGGER = "middag";
     private static final String TRIGGER_DEPRECATED = "dinner";
     private static final String TRIGGER_HELP = "dinner";
     private static final String SQL_HOST = "heiatufte.net";
     private static final String SQL_DB = "narvikdata";
     private static final String SQL_USER = "narvikdata";
-    public static String SQL_PASSWORD = "";
-
-    public Dinner(Grouphug bot) {
-        Dinner.bot = bot;
-    }
 
     private String replaceHTML(String str) {
         str = str.replace("&oslash;", "ø");
@@ -40,10 +34,10 @@ public class Dinner implements GrouphugModule {
 
     public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            bot.sendNotice(sender, "Dinner: Shows what's for dinner at HiN.");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <ukedag>");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" all");
+            Grouphug.getInstance().sendNotice(sender, "Dinner: Shows what's for dinner at HiN.");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <ukedag>");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" all");
             return true;
         }
         return false;
@@ -57,20 +51,20 @@ public class Dinner implements GrouphugModule {
         if(!message.startsWith(Dinner.TRIGGER) && !message.startsWith(Dinner.TRIGGER_DEPRECATED))
             return;
 
-        if(SQL_PASSWORD.equals("")) {
-            bot.sendMessage("Couldn't fetch SQL password from file, please fix and reload the module.", false);
+        if(PasswordManager.getGrimstuxPass() == null) {
+            Grouphug.getInstance().sendMessage("Sorry, I don't have the password for the SQL db on grimstux.", false);
             return;
         }
 
         // Fetch the data
         SQL sql = new SQL();
         try {
-            sql.connect(SQL_HOST, SQL_DB, SQL_USER, SQL_PASSWORD);
+            sql.connect(SQL_HOST, SQL_DB, SQL_USER, PasswordManager.getGrimstuxPass());
             sql.query("SELECT middag_dato, middag_mandag, middag_tirsdag, middag_onsdag, middag_torsdag, middag_fredag FROM narvikdata;");
             sql.getNext();
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.sendMessage("Sorry, an SQL error occurred.", false);
+            Grouphug.getInstance().sendMessage("Sorry, an SQL error occurred.", false);
             sql.disconnect();
             return;
         }
@@ -104,7 +98,7 @@ public class Dinner implements GrouphugModule {
             switch(new GregorianCalendar().get(GregorianCalendar.DAY_OF_WEEK)) {
                 case 7:
                 case 1:
-                    bot.sendMessage("Middag blir ikke servert i helgen.", false);
+                    Grouphug.getInstance().sendMessage("Middag blir ikke servert i helgen.", false);
                     return;
                 case 2: wantedDay = WeekDay.MONDAY; break;
                 case 3: wantedDay = WeekDay.TUESDAY; break;
@@ -112,23 +106,23 @@ public class Dinner implements GrouphugModule {
                 case 5: wantedDay = WeekDay.THURSDAY; break;
                 case 6: wantedDay = WeekDay.FRIDAY; break;
                 default:
-                    bot.sendMessage("Vet ikke hvilken dag det er idag, vennligst spesifiser.", false);
+                    Grouphug.getInstance().sendMessage("Vet ikke hvilken dag det er idag, vennligst spesifiser.", false);
                     return;
             }
         }
 
-        bot.sendMessage("Dagens middag ("+values[0]+"):", false);
+        Grouphug.getInstance().sendMessage("Dagens middag ("+values[0]+"):", false);
 
         if(wantedDay == WeekDay.MONDAY || wantedDay == WeekDay.ALL)
-            bot.sendMessage("Mandag: "+values[1], false);
+            Grouphug.getInstance().sendMessage("Mandag: "+values[1], false);
         if(wantedDay == WeekDay.TUESDAY || wantedDay == WeekDay.ALL)
-            bot.sendMessage("Tirsdag: "+values[2], false);
+            Grouphug.getInstance().sendMessage("Tirsdag: "+values[2], false);
         if(wantedDay == WeekDay.WEDNESDAY || wantedDay == WeekDay.ALL)
-            bot.sendMessage("Onsdag: "+values[3], false);
+            Grouphug.getInstance().sendMessage("Onsdag: "+values[3], false);
         if(wantedDay == WeekDay.THURSDAY || wantedDay == WeekDay.ALL)
-            bot.sendMessage("Torsdag: "+values[4], false);
+            Grouphug.getInstance().sendMessage("Torsdag: "+values[4], false);
         if(wantedDay == WeekDay.FRIDAY || wantedDay == WeekDay.ALL)
-            bot.sendMessage("Fredag: "+values[5], false);
+            Grouphug.getInstance().sendMessage("Fredag: "+values[5], false);
 
     }
 }

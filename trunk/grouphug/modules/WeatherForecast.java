@@ -2,12 +2,12 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.SQL;
+import grouphug.util.PasswordManager;
 
 import java.sql.SQLException;
 
 public class WeatherForecast implements GrouphugModule {
 
-    private static Grouphug bot;
     private static final String TRIGGER = "weather";
     private static final String TRIGGER_HELP = "weatherforecast";
     private static final String SQL_HOST = "heiatufte.net";
@@ -15,18 +15,14 @@ public class WeatherForecast implements GrouphugModule {
     private static final String SQL_USER = "narvikdata";
     public static String SQL_PASSWORD = "";
 
-    public WeatherForecast(Grouphug bot) {
-        WeatherForecast.bot = bot;
-    }
-
     public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
         return TRIGGER_HELP;
     }
 
     public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            bot.sendNotice(sender, "WeatherForecast: General forecast for Narvik tomorrow.");
-            bot.sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER);
+            Grouphug.getInstance().sendNotice(sender, "WeatherForecast: General forecast for Narvik tomorrow.");
+            Grouphug.getInstance().sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER);
             return true;
         }
         return false;
@@ -40,8 +36,8 @@ public class WeatherForecast implements GrouphugModule {
         if(!message.startsWith(WeatherForecast.TRIGGER))
             return;
 
-        if(SQL_PASSWORD.equals("")) {
-            bot.sendMessage("Couldn't fetch SQL password from file, please fix and reload the module.", false);
+        if(PasswordManager.getGrimstuxPass() == null) {
+            Grouphug.getInstance().sendMessage("Sorry, I don't have the password for the SQL db on grimstux.", false);
             return;
         }
 
@@ -52,7 +48,7 @@ public class WeatherForecast implements GrouphugModule {
             sql.getNext();
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.sendMessage("Sorry, an SQL error occurred.", false);
+            Grouphug.getInstance().sendMessage("Sorry, an SQL error occurred.", false);
             sql.disconnect();
             return;
         }
@@ -62,7 +58,7 @@ public class WeatherForecast implements GrouphugModule {
 
         values[0] = fixOutput((String)values[0]);
 
-        bot.sendMessage((String)values[0], false);
+        Grouphug.getInstance().sendMessage((String)values[0], false);
     }
 
     private String fixOutput(String str) {

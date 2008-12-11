@@ -1,10 +1,11 @@
 package grouphug;
 
+import grouphug.util.PasswordManager;
+
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
-import java.io.*;
 
 /**
  * Provides functionality to connect to and perform operations on an SQL database.
@@ -91,6 +92,11 @@ public class SQL {
      * @throws SQLException - if we were unable to connect to the database
      */
     public void connect() throws SQLException {
+        if(DEFAULT_SQL_PASSWORD == null) {
+            if((DEFAULT_SQL_PASSWORD = PasswordManager.getHinuxPass()) == null) {
+                throw new SQLException("The default password for the hinux SQL DB hasn't been properly loaded from file!");
+            }
+        }
         connect(DEFAULT_SQL_HOST, DEFAULT_SQL_DB, DEFAULT_SQL_USER, DEFAULT_SQL_PASSWORD);
     }
 
@@ -99,16 +105,10 @@ public class SQL {
      * @param host - IP address or DNS of the host
      * @param db - Name of the database to open
      * @param user - Username used to authenticate
-     * @param password - Password used to authenticate - if null, use default password.
+     * @param password - Password used to authenticate
      * @throws SQLException - if we were unable to connect to the database
      */
     public void connect(String host, String db, String user, String password) throws SQLException {
-
-        if (password == null)
-        {
-            password = DEFAULT_SQL_PASSWORD;
-        }
-
         connection = DriverManager.getConnection ("jdbc:mysql://" + host + '/' + db, user, password);
         statement = connection.createStatement();
     }
@@ -196,19 +196,5 @@ public class SQL {
      */
     public static java.util.Date sqlDateTimeToDate(String dateTime) throws ParseException {
         return SQL_DATE_FORMAT.parse(dateTime);
-    }
-
-    /**
-     * Load up the SQL password from the first line of the specified textfile
-     * @param filename The name of the text
-     * @throws IOException if an I/O error occurs, if the file could not be found or if no text was
-     *         extracted from the file
-     */
-    public static void loadPassword(String filename) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(new File(filename)));
-        DEFAULT_SQL_PASSWORD = reader.readLine();
-        reader.close();
-        if(DEFAULT_SQL_PASSWORD.equals(""))
-            throw new FileNotFoundException("No data extracted from MySQL password file!");
     }
 }

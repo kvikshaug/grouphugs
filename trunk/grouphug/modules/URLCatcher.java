@@ -19,13 +19,8 @@ public class URLCatcher implements GrouphugModule
     private static final String[] URI_SCHEMES = new String[] { "http://", "https://" }; 
     private static final Pattern TITLE_BEGIN = Pattern.compile("<title>|<TITLE>");
     private static final Pattern TITLE_END = Pattern.compile("</title>|</TITLE>");    
-    private static Grouphug bot;
     private static final String HELP_TRIGGER = "urlcatcher";
 
-    public URLCatcher(Grouphug bot)
-    {
-        URLCatcher.bot = bot;
-    }
 
     /**
      * This method is called by the bot when someone sends a chat line that starts with the trigger command.
@@ -67,7 +62,7 @@ public class URLCatcher implements GrouphugModule
         {
             String title = getHTMLTitle(url);
             if (title != null)
-                bot.sendMessage("Title: " + Grouphug.entitiesToChars(title) + " :: " + url, false);
+                Grouphug.getInstance().sendMessage("Title: " + Grouphug.entitiesToChars(title) + " :: " + url, false);
         }
     }
 
@@ -193,7 +188,7 @@ public class URLCatcher implements GrouphugModule
     {
         if (message.equals(HELP_TRIGGER))
         {
-            bot.sendNotice(sender, "URLCatcher tries to catch http:// or https:// URLs in messages to the channel, tries" +
+            Grouphug.getInstance().sendNotice(sender, "URLCatcher tries to catch http:// or https:// URLs in messages to the channel, tries" +
                                    " to look up the URL, then parses whatever it finds at  the URL, looking for " +
                                    "a html <title>, and sends the title back to the channel.");
             return true;

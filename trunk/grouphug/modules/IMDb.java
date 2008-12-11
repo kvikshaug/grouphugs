@@ -11,13 +11,9 @@ import java.io.InputStreamReader;
 
 public class IMDb implements GrouphugModule {
 
-    private static Grouphug bot;
     private static final String TRIGGER = "imdb ";
     private static final String TRIGGER_HELP = "imdb";
 
-    public IMDb(Grouphug bot) {
-        IMDb.bot = bot;
-    }
 
     public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
         return TRIGGER_HELP;
@@ -25,8 +21,8 @@ public class IMDb implements GrouphugModule {
 
     public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            bot.sendNotice(sender, "IMDb: Show IMDb info for a movie");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<movie name>");
+            Grouphug.getInstance().sendNotice(sender, "IMDb: Show IMDb info for a movie");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<movie name>");
             return true;
         }
         return false;
@@ -46,11 +42,11 @@ public class IMDb implements GrouphugModule {
         try {
             imdbURL = Google.search(query+"+site:www.imdb.com");
         } catch(IOException e) {
-            bot.sendMessage("But I don't want to. (IOException)", false);
+            Grouphug.getInstance().sendMessage("But I don't want to. (IOException)", false);
             return;
         }
         if(imdbURL == null) {
-            bot.sendMessage("Sorry, I didn't find "+query+" on IMDb.", false);
+            Grouphug.getInstance().sendMessage("Sorry, I didn't find "+query+" on IMDb.", false);
             return;
         }
 
@@ -116,23 +112,23 @@ public class IMDb implements GrouphugModule {
             }
 
         } catch(StringIndexOutOfBoundsException ex) {
-            bot.sendMessage("The IMDb site layout may have changed, I was unable to parse it.", false);
+            Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.", false);
             return;
         } catch(NumberFormatException ex) {
-            bot.sendMessage("The IMDb site layout may have changed, I was unable to parse it.", false);
+            Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.", false);
             return;
         } catch(MalformedURLException ex) {
-            bot.sendMessage("Wtf just happened? I caught a MalformedURLException.", false);
+            Grouphug.getInstance().sendMessage("Wtf just happened? I caught a MalformedURLException.", false);
             return;
         } catch(IOException ex) {
-            bot.sendMessage("Sorry, the intartubes seem to be clogged up.", false);
+            Grouphug.getInstance().sendMessage("Sorry, the intartubes seem to be clogged up.", false);
             return;
         }
 
         try {
-            bot.sendMessage(title+tagline+"\n"+plot+"\n"+"Comment: "+commentTitle+"\n"+score+"/10 ("+votes+" votes) - "+imdbURL.toString(), false);
+            Grouphug.getInstance().sendMessage(title+tagline+"\n"+plot+"\n"+"Comment: "+commentTitle+"\n"+score+"/10 ("+votes+" votes) - "+imdbURL.toString(), false);
         } catch(NullPointerException ex) {
-            bot.sendMessage("The IMDb site layout may have changed, I was unable to parse it.", false);
+            Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.", false);
         }
     }
 }

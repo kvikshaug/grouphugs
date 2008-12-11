@@ -2,6 +2,7 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.SQL;
+import grouphug.util.PasswordManager;
 
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -9,17 +10,14 @@ import java.text.SimpleDateFormat;
 
 public class Cinema implements GrouphugModule {
 
-    private static Grouphug bot;
     private static final String TRIGGER = "kino";
     private static final String TRIGGER_HELP = "cinema";
     private static final String SQL_HOST = "heiatufte.net";
     private static final String SQL_DB = "narvikdata";
     private static final String SQL_USER = "narvikdata";
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("d.M E HH:mm");
-    public static String SQL_PASSWORD = "";
 
-    public Cinema(Grouphug bot) {
-        Cinema.bot = bot;
+    public Cinema() {
     }
 
     private String replaceHTML(String str) {
@@ -36,10 +34,10 @@ public class Cinema implements GrouphugModule {
 
     public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            bot.sendNotice(sender, "Cinema module: Display upcoming movies at Narvik Cinema");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <nr of films>");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" all");
+            Grouphug.getInstance().sendNotice(sender, "Cinema module: Display upcoming movies at Narvik Cinema");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <nr of films>");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" all");
             return true;
         }
         return false;
@@ -54,8 +52,8 @@ public class Cinema implements GrouphugModule {
         if(!message.startsWith(Cinema.TRIGGER))
             return;
 
-        if(SQL_PASSWORD.equals("")) {
-            bot.sendMessage("Couldn't fetch SQL password from file, please fix and reload the module.", false);
+        if(PasswordManager.getGrimstuxPass() == null) {
+            Grouphug.getInstance().sendMessage("Sorry, I don't have the password for the SQL db on grimstux.", false);
             return;
         }
 
@@ -80,7 +78,7 @@ public class Cinema implements GrouphugModule {
         String lineToSend = "";
         SQL sql = new SQL();
         try {
-            sql.connect(SQL_HOST, SQL_DB, SQL_USER, SQL_PASSWORD);
+            sql.connect(SQL_HOST, SQL_DB, SQL_USER, PasswordManager.getGrimstuxPass());
             sql.query("SELECT datetime, title, cencor, theater, price FROM narvikdata_kino ORDER BY datetime"+limit+";");
             while(sql.getNext()) {
                 Object[] values = sql.getValueList();
@@ -93,11 +91,11 @@ public class Cinema implements GrouphugModule {
             }
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.sendMessage("Sorry, an SQL error occurred.", false);
+            Grouphug.getInstance().sendMessage("Sorry, an SQL error occurred.", false);
             sql.disconnect();
             return;
         }
 
-        bot.sendMessage(lineToSend, true);
+        Grouphug.getInstance().sendMessage(lineToSend, true);
     }
 }

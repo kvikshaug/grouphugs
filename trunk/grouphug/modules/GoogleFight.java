@@ -11,16 +11,11 @@ import java.io.InputStreamReader;
 
 public class GoogleFight implements GrouphugModule {
 
-    private static Grouphug bot;
     private static final String TRIGGER = "gfight ";
     private static final String TRIGGER_ALT = "gf ";
     private static final String TRIGGER_HELP = "googlefight";
     private static final String TRIGGER_VS = " <vs> ";
     private static final int CONN_TIMEOUT = 10000; // ms
-
-    public GoogleFight(Grouphug bot) {
-        GoogleFight.bot = bot;
-    }
 
     public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
         return TRIGGER_HELP;
@@ -28,9 +23,9 @@ public class GoogleFight implements GrouphugModule {
 
     public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            bot.sendNotice(sender, "Google fight:");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER + "<1st search>" + TRIGGER_VS + "<2nd search>");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER_ALT + "<1st search>" + TRIGGER_VS + "<2nd search>");
+            Grouphug.getInstance().sendNotice(sender, "Google fight:");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER + "<1st search>" + TRIGGER_VS + "<2nd search>");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER_ALT + "<1st search>" + TRIGGER_VS + "<2nd search>");
             return true;
         }
         return false;
@@ -53,7 +48,7 @@ public class GoogleFight implements GrouphugModule {
 
 
         if(!message.contains(TRIGGER_VS)) {
-            bot.sendMessage(sender+", try "+Grouphug.MAIN_TRIGGER+Grouphug.HELP_TRIGGER+" "+TRIGGER_HELP, false);
+            Grouphug.getInstance().sendMessage(sender+", try "+Grouphug.MAIN_TRIGGER+Grouphug.HELP_TRIGGER+" "+TRIGGER_HELP, false);
             return;
         }
 
@@ -69,10 +64,10 @@ public class GoogleFight implements GrouphugModule {
             if(hits2 == null)
                 hits2 = "no";
 
-            bot.sendMessage(query1+": "+hits1+" results\n"+query2+": "+hits2+" results", false);
+            Grouphug.getInstance().sendMessage(query1+": "+hits1+" results\n"+query2+": "+hits2+" results", false);
 
         } catch(IOException e) {
-            bot.sendMessage("Sorry, the intartubes seems to be clogged up (IOException)", false);
+            Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)", false);
             System.err.println(e.getMessage()+"\n"+e.getCause());
         }
     }

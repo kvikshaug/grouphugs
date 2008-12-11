@@ -11,14 +11,10 @@ import java.io.IOException;
 
 public class Google implements GrouphugModule {
 
-    private static Grouphug bot;
     private static final String TRIGGER = "google ";
     private static final String TRIGGER_HELP = "google";
     private static final int CONN_TIMEOUT = 10000; // ms
 
-    public Google(Grouphug bot) {
-        Google.bot = bot;
-    }
 
     public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
         return TRIGGER_HELP;
@@ -26,8 +22,8 @@ public class Google implements GrouphugModule {
 
     public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            bot.sendNotice(sender, "Google search:");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<searchword(s)>");
+            Grouphug.getInstance().sendNotice(sender, "Google search:");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<searchword(s)>");
             return true;
         }
         return false;
@@ -46,15 +42,15 @@ public class Google implements GrouphugModule {
         try {
             url = Google.search(message.substring(TRIGGER.length()));
         } catch(IOException e) {
-            bot.sendMessage("Sorry, the intartubes seems to be clogged up (IOException)", false);
+            Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)", false);
             System.err.println(e.getMessage()+"\n"+e.getCause());
             return;
         }
 
         if(url == null) {
-            bot.sendMessage("No results for "+message.substring(TRIGGER.length())+".", false);
+            Grouphug.getInstance().sendMessage("No results for "+message.substring(TRIGGER.length())+".", false);
         } else {
-            bot.sendMessage(url.toString(), false);
+            Grouphug.getInstance().sendMessage(url.toString(), false);
         }
     }
 

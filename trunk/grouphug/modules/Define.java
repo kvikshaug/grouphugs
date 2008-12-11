@@ -11,14 +11,9 @@ import java.io.InputStreamReader;
 
 public class Define implements GrouphugModule {
 
-    private static Grouphug bot;
     private static final String TRIGGER = "define ";
     private static final String TRIGGER_HELP = "define";
     private static final int CONN_TIMEOUT = 10000; // ms
-
-    public Define(Grouphug bot) {
-        Define.bot = bot;
-    }
 
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
@@ -31,8 +26,8 @@ public class Define implements GrouphugModule {
 
     public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            bot.sendNotice(sender, "Define: Use google to give a proper definition of a word.");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<keyword>");
+            Grouphug.getInstance().sendNotice(sender, "Define: Use google to give a proper definition of a word.");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<keyword>");
             return true;
         }
         return false;
@@ -48,15 +43,15 @@ public class Define implements GrouphugModule {
         try {
             answer = Define.search(message.substring(TRIGGER.length()));
         } catch(IOException e) {
-            bot.sendMessage("The intartubes seems to be clogged up (IOException).", false);
+            Grouphug.getInstance().sendMessage("The intartubes seems to be clogged up (IOException).", false);
             System.err.println(e.getMessage()+"\n"+e.getCause());
             return;
         }
 
         if(answer == null)
-            bot.sendMessage("No definition found for "+message.substring(TRIGGER.length())+".", false);
+            Grouphug.getInstance().sendMessage("No definition found for "+message.substring(TRIGGER.length())+".", false);
         else
-            bot.sendMessage(Grouphug.entitiesToChars(answer), false);
+            Grouphug.getInstance().sendMessage(Grouphug.entitiesToChars(answer), false);
     }
 
     public static String search(String query) throws IOException {

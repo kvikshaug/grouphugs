@@ -13,7 +13,6 @@ import java.io.IOException;
 public class Confession implements GrouphugModule {
     // TODO: reverify that timeouts are handled properly
 
-    private static Grouphug bot;
     private static final String TRIGGER = "gh";
     private static final String TRIGGER_HELP = "confession";
     private static final String KEYWORD_NEWEST = "-newest";
@@ -23,9 +22,7 @@ public class Confession implements GrouphugModule {
     // HACK this needs to be changed according to how many newsitems http://grouphug.us/ has. Se HACK tag further down.
     private static final int NO_OF_NEWSITEMS = 3;
 
-    public Confession(Grouphug bot) {
-        Confession.bot = bot;
-    }
+
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
         // do nothing
@@ -37,10 +34,10 @@ public class Confession implements GrouphugModule {
 
     public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            bot.sendNotice(sender, "Confession: Outputs a confession: random, newest or by search.");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" -newest");
-            bot.sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <searchword(s)>");
+            Grouphug.getInstance().sendNotice(sender, "Confession: Outputs a confession: random, newest or by search.");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" -newest");
+            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <searchword(s)>");
             return true;
         }
         return false;
@@ -67,9 +64,9 @@ public class Confession implements GrouphugModule {
         }
 
         if(conf == null)
-            bot.sendMessage(errorConfession, false);
+            Grouphug.getInstance().sendMessage(errorConfession, false);
         else
-            bot.sendMessage(conf.toString(), true);
+            Grouphug.getInstance().sendMessage(conf.toString(), true);
     }
 
     private ConfessionItem random() {
