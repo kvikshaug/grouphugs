@@ -385,6 +385,7 @@ public class Grouphug extends PircBot {
             Class clazz;
             try {
                 clazz = loadModule(s);
+                System.out.println("Loaded class: "+clazz.getCanonicalName());
                 modules.add((GrouphugModule)clazz.newInstance());
                 System.out.println("(Loader): "+s+".class : Reloaded OK");
             } catch (InstantiationException e) {
@@ -413,7 +414,7 @@ public class Grouphug extends PircBot {
         URL[] urls = null;
         try {
             // Convert the file object to a URL
-            File dir = new File(System.getProperty("user.dir")+File.pathSeparator+"grouphug"+File.pathSeparator+"modules");
+            File dir = new File(ROOT_DIR+"out"+File.pathSeparator+"grouphug"+File.pathSeparator+"modules");
             URL url = dir.toURI().toURL();
             urls = new URL[]{url};
         } catch (MalformedURLException e) {
