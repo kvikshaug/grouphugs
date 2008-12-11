@@ -76,7 +76,7 @@ public class Grouphug extends PircBot {
     private static final int RECONNECT_TIME = 15000;
 
     // The file to log all messages to
-    private static File logfile = new File("log-current");
+    private static File logfile = new File("/home/DT2006/murray/gh/log-current");
 
     // The standard outputstream
     private static PrintStream stdOut;
@@ -357,7 +357,7 @@ public class Grouphug extends PircBot {
      * containing a '$'-char and the GrouphugModule.class file)
      */
     private static void loadModules() {
-        File file = new File("grouphug/modules/");
+        File file = new File("/home/DT2006/murray/gh/out/grouphug/modules/");
         for(String s : file.list()) {
             if(s.equals("GrouphugModule.class")) {
                 System.out.println("Skipping "+s);
