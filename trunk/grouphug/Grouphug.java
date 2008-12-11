@@ -61,6 +61,9 @@ public class Grouphug extends PircBot {
     public static final String SPAM_TRIGGER = "@";
     public static final String HELP_TRIGGER = "help";
 
+    // the root directory the bot is running from
+    public static final String ROOT_DIR = "/home/DT2006/murray/gh/";
+
     // A list over all the nicknames we want
     protected static ArrayList<String> nicks = new ArrayList<String>();
 
@@ -76,7 +79,7 @@ public class Grouphug extends PircBot {
     private static final int RECONNECT_TIME = 15000;
 
     // The file to log all messages to
-    private static File logfile = new File("/home/DT2006/murray/gh/log-current");
+    private static File logfile = new File(ROOT_DIR+"log-current");
 
     // The standard outputstream
     private static PrintStream stdOut;
@@ -120,7 +123,7 @@ public class Grouphug extends PircBot {
         // Reloading?
         if(message.equals("!reload")) {
             try {
-                Runtime.getRuntime().exec("/home/DT2006/murray/gh/reload.sh").waitFor();
+                Runtime.getRuntime().exec(ROOT_DIR+"reload.sh").waitFor();
             } catch(IOException ex) {
                 System.err.println(ex);
                 bot.sendMessage("Sorry, HiNux seems to have clogging problems, I caught in IOException.", false);
@@ -357,32 +360,36 @@ public class Grouphug extends PircBot {
      * containing a '$'-char and the GrouphugModule.class file)
      */
     private static void loadModules() {
-        File file = new File("/home/DT2006/murray/gh/out/grouphug/modules/");
+        System.out.println("(Loader): Starting class loader");
+        File file = new File(ROOT_DIR+"out/grouphug/modules/");
         for(String s : file.list()) {
             if(s.equals("GrouphugModule.class")) {
-                System.out.println("Skipping "+s);
+                System.out.println("(Loader): "+s+" : Skipped");
                 continue;
             }
             if(s.contains("$")) {
-                System.out.println("Skipping "+s);
+                System.out.println("(Loader): "+s+" : Skipped");
                 continue;
             }
             if(!s.endsWith(".class")) {
-                System.out.println("Skipping "+s);
+                System.out.println("(Loader): "+s+" : Skipped");
                 continue;
             }
             s = s.substring(0, s.length()-6); // strip ".class"
-            System.out.println(s);
             Class clazz;
             try {
                 clazz = loadModule(s);
                 modules.add((GrouphugModule)clazz.newInstance());
+                System.out.println("(Loader): "+s+" : Reloaded OK");
             } catch (InstantiationException e) {
-                System.err.println("Failed to reload "+s+".class: "+e);
+                System.err.println("(Loader): "+s+".class : Failed reload!");
+                System.err.println(e);
             } catch (IllegalAccessException e) {
-                System.err.println("Failed to reload "+s+".class: "+e);
+                System.err.println("(Loader): "+s+".class : Failed reload!");
+                System.err.println(e);
             } catch(ClassNotFoundException e) {
-                System.err.println("Failed to reload "+s+".class: "+e);
+                System.err.println("(Loader): "+s+".class : Failed reload!");
+                System.err.println(e);
             }
         }
     }

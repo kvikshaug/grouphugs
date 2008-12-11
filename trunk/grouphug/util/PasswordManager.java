@@ -1,5 +1,7 @@
 package grouphug.util;
 
+import grouphug.Grouphug;
+
 import java.io.*;
 
 /**
@@ -8,8 +10,8 @@ import java.io.*;
  */
 public class PasswordManager {
 
-    private static final String FILE_HINUX_PW = "pw/hinux";
-    private static final String FILE_GRIMSTUX_PW = "pw/grimstux";
+    private static final String FILE_HINUX_PW = Grouphug.ROOT_DIR+"pw/hinux";
+    private static final String FILE_GRIMSTUX_PW = Grouphug.ROOT_DIR+"pw/grimstux";
 
     private static String hinuxPass;
     private static String grimstuxPass;
