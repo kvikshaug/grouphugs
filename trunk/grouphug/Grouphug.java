@@ -120,6 +120,12 @@ public class Grouphug extends PircBot {
             return;
         }
 
+        if(message.equals("!reloadWithoutScript")) {
+            reloadModules();
+            bot.sendMessage("Reloaded modules OK.", false);
+            return;
+        }
+
         // Reloading?
         if(message.equals("!reload")) {
             try {
