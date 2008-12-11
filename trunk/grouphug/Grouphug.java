@@ -357,62 +357,51 @@ public class Grouphug extends PircBot {
      * containing a '$'-char and the GrouphugModule.class file)
      */
     private static void loadModules() {
-        System.out.println("(Loader): Starting class loader");
+        System.out.println("(CL): Starting class loader");
         File file = new File(ROOT_DIR+"out/grouphug/modules/");
-        for(String s : file.list()) {
-            if(s.equals("GrouphugModule.class")) {
-                System.out.println("(Loader): "+s+" : Skipped");
-                continue;
-            }
-            if(s.contains("$")) {
-                System.out.println("(Loader): "+s+" : Skipped");
-                continue;
-            }
-            if(!s.endsWith(".class")) {
-                System.out.println("(Loader): "+s+" : Skipped");
-                continue;
-            }
-            s = s.substring(0, s.length()-6); // strip ".class"
-            Class clazz;
-            try {
-                clazz = loadModule(s);
-                modules.add((GrouphugModule)clazz.newInstance());
-                System.out.println("(Loader): "+s+".class : Reloaded OK");
-            } catch (InstantiationException e) {
-                System.err.println("(Loader): "+s+".class : Failed reload!");
-                System.err.println(e);
-            } catch (IllegalAccessException e) {
-                System.err.println("(Loader): "+s+".class : Failed reload!");
-                System.err.println(e);
-            } catch(ClassNotFoundException e) {
-                System.err.println("(Loader): "+s+".class : Failed reload!");
-                System.err.println(e);
-            }
-        }
-    }
 
-    /**
-     * Reloads the specified GrouphugModule class into memory
-     *
-     * @param moduleName the Class name of the module to reload
-     * @return the reloaded class
-     * @throws ClassNotFoundException if the class was not found
-     */
-    private static Class loadModule(String moduleName) throws ClassNotFoundException {
-
-        // Get the directory (URL) of the reloadable class
+        // Create a new classloader
         URL[] urls = null;
         try {
-            // Convert the file object to a URL
-            File dir = new File(ROOT_DIR+"out"+File.pathSeparator+"grouphug"+File.pathSeparator+"modules");
+            File dir = new File(ROOT_DIR+"out"+File.pathSeparator+"grouphug"+File.pathSeparator+"modules"+File.pathSeparator);
             URL url = dir.toURI().toURL();
             urls = new URL[]{url};
         } catch (MalformedURLException e) {
             // this won't happen
         }
 
-        // Create a new class loader, load the class, and return it
-        return new URLClassLoader(urls).loadClass("grouphug.modules."+moduleName);
+        URLClassLoader cl = new URLClassLoader(urls);
+
+        for(String s : file.list()) {
+            if(s.equals("GrouphugModule.class")) {
+                System.out.println("(CL) "+s+" : Skipped");
+                continue;
+            }
+            if(s.contains("$")) {
+                System.out.println("(CL) "+s+" : Skipped");
+                continue;
+            }
+            if(!s.endsWith(".class")) {
+                System.out.println("(CL) "+s+" : Skipped");
+                continue;
+            }
+            s = s.substring(0, s.length()-6); // strip ".class"
+            Class clazz;
+            try {
+                clazz = cl.loadClass("grouphug.modules."+s);
+                modules.add((GrouphugModule)clazz.newInstance());
+                System.out.println("(CL) "+s+".class : Reloaded OK");
+            } catch (InstantiationException e) {
+                System.err.println("(CL) "+s+".class : Failed reload!");
+                System.err.println(e);
+            } catch (IllegalAccessException e) {
+                System.err.println("(CL) "+s+".class : Failed reload!");
+                System.err.println(e);
+            } catch(ClassNotFoundException e) {
+                System.err.println("(CL) "+s+".class : Failed reload!");
+                System.err.println(e);
+            }
+        }
     }
 
     private static boolean recompileModules() {
