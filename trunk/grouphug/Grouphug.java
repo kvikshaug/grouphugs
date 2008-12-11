@@ -356,6 +356,7 @@ public class Grouphug extends PircBot {
         modules.add(new GoogleFight(bot));
         modules.add(new Bofh(bot));
         modules.add(new WordCount(bot));
+        modules.add(new URLCatcher(bot));
         Grouphug.loadGrimstuxPassword();
         SVNCommit.load(bot);
 
@@ -467,6 +468,10 @@ public class Grouphug extends PircBot {
         str = str.replace("&gt;", ">");
         str = str.replace("&#34;", "\"");
         str = str.replace("&#39;", "'");
+        str = str.replace("&laquo;", "«");
+        str = str.replace("&lsaquo;", "‹");
+        str = str.replace("&raquo;", "»");
+        str = str.replace("&rsaquo;", "›");
         return str;
     }
 
