@@ -5,6 +5,7 @@ import grouphug.util.Web;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.ArrayList;
 
 /**
  * URLCatcher module
@@ -15,8 +16,7 @@ import java.util.regex.Matcher;
  */
 public class URLCatcher implements GrouphugModule
 {
-    private static final String HTTP_URI = "http://";
-    private static final String HTTPS_URI = "https://";
+    private static final String[] URI_SCHEMES = new String[] { "http://", "https://" }; 
     private static final Pattern TITLE_BEGIN = Pattern.compile("<title>|<TITLE>");
     private static final Pattern TITLE_END = Pattern.compile("</title>|</TITLE>");    
     private static Grouphug bot;
@@ -41,6 +41,36 @@ public class URLCatcher implements GrouphugModule
     {
         // not used
     }
+
+    /**
+     * This method is similar to the <code>trigger</code> method, but is called when the chat line contains
+     * no specific trigger command. The module may still choose to parse this, e.g. the karma module fetching
+     * up sentences ending with ++/--, but be careful as an important part of this bot is not to bother anyone
+     * unless specifically requested.
+     *
+     * @param channel  - The channel to which the message was sent.
+     * @param sender   - The nick of the person who sent the message.
+     * @param login    - The login of the person who sent the message.
+     * @param hostname - The hostname of the person who sent the message.
+     * @param message  - The actual message sent to the channel.
+     */
+    public void specialTrigger(String channel, String sender, String login, String hostname, String message)
+    {
+       /*if (message.startsWith(HTTP_URI) || message.startsWith(HTTPS_URI))
+        {
+            String title = getHTMLTitle(message);
+            if (title != null)
+                bot.sendMessage("URLCatcher: " + title, false);
+        }*/
+        ArrayList<String> urls = findAllUrls(message);
+        for (String s : urls)
+        {
+            String title = getHTMLTitle(s);
+            if (title != null)
+                bot.sendMessage(s + " is: " + title, false);
+        }
+    }
+
 
     /**
      * Try to find the title of the html document that maybe is at url.
@@ -71,28 +101,53 @@ public class URLCatcher implements GrouphugModule
         return "".equalsIgnoreCase(title) ? null : title;
     }
 
+    /**
+     * Find all urls matching a URI scheme in URI_SCHEMES in string.
+     * @param string the strings to look for urls in.
+     * @return any urls found, in an arraylist.
+     */
+    private ArrayList<String> findAllUrls(String string)
+    {
+        ArrayList<String> urls = new ArrayList<String>();
 
+        for (String s : URI_SCHEMES)
+        {
+            urls.addAll(findUrls(s, string));
+        }
+        
+        return urls;
+    }
 
     /**
-     * This method is similar to the <code>trigger</code> method, but is called when the chat line contains
-     * no specific trigger command. The module may still choose to parse this, e.g. the karma module fetching
-     * up sentences ending with ++/--, but be careful as an important part of this bot is not to bother anyone
-     * unless specifically requested.
+     * Find all urls with URI scheme uriScheme in string
      *
-     * @param channel  - The channel to which the message was sent.
-     * @param sender   - The nick of the person who sent the message.
-     * @param login    - The login of the person who sent the message.
-     * @param hostname - The hostname of the person who sent the message.
-     * @param message  - The actual message sent to the channel.
+     * @param uriScheme the URI scheme to look for. (http://, git:// svn://, etc.)
+     * @param string the string to look for urøs in.
+     * @return any urls found
      */
-    public void specialTrigger(String channel, String sender, String login, String hostname, String message)
+    private ArrayList<String> findUrls(String uriScheme, String string)
     {
-       if (message.startsWith(HTTP_URI) || message.startsWith(HTTPS_URI))
+        ArrayList<String> urls = new ArrayList<String>();
+
+        int index = 0;
+        do
         {
-            String title = getHTMLTitle(message);
-            if (title != null)
-                bot.sendMessage("URLCatcher: " + title, false);
+            index = string.indexOf(uriScheme, index);
+
+            if (index == -1)
+                break;
+
+            int endIndex = string.indexOf(" ", index);
+            if (endIndex == -1)
+                endIndex = string.length();
+
+            urls.add(string.substring(index, endIndex));
+
+            index = endIndex;
         }
+        while (true);
+
+        return urls;
     }
 
     /**
