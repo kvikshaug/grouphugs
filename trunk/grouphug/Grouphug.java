@@ -35,7 +35,7 @@ import java.io.*;
 public class Grouphug extends PircBot {
 
     // Channel and server
-    public static final String CHANNEL = "#grouphugs-dev";
+    public static final String CHANNEL = "#grouphugs";
     public static final String SERVER = "irc.homelien.no";
 
     // Character encoding to use when communicating with the IRC server.
@@ -324,7 +324,7 @@ public class Grouphug extends PircBot {
         }
 
         // Load the SQL password from file
-        /*try {
+        try {
             SQL.loadPassword("pw/hinux");
         } catch(IOException e) {
             System.err.println("Fatal error: Could not load MySQL-password file.");
@@ -333,7 +333,7 @@ public class Grouphug extends PircBot {
             e.printStackTrace();
             stdOut.flush();
             System.exit(-1);
-        }*/
+        }
 
         // Load up the bot, enable debugging output, and specify encoding
         Grouphug bot = new Grouphug();
@@ -355,9 +355,9 @@ public class Grouphug extends PircBot {
         modules.add(new Factoid(bot));
         modules.add(new GoogleFight(bot));
         modules.add(new Bofh(bot));
-        //modules.add(new WordCount(bot));
+        modules.add(new WordCount(bot));
         modules.add(new URLCatcher(bot));
-        //Grouphug.loadGrimstuxPassword();
+        Grouphug.loadGrimstuxPassword();
         SVNCommit.load(bot);
 
         // Start a logfile flusher thread
@@ -365,7 +365,7 @@ public class Grouphug extends PircBot {
 
         // Save the nicks we want, in prioritized order
         //nicks.add("gh");
-        nicks.add("gh`-dev");
+        nicks.add("gh`");
         nicks.add("hugger");
         nicks.add("klemZ");
 
