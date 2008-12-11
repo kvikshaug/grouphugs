@@ -63,11 +63,12 @@ public class URLCatcher implements GrouphugModule
                 bot.sendMessage("URLCatcher: " + title, false);
         }*/
         ArrayList<String> urls = findAllUrls(message);
-        for (String s : urls)
+        for (String url : urls)
         {
-            String title = getHTMLTitle(s);
+            String title = getHTMLTitle(url);
             if (title != null)
-                bot.sendMessage(s + " is: " + title, false);
+                bot.sendMessage("[ " + url + " ] is " + title, false);
+                bot.sendMessage("Title: " + title + " :: " + url, false);
         }
     }
 
@@ -132,18 +133,18 @@ public class URLCatcher implements GrouphugModule
         int index = 0;
         do
         {
-            index = string.indexOf(uriScheme, index);
+            index = string.indexOf(uriScheme, index); // find the start index of a URL
 
-            if (index == -1)
+            if (index == -1) // if indexOf returned -1, we didn't find any urls
                 break;
 
-            int endIndex = string.indexOf(" ", index);
-            if (endIndex == -1)
-                endIndex = string.length();
+            int endIndex = string.indexOf(" ", index); // find the end index of a URL (look for a space character)
+            if (endIndex == -1)             // if indexOf returned -1, we didnt find a space character, so we set the
+                endIndex = string.length(); // end of the URL to the end of the string
 
             urls.add(string.substring(index, endIndex));
 
-            index = endIndex;
+            index = endIndex; // start at the end of the URL we just added
         }
         while (true);
 
