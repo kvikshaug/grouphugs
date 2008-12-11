@@ -13,7 +13,6 @@ public class WeatherForecast implements GrouphugModule {
     private static final String SQL_HOST = "heiatufte.net";
     private static final String SQL_DB = "narvikdata";
     private static final String SQL_USER = "narvikdata";
-    public static String SQL_PASSWORD = "";
 
     public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
         return TRIGGER_HELP;
@@ -43,7 +42,7 @@ public class WeatherForecast implements GrouphugModule {
 
         SQL sql = new SQL();
         try {
-            sql.connect(SQL_HOST, SQL_DB, SQL_USER, SQL_PASSWORD);
+            sql.connect(SQL_HOST, SQL_DB, SQL_USER, PasswordManager.getGrimstuxPass());
             sql.query("SELECT korttidsvarsel FROM narvikdata;");
             sql.getNext();
         } catch(SQLException e) {

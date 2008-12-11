@@ -16,10 +16,18 @@ public class PasswordManager {
     private static String hinuxPass;
     private static String grimstuxPass;
 
+    /**
+     * Returns the password for the HiNux MySQL DB account read from file, or null if it wasn't correctly read
+     * @return the password for the HiNux MySQL DB account read from file, or null if it wasn't correctly read
+     */
     public static String getHinuxPass() {
         return hinuxPass;
     }
 
+    /**
+     * Returns the password for the Grimstux MySQL DB account read from file, or null if it wasn't correctly read
+     * @return the password for the Grimstux MySQL DB account read from file, or null if it wasn't correctly read
+     */
     public static String getGrimstuxPass() {
         return grimstuxPass;
     }
