@@ -25,7 +25,7 @@ public class WordCount implements GrouphugModule {
     private static final DateFormat df = new SimpleDateFormat("d. MMMMM");
 
 	
-	public void addWords(String sender, String message){
+	public void addWords(String sender, String message) {
 		SQL sql = new SQL();
 
         // This method to count words should be more or less failsafe:

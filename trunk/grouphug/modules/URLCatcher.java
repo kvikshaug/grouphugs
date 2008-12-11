@@ -62,7 +62,7 @@ public class URLCatcher implements GrouphugModule
         {
             String title = getHTMLTitle(url);
             if (title != null)
-                Grouphug.getInstance().sendMessage("Title: " + Grouphug.entitiesToChars(title) + " :: " + url, false);
+                Grouphug.getInstance().sendMessage("Title: " + Grouphug.entitiesToChars(title) /*+ " :: " + url*/, false);
         }
     }
 
@@ -117,7 +117,7 @@ public class URLCatcher implements GrouphugModule
      * Find all urls with URI scheme uriScheme in string
      *
      * @param uriScheme the URI scheme to look for. (http://, git:// svn://, etc.)
-     * @param string the string to look for urøs in.
+     * @param string the string to look for urï¿½s in.
      * @return any urls found
      */
     private ArrayList<String> findUrls(String uriScheme, String string)

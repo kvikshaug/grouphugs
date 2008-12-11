@@ -548,33 +548,39 @@ public class Grouphug extends PircBot {
         str = str.replace("&#34;", "\"");
         str = str.replace("&#39;", "'");
         str = str.replace("&laquo;", "«");
-        str = str.replace("&lsaquo;", "‹");
+        str = str.replace("&lsaquo;", "?");
         str = str.replace("&raquo;", "»");
-        str = str.replace("&rsaquo;", "›");
+        str = str.replace("&rsaquo;", "?");
+        str = str.replace("&aelig;", "æ");
+        str = str.replace("&Aelig;", "Æ");
+        str = str.replace("&aring;", "å");
+        str = str.replace("&Aring;", "Å");
+        str = str.replace("&oslash;", "ø");
+        str = str.replace("&Oslash;", "Ø");
         return str;
     }
 
     /**
-     * This attempts to convert non-regular æøåÆØÅ's to regular ones. Or something.
+     * This attempts to convert non-regular ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½'s to regular ones. Or something.
      * @param str The unconverted string
      * @return The attempted converted string
      */
     public static String fixEncoding(String str) {
 
         // lowercase iso-8859-1 encoded
-        str = str.replace(new String(new char[] { (char)195, (char)352 }), "æ");
-        str = str.replace(new String(new char[] { (char)195, (char)382 }), "ø");
-        str = str.replace(new String(new char[] { (char)195, (char)165 }), "å");
+        str = str.replace(new String(new char[] { (char)195, (char)352 }), "ï¿½");
+        str = str.replace(new String(new char[] { (char)195, (char)382 }), "ï¿½");
+        str = str.replace(new String(new char[] { (char)195, (char)165 }), "ï¿½");
 
         // uppercase iso-8859-1 encoded
-        str = str.replace(new String(new char[] { (char)195, (char)134}), "Æ");
-        str = str.replace(new String(new char[] { (char)195, (char)152}), "Ø");
-        str = str.replace(new String(new char[] { (char)195, (char)195}), "Å");
+        str = str.replace(new String(new char[] { (char)195, (char)134}), "ï¿½");
+        str = str.replace(new String(new char[] { (char)195, (char)152}), "ï¿½");
+        str = str.replace(new String(new char[] { (char)195, (char)195}), "ï¿½");
 
         // not exactly sure what this is - supposed to be utf-8, not sure what happens really
-        // not sure of the char values for Æ and Å, these are commented out, enable them when this gets applicable
+        // not sure of the char values for ï¿½ and ï¿½, these are commented out, enable them when this gets applicable
         //str = str.replace(new String(new char[] { (char)195, (char)???}), "&AElig;");
-        str = str.replace(new String(new char[] { (char)195, (char)732}), "Ø");
+        str = str.replace(new String(new char[] { (char)195, (char)732}), "ï¿½");
         //str = str.replace(new String(new char[] { (char)195, (char)???}), "&Aring;");
 
         return str;
