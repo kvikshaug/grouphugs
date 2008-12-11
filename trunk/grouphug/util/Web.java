@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.security.cert.CertPathValidatorException;
 
 /**
  * Utilities for interacting with web pages etc.
@@ -49,12 +50,13 @@ public class Web
         }
         catch (UnknownHostException uhe)
         {
-            System.err.println("No site found at:" + url);
-            return null;
+            //System.err.println("No site found at:" + url);
+            return null; // fail silently
         }
         catch (IOException ioe)
         {
-            ioe.printStackTrace(System.err); //TODO proper IOException handling
+            //ioe.printStackTrace(System.err); //TODO proper IOException handling
+            return null; // fail silently
         }
         finally {
             try { if(input != null) input.close(); } catch (IOException ioeIsIgnored) { /*IDEA code inspection nags*/ }
