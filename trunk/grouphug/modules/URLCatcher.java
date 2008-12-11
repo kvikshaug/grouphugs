@@ -67,7 +67,6 @@ public class URLCatcher implements GrouphugModule
         {
             String title = getHTMLTitle(url);
             if (title != null)
-                bot.sendMessage("[ " + url + " ] is " + title, false);
                 bot.sendMessage("Title: " + title + " :: " + url, false);
         }
     }
