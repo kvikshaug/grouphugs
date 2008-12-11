@@ -128,18 +128,9 @@ public class Grouphug extends PircBot {
 
         // Reloading?
         if(message.equals("!reload")) {
-            try {
-                Runtime.getRuntime().exec(ROOT_DIR+"reload.sh").waitFor();
-            } catch(IOException ex) {
-                System.err.println(ex);
-                bot.sendMessage("Sorry, HiNux seems to have clogging problems, I caught in IOException.", false);
+            if(!recompileModules())
                 return;
-            } catch(InterruptedException ex) {
-                System.err.println("WARNING: I was interrupted before the compilation was done! NOT reloading modules.");
-                System.err.println(ex);
-                bot.sendMessage("I tried, but was interrupted! Hmpf.", false);
-                return;
-            }
+
             reloadModules();
             bot.sendMessage("Reloaded modules OK.", false);
             return;
@@ -385,7 +376,6 @@ public class Grouphug extends PircBot {
             Class clazz;
             try {
                 clazz = loadModule(s);
-                System.out.println("Loaded class: "+clazz.getCanonicalName());
                 modules.add((GrouphugModule)clazz.newInstance());
                 System.out.println("(Loader): "+s+".class : Reloaded OK");
             } catch (InstantiationException e) {
@@ -425,6 +415,22 @@ public class Grouphug extends PircBot {
         return new URLClassLoader(urls).loadClass("grouphug.modules."+moduleName);
     }
 
+    private static boolean recompileModules() {
+        try {
+            Runtime.getRuntime().exec(ROOT_DIR+"reload.sh").waitFor();
+        } catch(IOException ex) {
+            System.err.println(ex);
+            bot.sendMessage("Sorry, HiNux seems to have clogging problems, I caught in IOException.", false);
+            return false;
+        } catch(InterruptedException ex) {
+            System.err.println("WARNING: I was interrupted before the compilation was done! NOT reloading modules.");
+            System.err.println(ex);
+            bot.sendMessage("I tried, but was interrupted! Hmpf.", false);
+            return false;
+        }
+        return true;
+    }
+
     /**
      * The main method, starting the bot, connecting to the server and joining its main channel.
      *
@@ -457,6 +463,7 @@ public class Grouphug extends PircBot {
         bot.setEncoding(ENCODING);
 
         // Load up modules and threads
+        recompileModules();
         loadModules();
         SVNCommit.load(bot);
         new Thread(new LogFlusher(bot)).start();
