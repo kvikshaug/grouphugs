@@ -357,6 +357,8 @@ public class Grouphug extends PircBot {
      * containing a '$'-char and the GrouphugModule.class file)
      */
     private static void loadModules() {
+        // TODO - doesn't work. might be because modules are loaded by the bootstrap ClassLoader
+        // TODO - at startup, our classloader has the wrong parent, or something weird like that
         System.out.println("(CL): Starting class loader");
         File file = new File(ROOT_DIR+"out/grouphug/modules/");
 
@@ -452,8 +454,8 @@ public class Grouphug extends PircBot {
         bot.setEncoding(ENCODING);
 
         // Load up modules and threads
-        //recompileModules();
-        //loadModules();
+        recompileModules();
+        loadModules();
         SVNCommit.load(bot);
         new Thread(new LogFlusher(bot)).start();
 
