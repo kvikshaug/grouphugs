@@ -120,17 +120,16 @@ public class Grouphug extends PircBot {
             return;
         }
 
-        if(message.equals("!reloadWithoutScript")) {
+        // Reloading?
+        if(message.equals("!reload")) {
             bot.sendMessage("Reloaded "+reloadModules()+" modules, without recompiling.", false);
             return;
         }
-
-        // Reloading?
-        if(message.equals("!reload")) {
+        if(message.equals("!reload -compile")) {
             if(!recompileModules())
                 return;
 
-            bot.sendMessage("Reloaded "+reloadModules()+" modules OK.", false);
+            bot.sendMessage("Recompiled and reloaded "+reloadModules()+" modules OK.", false);
             return;
         }
 
@@ -357,6 +356,8 @@ public class Grouphug extends PircBot {
     private static int loadModules() {
         // TODO - doesn't work. might be because modules are loaded by the bootstrap ClassLoader
         // TODO - at startup, our classloader has the wrong parent, or something weird like that
+        // TODO -> Further testing shows that the problem is probably the fact that the modules
+        // TODO -> are in packages - the dynamic loading method doesn't seem to work with packages 
         System.out.println("(CL): Starting class loader");
         File file = new File(ROOT_DIR+"out/grouphug/modules/");
 
@@ -456,8 +457,8 @@ public class Grouphug extends PircBot {
         bot.setEncoding(ENCODING);
 
         // Load up modules and threads
-        //recompileModules();
-        //loadModules();
+        recompileModules();
+        loadModules();
         SVNCommit.load(bot);
         new Thread(new LogFlusher(bot)).start();
 
