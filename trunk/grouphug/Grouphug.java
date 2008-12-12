@@ -456,8 +456,8 @@ public class Grouphug extends PircBot {
         bot.setEncoding(ENCODING);
 
         // Load up modules and threads
-        recompileModules();
-        loadModules();
+        //recompileModules();
+        //loadModules();
         SVNCommit.load(bot);
         new Thread(new LogFlusher(bot)).start();
 
