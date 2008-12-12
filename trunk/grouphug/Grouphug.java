@@ -1,7 +1,6 @@
 package grouphug;
 
 import org.jibble.pircbot.*;
-import grouphug.GrouphugModule;
 import grouphug.util.PasswordManager;
 
 import java.util.ArrayList;
@@ -343,6 +342,8 @@ public class Grouphug extends PircBot {
 
     /**
      * Clears all loaded modules, and runs the loadModules() method
+     *
+     * @return the number of loaded modules
      */
     private static int reloadModules() {
         modules.clear();
@@ -352,6 +353,8 @@ public class Grouphug extends PircBot {
     /**
      * Loads up all the modules in the modules package (skipping anything not ending with ".class",
      * containing a '$'-char and the GrouphugModule.class file)
+     *
+     * @return the number of loaded modules
      */
     private static int loadModules() {
         // TODO - doesn't work. might be because modules are loaded by the bootstrap ClassLoader
@@ -391,7 +394,7 @@ public class Grouphug extends PircBot {
             s = s.substring(0, s.length()-6); // strip ".class"
             Class clazz;
             try {
-                clazz = cl.loadClass("grouphug.modules."+s);
+                clazz = cl.loadClass(s);
                 modules.add((GrouphugModule)clazz.newInstance());
                 System.out.println("(CL) "+s+".class : Reloaded OK");
                 loadedModules++;
