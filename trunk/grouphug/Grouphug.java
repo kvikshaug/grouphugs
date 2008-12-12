@@ -362,7 +362,7 @@ public class Grouphug extends PircBot {
         // TODO -> Further testing shows that the problem is probably the fact that the modules
         // TODO -> are in packages - the dynamic loading method doesn't seem to work with packages 
         System.out.println("(CL): Starting class loader");
-        File file = new File(ROOT_DIR+"out/modules/");
+        File file = new File(ROOT_DIR+"out/");
 
         // Create a new classloader
         URL[] urls = null;
@@ -394,7 +394,7 @@ public class Grouphug extends PircBot {
             s = s.substring(0, s.length()-6); // strip ".class"
             Class clazz;
             try {
-                clazz = cl.loadClass(s);
+                clazz = cl.loadClass("modules."+s);
                 modules.add((GrouphugModule)clazz.newInstance());
                 System.out.println("(CL) "+s+".class : Reloaded OK");
                 loadedModules++;
