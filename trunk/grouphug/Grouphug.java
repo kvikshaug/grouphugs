@@ -121,8 +121,7 @@ public class Grouphug extends PircBot {
         }
 
         if(message.equals("!reloadWithoutScript")) {
-            reloadModules();
-            bot.sendMessage("Reloaded modules OK.", false);
+            bot.sendMessage("Reloaded "+reloadModules()+" modules, without recompiling.", false);
             return;
         }
 
@@ -131,8 +130,7 @@ public class Grouphug extends PircBot {
             if(!recompileModules())
                 return;
 
-            reloadModules();
-            bot.sendMessage("Reloaded modules OK.", false);
+            bot.sendMessage("Reloaded "+reloadModules()+" modules OK.", false);
             return;
         }
 
@@ -347,16 +345,16 @@ public class Grouphug extends PircBot {
     /**
      * Clears all loaded modules, and runs the loadModules() method
      */
-    private static void reloadModules() {
+    private static int reloadModules() {
         modules.clear();
-        loadModules();
+        return loadModules();
     }
 
     /**
      * Loads up all the modules in the modules package (skipping anything not ending with ".class",
      * containing a '$'-char and the GrouphugModule.class file)
      */
-    private static void loadModules() {
+    private static int loadModules() {
         // TODO - doesn't work. might be because modules are loaded by the bootstrap ClassLoader
         // TODO - at startup, our classloader has the wrong parent, or something weird like that
         System.out.println("(CL): Starting class loader");
@@ -373,6 +371,8 @@ public class Grouphug extends PircBot {
         }
 
         URLClassLoader cl = new URLClassLoader(urls);
+
+        int loadedModules = 0;
 
         for(String s : file.list()) {
             if(s.equals("GrouphugModule.class")) {
@@ -393,6 +393,7 @@ public class Grouphug extends PircBot {
                 clazz = cl.loadClass("grouphug.modules."+s);
                 modules.add((GrouphugModule)clazz.newInstance());
                 System.out.println("(CL) "+s+".class : Reloaded OK");
+                loadedModules++;
             } catch (InstantiationException e) {
                 System.err.println("(CL) "+s+".class : Failed reload!");
                 System.err.println(e);
@@ -404,6 +405,7 @@ public class Grouphug extends PircBot {
                 System.err.println(e);
             }
         }
+        return loadedModules;
     }
 
     private static boolean recompileModules() {
