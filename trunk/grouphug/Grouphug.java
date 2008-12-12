@@ -362,13 +362,12 @@ public class Grouphug extends PircBot {
         // TODO -> Further testing shows that the problem is probably the fact that the modules
         // TODO -> are in packages - the dynamic loading method doesn't seem to work with packages 
         System.out.println("(CL): Starting class loader");
-        File file = new File(ROOT_DIR+"out/grouphug/modules/");
+        File moduleDirectory = new File(ROOT_DIR+"out/grouphug/modules/");
 
         // Create a new classloader
         URL[] urls = null;
         try {
-            File dir = new File(ROOT_DIR+"out"+File.pathSeparator+"grouphug"+File.pathSeparator+"modules"+File.pathSeparator);
-            URL url = dir.toURI().toURL();
+            URL url = moduleDirectory.toURI().toURL();
             urls = new URL[]{url};
         } catch (MalformedURLException e) {
             // this won't happen
@@ -378,7 +377,7 @@ public class Grouphug extends PircBot {
 
         int loadedModules = 0;
 
-        for(String s : file.list()) {
+        for(String s : moduleDirectory.list()) {
             /*if(s.equals("GrouphugModule.class")) {
                 System.out.println("(CL) "+s+" : Skipped");
                 continue;
