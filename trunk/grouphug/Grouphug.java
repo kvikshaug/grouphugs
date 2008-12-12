@@ -121,14 +121,10 @@ public class Grouphug extends PircBot {
 
         // Reloading?
         if(message.equals("!reload")) {
-            bot.sendMessage("Reloaded "+reloadModules()+" modules, without recompiling.", false);
-            return;
-        }
-        if(message.equals("!reload -compile")) {
             if(!recompileModules())
                 return;
 
-            bot.sendMessage("Recompiled and reloaded "+reloadModules()+" modules OK.", false);
+            bot.sendMessage("Reloaded "+reloadModules()+" modules.", false);
             return;
         }
 
@@ -345,23 +341,20 @@ public class Grouphug extends PircBot {
      *
      * @return the number of loaded modules
      */
+    // TODO - do this automatically upon SVNCommit, without output?
     private static int reloadModules() {
         modules.clear();
         return loadModules();
     }
 
     /**
-     * Loads up all the modules in the modules package (skipping anything not ending with ".class",
-     * containing a '$'-char and the GrouphugModule.class file)
+     * Loads up all the modules in the modules package (skipping anything not ending
+     * with ".class" or containing a '$'-char)
      *
      * @return the number of loaded modules
      */
     private static int loadModules() {
-        // TODO - doesn't work. might be because modules are loaded by the bootstrap ClassLoader
-        // TODO - at startup, our classloader has the wrong parent, or something weird like that
-        // TODO -> Further testing shows that the problem is probably the fact that the modules
-        // TODO -> are in packages - the dynamic loading method doesn't seem to work with packages 
-        System.out.println("(CL): Starting class loader");
+        System.out.println("(CL) Starting class loader");
         File moduleDirectory = new File(ROOT_DIR+"out/grouphug/modules/");
 
         // Create a new classloader
@@ -378,10 +371,6 @@ public class Grouphug extends PircBot {
         int loadedModules = 0;
 
         for(String s : moduleDirectory.list()) {
-            /*if(s.equals("GrouphugModule.class")) {
-                System.out.println("(CL) "+s+" : Skipped");
-                continue;
-            }*/
             if(s.contains("$")) {
                 System.out.println("(CL) "+s+" : Skipped");
                 continue;
@@ -395,18 +384,21 @@ public class Grouphug extends PircBot {
             try {
                 clazz = cl.loadClass(s);
                 modules.add((GrouphugModule)clazz.newInstance());
-                System.out.println("(CL) "+s+".class : Reloaded OK");
+                System.out.println("(CL) "+s+".class : Loaded OK");
                 loadedModules++;
             } catch (InstantiationException e) {
-                System.err.println("(CL) "+s+".class : Failed reload!");
+                System.err.println("(CL) "+s+".class : Failed to load!");
                 System.err.println(e);
             } catch (IllegalAccessException e) {
-                System.err.println("(CL) "+s+".class : Failed reload!");
+                System.err.println("(CL) "+s+".class : Failed to load!");
                 System.err.println(e);
             } catch(ClassNotFoundException e) {
-                System.err.println("(CL) "+s+".class : Failed reload!");
+                System.err.println("(CL) "+s+".class : Failed to load!");
                 System.err.println(e);
             }
+        }
+        if(loadedModules == 0) {
+            System.out.println("(CL) No modules to load.");
         }
         return loadedModules;
     }
@@ -459,8 +451,8 @@ public class Grouphug extends PircBot {
         bot.setEncoding(ENCODING);
 
         // Load up modules and threads
-        //recompileModules();
-        //loadModules();
+        recompileModules();
+        loadModules();
         SVNCommit.load(bot);
         new Thread(new LogFlusher(bot)).start();
 
