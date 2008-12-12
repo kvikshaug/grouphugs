@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 
 import grouphug.Grouphug;
 import grouphug.SQL;
+import grouphug.GrouphugModule;
 import grouphug.util.PasswordManager;
 
 

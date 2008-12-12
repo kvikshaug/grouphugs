@@ -1,4 +1,4 @@
-package grouphug.modules;
+package grouphug;
 
 public interface GrouphugModule {
 

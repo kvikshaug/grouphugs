@@ -2,6 +2,7 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.SQL;
+import grouphug.GrouphugModule;
 
 import java.util.ArrayList;
 import java.util.Random;

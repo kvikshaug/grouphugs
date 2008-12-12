@@ -1,7 +1,7 @@
 package grouphug;
 
 import org.jibble.pircbot.*;
-import grouphug.modules.GrouphugModule;
+import grouphug.GrouphugModule;
 import grouphug.util.PasswordManager;
 
 import java.util.ArrayList;
@@ -376,10 +376,10 @@ public class Grouphug extends PircBot {
         int loadedModules = 0;
 
         for(String s : file.list()) {
-            if(s.equals("GrouphugModule.class")) {
+            /*if(s.equals("GrouphugModule.class")) {
                 System.out.println("(CL) "+s+" : Skipped");
                 continue;
-            }
+            }*/
             if(s.contains("$")) {
                 System.out.println("(CL) "+s+" : Skipped");
                 continue;

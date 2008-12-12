@@ -1,6 +1,7 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
+import grouphug.GrouphugModule;
 
 import java.net.URL;
 import java.net.URLConnection;

@@ -3,6 +3,7 @@ package grouphug.modules;
 import grouphug.Grouphug;
 import grouphug.SQL;
 import grouphug.WeekDay;
+import grouphug.GrouphugModule;
 import grouphug.util.PasswordManager;
 
 import java.util.GregorianCalendar;
