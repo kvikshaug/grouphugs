@@ -405,7 +405,13 @@ public class Grouphug extends PircBot {
 
     private static boolean recompileModules() {
         try {
-            Runtime.getRuntime().exec(ROOT_DIR+"reload.sh").waitFor();
+            Process reload = Runtime.getRuntime().exec(ROOT_DIR+"reload.sh");
+            BufferedReader br = new BufferedReader(new InputStreamReader(reload.getInputStream()));
+            String line;
+            while ((line = br.readLine()) != null) {
+                System.out.println("Process output: "+line);
+            }
+            reload.waitFor();
         } catch(IOException ex) {
             System.err.println(ex);
             bot.sendMessage("Sorry, HiNux seems to have clogging problems, I caught in IOException.", false);
