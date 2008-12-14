@@ -354,7 +354,7 @@ public class Grouphug extends PircBot {
      * @return the number of loaded modules
      */
     private static int loadModules() {
-        System.out.println("(CL) Starting class loader");
+        System.out.println("(CL) Starting Class Loader...");
         File moduleDirectory = new File(ROOT_DIR+"out/grouphug/modules/");
 
         // Create a new classloader
@@ -408,8 +408,9 @@ public class Grouphug extends PircBot {
             Process reload = Runtime.getRuntime().exec(ROOT_DIR+"reload.sh");
             BufferedReader br = new BufferedReader(new InputStreamReader(reload.getInputStream()));
             String line;
+            System.out.println("(RC) Starting recompilation of modules...");
             while ((line = br.readLine()) != null) {
-                System.out.println("Process output: "+line);
+                System.out.println("(RC) "+line);
             }
             reload.waitFor();
         } catch(IOException ex) {
