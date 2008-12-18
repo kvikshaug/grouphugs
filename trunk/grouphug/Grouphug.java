@@ -225,7 +225,7 @@ public class Grouphug extends PircBot {
     @Override
     protected void onJoin(String channel, String sender, String login, String hostname) {
         if(!sender.equals(getNick()))
-            sendAction(CHANNEL, "hugs "+sender);
+            sendAction(CHANNEL, "laughs at "+sender+"'s bad connection");
     }
 
     /**
