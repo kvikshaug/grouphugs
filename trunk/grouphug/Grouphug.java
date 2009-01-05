@@ -224,8 +224,10 @@ public class Grouphug extends PircBot {
      */
     @Override
     protected void onJoin(String channel, String sender, String login, String hostname) {
+        /*
         if(!sender.equals(getNick()))
             sendAction(CHANNEL, "laughs at icc");
+        */
     }
 
     /**
@@ -565,26 +567,26 @@ public class Grouphug extends PircBot {
     }
 
     /**
-     * This attempts to convert non-regular ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½'s to regular ones. Or something.
+     * This attempts to convert non-regular æøåÆØÅ's to regular ones. Or something.
      * @param str The unconverted string
      * @return The attempted converted string
      */
     public static String fixEncoding(String str) {
 
         // lowercase iso-8859-1 encoded
-        str = str.replace(new String(new char[] { (char)195, (char)352 }), "ï¿½");
-        str = str.replace(new String(new char[] { (char)195, (char)382 }), "ï¿½");
-        str = str.replace(new String(new char[] { (char)195, (char)165 }), "ï¿½");
+        str = str.replace(new String(new char[] { (char)195, (char)352 }), "æ");
+        str = str.replace(new String(new char[] { (char)195, (char)382 }), "ø");
+        str = str.replace(new String(new char[] { (char)195, (char)165 }), "å");
 
         // uppercase iso-8859-1 encoded
-        str = str.replace(new String(new char[] { (char)195, (char)134}), "ï¿½");
-        str = str.replace(new String(new char[] { (char)195, (char)152}), "ï¿½");
-        str = str.replace(new String(new char[] { (char)195, (char)195}), "ï¿½");
+        str = str.replace(new String(new char[] { (char)195, (char)134}), "Æ");
+        str = str.replace(new String(new char[] { (char)195, (char)152}), "Ø");
+        str = str.replace(new String(new char[] { (char)195, (char)195}), "Å");
 
         // not exactly sure what this is - supposed to be utf-8, not sure what happens really
-        // not sure of the char values for ï¿½ and ï¿½, these are commented out, enable them when this gets applicable
+        // not sure of the char values for Æ and Å, these are commented out, enable them when this gets applicable
         //str = str.replace(new String(new char[] { (char)195, (char)???}), "&AElig;");
-        str = str.replace(new String(new char[] { (char)195, (char)732}), "ï¿½");
+        str = str.replace(new String(new char[] { (char)195, (char)732}), "Ø");
         //str = str.replace(new String(new char[] { (char)195, (char)???}), "&Aring;");
 
         return str;
