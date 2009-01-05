@@ -9,9 +9,7 @@ import java.util.regex.Matcher;
 import java.util.ArrayList;
 
 /**
- * User: oyvindio
- * Date: Jan 5, 2009
- * Time: 6:59:51 PM
+ * isup - parses http://downforeveryoneorjustme.com/some.url.tld to check if a website is up or down.
  */
 public class IsSiteUp implements GrouphugModule
 {
