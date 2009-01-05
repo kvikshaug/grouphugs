@@ -51,8 +51,7 @@ public class IsSiteUp implements GrouphugModule
 
             for (String URI : URIs)
             {
-                String cURI = cleanURI(URI);
-                String html = Web.fetchHTML(DFEOJM_URI + '/' + cURI);
+                String html = Web.fetchHTML(DFEOJM_URI + '/' + cleanURI(URI));
                 if (null != html)
                 {
                     String result = parseHTML(html);
@@ -62,6 +61,11 @@ public class IsSiteUp implements GrouphugModule
         }
     }
 
+    /**
+     * Removes http[s]://[www] from the start of a String.
+     * @param uri the string we want to clean.
+     * @return the cleaned string.
+     */
     private String cleanURI(String uri)
     {
         Matcher uriStart = URI_START_REGEX.matcher(uri);
@@ -74,6 +78,11 @@ public class IsSiteUp implements GrouphugModule
         return uri;
     }
 
+    /**
+     * Parses the html retrieved from downforeveryoneorjustme.com, to fetch the message returned by the site.
+     * @param html a String containing html.
+     * @return the message returned by the site.
+     */
     private String parseHTML(String html)
     {
         int msgStartIndex = 0;
@@ -151,6 +160,15 @@ public class IsSiteUp implements GrouphugModule
      */
     public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message)
     {
+        if (message.equals(TRIGGER))
+        {
+            Grouphug.getInstance().sendNotice(sender, "isup - Checks if a web site is down, or if it's just your connection that sucks somehow.");
+            Grouphug.getInstance().sendNotice(sender, "Usage:");
+            Grouphug.getInstance().sendNotice(sender, Grouphug.MAIN_TRIGGER + TRIGGER + " http://foo.tld");
+            Grouphug.getInstance().sendNotice(sender, "Checks if http://foo.tld is up or not.");
+            Grouphug.getInstance().sendNotice(sender, "NOTE: URIs must start with http:// or https://.");
+            return true;
+        }
         return false;
     }
 }
