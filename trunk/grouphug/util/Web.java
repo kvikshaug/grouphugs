@@ -6,7 +6,7 @@ import java.net.UnknownHostException;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.security.cert.CertPathValidatorException;
+import java.util.ArrayList;
 
 /**
  * Utilities for interacting with web pages etc.
@@ -63,6 +63,38 @@ public class Web
         }
         
         return html.toString();
+    }
+
+    /**
+     * Find all URIs with a specific URI scheme in a String
+     *
+     * @param uriScheme the URI scheme to look for. (http://, git:// svn://, etc.)
+     * @param string the String to look for URIs in.
+     * @return An ArrayList containing any URIs found.
+     */
+    public static ArrayList<String> findURIs(String uriScheme, String string)
+    {
+        ArrayList<String> uris = new ArrayList<String>();
+
+        int index = 0;
+        do
+        {
+            index = string.indexOf(uriScheme, index); // find the start index of a URL
+
+            if (index == -1) // if indexOf returned -1, we didn't find any urls
+                break;
+
+            int endIndex = string.indexOf(" ", index); // find the end index of a URL (look for a space character)
+            if (endIndex == -1)             // if indexOf returned -1, we didnt find a space character, so we set the
+                endIndex = string.length(); // end of the URL to the end of the string
+
+            uris.add(string.substring(index, endIndex));
+
+            index = endIndex; // start at the end of the URL we just added
+        }
+        while (true);
+
+        return uris;
     }
 
 }

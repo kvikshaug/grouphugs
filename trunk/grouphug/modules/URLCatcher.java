@@ -108,43 +108,12 @@ public class URLCatcher implements GrouphugModule
 
         for (String s : URI_SCHEMES)
         {
-            urls.addAll(findUrls(s, string));
+            urls.addAll(Web.findURIs(s, string));
         }
         
         return urls;
     }
 
-    /**
-     * Find all urls with URI scheme uriScheme in string
-     *
-     * @param uriScheme the URI scheme to look for. (http://, git:// svn://, etc.)
-     * @param string the string to look for ur�s in.
-     * @return any urls found
-     */
-    private ArrayList<String> findUrls(String uriScheme, String string)
-    {
-        ArrayList<String> urls = new ArrayList<String>();
-
-        int index = 0;
-        do
-        {
-            index = string.indexOf(uriScheme, index); // find the start index of a URL
-
-            if (index == -1) // if indexOf returned -1, we didn't find any urls
-                break;
-
-            int endIndex = string.indexOf(" ", index); // find the end index of a URL (look for a space character)
-            if (endIndex == -1)             // if indexOf returned -1, we didnt find a space character, so we set the
-                endIndex = string.length(); // end of the URL to the end of the string
-
-            urls.add(string.substring(index, endIndex));
-
-            index = endIndex; // start at the end of the URL we just added
-        }
-        while (true);
-
-        return urls;
-    }
 
     /**
      * This is called when the user is believed to ask for general help about the bot.
