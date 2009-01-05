@@ -14,6 +14,7 @@ import java.util.ArrayList;
 public class IsSiteUp implements GrouphugModule
 {
     private static final String TRIGGER = "isup .+";
+    private static final String HELP_TRIGGER = "isup";
     private static final String[] URI_SCHEMES = new String[] { "http://", "https://" };
     private static final String DFEOJM_URI = "http://downforeveryoneorjustme.com";
     private static final Pattern URI_START_REGEX = Pattern.compile("http(s)?://(www)?");
@@ -140,7 +141,7 @@ public class IsSiteUp implements GrouphugModule
      */
     public String helpMainTrigger(String channel, String sender, String login, String hostname, String message)
     {
-        return TRIGGER;
+        return HELP_TRIGGER;
     }
 
     /**
@@ -158,11 +159,11 @@ public class IsSiteUp implements GrouphugModule
      */
     public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message)
     {
-        if (message.equals(TRIGGER))
+        if (message.equals(HELP_TRIGGER))
         {
             Grouphug.getInstance().sendNotice(sender, "isup - Checks if a web site is down, or if it's just your connection that sucks somehow.");
             Grouphug.getInstance().sendNotice(sender, "Usage:");
-            Grouphug.getInstance().sendNotice(sender, Grouphug.MAIN_TRIGGER + TRIGGER + " http://foo.tld");
+            Grouphug.getInstance().sendNotice(sender, Grouphug.MAIN_TRIGGER + HELP_TRIGGER + " http://foo.tld");
             Grouphug.getInstance().sendNotice(sender, "Checks if http://foo.tld is up or not.");
             Grouphug.getInstance().sendNotice(sender, "NOTE: URIs must start with http:// or https://.");
             return true;
