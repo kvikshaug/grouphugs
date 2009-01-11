@@ -22,15 +22,14 @@ public class Slang implements GrouphugModule {
         return TRIGGER_HELP;
     }
 
-    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            Grouphug.getInstance().sendNotice(sender, "Slang: Define an expression in slang terms.");
-            Grouphug.getInstance().sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + "<expr>");
-            Grouphug.getInstance().sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + "<expr> <number>");
-            Grouphug.getInstance().sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + Slang.TRIGGER_EXAMPLE + "<expr>");
-            return true;
+            return "Slang: Define an expression in slang terms.\n" +
+                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + "<expr>\n" +
+                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + "<expr> <number>\n" +
+                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + Slang.TRIGGER_EXAMPLE + "<expr>";
         }
-        return false;
+        return null;
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {

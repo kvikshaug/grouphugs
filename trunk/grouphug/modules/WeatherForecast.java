@@ -19,13 +19,12 @@ public class WeatherForecast implements GrouphugModule {
         return TRIGGER_HELP;
     }
 
-    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            Grouphug.getInstance().sendNotice(sender, "WeatherForecast: General forecast for Narvik tomorrow.");
-            Grouphug.getInstance().sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER);
-            return true;
+            return "WeatherForecast: General forecast for Narvik tomorrow.\n" +
+                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER;
         }
-        return false;
+        return null;
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {

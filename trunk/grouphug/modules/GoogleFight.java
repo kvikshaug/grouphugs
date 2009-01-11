@@ -22,14 +22,13 @@ public class GoogleFight implements GrouphugModule {
         return TRIGGER_HELP;
     }
 
-    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            Grouphug.getInstance().sendNotice(sender, "Google fight:");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER + "<1st search>" + TRIGGER_VS + "<2nd search>");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER_ALT + "<1st search>" + TRIGGER_VS + "<2nd search>");
-            return true;
+            return "Google fight:\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER + "<1st search>" + TRIGGER_VS + "<2nd search>\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_ALT + "<1st search>" + TRIGGER_VS + "<2nd search>";
         }
-        return false;
+        return null;
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {

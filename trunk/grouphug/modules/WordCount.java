@@ -71,12 +71,12 @@ public class WordCount implements GrouphugModule {
 	public String helpMainTrigger(String channel, String sender, String login, String hostname, String message){
         return TRIGGER_HELP;
     }
-	public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message){
+	public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message){
 		if(message.equals(TRIGGER_HELP)) {
-            Grouphug.getInstance().sendNotice(sender, "Counts the number of words/lines a person has said");
-            Grouphug.getInstance().sendNotice(sender, "To check how many words someone has said, use " +Grouphug.MAIN_TRIGGER + TRIGGER + "<nick>" );
+            return "Counts the number of words/lines a person has said\n" +
+                   "To check how many words someone has said, use " +Grouphug.MAIN_TRIGGER + TRIGGER + "<nick>";
         }
-        return true;
+        return null;
 	}
 
     // TODO some duplicated code in the following two methods, can this be simplified ?

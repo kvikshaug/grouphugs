@@ -20,13 +20,12 @@ public class IMDb implements GrouphugModule {
         return TRIGGER_HELP;
     }
 
-    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            Grouphug.getInstance().sendNotice(sender, "IMDb: Show IMDb info for a movie");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<movie name>");
-            return true;
+            return "IMDb: Show IMDb info for a movie\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<movie name>";
         }
-        return false;
+        return null;
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {

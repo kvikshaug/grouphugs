@@ -141,19 +141,17 @@ public class Bofh implements GrouphugModule
      * @param login    - The login of the person who sent the message.
      * @param hostname - The hostname of the person who sent the message.
      * @param message  - The actual message sent to the channel, stripped for the triggers + 1 char for space
-     * @return boolean - true if the module reacted to the message, false otherwise
+     * @return The reply
      */
-    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message)
+    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message)
     {
         if (message.equals(HELP_TRIGGER))
         {
-            Grouphug.getInstance().sendNotice(sender, "BOFH - Fend off lusers with Bastard Operator From Hell excuses for their system \"problems\".");
-            Grouphug.getInstance().sendNotice(sender, "Usage:");
-            Grouphug.getInstance().sendNotice(sender, Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " returns a random excuse.");
-            Grouphug.getInstance().sendNotice(sender, Grouphug.MAIN_TRIGGER + SPECIFIC_TRIGGER + " returns an excuse by number. (\\d+ means any digit, 1-n times)");
-            return true;
+            return "BOFH - Fend off lusers with Bastard Operator From Hell excuses for their system \"problems\".\n" +
+                   "Usage:\n" +
+                   Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " returns a random excuse.\n" +
+                   Grouphug.MAIN_TRIGGER + SPECIFIC_TRIGGER + " returns an excuse by number. (\\d+ means any digit, 1-n times)";
         }
-
-        return false;
+        return null;
     }
 }

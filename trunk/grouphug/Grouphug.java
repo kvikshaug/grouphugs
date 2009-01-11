@@ -164,29 +164,33 @@ public class Grouphug extends PircBot {
     }
 
     private void checkForHelpTrigger(String channel, String sender, String login, String hostname, String message) {
-        // TODO tell about !reboot and !reload in help
         // First, check for the universal normal help-trigger
         if(message.equals(MAIN_TRIGGER + HELP_TRIGGER)) {
-            // Remember that if the line is > MAX_LINE_CHARS, it will *automatically* be split
-            // over several lines in the sendMessage() method, so we don't have to do that here
-            // On second thought, we use sendNotice() here, so forget that. We'll have to do that here when the time comes.
-            sendNotice(sender, "Currently implemented modules on "+this.getNick()+":");
-            String helpString = "";
+            sendMessage("Currently implemented modules on "+this.getNick()+":", false);
+            String helpString = "reboot, reload";
             for(GrouphugModule m : modules) {
                 helpString += ", ";
                 helpString += m.helpMainTrigger(channel, sender, login, hostname, message);
             }
-            // Remove the first comma
-            helpString = helpString.substring(2);
-            sendNotice(sender, helpString);
-            sendNotice(sender, "Use \"!help <module>\" for more specific info. This will also work in PM.");
+            sendMessage(helpString, false);
+            sendMessage("Use \"!help <module>\" for more specific info. This will also work in PM.", false);
         }
         // if not, check if help is triggered with a special module
         else if(message.startsWith(MAIN_TRIGGER+HELP_TRIGGER+" ")) {
             boolean replied = false;
+            if(message.equals(MAIN_TRIGGER+HELP_TRIGGER+" reboot")) {
+                sendMessage("\"Reboot\" shuts down the bot, recompiles everything, and restarts.", false);
+                replied = true;
+            } else if(message.equals(MAIN_TRIGGER+HELP_TRIGGER+" reload")) {
+                sendMessage("\"Reload\" recompiles and reloads all modules, without restarting the bot.", false);
+                replied = true;
+            }
             for(GrouphugModule m : modules) {
-                if(m.helpSpecialTrigger(channel, sender, login, hostname, message.substring(MAIN_TRIGGER.length() + HELP_TRIGGER.length() + 1)))
+                String reply = m.helpSpecialTrigger(channel, sender, login, hostname, message.substring(MAIN_TRIGGER.length() + HELP_TRIGGER.length() + 1));
+                if(reply != null) {
+                    bot.sendMessage(reply, false);
                     replied = true;
+                }
             }
             if(!replied)
                 sendMessage("No one has implemented a "+message.substring(MAIN_TRIGGER.length() + HELP_TRIGGER.length() + 1)+" module yet.", false);
@@ -443,15 +447,15 @@ public class Grouphug extends PircBot {
             System.setOut(stdOut);
             System.setErr(stdOut);
         } catch(IOException e) {
-            System.err.println("Fatal error: Unable to load or create logfile \""+logfile.toString()+"\" in default dir.");
-            e.printStackTrace();
-            System.exit(-1);
+            System.err.println(e);
+            System.err.println("WARNING: Unable to load or create logfile \""+logfile.toString()+"\" in default dir. " +
+                    "NOT redirecting stdout and stderr to logfile.");
         }
 
         // Load the SQL passwords from default files
         if(!PasswordManager.loadPasswords()) {
-            System.err.println("WARNING: I was unable to load one or more of the expected password files.\n" +
-                    "I will try to continue, but modules dependant upon SQL may barf when they try to connect.");
+            System.err.println("WARNING: Unable to load one or more of the expected password files. " +
+                    "I will try to continue, but modules dependant upon SQL may barf when they are used.");
         }
 
         // Load up the bot, enable debugging output, and specify encoding
@@ -459,9 +463,15 @@ public class Grouphug extends PircBot {
         bot.setVerbose(true);
         bot.setEncoding(ENCODING);
 
-        // Load up modules and threads
+        /* Load up modules
+         * DEBUG NOTE: If you want to run the bot locally, comment out these methods
+         * and load the modules you need with:
+         * modules.add(new grouphug.modules.ModuleName());
+         */
         recompileModules();
         loadModules();
+
+        // Start own threads
         SVNCommit.load(bot);
         new Thread(new LogFlusher(bot)).start();
 
@@ -547,6 +557,7 @@ public class Grouphug extends PircBot {
         str = str.replace("&#8221;", "\"");
         str = str.replace("&#8230;", "...");
         str = str.replace("&#8212;", " - ");
+        str = str.replace("&mdash;", " - ");
         str = str.replace("&quot;", "\"");
         str = str.replace("&apos;", "'");
         str = str.replace("&lt;", "<");
@@ -563,6 +574,7 @@ public class Grouphug extends PircBot {
         str = str.replace("&Aring;", "Å");
         str = str.replace("&oslash;", "ø");
         str = str.replace("&Oslash;", "Ø");
+        str = str.replace("&#228;", "ä");
         return str;
     }
 

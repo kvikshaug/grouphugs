@@ -33,15 +33,14 @@ public class Dinner implements GrouphugModule {
         return TRIGGER_HELP;
     }
 
-    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            Grouphug.getInstance().sendNotice(sender, "Dinner: Shows what's for dinner at HiN.");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <ukedag>");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" all");
-            return true;
+            return "Dinner: Shows what's for dinner at HiN.\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER+"\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <ukedag>\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" all";
         }
-        return false;
+        return null;
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {

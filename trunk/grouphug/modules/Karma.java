@@ -23,18 +23,17 @@ public class Karma implements GrouphugModule {
         return TRIGGER_HELP;
     }
 
-    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            Grouphug.getInstance().sendNotice(sender, "Karma: Increase, decrease, or show an objects karma.");
-            Grouphug.getInstance().sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<object>");
-            Grouphug.getInstance().sendNotice(sender, "  <object>++");
-            Grouphug.getInstance().sendNotice(sender, "  <object>--");
-            Grouphug.getInstance().sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP);
-            Grouphug.getInstance().sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM);
-            Grouphug.getInstance().sendNotice(sender, "  " + Grouphug.MAIN_TRIGGER + TRIGGER_RESET + " <object>" + " if reseting is enabled");
-            return true;
+            return "Karma: Increase, decrease, or show an objects karma.\n" +
+                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<object>\n" +
+                   "  <object>++\n" +
+                   "  <object>--\n" +
+                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP+"\n" +
+                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM+"\n" +
+                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_RESET + " <object>" + " if reseting is enabled";
         }
-        return false;
+        return null;
     }
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {

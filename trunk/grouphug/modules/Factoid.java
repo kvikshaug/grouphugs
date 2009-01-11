@@ -66,26 +66,20 @@ public class Factoid implements GrouphugModule {
         return TRIGGER_HELP;
     }
 
-    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            Grouphug.getInstance().sendNotice(sender, "Factoid: Make me say or do (message or action) \"reply\" when someone says \"trigger\".");
-            Grouphug.getInstance().sendNotice(sender, "Old methods:");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + TRIGGER_MAIN_ADD + "trigger <say> reply");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + TRIGGER_MAIN_ADD + "trigger <do> reply");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + TRIGGER_MAIN_DEL + "trigger");
-            Grouphug.getInstance().sendNotice(sender, "A new, easier version:");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+  TRIGGER_SHORT_ADD + "trigger <say> reply");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+  TRIGGER_SHORT_ADD + "trigger <do> reply");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+  TRIGGER_SHORT_DEL + "trigger");
-            Grouphug.getInstance().sendNotice(sender, "Other triggers, to view info, or get a random factoid:");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_MAIN + "trigger");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+ TRIGGER_RANDOM);
-            Grouphug.getInstance().sendNotice(sender, "Note 1: The string \"$sender\" will be replaced with the nick of the one triggering the factoid.");
-            Grouphug.getInstance().sendNotice(sender, "Note 2: A star (*) can be any string of characters.");
-            Grouphug.getInstance().sendNotice(sender, "Note 3: Regex can be used, but 1) remember that * is replaced with .* and 2) this will probably change very soon.");
-            return true;
+            return "Factoid: Make me say or do \"reply\" when someone says \"trigger\".\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_SHORT_ADD + "trigger <say> reply\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_SHORT_ADD + "trigger <do> reply\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_SHORT_DEL + "trigger\n" +
+                   "Other triggers, to view info, or get a random factoid:\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_MAIN + "trigger\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_RANDOM + "\n" +
+                   " - The string \"$sender\" will be replaced with the nick of the one triggering the factoid.\n" +
+                   " - A star (*) can be any string of characters.\n" +
+                   " - Regex can be used, but 1) remember that * is replaced with .* and 2) this will probably change very soon.";
         }
-        return false;
+        return null;
     }
 
 

@@ -33,15 +33,14 @@ public class Cinema implements GrouphugModule {
         return TRIGGER_HELP;
     }
 
-    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            Grouphug.getInstance().sendNotice(sender, "Cinema module: Display upcoming movies at Narvik Cinema");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <nr of films>");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" all");
-            return true;
+            return "Cinema module: Display upcoming movies at Narvik Cinema\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER+"\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <nr of films>\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" all";
         }
-        return false;
+        return null;
     }
 
 

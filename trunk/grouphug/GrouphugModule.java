@@ -47,9 +47,9 @@ public interface GrouphugModule {
 
     /**
      * This is called when the user is believed to ask for specific help of a module.
-     * The module should parse the message, and if it includes the trigger that would be sent back in the
-     * helpMainTrigger method, then this module should reply, with notices in pm to the sender,
-     * all info about how this module is used, under the presumtion that this is the only module replying.
+     * The module should parse the message, and if the module feels like it should reply, it should
+     * return a string with the reply all info about how this module is used, under
+     * the presumtion that this is the only module replying. If not, it should return null.
      * Example output:
      *
      * SuperModule 1.1 - Does Super Magic Upon Request
@@ -62,8 +62,8 @@ public interface GrouphugModule {
      * @param login - The login of the person who sent the message.
      * @param hostname - The hostname of the person who sent the message.
      * @param message - The actual message sent to the channel, stripped for the triggers + 1 char for space
-     * @return boolean - true if the module reacted to the message, false otherwise
+     * @return The reply
      */
-    public abstract boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message);
+    public abstract String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message);
 
 }

@@ -25,13 +25,12 @@ public class Define implements GrouphugModule {
         return TRIGGER_HELP;
     }
 
-    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            Grouphug.getInstance().sendNotice(sender, "Define: Use google to give a proper definition of a word.");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<keyword>");
-            return true;
+            return "Define: Use google to give a proper definition of a word.\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<keyword>";
         }
-        return false;
+        return null;
     }
 
 

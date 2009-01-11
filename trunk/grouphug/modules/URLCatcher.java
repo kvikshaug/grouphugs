@@ -154,16 +154,14 @@ public class URLCatcher implements GrouphugModule
      * @param message  - The actual message sent to the channel, stripped for the triggers + 1 char for space
      * @return boolean - true if the module reacted to the message, false otherwise
      */
-    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message)
+    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message)
     {
         if (message.equals(HELP_TRIGGER))
         {
-            Grouphug.getInstance().sendNotice(sender, "URLCatcher tries to catch http:// or https:// URLs in messages to the channel, tries" +
+            return "URLCatcher tries to catch http:// or https:// URLs in messages to the channel, tries" +
                                    " to look up the URL, then parses whatever it finds at  the URL, looking for " +
-                                   "a html <title>, and sends the title back to the channel.");
-            return true;
+                                   "a html <title>, and sends the title back to the channel.";
         }
-
-        return false;
+        return null;
     }
 }

@@ -2,6 +2,7 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.GrouphugModule;
+import grouphug.util.Web;
 
 import java.net.URL;
 import java.net.URLConnection;
@@ -10,10 +11,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
-public class Google implements GrouphugModule {
+public class Insulter implements GrouphugModule {
 
-    private static final String TRIGGER = "google ";
-    private static final String TRIGGER_HELP = "google";
+    private static final String TRIGGER = "insult";
+    private static final String TRIGGER_HELP = "insult";
     private static final int CONN_TIMEOUT = 10000; // ms
 
 
@@ -23,8 +24,9 @@ public class Google implements GrouphugModule {
 
     public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            return "Google search:\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<searchword(s)>";
+            return "Insult someone you don't like:\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <person>\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER;
         }
         return null;
     }
@@ -38,19 +40,30 @@ public class Google implements GrouphugModule {
         if(!message.startsWith(TRIGGER))
             return;
 
-        URL url;
-        try {
-            url = Google.search(message.substring(TRIGGER.length()));
-        } catch(IOException e) {
-            Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)", false);
-            System.err.println(e.getMessage()+"\n"+e.getCause());
-            return;
+        String insulted = "";
+        if(message.length() > TRIGGER.length() + 1) {
+          insulted = message.substring(TRIGGER.length()+1);
         }
 
-        if(url == null) {
-            Grouphug.getInstance().sendMessage("No results for "+message.substring(TRIGGER.length())+".", false);
+        String searchQ = "<td bordercolor=\"#FFFFFF\"><font face=\"Verdana\" size=\"4\"><strong><i>";
+
+        String insultSite = Web.fetchHTML("http://www.randominsults.net/");
+        if(insultSite == null) {
+            if(insulted.length() > 0) {
+                Grouphug.getInstance().sendMessage("Sorry, sunn's webconnection class failed on me. It wasn't my fault. Maybe it was "+insulted+"'s fault.", false);
+            } else {
+                Grouphug.getInstance().sendMessage("Sorry, sunn's webconnection class failed on me. It wasn't my fault.", false);
+            }
+            return;
+        }
+        int insultStart = insultSite.indexOf(searchQ) + searchQ.length();
+        int insultEnd = insultSite.indexOf('<', insultStart);
+        String insult = insultSite.substring(insultStart, insultEnd);
+
+        if(insulted.length() > 0) {
+            Grouphug.getInstance().sendMessage(insulted+": "+insult, false);
         } else {
-            Grouphug.getInstance().sendMessage(url.toString(), false);
+            Grouphug.getInstance().sendMessage(insult, false);
         }
     }
 

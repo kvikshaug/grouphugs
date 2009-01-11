@@ -33,15 +33,14 @@ public class Confession implements GrouphugModule {
         return TRIGGER_HELP;
     }
 
-    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            Grouphug.getInstance().sendNotice(sender, "Confession: Outputs a confession: random, newest or by search.");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" -newest");
-            Grouphug.getInstance().sendNotice(sender, "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <searchword(s)>");
-            return true;
+            return "Confession: Outputs a confession: random, newest or by search.\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER+"\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" -newest\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <searchword(s)>";
         }
-        return false;
+        return null;
     }
 
     public void trigger(String channel, String sender, String login, String hostname, String message) {

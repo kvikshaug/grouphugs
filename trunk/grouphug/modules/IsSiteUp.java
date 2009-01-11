@@ -157,17 +157,16 @@ public class IsSiteUp implements GrouphugModule
      * @param message  - The actual message sent to the channel, stripped for the triggers + 1 char for space
      * @return boolean - true if the module reacted to the message, false otherwise
      */
-    public boolean helpSpecialTrigger(String channel, String sender, String login, String hostname, String message)
+    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message)
     {
         if (message.equals(HELP_TRIGGER))
         {
-            Grouphug.getInstance().sendNotice(sender, "isup - Checks if a web site is down, or if it's just your connection that sucks somehow.");
-            Grouphug.getInstance().sendNotice(sender, "Usage:");
-            Grouphug.getInstance().sendNotice(sender, Grouphug.MAIN_TRIGGER + HELP_TRIGGER + " http://foo.tld");
-            Grouphug.getInstance().sendNotice(sender, "Checks if http://foo.tld is up or not.");
-            Grouphug.getInstance().sendNotice(sender, "NOTE: URIs must start with http:// or https://.");
-            return true;
+            return "isup - Checks if a web site is down, or if it's just your connection that sucks somehow.\n" +
+                   "Usage:\n" +
+                   Grouphug.MAIN_TRIGGER + HELP_TRIGGER + " http://foo.tld\n" +
+                   "Checks if http://foo.tld is up or not.\n" +
+                   "NOTE: URIs must start with http:// or https://.";
         }
-        return false;
+        return null;
     }
 }
