@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="gh-experimental" default="all">
+  
+  
+  <property file="gh-experimental.properties"/>
+  <!-- Uncomment the following property if no tests compilation is needed -->
+  <property name="skip.tests" value="true"/>
+
+  <!-- Compiler options -->
+  
+  <property name="compiler.debug" value="on"/>
+  <property name="compiler.generate.no.warnings" value="off"/>
+  <property name="compiler.args" value=""/>
+  <property name="compiler.max.memory" value="128m"/>
+  <patternset id="ignored.files">
+    <exclude name="**/CVS/**"/>
+    <exclude name="**/SCCS/**"/>
+    <exclude name="**/RCS/**"/>
+    <exclude name="**/rcs/**"/>
+    <exclude name="**/.DS_Store/**"/>
+    <exclude name="**/.svn/**"/>
+    <exclude name="**/.pyc/**"/>
+    <exclude name="**/.pyo/**"/>
+    <exclude name="**/*.pyc/**"/>
+    <exclude name="**/*.pyo/**"/>
+    <exclude name="**/.git/**"/>
+  </patternset>
+  <patternset id="library.patterns">
+    <include name="*.zip"/>
+    <include name="*.war"/>
+    <include name="*.egg"/>
+    <include name="*.ear"/>
+    <include name="*.swc"/>
+    <include name="*.jar"/>
+  </patternset>
+  <patternset id="compiler.resources">
+    <include name="**/?*.properties"/>
+    <include name="**/?*.xml"/>
+    <include name="**/?*.gif"/>
+    <include name="**/?*.png"/>
+    <include name="**/?*.jpeg"/>
+    <include name="**/?*.jpg"/>
+    <include name="**/?*.html"/>
+    <include name="**/?*.dtd"/>
+    <include name="**/?*.tld"/>
+    <include name="**/?*.ftl"/>
+    <include name="**/?*.properties"/>
+    <include name="**/?*.xml"/>
+    <include name="**/?*.html"/>
+    <include name="**/?*.dtd"/>
+    <include name="**/?*.tld"/>
+    <include name="**/?*.gif"/>
+    <include name="**/?*.png"/>
+    <include name="**/?*.jpeg"/>
+    <include name="**/?*.jpg"/>
+  </patternset>
+  
+  <!-- JDK definitions -->
+  
+  <property name="jdk.bin.1.6" value="${jdk.home.1.6}/bin"/>
+  <path id="jdk.classpath.1.6">
+    <fileset dir="${jdk.home.1.6}">
+      <include name="/jre/lib/resources.jar"/>
+      <include name="/jre/lib/javaws.jar"/>
+      <include name="/jre/lib/jsse.jar"/>
+      <include name="/jre/lib/plugin.jar"/>
+      <include name="/jre/lib/charsets.jar"/>
+      <include name="/jre/lib/deploy.jar"/>
+      <include name="/jre/lib/jce.jar"/>
+      <include name="/jre/lib/rt.jar"/>
+      <include name="/jre/lib/management-agent.jar"/>
+      <include name="/jre/lib/ext/dnsns.jar"/>
+      <include name="/jre/lib/ext/sunpkcs11.jar"/>
+      <include name="/jre/lib/ext/sunjce_provider.jar"/>
+      <include name="/jre/lib/ext/localedata.jar"/>
+    </fileset>
+  </path>
+  
+  <property name="project.jdk.home" value="${jdk.home.1.6}"/>
+  <property name="project.jdk.bin" value="${jdk.bin.1.6}"/>
+  <property name="project.jdk.classpath" value="jdk.classpath.1.6"/>
+  
+  
+  <!-- Project Libraries -->
+  
+  <path id="library.htmlentities.classpath">
+    <pathelement location="${basedir}/lib/htmlentities.jar"/>
+  </path>
+  
+  <path id="library.mysql-connector-java.classpath">
+    <pathelement location="${basedir}/lib/mysql-connector-java.jar"/>
+  </path>
+  
+  <path id="library.pircbot.classpath">
+    <pathelement location="${basedir}/lib/pircbot.jar"/>
+  </path>
+  
+  <!-- Modules -->
+  
+  
+  <!-- Module gh-experimental -->
+  
+  <dirname property="module.gh-experimental.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.gh-experimental" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.gh-experimental" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.gh-experimental" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.gh-experimental" value="${compiler.args}"/>
+  
+  <property name="gh-experimental.output.dir" value="${module.gh-experimental.basedir}/out/production/gh-experimental"/>
+  <property name="gh-experimental.testoutput.dir" value="${module.gh-experimental.basedir}/out/test/gh-experimental"/>
+  
+  <path id="gh-experimental.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="gh-experimental.module.classpath">
+    <path refid="${module.jdk.classpath.gh-experimental}"/>
+    <path refid="library.pircbot.classpath"/>
+    <path refid="library.mysql-connector-java.classpath"/>
+    <path refid="library.htmlentities.classpath"/>
+  </path>
+  
+  <path id="gh-experimental.runtime.module.classpath">
+    <pathelement location="${gh-experimental.output.dir}"/>
+    <pathelement location="${gh-experimental.testoutput.dir}"/>
+    <path refid="library.pircbot.classpath"/>
+    <path refid="library.mysql-connector-java.classpath"/>
+    <path refid="library.htmlentities.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.gh-experimental">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.gh-experimental">
+    <patternset refid="excluded.from.module.gh-experimental"/>
+  </patternset>
+  
+  <path id="gh-experimental.module.sourcepath">
+    <dirset dir="${module.gh-experimental.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.gh-experimental" depends="compile.module.gh-experimental.production,compile.module.gh-experimental.tests" description="Compile module gh-experimental"/>
+  
+  <target name="compile.module.gh-experimental.production" description="Compile module gh-experimental; production classes">
+    <mkdir dir="${gh-experimental.output.dir}"/>
+    <javac destdir="${gh-experimental.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.gh-experimental}/javac">
+      <compilerarg line="${compiler.args.gh-experimental}"/>
+      <bootclasspath refid="gh-experimental.module.bootclasspath"/>
+      <classpath refid="gh-experimental.module.classpath"/>
+      <src refid="gh-experimental.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.gh-experimental"/>
+    </javac>
+    
+    <copy todir="${gh-experimental.output.dir}">
+      <fileset dir="${module.gh-experimental.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.gh-experimental.tests" depends="compile.module.gh-experimental.production" description="compile module gh-experimental; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.gh-experimental" description="cleanup module">
+    <delete dir="${gh-experimental.output.dir}"/>
+    <delete dir="${gh-experimental.testoutput.dir}"/>
+  </target>
+  
+  <target name="init" description="Build initialization">
+    <!-- Perform any build initialization in this target -->
+  </target>
+  
+  <target name="clean" depends="clean.module.gh-experimental" description="cleanup all"/>
+  
+  <target name="all" depends="init, clean, compile.module.gh-experimental" description="build all"/>
+</project>
