@@ -7,6 +7,7 @@ import grouphug.util.Web;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.ArrayList;
+import com.tecnick.htmlutils.htmlentities.HTMLEntities;
 
 /**
  * URLCatcher module
@@ -63,7 +64,7 @@ public class URLCatcher implements GrouphugModule
         {
             String title = getHTMLTitle(url);
             if (title != null)
-                Grouphug.getInstance().sendMessage("Title: " + Grouphug.entitiesToChars(title) /*+ " :: " + url*/, false);
+                Grouphug.getInstance().sendMessage("Title: " + HTMLEntities.unhtmlentities(title) /*+ " :: " + url*/, false);
         }
     }
 

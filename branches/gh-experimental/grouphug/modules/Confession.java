@@ -10,6 +10,7 @@ import java.net.SocketTimeoutException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import com.tecnick.htmlutils.htmlentities.HTMLEntities;
 
 public class Confession implements GrouphugModule {
     // TODO: reverify that timeouts are handled properly
@@ -195,7 +196,7 @@ public class Confession implements GrouphugModule {
             return null;
         }
 
-        confession = Grouphug.entitiesToChars(confession);
+        confession = HTMLEntities.unhtmlentities(confession); 
 
         // strip tags
         confession = confession.replaceAll("\\<.*?\\>","");
