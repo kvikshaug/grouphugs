@@ -8,6 +8,8 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.ArrayList;
 
+import com.tecnick.htmlutils.htmlentities.HTMLEntities;
+
 /**
  * URLCatcher module
  *
@@ -52,18 +54,12 @@ public class URLCatcher implements GrouphugModule
      */
     public void specialTrigger(String channel, String sender, String login, String hostname, String message)
     {
-       /*if (message.startsWith(HTTP_URI) || message.startsWith(HTTPS_URI))
-        {
-            String title = getHTMLTitle(message);
-            if (title != null)
-                bot.sendMessage("URLCatcher: " + title, false);
-        }*/
         ArrayList<String> urls = findAllUrls(message);
         for (String url : urls)
         {
             String title = getHTMLTitle(url);
             if (title != null)
-                Grouphug.getInstance().sendMessage("Title: " + Grouphug.entitiesToChars(title) /*+ " :: " + url*/, false);
+                Grouphug.getInstance().sendMessage("Title: " + HTMLEntities.unhtmlentities(title) , false);
         }
     }
 

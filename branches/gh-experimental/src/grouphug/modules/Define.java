@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import com.tecnick.htmlutils.htmlentities.HTMLEntities;
+
 public class Define implements GrouphugModule {
 
     private static final String TRIGGER = "define ";
@@ -51,7 +53,7 @@ public class Define implements GrouphugModule {
         if(answer == null)
             Grouphug.getInstance().sendMessage("No definition found for "+message.substring(TRIGGER.length())+".", false);
         else
-            Grouphug.getInstance().sendMessage(Grouphug.entitiesToChars(answer), false);
+            Grouphug.getInstance().sendMessage(HTMLEntities.unhtmlentities(answer), false);
     }
 
     public static String search(String query) throws IOException {

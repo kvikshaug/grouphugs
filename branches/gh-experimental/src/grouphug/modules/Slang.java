@@ -10,6 +10,8 @@ import java.io.BufferedOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 
+import com.tecnick.htmlutils.htmlentities.HTMLEntities;
+
 public class Slang implements GrouphugModule {
 
     private static final String TRIGGER_HELP = "slang";
@@ -86,7 +88,7 @@ public class Slang implements GrouphugModule {
         else
             reply = si.getWord()+" ("+si.getNumber()+" of "+Slang.slangCount+"): "+ si.getDefinition();
 
-        reply = Grouphug.entitiesToChars(reply);
+        reply = HTMLEntities.unhtmlentities(reply);
 
         Grouphug.getInstance().sendMessage(reply, true);
     }
