@@ -35,11 +35,14 @@ public class IsSiteUp implements GrouphugModule
     {
         if (message.matches(TRIGGER))
         {
-            String html = Web.fetchHTML(DFEOJM_URI + '/' + cleanURI(message));
+            // strip trigger
+            String uri = message.split(TRIGGER)[2];
+
+            String html = Web.fetchHTML(DFEOJM_URI + '/' + cleanURI(uri));
             if (null != html)
             {
                 String result = parseHTML(html);
-                Grouphug.getInstance().sendMessage("" + message + " :: " + result, false);
+                Grouphug.getInstance().sendMessage("" + uri + " :: " + result, false);
             }
         }
     }
