@@ -36,7 +36,7 @@ public class IsSiteUp implements GrouphugModule
         if (message.matches(TRIGGER))
         {
             // strip trigger
-            String uri = message.split(TRIGGER)[2];
+            String uri = message.substring(4).trim();
 
             String html = Web.fetchHTML(DFEOJM_URI + '/' + cleanURI(uri));
             if (null != html)
