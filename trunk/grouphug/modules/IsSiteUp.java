@@ -6,7 +6,6 @@ import grouphug.util.Web;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import java.util.ArrayList;
 
 /**
  * isup - parses http://downforeveryoneorjustme.com/some.url.tld to check if a website is up or down.
@@ -15,7 +14,6 @@ public class IsSiteUp implements GrouphugModule
 {
     private static final String TRIGGER = "isup .+";
     private static final String HELP_TRIGGER = "isup";
-    private static final String[] URI_SCHEMES = new String[] { "http://", "https://" };
     private static final String DFEOJM_URI = "http://downforeveryoneorjustme.com";
     private static final Pattern URI_START_REGEX = Pattern.compile("http(s)?://(www)?");
 
@@ -37,25 +35,11 @@ public class IsSiteUp implements GrouphugModule
     {
         if (message.matches(TRIGGER))
         {
-            // find any URIs in message
-            ArrayList<String> URIs = new ArrayList<String>();
-            for (String URIScheme : URI_SCHEMES)
+            String html = Web.fetchHTML(DFEOJM_URI + '/' + cleanURI(message));
+            if (null != html)
             {
-                URIs.addAll(Web.findURIs(URIScheme, message));
-            }
-
-            // if we didn't find any URIs, return
-            URIs.trimToSize();
-            if (URIs.size() == 0) return;
-
-            for (String URI : URIs)
-            {
-                String html = Web.fetchHTML(DFEOJM_URI + '/' + cleanURI(URI));
-                if (null != html)
-                {
-                    String result = parseHTML(html);
-                    Grouphug.getInstance().sendMessage("" + URI + " :: " + result, false);
-                }
+                String result = parseHTML(html);
+                Grouphug.getInstance().sendMessage("" + message + " :: " + result, false);
             }
         }
     }
