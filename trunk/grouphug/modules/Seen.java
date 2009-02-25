@@ -46,10 +46,10 @@ public class Seen implements GrouphugModule {
 			sql.query("SELECT id, nick FROM "+SEEN_DB+" WHERE nick='"+sender+"';");
 						
 			if(!sql.getNext()) {
-				sql.query("INSERT INTO "+SEEN_DB+" (nick, date) VALUES ('"+sender+"', now());");
+				sql.query("INSERT INTO "+SEEN_DB+" (nick, date, lastwords) VALUES ('"+sender+"', now(),'"+message+"');");
 			}else{
 				Object[] values = sql.getValueList();
-				sql.query("UPDATE "+SEEN_DB+" SET date= now() WHERE id='"+values[0]+"';");
+				sql.query("UPDATE "+SEEN_DB+" SET date=now(), lastwords='"+ message+"' 	WHERE id='"+values[0]+"';");
 			}
 
 		}catch(SQLException e) {
@@ -74,7 +74,7 @@ public class Seen implements GrouphugModule {
         String nick = message.substring(TRIGGER.length());
         try{
             sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
-            sql.query("SELECT id, nick, date FROM "+SEEN_DB+" WHERE nick='"+nick+"';");
+            sql.query("SELECT id, nick, date, lastwords FROM "+SEEN_DB+" WHERE nick='"+nick+"';");
 
 
             if(!sql.getNext()) {
@@ -82,8 +82,9 @@ public class Seen implements GrouphugModule {
             }else{
                 Object[] values = sql.getValueList();
                 Date last = new Date(((Timestamp)values[2]).getTime());
+                String lastwords = (String)values[3];
 
-                Grouphug.getInstance().sendMessage(nick + " last uttered shit " +last, false);
+                Grouphug.getInstance().sendMessage(nick + "uttered \""+ lastwords+ "\" " +last, false);
             }
 
         }catch(SQLException e) {
