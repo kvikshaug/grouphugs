@@ -84,7 +84,7 @@ public class Seen implements GrouphugModule {
                 Date last = new Date(((Timestamp)values[2]).getTime());
                 String lastwords = (String)values[3];
 
-                Grouphug.getInstance().sendMessage(nick + "uttered \""+ lastwords+ "\" " +last, false);
+                Grouphug.getInstance().sendMessage(nick + " uttered \""+ lastwords+ "\" " +last, false);
             }
 
         }catch(SQLException e) {
