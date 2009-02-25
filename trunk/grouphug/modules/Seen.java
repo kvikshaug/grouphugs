@@ -40,7 +40,7 @@ public class Seen implements GrouphugModule {
 
 	@Override
 	public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-		message = message.replaceAll("'", "\'");
+		message = message.replaceAll("'", "");
 		message = message.replaceAll(";", "");
 		SQL sql = new SQL();
 		try{
