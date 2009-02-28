@@ -63,6 +63,7 @@ public class Seen implements GrouphugModule {
 				BigInteger id = (BigInteger)(values[0]);
 				int id2 = id.intValue();
 				statement.setInt(2, id2);
+				sql.executePreparedUpdate(statement);
 			}
 
 		}catch(SQLException e) {
