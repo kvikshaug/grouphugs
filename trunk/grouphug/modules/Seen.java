@@ -1,5 +1,6 @@
 package grouphug.modules;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
@@ -40,18 +41,29 @@ public class Seen implements GrouphugModule {
 
 	@Override
 	public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-		message = message.replaceAll("'", "");
-		message = message.replaceAll(";", "");
 		SQL sql = new SQL();
 		try{
 			sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
-			sql.query("SELECT id, nick FROM "+SEEN_DB+" WHERE nick='"+sender+"';");
+			PreparedStatement statement = sql.getConnection().prepareStatement("SELECT id, nick FROM ? WHERE nick=?;");
+			
+			statement.setString(0, SEEN_DB);
+			statement.setString(1, sender);
+			sql.executePreparedUpdate(statement);
 						
 			if(!sql.getNext()) {
-				sql.query("INSERT INTO "+SEEN_DB+" (nick, date, lastwords) VALUES ('"+sender+"', now(),'"+message+"');");
+				statement = sql.getConnection().prepareStatement("INSERT INTO ? (nick, date, lastwords) VALUES (?, now(),?);");
+				statement.setString(0, SEEN_DB);
+				statement.setString(1, sender);
+				statement.setString(2, message);
+				sql.executePreparedUpdate(statement);
 			}else{
 				Object[] values = sql.getValueList();
 				sql.query("UPDATE "+SEEN_DB+" SET date=now(), lastwords='"+ message+"' 	WHERE id='"+values[0]+"';");
+				
+				statement = sql.getConnection().prepareStatement("UPDATE ? SET date=now(), lastwords=? WHERE id=?;");
+				statement.setString(0, SEEN_DB);
+				statement.setString(1, message);
+				statement.setString(2, (String)values[0]);
 			}
 
 		}catch(SQLException e) {

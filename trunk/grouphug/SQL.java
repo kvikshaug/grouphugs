@@ -197,4 +197,13 @@ public class SQL {
     public static java.util.Date sqlDateTimeToDate(String dateTime) throws ParseException {
         return SQL_DATE_FORMAT.parse(dateTime);
     }
+    
+    public void executePreparedUpdate(PreparedStatement statement) throws SQLException{
+    	if(statement.executeUpdate()>0){
+    		resultset = statement.getResultSet();
+            valueList = new Object[resultset.getMetaData().getColumnCount()];
+    	}else{
+    		affectedRows = statement.getUpdateCount();
+    	}
+    }
 }
