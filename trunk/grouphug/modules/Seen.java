@@ -46,24 +46,24 @@ public class Seen implements GrouphugModule {
 			sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
 			PreparedStatement statement = sql.getConnection().prepareStatement("SELECT id, nick FROM ? WHERE nick=?;");
 			
-			statement.setString(0, SEEN_DB);
-			statement.setString(1, sender);
+			statement.setString(1, SEEN_DB);
+			statement.setString(2, sender);
 			sql.executePreparedUpdate(statement);
 						
 			if(!sql.getNext()) {
 				statement = sql.getConnection().prepareStatement("INSERT INTO ? (nick, date, lastwords) VALUES (?, now(),?);");
-				statement.setString(0, SEEN_DB);
-				statement.setString(1, sender);
-				statement.setString(2, message);
+				statement.setString(1, SEEN_DB);
+				statement.setString(2, sender);
+				statement.setString(3, message);
 				sql.executePreparedUpdate(statement);
 			}else{
 				Object[] values = sql.getValueList();
 				sql.query("UPDATE "+SEEN_DB+" SET date=now(), lastwords='"+ message+"' 	WHERE id='"+values[0]+"';");
 				
 				statement = sql.getConnection().prepareStatement("UPDATE ? SET date=now(), lastwords=? WHERE id=?;");
-				statement.setString(0, SEEN_DB);
-				statement.setString(1, message);
-				statement.setString(2, (String)values[0]);
+				statement.setString(1, SEEN_DB);
+				statement.setString(2, message);
+				statement.setString(3, (String)values[0]);
 			}
 
 		}catch(SQLException e) {
