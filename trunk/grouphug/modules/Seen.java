@@ -1,6 +1,7 @@
 package grouphug.modules;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -59,7 +60,9 @@ public class Seen implements GrouphugModule {
 				Object[] values = sql.getValueList();				
 				statement = sql.getConnection().prepareStatement("UPDATE "+SEEN_DB+" SET date=now(), lastwords= ? WHERE id= ? ;");
 				statement.setString(1, message);
-				statement.setBigDecimal(2, (BigDecimal)values[0]);
+				BigInteger id = (BigInteger)(values[0]);
+				int id2 = id.intValue();
+				statement.setInt(2, id2);
 			}
 
 		}catch(SQLException e) {
