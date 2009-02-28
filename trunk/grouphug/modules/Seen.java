@@ -44,24 +44,21 @@ public class Seen implements GrouphugModule {
 		SQL sql = new SQL();
 		try{
 			sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
-			PreparedStatement statement = sql.getConnection().prepareStatement("SELECT id, nick FROM ? WHERE nick=? ;");
+			PreparedStatement statement = sql.getConnection().prepareStatement("SELECT id, nick FROM "+ SEEN_DB+" WHERE nick=? ;");
 			
-			statement.setString(1, SEEN_DB);
-			statement.setString(2, sender);
+			statement.setString(1, sender);
 			sql.executePreparedSelect(statement);
 						
 			if(!sql.getNext()) {
-				statement = sql.getConnection().prepareStatement("INSERT INTO ? (nick, date, lastwords) VALUES (? , now(), ? );");
-				statement.setString(1, SEEN_DB);
-				statement.setString(2, sender);
-				statement.setString(3, message);
+				statement = sql.getConnection().prepareStatement("INSERT INTO "+SEEN_DB+" (nick, date, lastwords) VALUES (? , now(), ? );");
+				statement.setString(1, sender);
+				statement.setString(2, message);
 				sql.executePreparedUpdate(statement);
 			}else{
 				Object[] values = sql.getValueList();				
-				statement = sql.getConnection().prepareStatement("UPDATE ? SET date=now(), lastwords= ? WHERE id= ? ;");
-				statement.setString(1, SEEN_DB);
-				statement.setString(2, message);
-				statement.setString(3, (String)values[0]);
+				statement = sql.getConnection().prepareStatement("UPDATE "+SEEN_DB+" SET date=now(), lastwords= ? WHERE id= ? ;");
+				statement.setString(1, message);
+				statement.setString(2, (String)values[0]);
 			}
 
 		}catch(SQLException e) {
