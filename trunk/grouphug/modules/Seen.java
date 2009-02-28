@@ -58,7 +58,7 @@ public class Seen implements GrouphugModule {
 				Object[] values = sql.getValueList();				
 				statement = sql.getConnection().prepareStatement("UPDATE "+SEEN_DB+" SET date=now(), lastwords= ? WHERE id= ? ;");
 				statement.setString(1, message);
-				statement.setString(2, (String)values[0]);
+				statement.setInt(2, (Integer)values[0]);
 			}
 
 		}catch(SQLException e) {
