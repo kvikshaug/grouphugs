@@ -48,7 +48,7 @@ public class Seen implements GrouphugModule {
 			
 			statement.setString(1, SEEN_DB);
 			statement.setString(2, sender);
-			sql.executePreparedUpdate(statement);
+			sql.executePreparedSelect(statement);
 						
 			if(!sql.getNext()) {
 				statement = sql.getConnection().prepareStatement("INSERT INTO ? (nick, date, lastwords) VALUES (?, now(),?);");

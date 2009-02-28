@@ -199,11 +199,12 @@ public class SQL {
     }
     
     public void executePreparedUpdate(PreparedStatement statement) throws SQLException{
-    	if(statement.executeUpdate()>0){
+    	statement.executeUpdate();
+    }
+    public void executePreparedSelect(PreparedStatement statement) throws SQLException{
+    	if(statement.execute()){
     		resultset = statement.getResultSet();
             valueList = new Object[resultset.getMetaData().getColumnCount()];
-    	}else{
-    		affectedRows = statement.getUpdateCount();
     	}
     }
 }
