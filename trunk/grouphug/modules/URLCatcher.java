@@ -21,6 +21,7 @@ public class URLCatcher implements GrouphugModule
     private static final Pattern TITLE_BEGIN = Pattern.compile("<title>|<TITLE>");
     private static final Pattern TITLE_END = Pattern.compile("</title>|</TITLE>");    
     private static final String HELP_TRIGGER = "urlcatcher";
+    private static final int TITLE_MAX_LENGTH = 25;
 
 
     /**
@@ -62,8 +63,13 @@ public class URLCatcher implements GrouphugModule
         for (String url : urls)
         {
             String title = getHTMLTitle(url);
-            if (title != null)
+            if (title != null) {
+                if (title.length() > TITLE_MAX_LENGTH) {
+                    title = title.substring(0, TITLE_MAX_LENGTH);
+                    title.concat(" (...)");
+                }
                 Grouphug.getInstance().sendMessage("Title: " + Grouphug.entitiesToChars(title) /*+ " :: " + url*/, false);
+            }
         }
     }
 
