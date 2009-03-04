@@ -21,7 +21,7 @@ public class URLCatcher implements GrouphugModule
     private static final Pattern TITLE_BEGIN = Pattern.compile("<title>|<TITLE>");
     private static final Pattern TITLE_END = Pattern.compile("</title>|</TITLE>");    
     private static final String HELP_TRIGGER = "urlcatcher";
-    private static final int TITLE_MAX_LENGTH = 25;
+    private static final int TITLE_MAX_LENGTH = 100;
 
 
     /**
