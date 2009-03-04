@@ -66,7 +66,7 @@ public class URLCatcher implements GrouphugModule
             if (title != null) {
                 if (title.length() > TITLE_MAX_LENGTH) {
                     title = title.substring(0, TITLE_MAX_LENGTH);
-                    title.concat(" (...)");
+                    title = title.concat(" (...)");
                 }
                 Grouphug.getInstance().sendMessage("Title: " + Grouphug.entitiesToChars(title) /*+ " :: " + url*/, false);
             }
