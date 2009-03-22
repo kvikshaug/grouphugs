@@ -73,15 +73,15 @@ public class Google implements GrouphugModule {
         BufferedReader google = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
 
         // Find an URL to the search result
-        // HACK fugly jump to line 3 (should check for nullptr)
-        google.readLine();
-        google.readLine();
-        String line = google.readLine();
-
-        if(line == null)
-            return null;
 
         String parseSearch = "<h3 class=r><a href=\"";
+        String line;
+        do {
+            line = google.readLine();
+        } while(line != null && !line.contains(parseSearch));
+        if(line == null)
+          return null;
+        
         int startIndex = line.indexOf(parseSearch);
 
         // if -1, then the phrase wasn't found - should return error here, not "not found"
