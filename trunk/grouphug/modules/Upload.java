@@ -2,6 +2,7 @@ package grouphug.modules;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -105,7 +106,7 @@ public class Upload implements GrouphugModule {
 			statement.setString(3, sender);
 			sql.executePreparedUpdate(statement);
 
-			//Prints the URL to the uploaded file to the channel
+			// Prints the URL to the uploaded file to the channel
             Grouphug.getInstance().sendMessage("http://hinux.hin.no/~murray/gh/up/"+filename,false);
 		}catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
@@ -115,5 +116,13 @@ public class Upload implements GrouphugModule {
         }
         //Now we download the file, at least we hope so
         FileDataDownload.fileDownload(parts[0],"/home/DT2006/murray/public_html/gh/up/");
+
+        // And fix the permissions
+        try {
+            Runtime.getRuntime().exec("chmod o+x /home/DT2006/murray/public_html/gh/up/"+filename);
+        } catch(IOException ex) {
+            System.err.println(ex);
+        }
+
     }
 }
