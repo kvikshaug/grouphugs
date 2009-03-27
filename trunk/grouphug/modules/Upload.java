@@ -1,14 +1,9 @@
 package grouphug.modules;
 
-import java.io.File;
-import java.io.FileWriter;
+
 import java.io.IOException;
-import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.Date;
-
 import grouphug.Grouphug;
 import grouphug.GrouphugModule;
 import grouphug.SQL;
@@ -34,8 +29,9 @@ public class Upload implements GrouphugModule {
     @Override
     public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
-            return "A module to upload pictures and other things to gh\n" +
-                    "To use the module type " +Grouphug.MAIN_TRIGGER + TRIGGER + " <url> <keyword>";
+            return " A module to upload pictures and other things to gh\n" +
+                    " To use the module type " +Grouphug.MAIN_TRIGGER + TRIGGER + "<url> <keyword>\n" +
+                    " To get links associated with a keyword type "+ Grouphug.MAIN_TRIGGER + TRIGGER_KEYWORD+"<keyword>";
         }
         return null;
     }
