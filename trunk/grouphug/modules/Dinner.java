@@ -19,9 +19,9 @@ public class Dinner implements GrouphugModule {
     private static final String SQL_USER = "narvikdata";
 
     private String replaceHTML(String str) {
-        str = str.replace("&oslash;", "ø");
-        str = str.replace("&aring;", "å");
-        str = str.replace("&aelig;", "æ");
+        str = str.replace("&oslash;", "Ã¸");
+        str = str.replace("&aring;", "Ã¥");
+        str = str.replace("&aelig;", "Ã¦");
         str = str.replace("&quot;", "\"");
         str = str.replace("<br />", " - ");
         str = str.replace("<br>", " - ");

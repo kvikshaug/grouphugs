@@ -2,6 +2,7 @@ package grouphug;
 
 import org.jibble.pircbot.*;
 import grouphug.util.PasswordManager;
+import grouphug.util.Debugger;
 
 import java.util.ArrayList;
 import java.io.*;
@@ -49,7 +50,7 @@ import java.net.URLClassLoader;
 public class Grouphug extends PircBot {
 
     // Channel and server
-    public static final String CHANNEL = "#grouphugs";
+    public static final String CHANNEL = Debugger.CHANNEL;
     public static final String SERVER = "irc.homelien.no";
 
     // Character encoding to use when communicating with the IRC server.
@@ -420,13 +421,14 @@ public class Grouphug extends PircBot {
             }
             reload.waitFor();
         } catch(IOException ex) {
-            System.err.println(ex);
-            bot.sendMessage("Sorry, HiNux seems to have clogging problems, I caught in IOException.", false);
+            System.err.println("ERROR: Failed to run reload script: "+ex);
+            System.err.println("Reported problem: "+ex);
+            bot.sendMessage("Sorry, HiNux seems to have clogging problems, I caught in IOException while reloading modules.", false);
             return false;
         } catch(InterruptedException ex) {
             System.err.println("WARNING: I was interrupted before the compilation was done! NOT reloading modules.");
-            System.err.println(ex);
-            bot.sendMessage("I tried, but was interrupted! Hmpf.", false);
+            System.err.println("Reported problem: "+ex);
+            bot.sendMessage("I tried to reload modules, but was interrupted! Hmpf.", false);
             return false;
         }
         return true;
@@ -441,21 +443,23 @@ public class Grouphug extends PircBot {
     public static void main(String[] args) throws UnsupportedEncodingException {
 
         // Redirect standard output to logfile
-        try {
-            logfile.createNewFile();
-            stdOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(logfile)));
-            System.setOut(stdOut);
-            System.setErr(stdOut);
-        } catch(IOException e) {
-            System.err.println(e);
-            System.err.println("WARNING: Unable to load or create logfile \""+logfile.toString()+"\" in default dir. " +
-                    "NOT redirecting stdout and stderr to logfile.");
+        if(!Debugger.DEBUG) {
+            try {
+                logfile.createNewFile();
+                stdOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(logfile)));
+                System.setOut(stdOut);
+                System.setErr(stdOut);
+            } catch(IOException e) {
+                System.err.println("WARNING: Unable to load or create logfile \""+logfile.toString()+"\" in default dir.\n" +
+                        "Reported problem: " + e + "\n" +
+                        "I will continue WITHOUT a logfile, and let stdout/stderr go straight to console.\n");
+            }
         }
 
         // Load the SQL passwords from default files
         if(!PasswordManager.loadPasswords()) {
             System.err.println("WARNING: Unable to load one or more of the expected password files. " +
-                    "I will try to continue, but modules dependant upon SQL may barf when they are used.");
+                    "I will continue, but modules dependant upon SQL may barf when they are used.\n");
         }
 
         // Load up the bot, enable debugging output, and specify encoding
@@ -463,17 +467,29 @@ public class Grouphug extends PircBot {
         bot.setVerbose(true);
         bot.setEncoding(ENCODING);
 
-        /* Load up modules
-         * DEBUG NOTE: If you want to run the bot locally, comment out these methods
-         * and load the modules you need with:
-         * modules.add(new grouphug.modules.ModuleName());
-         */
-        recompileModules();
-        loadModules();
+        // Load up modules
+        if(Debugger.DEBUG) {
+            // When debugging, put the modules you want here!
+            // Example:
+            // modules.add(new grouphug.modules.ModuleName());
+        } else {
+            try {
+                recompileModules();
+                loadModules();
+            } catch(NullPointerException ex) {
+                System.err.println("\n" +
+                        "Caught a NullPointerException while recompiling modules.\n\n" +
+                        "This is usually caused by YOU trying to run/debug gh on your local machine.\n" +
+                        "If that's the case, please take a look at the grouphug.util.Debugger class.");
+                System.exit(-1);
+            }
+        }
 
         // Start own threads
-        SVNCommit.load(bot);
-        new Thread(new LogFlusher(bot)).start();
+        if(!Debugger.DEBUG) {
+            SVNCommit.load(bot);
+            new Thread(new LogFlusher(bot)).start();
+        }
 
         // Save the nicks we want, in prioritized order
         //nicks.add("gh");
@@ -564,41 +580,42 @@ public class Grouphug extends PircBot {
         str = str.replace("&gt;", ">");
         str = str.replace("&#34;", "\"");
         str = str.replace("&#39;", "'");
-        str = str.replace("&laquo;", "«");
+        str = str.replace("&laquo;", "ï¿½");
         str = str.replace("&lsaquo;", "?");
-        str = str.replace("&raquo;", "»");
+        str = str.replace("&raquo;", "ï¿½");
         str = str.replace("&rsaquo;", "?");
-        str = str.replace("&aelig;", "æ");
-        str = str.replace("&Aelig;", "Æ");
-        str = str.replace("&aring;", "å");
-        str = str.replace("&Aring;", "Å");
-        str = str.replace("&oslash;", "ø");
-        str = str.replace("&Oslash;", "Ø");
-        str = str.replace("&#228;", "ä");
+        str = str.replace("&aelig;", "Ã¦");
+        str = str.replace("&Aelig;", "Ã†");
+        str = str.replace("&aring;", "Ã¥");
+        str = str.replace("&Aring;", "Ã…");
+        str = str.replace("&oslash;", "Ã¸");
+        str = str.replace("&Oslash;", "Ã˜");
+        str = str.replace("&#228;", "ï¿½");
         return str;
     }
 
     /**
-     * This attempts to convert non-regular æøåÆØÅ's to regular ones. Or something.
+     * I will not try to pretend like I know what this method does.
+     * But it probably has something to do with fixing character encodings.
      * @param str The unconverted string
      * @return The attempted converted string
      */
     public static String fixEncoding(String str) {
 
         // lowercase iso-8859-1 encoded
-        str = str.replace(new String(new char[] { (char)195, (char)352 }), "æ");
-        str = str.replace(new String(new char[] { (char)195, (char)382 }), "ø");
-        str = str.replace(new String(new char[] { (char)195, (char)165 }), "å");
+        str = str.replace(new String(new char[] { (char)195, (char)352 }), "Ã¦");
+        str = str.replace(new String(new char[] { (char)195, (char)382 }), "Ã¸");
+        str = str.replace(new String(new char[] { (char)195, (char)165 }), "Ã¥");
 
         // uppercase iso-8859-1 encoded
-        str = str.replace(new String(new char[] { (char)195, (char)134}), "Æ");
-        str = str.replace(new String(new char[] { (char)195, (char)152}), "Ø");
-        str = str.replace(new String(new char[] { (char)195, (char)195}), "Å");
+        str = str.replace(new String(new char[] { (char)195, (char)134}), "Ã†");
+        str = str.replace(new String(new char[] { (char)195, (char)152}), "Ã˜");
+        str = str.replace(new String(new char[] { (char)195, (char)195}), "Ã…");
 
         // not exactly sure what this is - supposed to be utf-8, not sure what happens really
-        // not sure of the char values for Æ and Å, these are commented out, enable them when this gets applicable
+        // not sure of the char values for Ã† and Ã…, these are commented out, enable them when this gets applicable
         //str = str.replace(new String(new char[] { (char)195, (char)???}), "&AElig;");
-        str = str.replace(new String(new char[] { (char)195, (char)732}), "Ø");
+        str = str.replace(new String(new char[] { (char)195, (char)732}), "Ã˜");
         //str = str.replace(new String(new char[] { (char)195, (char)???}), "&Aring;");
 
         return str;

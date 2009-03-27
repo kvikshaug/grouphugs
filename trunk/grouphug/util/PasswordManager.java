@@ -40,22 +40,34 @@ public class PasswordManager {
     public static boolean loadPasswords() {
         boolean readOK = true;
 
-        // These are in separate try/catch blocks, so that if the first fails, it still tries the others
-
-        try {
-            hinuxPass = loadPassword(FILE_HINUX_PW);
-        } catch(IOException ex) {
-            System.err.println("Failed to load hinux password: "+ex.getMessage());
-            readOK = false;
+        if(Debugger.DEBUG) {
+            if(Debugger.HINUX_PASSWORD != null) {
+                hinuxPass = Debugger.HINUX_PASSWORD;
+            } else {
+                System.err.println("Debug-mode: MySQL password for HiNux not set.");
+                readOK = false;
+            }
+            if(Debugger.GRIMSTUX_PASSWORD != null) {
+                grimstuxPass = Debugger.GRIMSTUX_PASSWORD;
+            } else {
+                System.err.println("Debug-mode: MySQL password for Grimstux not set.");
+                readOK = false;
+            }
+        } else {
+            // The read attempts are in separate try/catch blocks, so that if the first fails, it still tries the others
+            try {
+                hinuxPass = loadPassword(FILE_HINUX_PW);
+            } catch(IOException ex) {
+                System.err.println("Failed to load hinux password: "+ex.getMessage());
+                readOK = false;
+            }
+            try {
+                grimstuxPass = loadPassword(FILE_GRIMSTUX_PW);
+            } catch(IOException ex) {
+                System.err.println("Failed to load grimstux password: "+ex.getMessage());
+                readOK = false;
+            }
         }
-
-        try {
-            grimstuxPass = loadPassword(FILE_GRIMSTUX_PW);
-        } catch(IOException ex) {
-            System.err.println("Failed to load grimstux password: "+ex.getMessage());
-            readOK = false;
-        }
-
         return readOK;
     }
 
