@@ -70,11 +70,11 @@ public class Upload implements GrouphugModule {
             }else{
                 //Prints the URL(s) associated with the keyword
                 Object[] values = sql.getValueList();
-                Grouphug.getInstance().sendMessage(values[1] + " uploaded http://hinux.hin.no/~murray/gh/"+ values[0], false);
+                Grouphug.getInstance().sendMessage(values[1] + " uploaded http://hinux.hin.no/~murray/gh/up/"+ values[0], false);
 
                 while(sql.getNext()){
                     values = sql.getValueList();
-                    Grouphug.getInstance().sendMessage(values[1] + " uploaded "+ values[0], false);
+                    Grouphug.getInstance().sendMessage(values[1] + " uploaded http://hinux.hin.no/~murray/gh/up/"+ values[0], false);
                 }
             }
         }catch(SQLException e) {
