@@ -9,7 +9,7 @@ public class FileDataDownload {
 	//Run this method, finds the filename and extension for you
 	public static void fileDownload(String fileAddress, String destinationDir){
 		
-		// Find the index of last occurrence of character ‘/’ and ‘.’.
+		// Find the index of last occurrence of character '/' and '.'.
 		
 		int lastIndexOfSlash = fileAddress.lastIndexOf('/');
 		int lastIndexOfPeriod = fileAddress.lastIndexOf('.');
@@ -39,7 +39,7 @@ public class FileDataDownload {
 			byte[] buf;
 			int ByteRead,ByteWritten=0;
 			fileUrl= new URL(fileAddress);
-			os = new BufferedOutputStream(new FileOutputStream(destinationDir+"\\"+localFileName));
+			os = new BufferedOutputStream(new FileOutputStream(destinationDir+"/"+localFileName));
 			//The URLConnection object is created by invoking the 	 	
 			// openConnection method on a URL.
 
