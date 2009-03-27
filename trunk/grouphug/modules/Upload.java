@@ -42,7 +42,8 @@ public class Upload implements GrouphugModule {
 
     @Override
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-        //Only does something when asked
+        //TODO upload pictures and the like
+    	//Only does something when asked
 
     }
 
@@ -61,6 +62,7 @@ public class Upload implements GrouphugModule {
     private void showUploads(String keyword) {
         SQL sql = new SQL();
         try{
+        	sql.connect(DEFAULT_SQL_HOST, "murray", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
             sql.query("SELECT url, nick FROM "+ UPLOAD_DB+" WHERE keyword='"+keyword+"';");
 
             if(!sql.getNext()) {
@@ -91,7 +93,6 @@ public class Upload implements GrouphugModule {
 
     }
 
-    //TODO Download the file
     private void insert(String message, String sender) {
         SQL sql = new SQL();
         //Split the message into URL and keyword, URL first
