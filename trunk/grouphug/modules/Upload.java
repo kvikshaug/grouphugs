@@ -119,7 +119,7 @@ public class Upload implements GrouphugModule {
 
         // And fix the permissions
         try {
-            Runtime.getRuntime().exec("chmod o+x /home/DT2006/murray/public_html/gh/up/"+filename);
+            Runtime.getRuntime().exec("chmod o+r /home/DT2006/murray/public_html/gh/up/"+filename);
         } catch(IOException ex) {
             System.err.println(ex);
         }
