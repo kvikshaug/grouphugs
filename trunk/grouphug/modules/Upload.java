@@ -1,5 +1,8 @@
 package grouphug.modules;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -9,6 +12,7 @@ import grouphug.Grouphug;
 import grouphug.GrouphugModule;
 import grouphug.SQL;
 import grouphug.util.PasswordManager;
+import grouphug.util.FileDataDownload;
 
 public class Upload implements GrouphugModule {
 	
@@ -91,22 +95,26 @@ public class Upload implements GrouphugModule {
 		SQL sql = new SQL();
 		//Split the message into URL and keyword, URL first
 		String[] parts = message.split(" ");
+		String filename = parts[0].substring(parts[0].lastIndexOf('/')+1);
 		try{
 			sql.connect(DEFAULT_SQL_HOST, "murray", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
 			PreparedStatement statement = sql.getConnection().prepareStatement("INSERT INTO "+UPLOAD_DB+" (url, keyword, nick) VALUES (?,?,?);");
-			statement.setString(1, parts[0].substring(parts[0].lastIndexOf('/')+1, parts[0].length()));
+			statement.setString(1, filename);
 			statement.setString(2, parts[1]);
 			statement.setString(3, sender);
 			sql.executePreparedUpdate(statement);
 			
 			//Prints the URL to the uploaded file to the channel
-			Grouphug.getInstance().sendMessage("http://hinux.hin.no/~murray/gh/"+parts[0].substring(parts[0].lastIndexOf('/')+1, parts[0].length()),false);
+			Grouphug.getInstance().sendMessage("http://hinux.hin.no/~murray/gh/up/"+filename,false);
 		}catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
 		}finally {
             sql.disconnect();
-        }	
+        }
+		//Now we download the file, at least we hope so
+		FileDataDownload.fileDownload(parts[0],"../../public_html/gh/up/");
 	}
+		
 
 }
