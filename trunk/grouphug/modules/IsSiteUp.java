@@ -20,6 +20,7 @@ public class IsSiteUp implements GrouphugModule
     private static final Pattern DFEOJM_MSG_START = Pattern.compile("<div id=\"container\">");
     private static final Pattern DFEOJM_MSG_END = Pattern.compile("(is up.)|(down from here.)");
     private static final String DFEOJM_MSG_HTML_REGEX = "(<a href=\".+\" class=\".+\">)|(</a></span>)";
+    private static final String A_HTML_REGEX = "(</a>)";
 
     /**
      * This method is called by the bot when someone sends a chat line that starts with the trigger command.
@@ -93,6 +94,7 @@ public class IsSiteUp implements GrouphugModule
         result = result.trim();                                     // trim surrounding whitespace
         result = result.replaceAll(" +", " ");                      // replace 1+n space chars with 1 space char
         result = result.replaceAll(DFEOJM_MSG_HTML_REGEX, "");      // remove html from string
+        result = result.replaceAll(A_HTML_REGEX, "");               // remove </a> tag from the middle of string
 
         return result;
     }
