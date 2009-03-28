@@ -18,7 +18,7 @@ public class IsSiteUp implements GrouphugModule
     private static final Pattern URI_START_REGEX = Pattern.compile("http(s)?://(www)?");
 
     private static final Pattern DFEOJM_MSG_START = Pattern.compile("<div id=\"container\">");
-    private static final Pattern DFEOJM_MSG_END = Pattern.compile("(is up.)|(on the interwho.)");
+    private static final Pattern DFEOJM_MSG_END = Pattern.compile("(is up.)|(down from here.)");
     private static final String DFEOJM_MSG_HTML_REGEX = "(<a href=\".+\" class=\".+\">)|(</a></span>)";
 
     /**
