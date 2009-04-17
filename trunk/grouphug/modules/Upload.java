@@ -103,8 +103,6 @@ public class Upload implements GrouphugModule {
 			statement.setString(3, sender);
 			sql.executePreparedUpdate(statement);
 
-			// Prints the URL to the uploaded file to the channel
-            Grouphug.getInstance().sendMessage("http://hinux.hin.no/~murray/gh/up/"+filename,false);
 		}catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
@@ -120,6 +118,8 @@ public class Upload implements GrouphugModule {
         } catch(IOException ex) {
             System.err.println(ex);
         }
+        // Prints the URL to the uploaded file to the channel
+        Grouphug.getInstance().sendMessage("http://hinux.hin.no/~murray/gh/up/"+filename,false);
 
     }
 }
