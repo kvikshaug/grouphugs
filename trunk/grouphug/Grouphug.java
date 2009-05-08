@@ -580,17 +580,17 @@ public class Grouphug extends PircBot {
         str = str.replace("&gt;", ">");
         str = str.replace("&#34;", "\"");
         str = str.replace("&#39;", "'");
-        str = str.replace("&laquo;", "�");
-        str = str.replace("&lsaquo;", "?");
-        str = str.replace("&raquo;", "�");
-        str = str.replace("&rsaquo;", "?");
+        str = str.replace("&laquo;", "«");
+        str = str.replace("&lsaquo;", "‹");
+        str = str.replace("&raquo;", "»");
+        str = str.replace("&rsaquo;", "›");
         str = str.replace("&aelig;", "æ");
         str = str.replace("&Aelig;", "Æ");
         str = str.replace("&aring;", "å");
         str = str.replace("&Aring;", "Å");
         str = str.replace("&oslash;", "ø");
         str = str.replace("&Oslash;", "Ø");
-        str = str.replace("&#228;", "�");
+        str = str.replace("&#228;", "ä");
         return str;
     }
 
