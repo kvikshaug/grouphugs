@@ -87,7 +87,7 @@ public class Factoid implements GrouphugModule {
     public void trigger(String channel, String sender, String login, String hostname, String message) {
 
         // If trying to ADD a NEW factoid (with the main trigger !factoid <on> or the shorttrigger !on)
-        if(message.startsWith(TRIGGER_MAIN + TRIGGER_MAIN_ADD) || message.startsWith(TRIGGER_SHORT_ADD)) {
+        if(message.startsWith(TRIGGER_MAIN + TRIGGER_MAIN_ADD) || message.startsWith(TRIGGER_SHORT_ADD) && !sender.equalsIgnoreCase("Twst") && !sender.equalsIgnoreCase("Twisty")){
 
             // First parse the line to find the trigger, reply, and if it's a message or action
             // Do this based on what kind of trigger that was used
