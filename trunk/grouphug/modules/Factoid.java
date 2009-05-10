@@ -87,7 +87,7 @@ public class Factoid implements GrouphugModule {
     public void trigger(String channel, String sender, String login, String hostname, String message) {
 
         // If trying to ADD a NEW factoid (with the main trigger !factoid <on> or the shorttrigger !on)
-        if(message.startsWith(TRIGGER_MAIN + TRIGGER_MAIN_ADD) || message.startsWith(TRIGGER_SHORT_ADD) && !sender.equalsIgnoreCase("Twst") && !sender.equalsIgnoreCase("Twisty")){
+        if(message.startsWith(TRIGGER_MAIN + TRIGGER_MAIN_ADD) || message.startsWith(TRIGGER_SHORT_ADD)){
 
             // First parse the line to find the trigger, reply, and if it's a message or action
             // Do this based on what kind of trigger that was used
@@ -135,7 +135,7 @@ public class Factoid implements GrouphugModule {
                 trigger = message.substring(TRIGGER_SHORT_DEL.length());
 
             // and try to remove it - del() returns true if it's removed, false if there is no such trigger
-            if(del(trigger)) {
+            if(!sender.equalsIgnoreCase("krashk") && del(trigger)) {
                 Grouphug.getInstance().sendMessage("I no longer know of this "+trigger+" that you speak of.", false);
             } else {
                 Grouphug.getInstance().sendMessage(sender+", I can't remember "+trigger+" in the first place.", false);
