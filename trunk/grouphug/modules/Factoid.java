@@ -135,7 +135,7 @@ public class Factoid implements GrouphugModule {
                 trigger = message.substring(TRIGGER_SHORT_DEL.length());
 
             // and try to remove it - del() returns true if it's removed, false if there is no such trigger
-            if(!sender.equalsIgnoreCase("krashk") && del(trigger)) {
+            if(del(trigger)) {
                 Grouphug.getInstance().sendMessage("I no longer know of this "+trigger+" that you speak of.", false);
             } else {
                 Grouphug.getInstance().sendMessage(sender+", I can't remember "+trigger+" in the first place.", false);
