@@ -1,8 +1,0 @@
-.classpath
-.project
-*.iml
-*.ipr
-*.iws
-*.swp
-out
-bin
