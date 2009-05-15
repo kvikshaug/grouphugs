@@ -5,6 +5,7 @@ lib/**
 *.ipr
 *.iml
 **/*.iml
+.idea/**
 *~
 *.swp
 *.class
