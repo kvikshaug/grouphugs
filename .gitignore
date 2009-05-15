@@ -1,0 +1,10 @@
+out/**
+bin/**
+lib/**
+*.iws
+*.ipr
+*.iml
+**/*.iml
+*~
+*.swp
+*.class
