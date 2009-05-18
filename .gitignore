@@ -1,6 +1,7 @@
 out/**
 bin/**
 lib/**
+target/**
 *.iws
 *.ipr
 *.iml
