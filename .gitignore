@@ -10,3 +10,5 @@ target/**
 *~
 *.swp
 *.class
+.classpath
+.project
