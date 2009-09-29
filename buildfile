@@ -15,12 +15,10 @@ define "gh" do
   project.group = GROUP
   manifest["Implementation-Vendor"] = COPYRIGHT
 
-  define "grouphugs" do
+  system("git pull github master")
 
-    system("git pull github master")
-
-    compile.with "mysql-connector-java-5.1.6-bin.jar", "pircbot.jar"
-    package(:jar)
-  end
+  compile.with("pircbot.jar", "mysql-connector-java-5.1.6-bin.jar")
+#    compile.with("mysql:mysql-connector-java:jar:5.1.6", "pircbot:pircbot:jar:1.4.2")
+  package(:jar).with :manifest=>_('src/main/MANIFEST.MF')
 
 end
