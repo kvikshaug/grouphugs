@@ -29,21 +29,12 @@ public class PasswordManager {
     public static boolean loadPasswords() {
         boolean readOK = true;
 
-        if(Debugger.DEBUG) {
-            if(Debugger.HINUX_PASSWORD != null) {
-                hinuxPass = Debugger.HINUX_PASSWORD;
-            } else {
-                System.err.println("Debug-mode: MySQL password for HiNux not set.");
-                readOK = false;
-            }
-        } else {
-            // The read attempts are in separate try/catch blocks, so that if the first fails, it still tries the others
-            try {
-                hinuxPass = loadPassword(PW_FILE);
-            } catch(IOException ex) {
-                System.err.println("Failed to load hinux password: "+ex.getMessage());
-                readOK = false;
-            }
+        // The read attempts are in separate try/catch blocks, so that if the first fails, it still tries the others
+        try {
+            hinuxPass = loadPassword(PW_FILE);
+        } catch(IOException ex) {
+            System.err.println("Failed to load hinux password: "+ex.getMessage());
+            readOK = false;
         }
         return readOK;
     }

@@ -352,18 +352,18 @@ public class Grouphug extends PircBot {
     public static void main(String[] args) throws UnsupportedEncodingException {
 
         // Redirect standard output to logfile
-            try {
-                System.out.println("Standard input will be redirected to a logfile.");
-                System.out.println("Look for the file '"+logfile.getAbsolutePath()+"'.");
-                logfile.createNewFile();
-                PrintStream stdOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(logfile)));
-                //System.setOut(stdOut);
-                //System.setErr(stdOut);
-            } catch(IOException e) {
-                System.err.println("WARNING: Unable to load or create logfile \""+logfile.toString()+"\" in default dir.\n" +
-                        "Reported problem: " + e + "\n" +
-                        "I will continue WITHOUT a logfile, and let stdout/stderr go straight to console.\n");
-            }
+        try {
+            System.out.println("Standard input will be redirected to a logfile.");
+            System.out.println("Look for the file '"+logfile.getAbsolutePath()+"'.");
+            logfile.createNewFile();
+            PrintStream stdOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(logfile)));
+            //System.setOut(stdOut);
+            //System.setErr(stdOut);
+        } catch(IOException e) {
+            System.err.println("WARNING: Unable to load or create logfile \""+logfile.toString()+"\" in default dir.\n" +
+                    "Reported problem: " + e + "\n" +
+                    "I will continue WITHOUT a logfile, and let stdout/stderr go straight to console.\n");
+        }
 
         // Load the SQL passwords from default files
         if(!PasswordManager.loadPasswords()) {
@@ -400,8 +400,8 @@ public class Grouphug extends PircBot {
         modules.add(new grouphug.modules.WordCount());
 
         // Start own threads
-            SVNCommit.load(bot);
-            new Thread(new LogFlusher(bot)).start();
+        SVNCommit.load(bot);
+        new Thread(new LogFlusher(bot)).start();
 
         // Save the nicks we want, in prioritized order
         nicks.add("gh");
