@@ -52,7 +52,8 @@ public class Cinema implements GrouphugModule {
         if(!message.startsWith(Cinema.TRIGGER))
             return;
 
-        if(PasswordManager.getGrimstuxPass() == null) {
+        // TODO find a new db
+        if(PasswordManager.getSQLPassword() == null) {
             Grouphug.getInstance().sendMessage("Sorry, I don't have the password for the SQL db on grimstux.", false);
             return;
         }
@@ -78,7 +79,7 @@ public class Cinema implements GrouphugModule {
         String lineToSend = "";
         SQL sql = new SQL();
         try {
-            sql.connect(SQL_HOST, SQL_DB, SQL_USER, PasswordManager.getGrimstuxPass());
+            sql.connect(SQL_HOST, SQL_DB, SQL_USER, PasswordManager.getSQLPassword());
             sql.query("SELECT datetime, title, cencor, theater, price FROM narvikdata_kino ORDER BY datetime"+limit+";");
             while(sql.getNext()) {
                 Object[] values = sql.getValueList();

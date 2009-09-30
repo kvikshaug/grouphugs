@@ -93,7 +93,7 @@ public class SQL {
      */
     public void connect() throws SQLException {
         if(DEFAULT_SQL_PASSWORD == null) {
-            if((DEFAULT_SQL_PASSWORD = PasswordManager.getHinuxPass()) == null) {
+            if((DEFAULT_SQL_PASSWORD = PasswordManager.getSQLPassword()) == null) {
                 throw new SQLException("The default password for the hinux SQL DB hasn't been properly loaded from file!");
             }
         }

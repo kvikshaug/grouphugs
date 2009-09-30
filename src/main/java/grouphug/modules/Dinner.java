@@ -51,7 +51,8 @@ public class Dinner implements GrouphugModule {
         if(!message.startsWith(Dinner.TRIGGER) && !message.startsWith(Dinner.TRIGGER_DEPRECATED))
             return;
 
-        if(PasswordManager.getGrimstuxPass() == null) {
+        // TODO find a new db
+        if(PasswordManager.getSQLPassword() == null) {
             Grouphug.getInstance().sendMessage("Sorry, I don't have the password for the SQL db on grimstux.", false);
             return;
         }
@@ -59,7 +60,7 @@ public class Dinner implements GrouphugModule {
         // Fetch the data
         SQL sql = new SQL();
         try {
-            sql.connect(SQL_HOST, SQL_DB, SQL_USER, PasswordManager.getGrimstuxPass());
+            sql.connect(SQL_HOST, SQL_DB, SQL_USER, PasswordManager.getSQLPassword());
             sql.query("SELECT middag_dato, middag_mandag, middag_tirsdag, middag_onsdag, middag_torsdag, middag_fredag FROM narvikdata;");
             sql.getNext();
         } catch(SQLException e) {

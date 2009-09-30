@@ -31,7 +31,8 @@ class LogFlusher implements Runnable {
                 // interrupted, ok care, doesn't matter if we flush a little early once in a while
             }
 
-            bot.flushLogs();
+            System.out.flush();
+            System.err.flush();
         }
     }
 }

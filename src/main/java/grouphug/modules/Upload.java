@@ -58,7 +58,7 @@ public class Upload implements GrouphugModule {
     private void showUploads(String keyword) {
         SQL sql = new SQL();
         try{
-        	sql.connect(DEFAULT_SQL_HOST, "murray", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
+        	sql.connect(DEFAULT_SQL_HOST, "murray", DEFAULT_SQL_USER, PasswordManager.getSQLPassword());
             sql.query("SELECT url, nick FROM "+ UPLOAD_DB+" WHERE keyword='"+keyword+"';");
 
             if(!sql.getNext()) {
@@ -96,7 +96,7 @@ public class Upload implements GrouphugModule {
         String filename = parts[0].substring(parts[0].lastIndexOf('/')+1);
 
         try{
-			sql.connect(DEFAULT_SQL_HOST, "murray", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
+			sql.connect(DEFAULT_SQL_HOST, "murray", DEFAULT_SQL_USER, PasswordManager.getSQLPassword());
 			PreparedStatement statement = sql.getConnection().prepareStatement("INSERT INTO "+UPLOAD_DB+" (url, keyword, nick) VALUES (?,?,?);");
 			statement.setString(1, filename);
 			statement.setString(2, parts[1]);

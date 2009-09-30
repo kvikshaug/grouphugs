@@ -35,14 +35,15 @@ public class WeatherForecast implements GrouphugModule {
         if(!message.startsWith(WeatherForecast.TRIGGER))
             return;
 
-        if(PasswordManager.getGrimstuxPass() == null) {
+        // TODO find a new db
+        if(PasswordManager.getSQLPassword() == null) {
             Grouphug.getInstance().sendMessage("Sorry, I don't have the password for the SQL db on grimstux.", false);
             return;
         }
 
         SQL sql = new SQL();
         try {
-            sql.connect(SQL_HOST, SQL_DB, SQL_USER, PasswordManager.getGrimstuxPass());
+            sql.connect(SQL_HOST, SQL_DB, SQL_USER, PasswordManager.getSQLPassword());
             sql.query("SELECT korttidsvarsel FROM narvikdata;");
             sql.getNext();
         } catch(SQLException e) {

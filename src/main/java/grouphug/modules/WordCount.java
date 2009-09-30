@@ -33,7 +33,7 @@ public class WordCount implements GrouphugModule {
         int newWords = message.trim().replaceAll(" {2,}+", " ").split(" ").length;
 
 		try{
-			sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
+			sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getSQLPassword());
 			sql.query("SELECT id, words, `lines` FROM "+WORDS_DB+" WHERE nick='"+sender+"';");
 			
 			
@@ -89,7 +89,7 @@ public class WordCount implements GrouphugModule {
         else
             reply = "The laziest idlers are:\n";
         try {
-            sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
+            sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getSQLPassword());
             String query = ("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" ORDER BY words ");
             if(top)
                 query += "DESC ";
@@ -123,7 +123,7 @@ public class WordCount implements GrouphugModule {
         SQL sql = new SQL();
         String nick = message.substring(10, message.length());
         try{
-            sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
+            sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getSQLPassword());
             sql.query("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick='"+nick+"';");
 
 

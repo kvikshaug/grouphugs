@@ -1,11 +1,9 @@
 package grouphug.modules;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.DecimalFormat;
 import java.util.Date;
 
 import grouphug.Grouphug;
@@ -45,7 +43,7 @@ public class Seen implements GrouphugModule {
 	public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
 		SQL sql = new SQL();
 		try{
-			sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
+			sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getSQLPassword());
 			PreparedStatement statement = sql.getConnection().prepareStatement("SELECT id, nick FROM "+ SEEN_DB+" WHERE nick=? ;");
 			
 			statement.setString(1, sender);
@@ -87,7 +85,7 @@ public class Seen implements GrouphugModule {
 		SQL sql = new SQL();
         String nick = message.substring(TRIGGER.length());
         try{
-            sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
+            sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getSQLPassword());
             sql.query("SELECT id, nick, date, lastwords FROM "+SEEN_DB+" WHERE nick='"+nick+"';");
 
 
