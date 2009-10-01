@@ -1,10 +1,13 @@
 package grouphug;
 
-import org.jibble.pircbot.*;
 import grouphug.util.PasswordManager;
+import org.jibble.pircbot.IrcException;
+import org.jibble.pircbot.NickAlreadyInUseException;
+import org.jibble.pircbot.PircBot;
+import org.jibble.pircbot.User;
 
-import java.util.ArrayList;
 import java.io.*;
+import java.util.ArrayList;
 
 /**
  * Grouphug
@@ -50,7 +53,7 @@ public class Grouphug extends PircBot {
     public static final String SERVER = "irc.homelien.no";
 
     // Character encoding to use when communicating with the IRC server.
-    public static final String ENCODING = "ISO8859-15";
+    public static final String ENCODING = "UTF-8";
 
     // The trigger characters (as Strings since startsWith takes String)
     public static final String MAIN_TRIGGER = "!";
@@ -378,11 +381,9 @@ public class Grouphug extends PircBot {
 
         // Load up modules
         modules.add(new grouphug.modules.Bofh());
-        modules.add(new grouphug.modules.Cinema());
         modules.add(new grouphug.modules.Confession());
         modules.add(new grouphug.modules.Decider());
         modules.add(new grouphug.modules.Define());
-        modules.add(new grouphug.modules.Dinner());
         modules.add(new grouphug.modules.EightBall());
         modules.add(new grouphug.modules.Factoid());
         modules.add(new grouphug.modules.Google());
@@ -396,7 +397,6 @@ public class Grouphug extends PircBot {
         modules.add(new grouphug.modules.Tracking());
         modules.add(new grouphug.modules.Upload());
         modules.add(new grouphug.modules.URLCatcher());
-        modules.add(new grouphug.modules.WeatherForecast());
         modules.add(new grouphug.modules.WordCount());
 
         // Start own threads

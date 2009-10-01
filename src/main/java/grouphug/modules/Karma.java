@@ -1,10 +1,11 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
-import grouphug.SQL;
 import grouphug.GrouphugModule;
+import grouphug.sql.SQLHandler;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class Karma implements GrouphugModule {
 
@@ -18,6 +19,17 @@ public class Karma implements GrouphugModule {
     private static final int LIMIT = 5; // how many items to show in karmatop/karmabottom
 
     private static final String KARMA_DB = "gh_karma";
+
+    private SQLHandler sqlHandler;
+
+    public Karma() {
+        try {
+            sqlHandler = SQLHandler.getSQLHandler();
+        } catch(ClassNotFoundException ex) {
+            System.err.println("Karma startup error: SQL unavailable!");
+            // TODO should disable this module at this point.
+        }
+    }
 
     public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
         return TRIGGER_HELP;
@@ -102,9 +114,7 @@ public class Karma implements GrouphugModule {
 
         String sqlName = norwegianCharsToHtmlEntities(name);
 
-        SQL sql = new SQL();
         try {
-            sql.connect();
             // we sleep for a little while, in case the user is very fast - to avoid duplicate inserts
             try {
                 Thread.sleep(600);
@@ -112,17 +122,16 @@ public class Karma implements GrouphugModule {
                 // interrupted, ok, just continue
             }
             KarmaItem ki = find(sqlName);
-            if(ki == null)
-                sql.query("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('"+sqlName+"', '"+karma+"');");
-            else if(karma == 0)
-                sql.query("UPDATE "+KARMA_DB+" SET value='"+karma+"' WHERE id='"+ki.getID()+"';");
-            else
-                sql.query("UPDATE "+KARMA_DB+" SET value='"+(ki.getKarma() + karma)+"' WHERE id='"+ki.getID()+"';");
+            if(ki == null) {
+                sqlHandler.insert("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('"+sqlName+"', '"+karma+"');");
+            } else if(karma == 0) {
+                sqlHandler.update("UPDATE "+KARMA_DB+" SET value='"+karma+"' WHERE id='"+ki.getID()+"';");
+            } else {
+                sqlHandler.update("UPDATE "+KARMA_DB+" SET value='"+(ki.getKarma() + karma)+"' WHERE id='"+ki.getID()+"';");
+            }
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             Grouphug.getInstance().sendMessage("Sorry, an SQL error occurred.", false);
-        } finally {
-            sql.disconnect();
         }
     }
 
@@ -133,35 +142,28 @@ public class Karma implements GrouphugModule {
      * @throws SQLException - if an SQL error occured
      */
     private KarmaItem find(String karma) throws SQLException {
-        SQL sql = new SQL();
-        sql.connect();
-        sql.query("SELECT id, name, value FROM "+KARMA_DB+" WHERE name='"+karma+"';");
-        if(!sql.getNext()) {
+        Object[] row = sqlHandler.selectSingle("SELECT id, name, value FROM "+KARMA_DB+" WHERE name='"+karma+"';");
+        if(row == null) {
             return null;
         }
-        Object[] values = sql.getValueList();
-        sql.disconnect();
-        return new KarmaItem((Integer)values[0], htmlEntitiesToNorwegianChars((String)values[1]), (Integer)values[2]);
+        return new KarmaItem((Integer)row[0], htmlEntitiesToNorwegianChars((String)row[1]), (Integer)row[2]);
     }
 
     private void showScore(boolean top) {
-        SQL sql = new SQL();
         String reply;
         if(top)
             reply = "Top five karma winners:\n";
         else
             reply = "Bottom five karma losers:\n";
         try {
-            sql.connect();
             String query = "SELECT name, value FROM "+KARMA_DB+" ORDER BY value ";
             if(top)
                 query += "DESC ";
             query += "LIMIT "+LIMIT+";";
-            sql.query(query);
+            ArrayList<Object[]> rows = sqlHandler.select(query);
             int place = 1;
-            while(sql.getNext()) {
-                Object[] values = sql.getValueList();
-                reply += (place++)+". "+htmlEntitiesToNorwegianChars((String)values[0])+" ("+values[1]+")\n";
+            for(Object[] row : rows) {
+                reply += (place++)+". "+htmlEntitiesToNorwegianChars((String)row[0])+" ("+row[1]+")\n";
             }
             if(top)
                 reply += "May their lives be filled with sunlight and pink stuff.";

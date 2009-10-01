@@ -1,13 +1,13 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
-import grouphug.SQL;
 import grouphug.GrouphugModule;
+import grouphug.sql.SQLHandler;
 
-import java.util.ArrayList;
-import java.util.Random;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
+import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Need a quick excuse to shut a luser up? Look no further, the BOFH module will assist you.
@@ -25,6 +25,8 @@ public class Bofh implements GrouphugModule
     private Random random;
     private ArrayList<String> excuses;
 
+    private SQLHandler sqlHandler;
+
     public Bofh()
     {
         random = new Random(System.nanoTime());
@@ -37,18 +39,21 @@ public class Bofh implements GrouphugModule
      */
     private void initExcuses()
     {
-        SQL sql = new SQL();
+        try {
+            sqlHandler = SQLHandler.getSQLHandler();
+        } catch(ClassNotFoundException ex) {
+            System.err.println("BOFH Startup error: SQL unavailable!");
+            // TODO should disable this module at this point.
+        }
         excuses = new ArrayList<String>(500); // there's just short of 500 rows in the db at the moment.
 
         try
         {
-            sql.connect();
-            sql.query("SELECT `excuse` FROM gh_bofh;");
+            ArrayList<Object[]> rows = sqlHandler.select("SELECT `excuse` FROM gh_bofh;");
 
             int i = 1;
-            while(sql.getNext())
-            {
-                excuses.add("BOFH excuse #" + i + ": " +sql.getValueList()[0]);
+            for(Object[] row : rows) {
+                excuses.add("BOFH excuse #" + i + ": " +row[0]);
                 i++;
             }
             excuses.trimToSize();
@@ -60,10 +65,6 @@ public class Bofh implements GrouphugModule
         catch (SQLException se)
         {
             System.err.println("BOFH startup: SQL exception - MySQL said: " + se);
-        }
-        finally
-        {
-            sql.disconnect();
         }
 
         assert (excuses != null) : "BOFH startup: Init failed!";
