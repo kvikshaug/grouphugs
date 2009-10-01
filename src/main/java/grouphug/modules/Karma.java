@@ -18,7 +18,7 @@ public class Karma implements GrouphugModule {
 
     private static final int LIMIT = 5; // how many items to show in karmatop/karmabottom
 
-    private static final String KARMA_DB = "gh_karma";
+    private static final String KARMA_DB = "karma";
 
     private SQLHandler sqlHandler;
 

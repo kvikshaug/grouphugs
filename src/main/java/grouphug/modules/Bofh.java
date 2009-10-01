@@ -49,7 +49,7 @@ public class Bofh implements GrouphugModule
 
         try
         {
-            ArrayList<Object[]> rows = sqlHandler.select("SELECT `excuse` FROM gh_bofh;");
+            ArrayList<Object[]> rows = sqlHandler.select("SELECT `excuse` FROM bofh;");
 
             int i = 1;
             for(Object[] row : rows) {

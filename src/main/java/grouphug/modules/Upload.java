@@ -14,7 +14,7 @@ public class Upload implements GrouphugModule {
 
     private static final String TRIGGER_HELP = "upload";
     private static final String TRIGGER = "upload ";
-    private static final String UPLOAD_DB= "gh_upload";
+    private static final String UPLOAD_DB= "upload";
     private static final String TRIGGER_RANDOM = "uploadrandom";
     private static final String TRIGGER_KEYWORD = "keyword ";
 

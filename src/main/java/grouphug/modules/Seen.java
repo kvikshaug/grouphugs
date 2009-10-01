@@ -15,7 +15,7 @@ public class Seen implements GrouphugModule {
     private static final String TRIGGER_HELP = "seen";
     private static final String TRIGGER = "seen ";
     
-    private static final String SEEN_DB = "gh_seen";
+    private static final String SEEN_DB = "seen";
 	
 	private SQLHandler sqlHandler;
 

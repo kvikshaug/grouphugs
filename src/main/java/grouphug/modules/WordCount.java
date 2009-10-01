@@ -18,7 +18,7 @@ public class WordCount implements GrouphugModule {
 
     private static final String TRIGGER_HELP = "wordcount";
 	private static final String TRIGGER = "wordcount ";
-	private static final String WORDS_DB= "gh_words";
+	private static final String WORDS_DB= "words";
     private static final String TRIGGER_TOP = "wordcounttop";
     private static final String TRIGGER_BOTTOM = "wordcountbottom";
     private static final int LIMIT = 5;
