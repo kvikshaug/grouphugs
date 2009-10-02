@@ -1,6 +1,5 @@
 package grouphug;
 
-import grouphug.util.PasswordManager;
 import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
 import org.jibble.pircbot.PircBot;
@@ -344,12 +343,6 @@ public class Grouphug extends PircBot {
             System.err.println("WARNING: Unable to load or create logfile \""+logfile.toString()+"\" in default dir.\n" +
                     "Reported problem: " + e + "\n" +
                     "I will continue WITHOUT a logfile, and let stdout/stderr go straight to console.\n");
-        }
-
-        // Load the SQL passwords from default files
-        if(!PasswordManager.loadPasswords()) {
-            System.err.println("WARNING: Unable to load one or more of the expected password files. " +
-                    "I will continue, but modules dependant upon SQL may barf when they are used.\n");
         }
 
         // Load up the bot, enable debugging output, and specify encoding
