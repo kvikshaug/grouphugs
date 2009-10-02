@@ -49,13 +49,14 @@ public class WordCount implements GrouphugModule {
                 params.add(SQL.dateToSQLDateTime(new Date()));
 				sqlHandler.insert("INSERT INTO "+WORDS_DB+" (nick, words, `lines`, since) VALUES ('?', '?', '1', '?');", params);
 			} else {
-                long existingWords = ((Long)row[1]);
-                long existingLines = ((Long)row[2]);
+                long existingWords = ((Integer)row[1]);
+                long existingLines = ((Integer)row[2]);
 				sqlHandler.update("UPDATE "+WORDS_DB+" SET words='"+(existingWords + newWords)+"', `lines`='"+(existingLines + 1)+"' WHERE id='"+row[0]+"';");
 			}
 
 		} catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
+            e.printStackTrace();
             Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
         }
 	}
@@ -101,8 +102,8 @@ public class WordCount implements GrouphugModule {
             ArrayList<Object[]> rows = sqlHandler.select(query);
             int place = 1;
             for(Object[] row : rows) {
-                long words = ((Long)row[2]);
-                long lines = ((Long)row[3]);
+                long words = ((Integer)row[2]);
+                long lines = ((Integer)row[3]);
                 double wpl = (double)words / (double)lines;
                 Date since = new Date(((Timestamp)row[4]).getTime());
                 reply += (place++)+". "+row[1]+ " ("+words+" words, "+lines+" lines, "+
@@ -128,8 +129,8 @@ public class WordCount implements GrouphugModule {
             if(row == null) {
                 Grouphug.getInstance().sendMessage(nick + " doesn't have any words counted.", false);
             } else {
-                long words = ((Long)row[2]);
-                long lines = ((Long)row[3]);
+                long words = ((Integer)row[2]);
+                long lines = ((Integer)row[3]);
                 Date since = new Date(((Timestamp)row[4]).getTime());
                 double wpl = (double)words / (double)lines;
 

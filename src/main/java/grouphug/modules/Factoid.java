@@ -37,6 +37,8 @@ public class Factoid implements GrouphugModule {
     private static final String SEPARATOR_MESSAGE = " <say> ";
     private static final String SEPARATOR_ACTION = " <do> ";
 
+    private static final String FACTOID_TABLE = "factoid";
+
     private static Random random = new Random(System.nanoTime());
 
     private long lastAddedTime; // HACK to avoid specialTrigger() being called on the same line
@@ -47,7 +49,7 @@ public class Factoid implements GrouphugModule {
         // Load up all existing factoids from sql
         try {
             sqlHandler = new SQLHandler(true);
-            ArrayList<Object[]> rows = sqlHandler.select("SELECT `type`, `trigger`, `reply`, `author` FROM gh_factoid;");
+            ArrayList<Object[]> rows = sqlHandler.select("SELECT `type`, `trigger`, `reply`, `author` FROM " + FACTOID_TABLE + ";");
             for(Object[] row : rows) {
                 boolean message = row[0].equals("message");
                 factoids.add(new FactoidItem(message, (String)row[1], (String)row[2], (String)row[3]));
@@ -187,7 +189,7 @@ public class Factoid implements GrouphugModule {
 
         // First add the new item to the SQL db
         try {
-            sqlHandler.insert("INSERT INTO gh_factoid (`type`, `trigger`, `reply`, `author`) VALUES ('"+(message ? "message" : "action")+"', '"+trigger+"', '"+reply+"', '"+author+"');");
+            sqlHandler.insert("INSERT INTO " + FACTOID_TABLE + " (`type`, `trigger`, `reply`, `author`) VALUES ('"+(message ? "message" : "action")+"', '"+trigger+"', '"+reply+"', '"+author+"');");
         } catch(SQLException e) {
             System.err.println("Factoid insertion: SQL Exception: "+e);
         }
@@ -207,7 +209,7 @@ public class Factoid implements GrouphugModule {
         if((factoid = find(trigger, false)) != null) {
             // First remove it from the SQL db
             try {
-                if(sqlHandler.delete("DELETE FROM gh_factoid WHERE `trigger` = '"+trigger+"';") == 0) {
+                if(sqlHandler.delete("DELETE FROM " + FACTOID_TABLE + "  WHERE `trigger` = '"+trigger+"';") == 0) {
                     System.err.println("Factoid deletion warning: Item was found in local arraylist, but not in SQL DB!");
                     Grouphug.getInstance().sendMessage("OMG inconsistency; I have the factoid in memory but not in the SQL db.", false);
                     return false;

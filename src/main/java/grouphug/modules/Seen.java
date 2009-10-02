@@ -46,7 +46,7 @@ public class Seen implements GrouphugModule {
 		try {
             ArrayList<String> params = new ArrayList<String>();
             params.add(sender);
-            Object[] row = sqlHandler.selectSingle("SELECT id, nick FROM "+ SEEN_DB +" WHERE nick=? ;", params);
+            Object[] row = sqlHandler.selectSingle("SELECT id, nick FROM "+ SEEN_DB +" WHERE nick='?' ;", params);
 
             if(row == null) {
                 params.clear();

@@ -156,7 +156,7 @@ public class Grouphug extends PircBot {
     protected void onPrivateMessage(String sender, String login, String hostname, String message) {
         // Help triggers will also activate in PM
         checkForHelpTrigger(null, sender, login, hostname, message);
-        // TODO if the message was unrecognized, say something "hi, i'm a bot. visit
+        // TODO if the message was unrecognized, say something like "hi, i'm a bot. visit
         // TODO the people in #grouphugs to ask about me, or say !help to learn what i can do." 
     }
 
