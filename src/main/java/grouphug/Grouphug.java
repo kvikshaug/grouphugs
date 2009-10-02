@@ -15,33 +15,23 @@ import java.util.ArrayList;
  * Grouphug
  *
  * A java-based IRC-bot created purely for entertainment purposes and as a personal excercise in design.
+ * This bot extends the functionality of the well-designed PircBot, see http://www.jibble.org/
  *
- * This bot manages a list of modules that may make the bot react up certain triggers or messages sent to
- * the channel this bot resides on. It contains functionality for preventing spam, splitting lines and more.
+ * The bot acts as a framework for modules that each serve their own purpose. With the help of SQL,
+ * external web sites and clever imagination, the modules are used to entertain, insult, and/or inform the
+ * users in its IRC channel.
  *
- * The modules are dynamically loaded - the demands for a module is simple:
- * - It must exist in the grouphug.modules package
- * - It must implement the grouphug.modules.GrouphugModule interface
- * - Its constructor must take no parameters (because of dynamic loading)
- * Any module filling these demands will be loaded and accessed as any other upon trigger calls.
+ * It is (supposed to be) easy to add a new module to the mix, and several utilities exist to make
+ * writing a module as easy as possible.
  *
  * Some important concepts for the bot:
  * - It should never bother anyone unless it is clear that they want a response from it.
  * - It should never be unclear what a command or module does or intends to do. From a single !help trigger,
- *   a user should be able to dig down in detail and find out every interaction he/she is able to make to the bot,
- *   and what to be expected in return.
+ *   a user should be able to dig down in detail and find out every interaction he/she is able to make to
+ *   the bot, and what to be expected in return.
  *
- * Certain functionality is closely tied to the linux account it currently runs on, and shell scripts,
- * website access and the like located on that account.
- *
- * A future vision for the bot will be to changed the design to be event-based, an own event for each
- * overriden method (onMessage, onKick etc.). This is currently under development and anyone are free
- * to contribute at this stage.
- *
- * The grouphug bot was originally started by Alex Kvikshaug and continued as
- * an SVN project by the guys currently hanging in #grouphugs @ efnet.
- *
- * The bot extends the functionality of the well-designed PircBot, see http://www.jibble.org/
+ * The bot is currently maintained by most of the people hanging in #grouphugs @ efnet.
+ * For more information, please join our channel or visit the web site: [coming soon]
  */
 
 // TODO - use sunn's grouphug.utils.Web on: Google/GoogleFight/Define/Tracking/Confession
@@ -333,9 +323,11 @@ public class Grouphug extends PircBot {
 
         // Redirect standard output to logfile
         try {
-            System.out.println("Standard input will be redirected to a logfile.");
-            System.out.println("Look for the file '"+logfile.getAbsolutePath()+"'.");
-            logfile.createNewFile();
+            System.out.println("Standard input will be redirected the following logfile:");
+            System.out.println("'"+logfile.getAbsolutePath()+"'.");
+            if(!logfile.createNewFile()) {
+                System.out.println("Note: The logfile already exists, any existing data will be overwritten.");
+            }
             PrintStream stdOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(logfile)));
             //System.setOut(stdOut);
             //System.setErr(stdOut);
