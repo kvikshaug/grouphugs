@@ -1,4 +1,4 @@
-package grouphug.sql;
+package grouphug.util;
 
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;

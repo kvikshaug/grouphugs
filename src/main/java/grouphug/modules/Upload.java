@@ -3,8 +3,8 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.GrouphugModule;
-import grouphug.sql.SQLHandler;
 import grouphug.util.FileDataDownload;
+import grouphug.util.SQLHandler;
 
 import java.io.IOException;
 import java.sql.SQLException;

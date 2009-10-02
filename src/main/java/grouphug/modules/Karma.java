@@ -2,7 +2,7 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.GrouphugModule;
-import grouphug.sql.SQLHandler;
+import grouphug.util.SQLHandler;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

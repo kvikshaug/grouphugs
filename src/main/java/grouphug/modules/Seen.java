@@ -2,8 +2,8 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.GrouphugModule;
-import grouphug.sql.SQL;
-import grouphug.sql.SQLHandler;
+import grouphug.util.SQL;
+import grouphug.util.SQLHandler;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
