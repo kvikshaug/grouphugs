@@ -7,6 +7,9 @@ import org.jibble.pircbot.PircBot;
 import org.jibble.pircbot.User;
 
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 
 /**
@@ -103,23 +106,10 @@ public class Grouphug extends PircBot {
     @Override
     protected void onMessage(String channel, String sender, String login, String hostname, String message) {
 
-        // Rebooting?
-        if(message.equals("!reboot")) {
-            try {
-                Runtime.getRuntime().exec("wget -qO - http://hinux.hin.no/~murray/gh/?reboot > /dev/null 2>&1");
-            } catch(IOException ex) {
-                System.err.println(ex);
-            }
-            return;
-        }
-
-        // Reloading?
-        if(message.equals("!reload")) {
-            System.out.println("NOT RELOADING MODULES!");
-            if(!recompileModules())
-                return;
-
-            bot.sendMessage("Reloaded NO modules, because this functionality has been disabled.", false);
+        // Old reboot/reload functions - this is strictly not necessary, but maybe these
+        // should be reimplemented properly sometime?
+        if(message.equals("!reboot") || message.equals("!reload")) {
+            bot.sendMessage("Sorry, this functionality has been disabled. Patches are welcome though :)", false);
             return;
         }
 
@@ -175,13 +165,6 @@ public class Grouphug extends PircBot {
         // if not, check if help is triggered with a special module
         else if(message.startsWith(MAIN_TRIGGER+HELP_TRIGGER+" ")) {
             boolean replied = false;
-            if(message.equals(MAIN_TRIGGER+HELP_TRIGGER+" reboot")) {
-                sendMessage("\"Reboot\" shuts down the bot, recompiles everything, and restarts.", false);
-                replied = true;
-            } else if(message.equals(MAIN_TRIGGER+HELP_TRIGGER+" reload")) {
-                sendMessage("\"Reload\" recompiles and reloads all modules, without restarting the bot.", false);
-                replied = true;
-            }
             for(GrouphugModule m : modules) {
                 String reply = m.helpSpecialTrigger(channel, sender, login, hostname, message.substring(MAIN_TRIGGER.length() + HELP_TRIGGER.length() + 1));
                 if(reply != null) {
@@ -341,11 +324,6 @@ public class Grouphug extends PircBot {
         }
     }
 
-    private static boolean recompileModules() {
-        System.out.println("Supposed to recompile modules; skipping.");
-        return true;
-    }
-
     /**
      * The main method, starting the bot, connecting to the server and joining its main channel.
      *
@@ -400,7 +378,6 @@ public class Grouphug extends PircBot {
         modules.add(new grouphug.modules.WordCount());
 
         // Start own threads
-        SVNCommit.load(bot);
         new Thread(new LogFlusher(bot)).start();
 
         // Save the nicks we want, in prioritized order
@@ -412,14 +389,14 @@ public class Grouphug extends PircBot {
         try {
             connect(bot, false);
         } catch(IrcException e) {
-            // No idea how to handle this. So print the message and exit
-            System.err.println(e.getMessage());
+            // No idea how to handle this. So print debug information and exit
+            e.printStackTrace();
             System.out.flush();
             System.err.flush();
             System.exit(-1);
         } catch(IOException e) {
-            // No idea how to handle this. So print the message and exit
-            System.err.println(e.getMessage());
+            // No idea how to handle this. So print debug information and exit
+            e.printStackTrace();
             System.out.flush();
             System.err.flush();
             System.exit(-1);
@@ -509,22 +486,23 @@ public class Grouphug extends PircBot {
      */
     public static String fixEncoding(String str) {
 
-        // lowercase iso-8859-1 encoded
-        str = str.replace(new String(new char[] { (char)195, (char)352 }), "æ");
-        str = str.replace(new String(new char[] { (char)195, (char)382 }), "ø");
-        str = str.replace(new String(new char[] { (char)195, (char)165 }), "å");
+        Charset utf8charset = Charset.forName("UTF-8");
+        Charset iso88591charset = Charset.forName("ISO-8859-1");
+        ByteBuffer inputBuffer = ByteBuffer.wrap(str.getBytes());
 
-        // uppercase iso-8859-1 encoded
-        str = str.replace(new String(new char[] { (char)195, (char)134}), "Æ");
-        str = str.replace(new String(new char[] { (char)195, (char)152}), "Ø");
-        str = str.replace(new String(new char[] { (char)195, (char)195}), "Å");
+        // decode UTF-8
+        CharBuffer data = iso88591charset.decode(inputBuffer);
 
-        // not exactly sure what this is - supposed to be utf-8, not sure what happens really
-        // not sure of the char values for Æ and Å, these are commented out, enable them when this gets applicable
-        //str = str.replace(new String(new char[] { (char)195, (char)???}), "&AElig;");
-        str = str.replace(new String(new char[] { (char)195, (char)732}), "Ø");
-        //str = str.replace(new String(new char[] { (char)195, (char)???}), "&Aring;");
+        // encode ISO-8559-1
+        ByteBuffer outputBuffer = utf8charset.encode(data);
 
-        return str;
+        byte[] outputData = outputBuffer.array();
+        String newStr = outputData.toString();
+
+        if(!newStr.equals(str)) {
+            bot.sendMessage("o hai, fixEncoding() here, i just tried to convert iso: '"+str+"'\nto utf8: '"+newStr+"'", false);
+        }
+
+        return newStr;
     }
 }
