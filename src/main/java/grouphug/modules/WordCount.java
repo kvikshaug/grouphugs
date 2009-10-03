@@ -6,9 +6,9 @@ import grouphug.util.SQL;
 import grouphug.util.SQLHandler;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -105,7 +105,7 @@ public class WordCount implements GrouphugModule {
                 long words = ((Integer)row[2]);
                 long lines = ((Integer)row[3]);
                 double wpl = (double)words / (double)lines;
-                Date since = new Date(((Timestamp)row[4]).getTime());
+                Date since = SQL.sqlDateTimeToDate((String)row[4]);
                 reply += (place++)+". "+row[1]+ " ("+words+" words, "+lines+" lines, "+
                         (new DecimalFormat("0.0")).format(wpl)+
                         " wpl) since "+df.format(since)+"\n";
@@ -118,6 +118,9 @@ public class WordCount implements GrouphugModule {
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
+        } catch(ParseException e) {
+            System.err.println("Unable to parse the SQL datetime!");
+            Grouphug.getInstance().sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.", false);
         }
     }
 
@@ -131,7 +134,7 @@ public class WordCount implements GrouphugModule {
             } else {
                 long words = ((Integer)row[2]);
                 long lines = ((Integer)row[3]);
-                Date since = new Date(((Timestamp)row[4]).getTime());
+                Date since = SQL.sqlDateTimeToDate((String)row[4]);
                 double wpl = (double)words / (double)lines;
 
                 Grouphug.getInstance().sendMessage(nick + " has uttered "+words+ " words in "+lines+" lines ("+
@@ -142,6 +145,9 @@ public class WordCount implements GrouphugModule {
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
+        } catch(ParseException e) {
+            System.err.println("Unable to parse the SQL datetime!");
+            Grouphug.getInstance().sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.", false);
         }
     }
 }
