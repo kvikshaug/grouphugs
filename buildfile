@@ -17,7 +17,7 @@ define "gh" do
 
   system("git pull github master")
 
-  compile.with("pircbot-1.4.6.jar", "mysql-connector-java-5.1.6-bin.jar")
+  compile.with("pircbot-1.4.6.jar", "sqlitejdbc-v056-pure.jar")
 #    compile.with("mysql:mysql-connector-java:jar:5.1.6", "pircbot:pircbot:jar:1.4.2")
   package(:jar).with :manifest => {"Main-Class" => "grouphug.Grouphug",
                                    "Class-Path" => "../pircbot-1.4.6.jar ../sqlitejdbc-v056-pure.jar" }
