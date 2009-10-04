@@ -329,8 +329,8 @@ public class Grouphug extends PircBot {
                 System.out.println("Note: The logfile already exists, any existing data will be overwritten.");
             }
             PrintStream stdOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(logfile)));
-            //System.setOut(stdOut);
-            //System.setErr(stdOut);
+            System.setOut(stdOut);
+            System.setErr(stdOut);
         } catch(IOException e) {
             System.err.println("WARNING: Unable to load or create logfile \""+logfile.toString()+"\" in default dir.\n" +
                     "Reported problem: " + e + "\n" +
