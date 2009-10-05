@@ -1,38 +1,39 @@
 package grouphug.modules;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.DecimalFormat;
-import java.util.Date;
-
 import grouphug.Grouphug;
 import grouphug.GrouphugModule;
-import grouphug.SQL;
-import grouphug.util.PasswordManager;
+import grouphug.util.SQL;
+import grouphug.util.SQLHandler;
+
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class Seen implements GrouphugModule {
 
-    private static final String DEFAULT_SQL_HOST = "127.0.0.1";
-    private static final String DEFAULT_SQL_USER = "gh";
     private static final String TRIGGER_HELP = "seen";
     private static final String TRIGGER = "seen ";
     
-    private static final String SEEN_DB = "gh_seen";
+    private static final String SEEN_DB = "seen";
+	
+	private SQLHandler sqlHandler;
+
+    public Seen() {
+        try {
+            sqlHandler = SQLHandler.getSQLHandler();
+        } catch(ClassNotFoundException ex) {
+            System.err.println("Seen startup error: SQL unavailable!");
+            // TODO should disable this module at this point.
+        }
+    }
 	
 	
 	
-	
-	
-	
-	@Override
 	public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
 		return TRIGGER_HELP;
 	}
 
-	@Override
 	public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
 		if(message.equals(TRIGGER_HELP)) {
             return "Seen: When someone last said something in this channel\n" +
@@ -41,12 +42,29 @@ public class Seen implements GrouphugModule {
         return null;
     }
 
-	@Override
 	public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-		SQL sql = new SQL();
-		try{
-			sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
-			PreparedStatement statement = sql.getConnection().prepareStatement("SELECT id, nick FROM "+ SEEN_DB+" WHERE nick=? ;");
+		try {
+            ArrayList<String> params = new ArrayList<String>();
+            params.add(sender);
+            Object[] row = sqlHandler.selectSingle("SELECT id, nick FROM "+ SEEN_DB +" WHERE nick='?' ;", params);
+
+            if(row == null) {
+                params.clear();
+                params.add(sender);
+                params.add(SQL.dateToSQLDateTime(new Date()));
+                params.add(message);
+                sqlHandler.insert("INSERT INTO "+SEEN_DB+" (nick, date, lastwords) VALUES ('?', '?', '?');");
+            } else {
+                params.clear();
+                params.add(SQL.dateToSQLDateTime(new Date()));
+                params.add(message);
+                params.add(row[0] + "");
+                sqlHandler.update("UPDATE "+SEEN_DB+" SET date='?', lastwords='?' WHERE id='?' ;");
+            }
+
+            /* The following is some good-faith attempt to do SQL properly
+
+			PreparedStatement statement = sqlHandler.getConnection().prepareStatement("SELECT id, nick FROM "+ SEEN_DB+" WHERE nick=? ;");
 			
 			statement.setString(1, sender);
 			sql.executePreparedSelect(statement);
@@ -56,7 +74,7 @@ public class Seen implements GrouphugModule {
 				statement.setString(1, sender);
 				statement.setString(2, message);
 				sql.executePreparedUpdate(statement);
-			}else{
+			} else {
 				Object[] values = sql.getValueList();				
 				statement = sql.getConnection().prepareStatement("UPDATE "+SEEN_DB+" SET date=now(), lastwords= ? WHERE id= ? ;");
 				statement.setString(1, message);
@@ -65,17 +83,15 @@ public class Seen implements GrouphugModule {
 				statement.setInt(2, id2);
 				sql.executePreparedUpdate(statement);
 			}
+			*/
 
-		}catch(SQLException e) {
+		} catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
-		}finally {
-            sql.disconnect();
         }
 		
 	}
 
-	@Override
 	public void trigger(String channel, String sender, String login, String hostname, String message) {
 		if(message.startsWith(TRIGGER)){
 			print(message);
@@ -84,28 +100,22 @@ public class Seen implements GrouphugModule {
 	}
 	
 	private void print(String message){
-		SQL sql = new SQL();
         String nick = message.substring(TRIGGER.length());
         try{
-            sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
-            sql.query("SELECT id, nick, date, lastwords FROM "+SEEN_DB+" WHERE nick='"+nick+"';");
+            Object[] row = sqlHandler.selectSingle("SELECT id, nick, date, lastwords FROM "+SEEN_DB+" WHERE nick='"+nick+"';");
 
-
-            if(!sql.getNext()) {
+            if(row == null) {
                 Grouphug.getInstance().sendMessage(nick + " hasn't said anything yet.", false);
-            }else{
-                Object[] values = sql.getValueList();
-                Date last = new Date(((Timestamp)values[2]).getTime());
-                String lastwords = (String)values[3];
+            } else {
+                Date last = new Date(((Timestamp)row[2]).getTime());
+                String lastwords = (String)row[3];
 
                 Grouphug.getInstance().sendMessage(nick + " uttered \""+ lastwords+ "\" on " +last, false);
             }
 
-        }catch(SQLException e) {
+        } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
-        }finally {
-            sql.disconnect();
         }
     }
 

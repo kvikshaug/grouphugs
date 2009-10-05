@@ -1,56 +1,63 @@
 package grouphug.modules;
 
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.Date;
-import java.text.DecimalFormat;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
 import grouphug.Grouphug;
-import grouphug.SQL;
 import grouphug.GrouphugModule;
-import grouphug.util.PasswordManager;
+import grouphug.util.SQL;
+import grouphug.util.SQLHandler;
+
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 
 public class WordCount implements GrouphugModule {
 
-    private static final String DEFAULT_SQL_HOST = "127.0.0.1";
-    private static final String DEFAULT_SQL_USER = "gh";
     private static final String TRIGGER_HELP = "wordcount";
 	private static final String TRIGGER = "wordcount ";
-	private static final String WORDS_DB= "gh_words";
+	private static final String WORDS_DB= "words";
     private static final String TRIGGER_TOP = "wordcounttop";
     private static final String TRIGGER_BOTTOM = "wordcountbottom";
     private static final int LIMIT = 5;
     private static final DateFormat df = new SimpleDateFormat("d. MMMMM");
 
+    private SQLHandler sqlHandler;
+
+    public WordCount() {
+        try {
+            sqlHandler = SQLHandler.getSQLHandler();
+        } catch(ClassNotFoundException ex) {
+            System.err.println("WordCount startup error: SQL unavailable!");
+            // TODO should disable this module at this point.
+        }
+    }
+
 	
 	public void addWords(String sender, String message) {
-		SQL sql = new SQL();
-
         // This method to count words should be more or less failsafe:
         int newWords = message.trim().replaceAll(" {2,}+", " ").split(" ").length;
 
 		try{
-			sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
-			sql.query("SELECT id, words, `lines` FROM "+WORDS_DB+" WHERE nick='"+sender+"';");
-			
-			
-			if(!sql.getNext()) {
-				sql.query("INSERT INTO "+WORDS_DB+" (nick, words, `lines`, since) VALUES ('"+sender+"', '"+newWords+"', '1', '"+SQL.dateToSQLDateTime(new Date())+"');");
-			}else{
-				Object[] values = sql.getValueList();
-                long existingWords = ((Long)values[1]);
-                long existingLines = ((Long)values[2]);
-				sql.query("UPDATE "+WORDS_DB+" SET words='"+(existingWords + newWords)+"', `lines`='"+(existingLines + 1)+"' WHERE id='"+values[0]+"';");
+			Object[] row = sqlHandler.selectSingle("SELECT id, words, `lines` FROM "+WORDS_DB+" WHERE nick='"+sender+"';");
+			if(row == null) {
+                ArrayList<String> params = new ArrayList<String>();
+                params.add(sender);
+                params.add(newWords + "");
+                params.add(SQL.dateToSQLDateTime(new Date()));
+				sqlHandler.insert("INSERT INTO "+WORDS_DB+" (nick, words, `lines`, since) VALUES ('?', '?', '1', '?');", params);
+			} else {
+                long existingWords = ((Integer)row[1]);
+                long existingLines = ((Integer)row[2]);
+				sqlHandler.update("UPDATE "+WORDS_DB+" SET words='"+(existingWords + newWords)+"', `lines`='"+(existingLines + 1)+"' WHERE id='"+row[0]+"';");
 			}
 
-		}catch(SQLException e) {
+		} catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
+            e.printStackTrace();
             Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
-		}finally {
-            sql.disconnect();
         }
 	}
 	
@@ -82,27 +89,24 @@ public class WordCount implements GrouphugModule {
     // TODO some duplicated code in the following two methods, can this be simplified ?
 
     private void showScore(boolean top) {
-        SQL sql = new SQL();
         String reply;
         if(top)
             reply = "The biggest losers are:\n";
         else
             reply = "The laziest idlers are:\n";
         try {
-            sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
             String query = ("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" ORDER BY words ");
             if(top)
                 query += "DESC ";
             query += "LIMIT "+LIMIT+";";
-            sql.query(query);
+            ArrayList<Object[]> rows = sqlHandler.select(query);
             int place = 1;
-            while(sql.getNext()) {
-                Object[] values = sql.getValueList();
-                long words = ((Long)values[2]);
-                long lines = ((Long)values[3]);
+            for(Object[] row : rows) {
+                long words = ((Integer)row[2]);
+                long lines = ((Integer)row[3]);
                 double wpl = (double)words / (double)lines;
-                Date since = new Date(((Timestamp)values[4]).getTime());
-                reply += (place++)+". "+ values[1]+ " ("+words+" words, "+lines+" lines, "+
+                Date since = SQL.sqlDateTimeToDate((String)row[4]);
+                reply += (place++)+". "+row[1]+ " ("+words+" words, "+lines+" lines, "+
                         (new DecimalFormat("0.0")).format(wpl)+
                         " wpl) since "+df.format(since)+"\n";
             }
@@ -114,26 +118,23 @@ public class WordCount implements GrouphugModule {
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
-        }finally {
-            sql.disconnect();
+        } catch(ParseException e) {
+            System.err.println("Unable to parse the SQL datetime!");
+            Grouphug.getInstance().sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.", false);
         }
     }
 
     private void print(String message){
-        SQL sql = new SQL();
         String nick = message.substring(10, message.length());
         try{
-            sql.connect(DEFAULT_SQL_HOST, "sunn", DEFAULT_SQL_USER, PasswordManager.getHinuxPass());
-            sql.query("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick='"+nick+"';");
+            Object[] row = sqlHandler.selectSingle("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick='"+nick+"';");
 
-
-            if(!sql.getNext()) {
+            if(row == null) {
                 Grouphug.getInstance().sendMessage(nick + " doesn't have any words counted.", false);
-            }else{
-                Object[] values = sql.getValueList();
-                long words = ((Long)values[2]);
-                long lines = ((Long)values[3]);
-                Date since = new Date(((Timestamp)values[4]).getTime());
+            } else {
+                long words = ((Integer)row[2]);
+                long lines = ((Integer)row[3]);
+                Date since = SQL.sqlDateTimeToDate((String)row[4]);
                 double wpl = (double)words / (double)lines;
 
                 Grouphug.getInstance().sendMessage(nick + " has uttered "+words+ " words in "+lines+" lines ("+
@@ -141,11 +142,12 @@ public class WordCount implements GrouphugModule {
                         " wpl) since "+df.format(since), false);
             }
 
-        }catch(SQLException e) {
+        } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
-        }finally {
-            sql.disconnect();
+        } catch(ParseException e) {
+            System.err.println("Unable to parse the SQL datetime!");
+            Grouphug.getInstance().sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.", false);
         }
     }
 }

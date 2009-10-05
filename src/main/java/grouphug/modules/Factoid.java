@@ -1,11 +1,10 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
-import grouphug.SQL;
 import grouphug.GrouphugModule;
+import grouphug.util.SQLHandler;
 
 import java.sql.SQLException;
-import java.sql.SQLSyntaxErrorException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -38,27 +37,29 @@ public class Factoid implements GrouphugModule {
     private static final String SEPARATOR_MESSAGE = " <say> ";
     private static final String SEPARATOR_ACTION = " <do> ";
 
+    private static final String FACTOID_TABLE = "factoid";
+
     private static Random random = new Random(System.nanoTime());
 
     private long lastAddedTime; // HACK to avoid specialTrigger() being called on the same line
 
+    private SQLHandler sqlHandler;
+
     public Factoid() {
         // Load up all existing factoids from sql
-        SQL sql = new SQL();
         try {
-            sql.connect();
-            sql.query("SELECT `type`, `trigger`, `reply`, `author` FROM gh_factoid;");
-            while(sql.getNext()) {
-                Object[] values = sql.getValueList();
-                boolean message = values[0].equals("message");
-                factoids.add(new FactoidItem(message, (String)values[1], (String)values[2], (String)values[3]));
+            sqlHandler = new SQLHandler(true);
+            ArrayList<Object[]> rows = sqlHandler.select("SELECT `type`, `trigger`, `reply`, `author` FROM " + FACTOID_TABLE + ";");
+            for(Object[] row : rows) {
+                boolean message = row[0].equals("message");
+                factoids.add(new FactoidItem(message, (String)row[1], (String)row[2], (String)row[3]));
             }
-        } catch(SQLSyntaxErrorException e) {
-            System.err.println("Factoid startup: SQL Syntax error: "+e);
-        } catch(SQLException e) {
+
+        } catch(ClassNotFoundException ex) {
+            System.err.println("Factoid startup: SQL unavailable!");
+            // TODO should disable this module at this point
+        } catch (SQLException e) {
             System.err.println("Factoid startup: SQL Exception: "+e);
-        } finally {
-            sql.disconnect();
         }
     }
 
@@ -187,16 +188,10 @@ public class Factoid implements GrouphugModule {
         }
 
         // First add the new item to the SQL db
-        SQL sql = new SQL();
         try {
-            sql.connect();
-            sql.query("INSERT INTO gh_factoid (`type`, `trigger`, `reply`, `author`) VALUES ('"+(message ? "message" : "action")+"', '"+trigger+"', '"+reply+"', '"+author+"');");
-        } catch(SQLSyntaxErrorException e) {
-            System.err.println("Factoid insertion: SQL Syntax error: "+e);
+            sqlHandler.insert("INSERT INTO " + FACTOID_TABLE + " (`type`, `trigger`, `reply`, `author`) VALUES ('"+(message ? "message" : "action")+"', '"+trigger+"', '"+reply+"', '"+author+"');");
         } catch(SQLException e) {
             System.err.println("Factoid insertion: SQL Exception: "+e);
-        } finally {
-            sql.disconnect();
         }
 
         // Then add it to memory
@@ -213,21 +208,15 @@ public class Factoid implements GrouphugModule {
         FactoidItem factoid;
         if((factoid = find(trigger, false)) != null) {
             // First remove it from the SQL db
-            SQL sql = new SQL();
             try {
-                sql.connect();
-                sql.query("DELETE FROM gh_factoid WHERE `trigger` = '"+trigger+"';");
-                if(sql.getAffectedRows() == 0) {
+                if(sqlHandler.delete("DELETE FROM " + FACTOID_TABLE + "  WHERE `trigger` = '"+trigger+"';") == 0) {
                     System.err.println("Factoid deletion warning: Item was found in local arraylist, but not in SQL DB!");
                     Grouphug.getInstance().sendMessage("OMG inconsistency; I have the factoid in memory but not in the SQL db.", false);
                     return false;
+
                 }
-            } catch(SQLSyntaxErrorException e) {
-                System.err.println("Factoid deletion: SQL Syntax error: "+e);
             } catch(SQLException e) {
                 System.err.println("Factoid deletion: SQL Exception: "+e);
-            } finally {
-                sql.disconnect();
             }
 
             // Then remove it from memory

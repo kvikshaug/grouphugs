@@ -1,46 +1,37 @@
 package grouphug;
 
-import org.jibble.pircbot.*;
-import grouphug.util.PasswordManager;
-import grouphug.util.Debugger;
+import org.jibble.pircbot.IrcException;
+import org.jibble.pircbot.NickAlreadyInUseException;
+import org.jibble.pircbot.PircBot;
+import org.jibble.pircbot.User;
 
-import java.util.ArrayList;
 import java.io.*;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.net.URLClassLoader;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 
 /**
  * Grouphug
  *
  * A java-based IRC-bot created purely for entertainment purposes and as a personal excercise in design.
+ * This bot extends the functionality of the well-designed PircBot, see http://www.jibble.org/
  *
- * This bot manages a list of modules that may make the bot react up certain triggers or messages sent to
- * the channel this bot resides on. It contains functionality for preventing spam, splitting lines and more.
+ * The bot acts as a framework for modules that each serve their own purpose. With the help of SQL,
+ * external web sites and clever imagination, the modules are used to entertain, insult, and/or inform the
+ * users in its IRC channel.
  *
- * The modules are dynamically loaded - the demands for a module is simple:
- * - It must exist in the grouphug.modules package
- * - It must implement the grouphug.modules.GrouphugModule interface
- * - Its constructor must take no parameters (because of dynamic loading)
- * Any module filling these demands will be loaded and accessed as any other upon trigger calls.
+ * It is (supposed to be) easy to add a new module to the mix, and several utilities exist to make
+ * writing a module as easy as possible.
  *
  * Some important concepts for the bot:
  * - It should never bother anyone unless it is clear that they want a response from it.
  * - It should never be unclear what a command or module does or intends to do. From a single !help trigger,
- *   a user should be able to dig down in detail and find out every interaction he/she is able to make to the bot,
- *   and what to be expected in return.
+ *   a user should be able to dig down in detail and find out every interaction he/she is able to make to
+ *   the bot, and what to be expected in return.
  *
- * Certain functionality is closely tied to the linux account it currently runs on, and shell scripts,
- * website access and the like located on that account.
- *
- * A future vision for the bot will be to changed the design to be event-based, an own event for each
- * overriden method (onMessage, onKick etc.). This is currently under development and anyone are free
- * to contribute at this stage.
- *
- * The grouphug bot was originally started by Alex Kvikshaug and continued as
- * an SVN project by the guys currently hanging in #grouphugs @ efnet.
- *
- * The bot extends the functionality of the well-designed PircBot, see http://www.jibble.org/
+ * The bot is currently maintained by most of the people hanging in #grouphugs @ efnet.
+ * For more information, please join our channel or visit the web site: [coming soon]
  */
 
 // TODO - use sunn's grouphug.utils.Web on: Google/GoogleFight/Define/Tracking/Confession
@@ -50,19 +41,16 @@ import java.net.URLClassLoader;
 public class Grouphug extends PircBot {
 
     // Channel and server
-    public static final String CHANNEL = Debugger.CHANNEL;
+    public static final String CHANNEL = "#grouphugs";
     public static final String SERVER = "irc.homelien.no";
 
     // Character encoding to use when communicating with the IRC server.
-    public static final String ENCODING = "ISO8859-15";
+    public static final String ENCODING = "UTF-8";
 
     // The trigger characters (as Strings since startsWith takes String)
     public static final String MAIN_TRIGGER = "!";
     public static final String SPAM_TRIGGER = "@";
     public static final String HELP_TRIGGER = "help";
-
-    // the root directory the bot is running from
-    public static final String ROOT_DIR = "/home/DT2006/murray/gh/";
 
     // A list over all the nicknames we want
     protected static ArrayList<String> nicks = new ArrayList<String>();
@@ -79,10 +67,7 @@ public class Grouphug extends PircBot {
     private static final int RECONNECT_TIME = 15000;
 
     // The file to log all messages to
-    private static File logfile = new File(ROOT_DIR+"log-current");
-
-    // The standard outputstream
-    private static PrintStream stdOut;
+    private static File logfile = new File("log-current");
 
     // A list over all loaded modules
     private static ArrayList<GrouphugModule> modules = new ArrayList<GrouphugModule>();
@@ -110,22 +95,10 @@ public class Grouphug extends PircBot {
     @Override
     protected void onMessage(String channel, String sender, String login, String hostname, String message) {
 
-        // Rebooting?
-        if(message.equals("!reboot")) {
-            try {
-                Runtime.getRuntime().exec("wget -qO - http://hinux.hin.no/~murray/gh/?reboot > /dev/null 2>&1");
-            } catch(IOException ex) {
-                System.err.println(ex);
-            }
-            return;
-        }
-
-        // Reloading?
-        if(message.equals("!reload")) {
-            if(!recompileModules())
-                return;
-
-            bot.sendMessage("Reloaded "+reloadModules()+" modules.", false);
+        // Old reboot/reload functions - this is strictly not necessary, but maybe these
+        // should be reimplemented properly sometime?
+        if(message.equals("!reboot") || message.equals("!reload")) {
+            bot.sendMessage("Sorry, this functionality has been disabled. Patches are welcome though :)", false);
             return;
         }
 
@@ -162,6 +135,8 @@ public class Grouphug extends PircBot {
     protected void onPrivateMessage(String sender, String login, String hostname, String message) {
         // Help triggers will also activate in PM
         checkForHelpTrigger(null, sender, login, hostname, message);
+        // TODO if the message was unrecognized, say something like "hi, i'm a bot. visit
+        // TODO the people in #grouphugs to ask about me, or say !help to learn what i can do." 
     }
 
     private void checkForHelpTrigger(String channel, String sender, String login, String hostname, String message) {
@@ -179,13 +154,6 @@ public class Grouphug extends PircBot {
         // if not, check if help is triggered with a special module
         else if(message.startsWith(MAIN_TRIGGER+HELP_TRIGGER+" ")) {
             boolean replied = false;
-            if(message.equals(MAIN_TRIGGER+HELP_TRIGGER+" reboot")) {
-                sendMessage("\"Reboot\" shuts down the bot, recompiles everything, and restarts.", false);
-                replied = true;
-            } else if(message.equals(MAIN_TRIGGER+HELP_TRIGGER+" reload")) {
-                sendMessage("\"Reload\" recompiles and reloads all modules, without restarting the bot.", false);
-                replied = true;
-            }
             for(GrouphugModule m : modules) {
                 String reply = m.helpSpecialTrigger(channel, sender, login, hostname, message.substring(MAIN_TRIGGER.length() + HELP_TRIGGER.length() + 1));
                 if(reply != null) {
@@ -275,12 +243,14 @@ public class Grouphug extends PircBot {
         } catch(IrcException e) {
             // No idea how to handle this. So print the message and exit
             System.err.println(e.getMessage());
-            stdOut.flush();
+            System.out.flush();
+            System.err.flush();
             System.exit(-1);
         } catch(IOException e) {
             // No idea how to handle this. So print the message and exit
             System.err.println(e.getMessage());
-            stdOut.flush();
+            System.out.flush();
+            System.err.flush();
             System.exit(-1);
         }
         this.joinChannel(Grouphug.CHANNEL);
@@ -344,97 +314,6 @@ public class Grouphug extends PircBot {
     }
 
     /**
-     * Clears all loaded modules, and runs the loadModules() method
-     *
-     * @return the number of loaded modules
-     */
-    // TODO - do this automatically upon SVNCommit, without output?
-    private static int reloadModules() {
-        modules.clear();
-        return loadModules();
-    }
-
-    /**
-     * Loads up all the modules in the modules package (skipping anything not ending
-     * with ".class" or containing a '$'-char)
-     *
-     * @return the number of loaded modules
-     */
-    private static int loadModules() {
-        System.out.println("(CL) Starting Class Loader...");
-        File moduleDirectory = new File(ROOT_DIR+"out/grouphug/modules/");
-
-        // Create a new classloader
-        URL[] urls = null;
-        try {
-            URL url = moduleDirectory.toURI().toURL();
-            urls = new URL[]{url};
-        } catch (MalformedURLException e) {
-            // this won't happen
-        }
-
-        ClassLoader cl = new URLClassLoader(urls);
-
-        int loadedModules = 0;
-
-        for(String s : moduleDirectory.list()) {
-            if(s.contains("$")) {
-                System.out.println("(CL) "+s+" : Skipped");
-                continue;
-            }
-            if(!s.endsWith(".class")) {
-                System.out.println("(CL) "+s+" : Skipped");
-                continue;
-            }
-            s = s.substring(0, s.length()-6); // strip ".class"
-            Class clazz;
-            try {
-                clazz = cl.loadClass(s);
-                modules.add((GrouphugModule)clazz.newInstance());
-                System.out.println("(CL) "+s+".class : Loaded OK");
-                loadedModules++;
-            } catch (InstantiationException e) {
-                System.err.println("(CL) "+s+".class : Failed to load!");
-                System.err.println(e);
-            } catch (IllegalAccessException e) {
-                System.err.println("(CL) "+s+".class : Failed to load!");
-                System.err.println(e);
-            } catch(ClassNotFoundException e) {
-                System.err.println("(CL) "+s+".class : Failed to load!");
-                System.err.println(e);
-            }
-        }
-        if(loadedModules == 0) {
-            System.out.println("(CL) No modules to load.");
-        }
-        return loadedModules;
-    }
-
-    private static boolean recompileModules() {
-        try {
-            Process reload = Runtime.getRuntime().exec(ROOT_DIR+"reload.sh");
-            BufferedReader br = new BufferedReader(new InputStreamReader(reload.getInputStream()));
-            String line;
-            System.out.println("(RC) Starting recompilation of modules...");
-            while ((line = br.readLine()) != null) {
-                System.out.println("(RC) "+line);
-            }
-            reload.waitFor();
-        } catch(IOException ex) {
-            System.err.println("ERROR: Failed to run reload script: "+ex);
-            System.err.println("Reported problem: "+ex);
-            bot.sendMessage("Sorry, HiNux seems to have clogging problems, I caught in IOException while reloading modules.", false);
-            return false;
-        } catch(InterruptedException ex) {
-            System.err.println("WARNING: I was interrupted before the compilation was done! NOT reloading modules.");
-            System.err.println("Reported problem: "+ex);
-            bot.sendMessage("I tried to reload modules, but was interrupted! Hmpf.", false);
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * The main method, starting the bot, connecting to the server and joining its main channel.
      *
      * @param args Command-line arguments, unused
@@ -443,23 +322,19 @@ public class Grouphug extends PircBot {
     public static void main(String[] args) throws UnsupportedEncodingException {
 
         // Redirect standard output to logfile
-        if(!Debugger.DEBUG) {
-            try {
-                logfile.createNewFile();
-                stdOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(logfile)));
-                System.setOut(stdOut);
-                System.setErr(stdOut);
-            } catch(IOException e) {
-                System.err.println("WARNING: Unable to load or create logfile \""+logfile.toString()+"\" in default dir.\n" +
-                        "Reported problem: " + e + "\n" +
-                        "I will continue WITHOUT a logfile, and let stdout/stderr go straight to console.\n");
+        try {
+            System.out.println("Standard input will be redirected the following logfile:");
+            System.out.println("'"+logfile.getAbsolutePath()+"'.");
+            if(!logfile.createNewFile()) {
+                System.out.println("Note: The logfile already exists, any existing data will be overwritten.");
             }
-        }
-
-        // Load the SQL passwords from default files
-        if(!PasswordManager.loadPasswords()) {
-            System.err.println("WARNING: Unable to load one or more of the expected password files. " +
-                    "I will continue, but modules dependant upon SQL may barf when they are used.\n");
+            PrintStream stdOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(logfile)));
+            System.setOut(stdOut);
+            System.setErr(stdOut);
+        } catch(IOException e) {
+            System.err.println("WARNING: Unable to load or create logfile \""+logfile.toString()+"\" in default dir.\n" +
+                    "Reported problem: " + e + "\n" +
+                    "I will continue WITHOUT a logfile, and let stdout/stderr go straight to console.\n");
         }
 
         // Load up the bot, enable debugging output, and specify encoding
@@ -468,31 +343,30 @@ public class Grouphug extends PircBot {
         bot.setEncoding(ENCODING);
 
         // Load up modules
-        if(Debugger.DEBUG) {
-            // When debugging, put the modules you want here!
-            // Example:
-            // modules.add(new grouphug.modules.ModuleName());
-        } else {
-            try {
-                recompileModules();
-                loadModules();
-            } catch(NullPointerException ex) {
-                System.err.println("\n" +
-                        "Caught a NullPointerException while recompiling modules.\n\n" +
-                        "This is usually caused by YOU trying to run/debug gh on your local machine.\n" +
-                        "If that's the case, please take a look at the grouphug.util.Debugger class.");
-                System.exit(-1);
-            }
-        }
+        modules.add(new grouphug.modules.Bofh());
+        modules.add(new grouphug.modules.Confession());
+        modules.add(new grouphug.modules.Decider());
+        modules.add(new grouphug.modules.Define());
+        modules.add(new grouphug.modules.EightBall());
+        modules.add(new grouphug.modules.Factoid());
+        modules.add(new grouphug.modules.Google());
+        modules.add(new grouphug.modules.GoogleFight());
+        modules.add(new grouphug.modules.IMDb());
+        modules.add(new grouphug.modules.Insulter());
+        modules.add(new grouphug.modules.IsSiteUp());
+        modules.add(new grouphug.modules.Karma());
+        modules.add(new grouphug.modules.Seen());
+        modules.add(new grouphug.modules.Slang());
+        modules.add(new grouphug.modules.Tracking());
+        modules.add(new grouphug.modules.Upload());
+        modules.add(new grouphug.modules.URLCatcher());
+        modules.add(new grouphug.modules.WordCount());
 
         // Start own threads
-        if(!Debugger.DEBUG) {
-            SVNCommit.load(bot);
-            new Thread(new LogFlusher(bot)).start();
-        }
+        new Thread(new LogFlusher(bot)).start();
 
         // Save the nicks we want, in prioritized order
-        //nicks.add("gh");
+        nicks.add("gh");
         nicks.add("gh`");
         nicks.add("hugger");
         nicks.add("klemZ");
@@ -500,14 +374,16 @@ public class Grouphug extends PircBot {
         try {
             connect(bot, false);
         } catch(IrcException e) {
-            // No idea how to handle this. So print the message and exit
-            System.err.println(e.getMessage());
-            stdOut.flush();
+            // No idea how to handle this. So print debug information and exit
+            e.printStackTrace();
+            System.out.flush();
+            System.err.flush();
             System.exit(-1);
         } catch(IOException e) {
-            // No idea how to handle this. So print the message and exit
-            System.err.println(e.getMessage());
-            stdOut.flush();
+            // No idea how to handle this. So print debug information and exit
+            e.printStackTrace();
+            System.out.flush();
+            System.err.flush();
             System.exit(-1);
         }
 
@@ -553,13 +429,6 @@ public class Grouphug extends PircBot {
     }
 
     /**
-     * Flushes the stdout buffer to the logfile
-     */
-    protected void flushLogs() {
-        stdOut.flush();
-    }
-
-    /**
      * Convert HTML entities to their respective characters
      * @param str The unconverted string
      * @return The converted string
@@ -602,22 +471,23 @@ public class Grouphug extends PircBot {
      */
     public static String fixEncoding(String str) {
 
-        // lowercase iso-8859-1 encoded
-        str = str.replace(new String(new char[] { (char)195, (char)352 }), "æ");
-        str = str.replace(new String(new char[] { (char)195, (char)382 }), "ø");
-        str = str.replace(new String(new char[] { (char)195, (char)165 }), "å");
+        Charset utf8charset = Charset.forName("UTF-8");
+        Charset iso88591charset = Charset.forName("ISO-8859-1");
+        ByteBuffer inputBuffer = ByteBuffer.wrap(str.getBytes());
 
-        // uppercase iso-8859-1 encoded
-        str = str.replace(new String(new char[] { (char)195, (char)134}), "Æ");
-        str = str.replace(new String(new char[] { (char)195, (char)152}), "Ø");
-        str = str.replace(new String(new char[] { (char)195, (char)195}), "Å");
+        // decode UTF-8
+        CharBuffer data = iso88591charset.decode(inputBuffer);
 
-        // not exactly sure what this is - supposed to be utf-8, not sure what happens really
-        // not sure of the char values for Æ and Å, these are commented out, enable them when this gets applicable
-        //str = str.replace(new String(new char[] { (char)195, (char)???}), "&AElig;");
-        str = str.replace(new String(new char[] { (char)195, (char)732}), "Ø");
-        //str = str.replace(new String(new char[] { (char)195, (char)???}), "&Aring;");
+        // encode ISO-8559-1
+        ByteBuffer outputBuffer = utf8charset.encode(data);
 
-        return str;
+        byte[] outputData = outputBuffer.array();
+        String newStr = outputData.toString();
+
+        if(!newStr.equals(str)) {
+            bot.sendMessage("o hai, fixEncoding() here, i just tried to convert iso: '"+str+"'\nto utf8: '"+newStr+"'", false);
+        }
+
+        return newStr;
     }
 }

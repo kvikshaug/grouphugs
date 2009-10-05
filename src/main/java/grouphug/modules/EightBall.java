@@ -1,11 +1,11 @@
 package grouphug.modules;
 
-import grouphug.GrouphugModule;
 import grouphug.Grouphug;
+import grouphug.GrouphugModule;
 
-import java.util.Random;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class EightBall implements GrouphugModule {
 
@@ -37,23 +37,19 @@ public class EightBall implements GrouphugModule {
         answerDb.add("Very doubtful.");
     }
 
-    @Override
     public void trigger(String channel, String sender, String login, String hostname, String message) {
         if(message.startsWith(TRIGGER))
             Grouphug.getInstance().sendMessage(sender+": "+answerDb.get(random.nextInt(answerDb.size())), false);
     }
 
-    @Override
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
         // no special action
     }
 
-    @Override
     public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
         return TRIGGER_HELP;
     }
 
-    @Override
     public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
             return "Seek advice from the magic 8-ball fortuneteller!\n" +
