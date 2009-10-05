@@ -6,9 +6,6 @@ import org.jibble.pircbot.PircBot;
 import org.jibble.pircbot.User;
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 
 /**
@@ -461,33 +458,5 @@ public class Grouphug extends PircBot {
         str = str.replace("&Oslash;", "Ø");
         str = str.replace("&#228;", "ä");
         return str;
-    }
-
-    /**
-     * I will not try to pretend like I know what this method does.
-     * But it probably has something to do with fixing character encodings.
-     * @param str The unconverted string
-     * @return The attempted converted string
-     */
-    public static String fixEncoding(String str) {
-
-        Charset utf8charset = Charset.forName("UTF-8");
-        Charset iso88591charset = Charset.forName("ISO-8859-1");
-        ByteBuffer inputBuffer = ByteBuffer.wrap(str.getBytes());
-
-        // decode UTF-8
-        CharBuffer data = iso88591charset.decode(inputBuffer);
-
-        // encode ISO-8559-1
-        ByteBuffer outputBuffer = utf8charset.encode(data);
-
-        byte[] outputData = outputBuffer.array();
-        String newStr = outputData.toString();
-
-        if(!newStr.equals(str)) {
-            bot.sendMessage("o hai, fixEncoding() here, i just tried to convert iso: '"+str+"'\nto utf8: '"+newStr+"'", false);
-        }
-
-        return newStr;
     }
 }
