@@ -355,6 +355,7 @@ public class Grouphug extends PircBot {
         modules.add(new grouphug.modules.Seen());
         modules.add(new grouphug.modules.Slang());
         modules.add(new grouphug.modules.Tracking());
+        modules.add(new grouphug.modules.Translate());
         modules.add(new grouphug.modules.Upload());
         modules.add(new grouphug.modules.URLCatcher());
         modules.add(new grouphug.modules.WordCount());

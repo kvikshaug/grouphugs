@@ -39,8 +39,10 @@ public class Web
      * @throws java.io.IOException sometimes
      */
     public static ArrayList<String> fetchHtmlList(String urlString, int timeout) throws IOException {
-        URL url = new URL(urlString);
+        urlString = urlString.replace(" ", "%20");
 
+        URL url = new URL(urlString);
+        System.out.println("Opening: " + urlString + " ...");
         URLConnection urlConn = url.openConnection();
 
         urlConn.setConnectTimeout(timeout);
