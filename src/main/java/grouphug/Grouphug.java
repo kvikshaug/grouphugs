@@ -6,9 +6,6 @@ import org.jibble.pircbot.PircBot;
 import org.jibble.pircbot.User;
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 
 /**
@@ -57,8 +54,8 @@ public class Grouphug extends PircBot {
 
     // The number of characters upon which lines are splitted
     // Note that the 512 max limit includes the channel name, \r\n, and probably some other stuff.
-    // maxing out on 450 seems to be a reasonable amount, both ways.
-    private static final int MAX_LINE_CHARS = 450;
+    // maxing out on 445 seems to be a reasonable amount, both ways.
+    private static final int MAX_LINE_CHARS = 445;
 
     // How many lines we can send to the channel in one go without needing spam-trigger
     private static final int MAX_SPAM_LINES = 5;
@@ -358,6 +355,7 @@ public class Grouphug extends PircBot {
         modules.add(new grouphug.modules.Seen());
         modules.add(new grouphug.modules.Slang());
         modules.add(new grouphug.modules.Tracking());
+        modules.add(new grouphug.modules.Translate());
         modules.add(new grouphug.modules.Upload());
         modules.add(new grouphug.modules.URLCatcher());
         modules.add(new grouphug.modules.WordCount());
@@ -461,33 +459,5 @@ public class Grouphug extends PircBot {
         str = str.replace("&Oslash;", "Ø");
         str = str.replace("&#228;", "ä");
         return str;
-    }
-
-    /**
-     * I will not try to pretend like I know what this method does.
-     * But it probably has something to do with fixing character encodings.
-     * @param str The unconverted string
-     * @return The attempted converted string
-     */
-    public static String fixEncoding(String str) {
-
-        Charset utf8charset = Charset.forName("UTF-8");
-        Charset iso88591charset = Charset.forName("ISO-8859-1");
-        ByteBuffer inputBuffer = ByteBuffer.wrap(str.getBytes());
-
-        // decode UTF-8
-        CharBuffer data = iso88591charset.decode(inputBuffer);
-
-        // encode ISO-8559-1
-        ByteBuffer outputBuffer = utf8charset.encode(data);
-
-        byte[] outputData = outputBuffer.array();
-        String newStr = outputData.toString();
-
-        if(!newStr.equals(str)) {
-            bot.sendMessage("o hai, fixEncoding() here, i just tried to convert iso: '"+str+"'\nto utf8: '"+newStr+"'", false);
-        }
-
-        return newStr;
     }
 }

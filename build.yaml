@@ -1,0 +1,3 @@
+artifacts:
+    sqlite: org.xerial:sqlite-jdbc:jar:3.6.16     
+    pircbot: pircbot:pircbot:jar:1.4.2

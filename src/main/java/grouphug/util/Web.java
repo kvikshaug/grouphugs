@@ -1,11 +1,12 @@
 package grouphug.util;
 
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.net.UnknownHostException;
-import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 /**
@@ -16,6 +17,49 @@ import java.util.ArrayList;
  */
 public class Web
 {
+
+    /**
+     * Fetches a web page for you and returns a nicely formatted arraylist when the whole
+     * thing has loaded. This method has a default timeout value of 20 seconds.
+     * @param urlString the url you want to look up.
+     * @return an arraylist containing each line of the web site html
+     * @throws java.io.IOException sometimes
+     */
+    public static ArrayList<String> fetchHtmlList(String urlString) throws IOException {
+        return fetchHtmlList(urlString, 20000);
+    }
+
+    /**
+     * Fetches a web page for you and returns a nicely formatted arraylist when the whole
+     * thing has loaded.
+     * @param urlString the url you want to look up.
+     * @param timeout an int that specifies the connect timeout value in milliseconds - if this time passes,
+     * a SocketTimeoutException is raised.
+     * @return an arraylist containing each line of the web site html
+     * @throws java.io.IOException sometimes
+     */
+    public static ArrayList<String> fetchHtmlList(String urlString, int timeout) throws IOException {
+        urlString = urlString.replace(" ", "%20");
+
+        URL url = new URL(urlString);
+        System.out.println("Opening: " + urlString + " ...");
+        URLConnection urlConn = url.openConnection();
+
+        urlConn.setConnectTimeout(timeout);
+        urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Pretend we're a proper browser :)
+
+        BufferedReader input = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
+
+        ArrayList<String> lines = new ArrayList<String>();
+        String htmlLine;
+        while ((htmlLine = input.readLine()) != null) {
+            lines.add(htmlLine);
+        }
+        input.close();
+        return lines;
+    }
+
+
     /**
      * Tries to fetch a HTML page from a URL.
      * @param url the url we want to look up.
@@ -61,7 +105,7 @@ public class Web
         finally {
             try { if(input != null) input.close(); } catch (IOException ioeIsIgnored) { /*IDEA code inspection nags*/ }
         }
-        
+
         return html.toString();
     }
 
