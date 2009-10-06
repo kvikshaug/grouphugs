@@ -2,13 +2,14 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.GrouphugModule;
+import grouphug.util.Web;
 
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.io.DataOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.InputStream;
-import java.io.IOException;
 
 public class Slang implements GrouphugModule {
 
@@ -86,7 +87,7 @@ public class Slang implements GrouphugModule {
         else
             reply = si.getWord()+" ("+si.getNumber()+" of "+Slang.slangCount+"): "+ si.getDefinition();
 
-        reply = Grouphug.entitiesToChars(reply);
+        reply = Web.entitiesToChars(reply);
 
         Grouphug.getInstance().sendMessage(reply, true);
     }

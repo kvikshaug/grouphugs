@@ -3,7 +3,6 @@ package grouphug;
 import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
 import org.jibble.pircbot.PircBot;
-import org.jibble.pircbot.User;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -28,21 +27,14 @@ import java.util.ArrayList;
  *   the bot, and what to be expected in return.
  *
  * The bot is currently maintained by most of the people hanging in #grouphugs @ efnet.
- * For more information, please join our channel or visit the web site: [coming soon]
+ * For more information, please join our channel or visit the web site: http://gh.kvikshaug.no/
  */
-
-// TODO - use sunn's grouphug.utils.Web on: Google/GoogleFight/Define/Tracking/Confession
-// TODO - bash for #grouphugs ?
-// TODO - tlf module ?
 
 public class Grouphug extends PircBot {
 
     // Channel and server
     public static final String CHANNEL = "#grouphugs";
     public static final String SERVER = "irc.homelien.no";
-
-    // Character encoding to use when communicating with the IRC server.
-    public static final String ENCODING = "UTF-8";
 
     // The trigger characters (as Strings since startsWith takes String)
     public static final String MAIN_TRIGGER = "!";
@@ -78,17 +70,6 @@ public class Grouphug extends PircBot {
         return bot;
     }
 
-
-    /**
-     * This method is called whenever a message is sent to a channel.
-     * This triggers all loaded modules and lets them react to the message.
-     *
-     * @param channel - The channel to which the message was sent.
-     * @param sender - The nick of the person who sent the message.
-     * @param login - The login of the person who sent the message.
-     * @param hostname - The hostname of the person who sent the message.
-     * @param message - The actual message sent to the channel.
-     */
     @Override
     protected void onMessage(String channel, String sender, String login, String hostname, String message) {
 
@@ -133,7 +114,7 @@ public class Grouphug extends PircBot {
         // Help triggers will also activate in PM
         checkForHelpTrigger(null, sender, login, hostname, message);
         // TODO if the message was unrecognized, say something like "hi, i'm a bot. visit
-        // TODO the people in #grouphugs to ask about me, or say !help to learn what i can do." 
+        // TODO the people in #grouphugs to ask about me, or say !help to learn what i can do."
     }
 
     private void checkForHelpTrigger(String channel, String sender, String login, String hostname, String message) {
@@ -163,67 +144,12 @@ public class Grouphug extends PircBot {
         }
     }
 
-    /**
-     * This method is called whenever someone (possibly us) is kicked from any of the channels that we are in.
-     * If we were kicked, try to rejoin with a sorry message.
-     *
-     * @param channel - The channel from which the recipient was kicked.
-     * @param kickerNick - The nick of the user who performed the kick.
-     * @param kickerLogin - The login of the user who performed the kick.
-     * @param kickerHostname - The hostname of the user who performed the kick.
-     * @param recipientNick - The unfortunate recipient of the kick.
-     * @param reason - The reason given by the user who performed the kick.
-     */
     @Override
     protected void onKick(String channel, String kickerNick, String kickerLogin, String kickerHostname, String recipientNick, String reason) {
         if (recipientNick.equalsIgnoreCase(getNick())) {
             joinChannel(channel);
             sendMessage(CHANNEL, "sry :(");
         }
-    }
-
-
-    /**
-     * This method is called whenever someone (possibly us) joins a channel which we are on.
-     * What we do is hug them :) <3
-     *
-     * @param channel - The channel which somebody joined.
-     * @param sender - The nick of the user who joined the channel.
-     * @param login - The login of the user who joined the channel.
-     * @param hostname - The hostname of the user who joined the channel.
-     */
-    @Override
-    protected void onJoin(String channel, String sender, String login, String hostname) {
-        /*
-        if(!sender.equals(getNick()))
-            sendAction(CHANNEL, "laughs at icc");
-        */
-    }
-
-    /**
-     * This method is called when we receive a user list from the server after joining a channel.
-     * Shortly after joining a channel, the IRC server sends a list of all users in that channel. The PircBot collects this information and calls this method as soon as it has the full list.
-     * To obtain the nick of each user in the channel, call the getNick() method on each User object in the array.
-     * At a later time, you may call the getUsers method to obtain an up to date list of the users in the channel.
-     *
-     * @param channel - The name of the channel.
-     * @param users - An array of User objects belonging to this channel.
-     */
-    @Override
-    protected void onUserList(String channel, User[] users) {
-        /*
-        String nicks = "";
-        for(User u : users) {
-            if(!u.getNick().equals(getNick()))
-                nicks += ", "+u.getNick();
-        }
-        nicks = nicks.substring(2);
-        if(nicks.contains(", ")) {
-            String org = nicks;
-            nicks = org.substring(0, org.lastIndexOf(", ")) + " and " + org.substring(org.lastIndexOf(", ") + 2);
-        }
-        sendAction(Grouphug.CHANNEL, "hugs "+nicks);
-        */
     }
 
     /**
@@ -337,7 +263,7 @@ public class Grouphug extends PircBot {
         // Load up the bot, enable debugging output, and specify encoding
         Grouphug.bot = new Grouphug();
         bot.setVerbose(true);
-        bot.setEncoding(ENCODING);
+        bot.setEncoding("UTF-8");
 
         // Load up modules
         modules.add(new grouphug.modules.Bofh());
@@ -390,7 +316,9 @@ public class Grouphug extends PircBot {
     }
 
     /**
-     * connect tries to connect the specified bot to the specified server, using the static nicklist
+     * This static method tries to connect the specified bot to the irc server.
+     * The method contains some spaghetti code which serves the purpose of getting
+     * the most wanted nick from the nicklist
      *
      * @param bot The bot object that will try to connect
      * @param reconnecting true if we have lost a connection and are reconnecting to that
@@ -424,40 +352,5 @@ public class Grouphug extends PircBot {
         }
         // start a thread for polling back our first nick if unavailable
         NickPoller.load(bot);
-    }
-
-    /**
-     * Convert HTML entities to their respective characters
-     * @param str The unconverted string
-     * @return The converted string
-     */
-    public static String entitiesToChars(String str) {
-        str = str.replace("&amp;", "&");
-        str = str.replace("&nbsp;", " ");
-        str = str.replace("&#8216;", "'");
-        str = str.replace("&#8217;", "'");
-        str = str.replace("&#8220;", "\"");
-        str = str.replace("&#8221;", "\"");
-        str = str.replace("&#8230;", "...");
-        str = str.replace("&#8212;", " - ");
-        str = str.replace("&mdash;", " - ");
-        str = str.replace("&quot;", "\"");
-        str = str.replace("&apos;", "'");
-        str = str.replace("&lt;", "<");
-        str = str.replace("&gt;", ">");
-        str = str.replace("&#34;", "\"");
-        str = str.replace("&#39;", "'");
-        str = str.replace("&laquo;", "«");
-        str = str.replace("&lsaquo;", "‹");
-        str = str.replace("&raquo;", "»");
-        str = str.replace("&rsaquo;", "›");
-        str = str.replace("&aelig;", "æ");
-        str = str.replace("&Aelig;", "Æ");
-        str = str.replace("&aring;", "å");
-        str = str.replace("&Aring;", "Å");
-        str = str.replace("&oslash;", "ø");
-        str = str.replace("&Oslash;", "Ø");
-        str = str.replace("&#228;", "ä");
-        return str;
     }
 }

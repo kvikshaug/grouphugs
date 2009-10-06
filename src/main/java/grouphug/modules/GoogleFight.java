@@ -3,12 +3,12 @@ package grouphug.modules;
 import grouphug.Grouphug;
 import grouphug.GrouphugModule;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.MalformedURLException;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 public class GoogleFight implements GrouphugModule {
 

@@ -2,13 +2,14 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.GrouphugModule;
+import grouphug.util.Web;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.MalformedURLException;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 public class IMDb implements GrouphugModule {
 
@@ -76,7 +77,7 @@ public class IMDb implements GrouphugModule {
             // A bit of copy-pasta and wtf's in here, enjoy :)
             while((line = imdb.readLine()) != null) {
                 if(line.startsWith(titleString)) {
-                    title = Grouphug.entitiesToChars(line.substring(line.indexOf(">") + 1, line.substring(1).indexOf("<")+1));
+                    title = Web.entitiesToChars(line.substring(line.indexOf(">") + 1, line.substring(1).indexOf("<")+1));
                 }
                 if(line.trim().equals(scoreString)) {
                     line = imdb.readLine();
@@ -91,7 +92,7 @@ public class IMDb implements GrouphugModule {
                     if(ind != -1) {
                         tagline = tagline.substring(0, ind).trim();
                     }
-                    tagline = Grouphug.entitiesToChars(" - "+tagline.replace("|", " "));
+                    tagline = Web.entitiesToChars(" - "+tagline.replace("|", " "));
                 }
                 if(line.startsWith(plotString)) {
                     plot = imdb.readLine().trim();
@@ -99,7 +100,7 @@ public class IMDb implements GrouphugModule {
                     if(ind != -1) {
                         plot = plot.substring(0, ind).trim();
                     }
-                    plot = Grouphug.entitiesToChars(plot.replace("|", " "));
+                    plot = Web.entitiesToChars(plot.replace("|", " "));
                 }
                 if(line.startsWith(commentString)) {
                     commentTitle = imdb.readLine().trim();
@@ -107,7 +108,7 @@ public class IMDb implements GrouphugModule {
                     if(ind != -1) {
                         commentTitle = commentTitle.substring(0, ind).trim();
                     }
-                    commentTitle = Grouphug.entitiesToChars(commentTitle.replace("|", " "));
+                    commentTitle = Web.entitiesToChars(commentTitle.replace("|", " "));
                 }
             }
 

@@ -4,12 +4,12 @@ import grouphug.Grouphug;
 import grouphug.GrouphugModule;
 import grouphug.util.Web;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.MalformedURLException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
 
 public class Insulter implements GrouphugModule {
 

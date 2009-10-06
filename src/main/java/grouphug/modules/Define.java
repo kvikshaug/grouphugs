@@ -2,13 +2,14 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.GrouphugModule;
+import grouphug.util.Web;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.MalformedURLException;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 public class Define implements GrouphugModule {
 
@@ -51,7 +52,7 @@ public class Define implements GrouphugModule {
         if(answer == null)
             Grouphug.getInstance().sendMessage("No definition found for "+message.substring(TRIGGER.length())+".", false);
         else
-            Grouphug.getInstance().sendMessage(Grouphug.entitiesToChars(answer), false);
+            Grouphug.getInstance().sendMessage(Web.entitiesToChars(answer), false);
     }
 
     public static String search(String query) throws IOException {

@@ -34,8 +34,6 @@ public class WordCount implements GrouphugModule {
             // TODO should disable this module at this point.
         }
     }
-
-	
 	public void addWords(String sender, String message) {
         // This method to count words should be more or less failsafe:
         int newWords = message.trim().replaceAll(" {2,}+", " ").split(" ").length;
@@ -60,7 +58,7 @@ public class WordCount implements GrouphugModule {
             Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
         }
 	}
-	
+
 	public void specialTrigger(String channel, String sender, String login, String hostname, String message){
 		addWords(sender, message);
 	}

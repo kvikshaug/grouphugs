@@ -3,12 +3,12 @@ package grouphug.modules;
 import grouphug.Grouphug;
 import grouphug.GrouphugModule;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.MalformedURLException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
 
 public class Google implements GrouphugModule {
 
@@ -81,7 +81,7 @@ public class Google implements GrouphugModule {
         } while(line != null && !line.contains(parseSearch));
         if(line == null)
           return null;
-        
+
         int startIndex = line.indexOf(parseSearch);
 
         // if -1, then the phrase wasn't found - should return error here, not "not found"

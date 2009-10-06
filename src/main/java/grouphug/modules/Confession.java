@@ -119,7 +119,7 @@ public class Confession implements GrouphugModule {
             confession += lines.get(line).trim()+"\n";
         }
 
-        confession = Grouphug.entitiesToChars(confession);
+        confession = Web.entitiesToChars(confession);
         confession = confession.replaceAll("\\<.*?\\>",""); // strip html tags
         confession = confession.substring(0, confession.length()-1);
 

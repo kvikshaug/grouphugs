@@ -4,9 +4,9 @@ import grouphug.Grouphug;
 import grouphug.GrouphugModule;
 import grouphug.util.Web;
 
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * URLCatcher module
@@ -17,9 +17,9 @@ import java.util.ArrayList;
  */
 public class URLCatcher implements GrouphugModule
 {
-    private static final String[] URI_SCHEMES = new String[] { "http://", "https://" }; 
+    private static final String[] URI_SCHEMES = new String[] { "http://", "https://" };
     private static final Pattern TITLE_BEGIN = Pattern.compile("<title>|<TITLE>");
-    private static final Pattern TITLE_END = Pattern.compile("</title>|</TITLE>");    
+    private static final Pattern TITLE_END = Pattern.compile("</title>|</TITLE>");
     private static final String HELP_TRIGGER = "urlcatcher";
     private static final int TITLE_MAX_LENGTH = 100;
 
@@ -53,7 +53,7 @@ public class URLCatcher implements GrouphugModule
      */
     public void specialTrigger(String channel, String sender, String login, String hostname, String message)
     {
-       /*if (message.startsWith(HTTP_URI) || message.startsWith(HTTPS_URI))
+        /*if (message.startsWith(HTTP_URI) || message.startsWith(HTTPS_URI))
         {
             String title = getHTMLTitle(message);
             if (title != null)
@@ -68,7 +68,7 @@ public class URLCatcher implements GrouphugModule
                     title = title.substring(0, TITLE_MAX_LENGTH);
                     title = title.concat(" (...)");
                 }
-                Grouphug.getInstance().sendMessage("Title: " + Grouphug.entitiesToChars(title) /*+ " :: " + url*/, false);
+                Grouphug.getInstance().sendMessage("Title: " + Web.entitiesToChars(title) /*+ " :: " + url*/, false);
             }
         }
     }
@@ -116,7 +116,7 @@ public class URLCatcher implements GrouphugModule
         {
             urls.addAll(Web.findURIs(s, string));
         }
-        
+
         return urls;
     }
 
@@ -165,8 +165,8 @@ public class URLCatcher implements GrouphugModule
         if (message.equals(HELP_TRIGGER))
         {
             return "URLCatcher tries to catch http:// or https:// URLs in messages to the channel, tries" +
-                                   " to look up the URL, then parses whatever it finds at  the URL, looking for " +
-                                   "a html <title>, and sends the title back to the channel.";
+                    " to look up the URL, then parses whatever it finds at  the URL, looking for " +
+                    "a html <title>, and sends the title back to the channel.";
         }
         return null;
     }

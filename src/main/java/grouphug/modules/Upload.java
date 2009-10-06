@@ -45,9 +45,8 @@ public class Upload implements GrouphugModule {
 
     public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
         //TODO upload pictures and the like
-    	//Only does something when asked
-
-    }
+        //Only does something when asked
+}
 
     public void trigger(String channel, String sender, String login, String hostname, String message) {
         if(message.startsWith(TRIGGER)){

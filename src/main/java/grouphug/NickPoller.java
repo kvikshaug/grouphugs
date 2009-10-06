@@ -9,7 +9,7 @@ class NickPoller implements Runnable {
     // How long we wait between each time we try to recapture our nick
     private static int RETRY_TIME = 3 * 60 * 1000; // in ms - every 3 minutes, should be pretty reasonable?
 
-    // How long we wait for the confirmation of a nickchange before we check if the change was successful 
+    // How long we wait for the confirmation of a nickchange before we check if the change was successful
     private static int CONFIRMATION_WAIT_TIME = 2000; // in ms
 
     private static Grouphug bot;

@@ -14,10 +14,10 @@ public class Seen implements GrouphugModule {
 
     private static final String TRIGGER_HELP = "seen";
     private static final String TRIGGER = "seen ";
-    
+
     private static final String SEEN_DB = "seen";
-	
-	private SQLHandler sqlHandler;
+
+    private SQLHandler sqlHandler;
 
     public Seen() {
         try {
@@ -27,23 +27,23 @@ public class Seen implements GrouphugModule {
             // TODO should disable this module at this point.
         }
     }
-	
-	
-	
-	public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
-		return TRIGGER_HELP;
-	}
 
-	public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
-		if(message.equals(TRIGGER_HELP)) {
+
+
+    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
+        return TRIGGER_HELP;
+    }
+
+    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
+        if(message.equals(TRIGGER_HELP)) {
             return "Seen: When someone last said something in this channel\n" +
-                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<nick>\n";
+                    "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<nick>\n";
         }
         return null;
     }
 
-	public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-		try {
+    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
+        try {
             ArrayList<String> params = new ArrayList<String>();
             params.add(sender);
             Object[] row = sqlHandler.selectSingle("SELECT id, nick FROM "+ SEEN_DB +" WHERE nick='?' ;", params);
@@ -65,17 +65,17 @@ public class Seen implements GrouphugModule {
             /* The following is some good-faith attempt to do SQL properly
 
 			PreparedStatement statement = sqlHandler.getConnection().prepareStatement("SELECT id, nick FROM "+ SEEN_DB+" WHERE nick=? ;");
-			
+
 			statement.setString(1, sender);
 			sql.executePreparedSelect(statement);
-						
+
 			if(!sql.getNext()) {
 				statement = sql.getConnection().prepareStatement("INSERT INTO "+SEEN_DB+" (nick, date, lastwords) VALUES (? , now(), ? );");
 				statement.setString(1, sender);
 				statement.setString(2, message);
 				sql.executePreparedUpdate(statement);
 			} else {
-				Object[] values = sql.getValueList();				
+				Object[] values = sql.getValueList();
 				statement = sql.getConnection().prepareStatement("UPDATE "+SEEN_DB+" SET date=now(), lastwords= ? WHERE id= ? ;");
 				statement.setString(1, message);
 				BigInteger id = (BigInteger)(values[0]);
@@ -85,21 +85,21 @@ public class Seen implements GrouphugModule {
 			}
 			*/
 
-		} catch(SQLException e) {
+        } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
         }
-		
-	}
 
-	public void trigger(String channel, String sender, String login, String hostname, String message) {
-		if(message.startsWith(TRIGGER)){
-			print(message);
-		}
-		
-	}
-	
-	private void print(String message){
+    }
+
+    public void trigger(String channel, String sender, String login, String hostname, String message) {
+        if(message.startsWith(TRIGGER)){
+            print(message);
+        }
+
+    }
+
+    private void print(String message){
         String nick = message.substring(TRIGGER.length());
         try{
             Object[] row = sqlHandler.selectSingle("SELECT id, nick, date, lastwords FROM "+SEEN_DB+" WHERE nick='"+nick+"';");

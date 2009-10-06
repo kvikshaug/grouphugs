@@ -38,12 +38,12 @@ public class Karma implements GrouphugModule {
     public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.equals(TRIGGER_HELP)) {
             return "Karma: Increase, decrease, or show an objects karma.\n" +
-                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<object>\n" +
-                   "  <object>++\n" +
-                   "  <object>--\n" +
-                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP+"\n" +
-                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM+"\n" +
-                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_RESET + " <object>" + " if reseting is enabled";
+                    "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<object>\n" +
+                    "  <object>++\n" +
+                    "  <object>--\n" +
+                    "  " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP+"\n" +
+                    "  " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM+"\n" +
+                    "  " + Grouphug.MAIN_TRIGGER + TRIGGER_RESET + " <object>" + " if reseting is enabled";
         }
         return null;
     }
@@ -58,14 +58,14 @@ public class Karma implements GrouphugModule {
     public void trigger(String channel, String sender, String login, String hostname, String message) {
 
         // First, check for triggers: keywords, ++, --
-    	if(message.startsWith(TRIGGER))
+        if(message.startsWith(TRIGGER))
             print(message.substring(TRIGGER.length()));
         else if(message.equals(TRIGGER_TOP))
             showScore(true);
         else if(message.equals(TRIGGER_BOTTOM))
             showScore(false);
         else if(message.startsWith(TRIGGER_RESET) && CAN_RESET)
-        	add(sender, message.substring(11, message.length()), 0);
+            add(sender, message.substring(11, message.length()), 0);
 
     }
 
