@@ -2,14 +2,14 @@
 ############################################################################
 # Project properties
 ############################################################################
-VERSION_NUMBER = "1.0.0" # Version number for this release
-GROUP = "gh"             # Group identifier for your projects
-COPYRIGHT = ""           # Copyright for the project
+VERSION_NUMBER = "1.0.0"
+GROUP = "gh"
+COPYRIGHT = "copyleft"
 
 # Specify Maven 2.0 remote repositories here, like this:
 repositories.remote << "http://www.ibiblio.org/maven2/"
 
-desc "The Gh project"
+desc "A pircbot implementation whose sole purpose is creating fun, happiness and grouped hugs"
 define "gh" do
   ############################################################################
   # Project build properties
@@ -18,16 +18,11 @@ define "gh" do
   project.group = GROUP
   manifest["Implementation-Vendor"] = COPYRIGHT
 
-#  system("git pull github master")
-
   ############################################################################
   # Compilation
   ############################################################################
   # target java 6
   compile.options.target = '1.6'
-
-  # compile against local jars
-#  compile.with("pircbot-1.4.6.jar", "sqlite-jdbc-3.6.16.jar")
 
   # compile against maven artifacts
   compile.with artifacts(:sqlite, :pircbot)
@@ -36,10 +31,6 @@ define "gh" do
   ############################################################################
   # Packaging
   ############################################################################
-  # package against local jars
-#  package(:jar).with :manifest => {"Main-Class" => "grouphug.Grouphug",
-#                                   "Class-Path" => "../pircbot-1.4.6.jar ../sqlite-jdbc-3.6.16.jar" }
-  
   # package against maven artifacts
   package(:jar).with :manifest => {"Main-Class" => "grouphug.Grouphug",
                                    "Class-Path" => artifacts(:sqlite, :pircbot).each(&:invoke).map(&:name).join(" ")  }
