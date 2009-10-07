@@ -273,6 +273,7 @@ public class Grouphug extends PircBot {
         modules.add(new grouphug.modules.EightBall());
         modules.add(new grouphug.modules.Factoid());
         modules.add(new grouphug.modules.Google());
+        modules.add(new grouphug.modules.GoogleCalc());
         modules.add(new grouphug.modules.GoogleFight());
         modules.add(new grouphug.modules.IMDb());
         modules.add(new grouphug.modules.Insulter());

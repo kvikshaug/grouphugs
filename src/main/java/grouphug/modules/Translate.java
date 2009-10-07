@@ -40,7 +40,7 @@ public class Translate implements GrouphugModule {
 
         try {
             ArrayList<String> lines = Web.fetchHtmlList("http://translate.google.com/translate_t?hl=no&text=" + message +
-                "&file=&sl=" + fromLanguage + "&tl=" + toLanguage + "&history_state0=#");
+                    "&file=&sl=" + fromLanguage + "&tl=" + toLanguage + "&history_state0=#");
             for(String line : lines) {
                 if(line.contains("<div id=result_box dir=\"ltr\">")) {
                     int index = line.indexOf("<div id=result_box dir=\"ltr\">") + "<div id=result_box dir=\"ltr\">".length();
@@ -66,9 +66,12 @@ public class Translate implements GrouphugModule {
 
     public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
         // lazy, sorry
-        return "Uses Google Translate to translate a string. Usage:\n" +
-                "!translate <string>\n" +
-                "!translate f=<from_lang> t=<to_lang> <string>\n" +
-                "Norwegian to english is default. Languages has to be specified by their 2-letter code (en, no, etc.); check translate.google.com for these.";
+        if(message.equals("translate")) {
+            return "Uses Google Translate to translate a string. Usage:\n" +
+                    "!translate <string>\n" +
+                    "!translate f=<from_lang> t=<to_lang> <string>\n" +
+                    "Norwegian to english is default. Languages has to be specified by their 2-letter code (en, no, etc.); check translate.google.com for these.";
+        }
+        return null;
     }
 }
