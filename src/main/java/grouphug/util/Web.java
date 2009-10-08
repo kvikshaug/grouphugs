@@ -147,32 +147,32 @@ public class Web
      * @return The converted string
      */
     public static String entitiesToChars(String str) {
-        str = str.replace("&amp;", "&");
-        str = str.replace("&nbsp;", " ");
-        str = str.replace("&#8216;", "'");
-        str = str.replace("&#8217;", "'");
-        str = str.replace("&#8220;", "\"");
-        str = str.replace("&#8221;", "\"");
-        str = str.replace("&#8230;", "...");
-        str = str.replace("&#8212;", " - ");
-        str = str.replace("&mdash;", " - ");
-        str = str.replace("&quot;", "\"");
-        str = str.replace("&apos;", "'");
-        str = str.replace("&lt;", "<");
-        str = str.replace("&gt;", ">");
-        str = str.replace("&#34;", "\"");
-        str = str.replace("&#39;", "'");
-        str = str.replace("&laquo;", "«");
-        str = str.replace("&lsaquo;", "‹");
-        str = str.replace("&raquo;", "»");
-        str = str.replace("&rsaquo;", "›");
-        str = str.replace("&aelig;", "æ");
-        str = str.replace("&Aelig;", "Æ");
-        str = str.replace("&aring;", "å");
-        str = str.replace("&Aring;", "Å");
-        str = str.replace("&oslash;", "ø");
-        str = str.replace("&Oslash;", "Ø");
-        str = str.replace("&#228;", "ä");
-        return str;
+        return str.replace("&amp;", "&")
+                .replace("&nbsp;", " ")
+                .replace("&quot;", "\"")
+                .replace("&apos;", "'")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&mdash;", " - ")
+                .replace("&laquo;", "«")
+                .replace("&lsaquo;", "‹")
+                .replace("&raquo;", "»")
+                .replace("&rsaquo;", "›")
+                .replace("&aelig;", "æ")
+                .replace("&Aelig;", "Æ")
+                .replace("&oslash;", "ø")
+                .replace("&Oslash;", "Ø")
+                .replace("&aring;", "å")
+                .replace("&Aring;", "Å")
+                .replace("&#34;", "\"")
+                .replace("&#39;", "'")
+                .replace("&#039;", "'")
+                .replace("&#228;", "ä")
+                .replace("&#8212;", " - ")
+                .replace("&#8216;", "'")
+                .replace("&#8217;", "'")
+                .replace("&#8220;", "\"")
+                .replace("&#8221;", "\"")
+                .replace("&#8230;", "...");
     }
 }
