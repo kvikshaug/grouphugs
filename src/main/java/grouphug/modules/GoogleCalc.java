@@ -28,7 +28,7 @@ public class GoogleCalc implements GrouphugModule {
             if(reply == null) {
                 Grouphug.getInstance().sendMessage("The google calculator had nothing to say about that.", false);
             } else {
-                Grouphug.getInstance().sendMessage(reply, true);
+                Grouphug.getInstance().sendMessage(reply.replaceAll("\\<.*?\\>",""), true);
             }
         } catch(IOException ex) {
             Grouphug.getInstance().sendMessage("The intertubes seem to be clogged up (I got an IOException)", false);
