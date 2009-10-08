@@ -1,7 +1,8 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
-import grouphug.GrouphugModule;
+import grouphug.ModuleHandler;
+import grouphug.listeners.TriggerListener;
 import grouphug.util.Web;
 
 import java.io.IOException;
@@ -10,15 +11,18 @@ import java.util.ArrayList;
 /**
  * Uses google translate to translate a text
  */
-public class Translate implements GrouphugModule {
+public class Translate implements TriggerListener {
 
-    public void trigger(String channel, String sender, String login, String hostname, String message) {
-        if(!message.startsWith("translate")) {
-            return;
-        }
+    public Translate(ModuleHandler moduleHandler) {
+        moduleHandler.addTriggerListener("translate", this);
+        moduleHandler.registerHelp("translate", "Uses Google Translate to translate a string. Usage:\n" +
+                    "!translate <string>\n" +
+                    "!translate f=<from_lang> t=<to_lang> <string>\n" +
+                    "Norwegian to english is default. Languages has to be specified by their 2-letter code (en, no, etc.); check translate.google.com for these.");
+        System.out.println("Translate module loaded.");
+    }
 
-        message = message.substring("translate ".length());
-
+    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
         String fromLanguage = "no";
         String toLanguage = "en";
 
@@ -54,24 +58,5 @@ public class Translate implements GrouphugModule {
             ex.printStackTrace();
         }
 
-    }
-
-    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-
-    }
-
-    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
-        return "translate";
-    }
-
-    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
-        // lazy, sorry
-        if(message.equals("translate")) {
-            return "Uses Google Translate to translate a string. Usage:\n" +
-                    "!translate <string>\n" +
-                    "!translate f=<from_lang> t=<to_lang> <string>\n" +
-                    "Norwegian to english is default. Languages has to be specified by their 2-letter code (en, no, etc.); check translate.google.com for these.";
-        }
-        return null;
     }
 }

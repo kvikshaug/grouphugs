@@ -1,7 +1,8 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
-import grouphug.GrouphugModule;
+import grouphug.ModuleHandler;
+import grouphug.listeners.TriggerListener;
 import grouphug.util.Web;
 
 import java.io.BufferedOutputStream;
@@ -11,65 +12,51 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class Slang implements GrouphugModule {
+public class Slang implements TriggerListener {
 
     private static final String TRIGGER_HELP = "slang";
-    private static final String TRIGGER_MAIN = "slang ";
-    private static final String TRIGGER_EXAMPLE = "-ex ";
+    private static final String TRIGGER_MAIN = "slang";
+    private static final String TRIGGER_EXAMPLE = "-ex";
 
     private static int slangCount = 0;
 
-    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
-        return TRIGGER_HELP;
-    }
-
-    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
-        if(message.equals(TRIGGER_HELP)) {
-            return "Slang: Define an expression in slang terms.\n" +
+    public Slang(ModuleHandler moduleHandler) {
+        moduleHandler.addTriggerListener(TRIGGER_MAIN, this);
+        moduleHandler.registerHelp(TRIGGER_HELP, "Slang: Define an expression in slang terms.\n" +
                    "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + "<expr>\n" +
                    "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + "<expr> <number>\n" +
-                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + Slang.TRIGGER_EXAMPLE + "<expr>";
-        }
-        return null;
+                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + Slang.TRIGGER_EXAMPLE + "<expr>");
+        System.out.println("Slang module loaded.");
     }
 
-    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-        // do nothing
-    }
-
-    public void trigger(String channel, String sender, String login, String hostname, String message) {
-        if(!message.startsWith(TRIGGER_MAIN))
-            return;
-
+    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
         boolean includeExample;
-        String text;
-        if(message.startsWith(TRIGGER_MAIN + TRIGGER_EXAMPLE)) {
+        if(message.contains(TRIGGER_EXAMPLE)) {
             includeExample = true;
-            text = message.substring(TRIGGER_MAIN.length() + TRIGGER_EXAMPLE.length());
+            message = message.replace("-ex", "").trim();
         } else {
             includeExample = false;
-            text = message.substring(TRIGGER_MAIN.length());
         }
 
         // Check if the line ends with a number - in which case a specified slangitem is to be extracted
         int number = -1;
         try {
             number = Integer.parseInt(message.substring(message.length() - 1, message.length()));
-            text = text.substring(0, text.length()-1);
+            message = message.substring(0, message.length()-1);
             number = Integer.parseInt(message.substring(message.length() - 2, message.length()));
-            text = text.substring(0, text.length()-1);
+            message = message.substring(0, message.length()-1);
         } catch(NumberFormatException ex) {
             // do nothing - if the number hasn't been set, we know it didn't work
         }
 
-        text = text.trim();
+        message = message.trim();
 
         if(number <= 0)
             number = 1;
 
         SlangItem si;
         try {
-            si = parseXML(getSlangXML(text), number);
+            si = parseXML(getSlangXML(message), number);
         } catch(IOException e) {
             Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)", false);
             System.err.println(e);
@@ -77,7 +64,7 @@ public class Slang implements GrouphugModule {
         } catch(Exception e) {
             // TODO small hack (better than the previous one): A general Exception is only thrown
             // TODO by us when no slang was found
-            Grouphug.getInstance().sendMessage("No slang found for "+text+".", false);
+            Grouphug.getInstance().sendMessage("No slang found for "+message+".", false);
             return;
         }
 

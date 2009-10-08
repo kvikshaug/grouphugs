@@ -1,20 +1,22 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
-import grouphug.GrouphugModule;
+import grouphug.ModuleHandler;
+import grouphug.listeners.MessageListener;
+import grouphug.listeners.TriggerListener;
 import grouphug.util.SQLHandler;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class Karma implements GrouphugModule {
+public class Karma implements TriggerListener, MessageListener {
 
     private static final String TRIGGER_HELP = "karma";
-    private static final String TRIGGER = "karma ";
+    private static final String TRIGGER = "karma";
     private static final String TRIGGER_TOP = "karmatop";
     private static final String TRIGGER_BOTTOM = "karmabottom";
     private static final String TRIGGER_RESET = "karmareset";
-    private static final boolean CAN_RESET = false;
+    //private static final boolean CAN_RESET = false;
 
     private static final int LIMIT = 5; // how many items to show in karmatop/karmabottom
 
@@ -22,51 +24,39 @@ public class Karma implements GrouphugModule {
 
     private SQLHandler sqlHandler;
 
-    public Karma() {
+    public Karma(ModuleHandler moduleHandler) {
         try {
             sqlHandler = SQLHandler.getSQLHandler();
-        } catch(ClassNotFoundException ex) {
-            System.err.println("Karma startup error: SQL unavailable!");
-            // TODO should disable this module at this point.
-        }
-    }
-
-    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
-        return TRIGGER_HELP;
-    }
-
-    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
-        if(message.equals(TRIGGER_HELP)) {
-            return "Karma: Increase, decrease, or show an objects karma.\n" +
+            moduleHandler.addTriggerListener(TRIGGER, this);
+            moduleHandler.addMessageListener(this);
+            moduleHandler.registerHelp(TRIGGER_HELP, "Karma: Increase, decrease, or show an objects karma.\n" +
                     "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<object>\n" +
                     "  <object>++\n" +
                     "  <object>--\n" +
-                    "  " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP+"\n" +
-                    "  " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM+"\n" +
-                    "  " + Grouphug.MAIN_TRIGGER + TRIGGER_RESET + " <object>" + " if reseting is enabled";
+                    "  " + Grouphug.MAIN_TRIGGER + " " + TRIGGER_TOP+"\n" +
+                    "  " + Grouphug.MAIN_TRIGGER + " " + TRIGGER_BOTTOM+"\n" +
+                    "  " + Grouphug.MAIN_TRIGGER + " " + TRIGGER_RESET + " <object>" + " if resetting is enabled");
+        } catch(ClassNotFoundException ex) {
+            System.err.println("Karma startup error: SQL unavailable!");
         }
-        return null;
     }
 
-    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-        if(message.endsWith("++") || message.endsWith("++;"))
+    public void onMessage(String channel, String sender, String login, String hostname, String message) {
+        if(message.endsWith("++") || message.endsWith("++;")) {
             add(sender, message.substring(0, message.length()-2), 1);
-        else if(message.endsWith("--") || message.endsWith("--;"))
+        } else if(message.endsWith("--") || message.endsWith("--;")) {
             add(sender, message.substring(0, message.length()-2), -1);
+        } else if(message.equals(Grouphug.MAIN_TRIGGER + TRIGGER_TOP)) {
+            showScore(true);
+        } else if(message.equals(Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM)) {
+            showScore(false);
+//        } else if(message.startsWith(Grouphug.MAIN_TRIGGER + TRIGGER_RESET) && CAN_RESET) {
+//            add(sender, message.substring(11, message.length()), 0);
+        }
     }
 
-    public void trigger(String channel, String sender, String login, String hostname, String message) {
-
-        // First, check for triggers: keywords, ++, --
-        if(message.startsWith(TRIGGER))
-            print(message.substring(TRIGGER.length()));
-        else if(message.equals(TRIGGER_TOP))
-            showScore(true);
-        else if(message.equals(TRIGGER_BOTTOM))
-            showScore(false);
-        else if(message.startsWith(TRIGGER_RESET) && CAN_RESET)
-            add(sender, message.substring(11, message.length()), 0);
-
+    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+        print(message);
     }
 
     private String htmlEntitiesToNorwegianChars(String str) {
@@ -150,24 +140,27 @@ public class Karma implements GrouphugModule {
 
     private void showScore(boolean top) {
         String reply;
-        if(top)
+        if(top) {
             reply = "Top five karma winners:\n";
-        else
+        } else {
             reply = "Bottom five karma losers:\n";
+        }
         try {
             String query = "SELECT name, value FROM "+KARMA_DB+" ORDER BY value ";
-            if(top)
+            if(top) {
                 query += "DESC ";
+            }
             query += "LIMIT "+LIMIT+";";
             ArrayList<Object[]> rows = sqlHandler.select(query);
             int place = 1;
             for(Object[] row : rows) {
                 reply += (place++)+". "+htmlEntitiesToNorwegianChars((String)row[0])+" ("+row[1]+")\n";
             }
-            if(top)
+            if(top) {
                 reply += "May their lives be filled with sunlight and pink stuff.";
-            else
+            } else {
                 reply += "May they burn forever in the pits of "+ Grouphug.CHANNEL+".";
+            }
             Grouphug.getInstance().sendMessage(reply, false);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());

@@ -1,64 +1,49 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
-import grouphug.GrouphugModule;
+import grouphug.ModuleHandler;
+import grouphug.listeners.TriggerListener;
 import grouphug.util.Web;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class Confession implements GrouphugModule {
+public class Confession implements TriggerListener {
     private static final String TRIGGER = "gh";
-    private static final String TRIGGER_HELP = "confession";
     private static final String KEYWORD_NEWEST = "-newest";
     private static String errorConfession = "I have nothing to confess at the moment, please try again later.";
 
-
-
-    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-        // do nothing
-    }
-
-    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
-        return TRIGGER_HELP;
-    }
-
-    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
-        if(message.equals(TRIGGER_HELP)) {
-            return "Confession: Outputs a confession: random, newest or by search.\n" +
+    public Confession(ModuleHandler moduleHandler) {
+        moduleHandler.addTriggerListener(TRIGGER, this);
+        moduleHandler.registerHelp("confession", "Confession: Outputs a confession: random, newest or by search.\n" +
                     "  "+Grouphug.MAIN_TRIGGER+TRIGGER+"\n" +
                     "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" -newest\n" +
-                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <searchword(s)>";
-        }
-        return null;
+                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <searchword(s)>");
+        System.out.println("Confession module loaded.");
     }
 
-    public void trigger(String channel, String sender, String login, String hostname, String message) {
-        if(!message.startsWith(Confession.TRIGGER))
-            return;
 
+    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
         try {
-
             // Check if argument is provided
             ConfessionItem conf;
             if(message.contains(KEYWORD_NEWEST)) {
                 conf = newest();
-            }
-            else {
+            } else {
                 // check for search-words
-                if(!message.substring(TRIGGER.length()).trim().equals("")) {
-                    conf = search(message.substring(TRIGGER.length()).trim());
-                }
-                else {
+                if(!message.equals("")) {
+                    conf = search(message);
+                } else {
                     conf = random();
                 }
             }
 
-            if(conf == null)
+            if(conf == null) {
                 Grouphug.getInstance().sendMessage(errorConfession, false);
-            else
+            } else {
                 Grouphug.getInstance().sendMessage(conf.toString(), true);
+            }
         } catch(IOException ex) {
             Grouphug.getInstance().sendMessage("Sorry, the intertubes seem to be clogged up, " +
                     "I catched an IOException.", false);
@@ -122,8 +107,6 @@ public class Confession implements GrouphugModule {
         confession = Web.entitiesToChars(confession);
         confession = confession.replaceAll("\\<.*?\\>",""); // strip html tags
         confession = confession.substring(0, confession.length()-1);
-
-        System.out.println("The string is: " + confession);
 
         return new ConfessionItem(confession);
     }

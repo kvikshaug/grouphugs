@@ -1,7 +1,8 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
-import grouphug.GrouphugModule;
+import grouphug.ModuleHandler;
+import grouphug.listeners.TriggerListener;
 import grouphug.util.Web;
 
 import java.io.BufferedReader;
@@ -11,38 +12,24 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class Define implements GrouphugModule {
+public class Define implements TriggerListener {
 
-    private static final String TRIGGER = "define ";
+    private static final String TRIGGER = "define";
     private static final String TRIGGER_HELP = "define";
     private static final int CONN_TIMEOUT = 10000; // ms
 
-
-    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-        // do nothing
-    }
-
-    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
-        return TRIGGER_HELP;
-    }
-
-    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
-        if(message.equals(TRIGGER_HELP)) {
-            return "Define: Use google to give a proper definition of a word.\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<keyword>";
-        }
-        return null;
+    public Define(ModuleHandler moduleHandler) {
+        moduleHandler.addTriggerListener(TRIGGER, this);
+        moduleHandler.registerHelp(TRIGGER_HELP, "Define: Use google to give a proper definition of a word.\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<keyword>");
+        System.out.println("Define module loaded.");
     }
 
 
-    public void trigger(String channel, String sender, String login, String hostname, String message) {
-        if(!message.startsWith(TRIGGER))
-            return;
-
+    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
         String answer;
-
         try {
-            answer = Define.search(message.substring(TRIGGER.length()));
+            answer = Define.search(message);
         } catch(IOException e) {
             Grouphug.getInstance().sendMessage("The intartubes seems to be clogged up (IOException).", false);
             System.err.println(e.getMessage()+"\n"+e.getCause());

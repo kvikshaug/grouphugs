@@ -1,7 +1,8 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
-import grouphug.GrouphugModule;
+import grouphug.ModuleHandler;
+import grouphug.listeners.TriggerListener;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,50 +11,29 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class GoogleFight implements GrouphugModule {
+public class GoogleFight implements TriggerListener {
 
-    private static final String TRIGGER = "gfight ";
-    private static final String TRIGGER_ALT = "gf ";
+    private static final String TRIGGER = "gf";
     private static final String TRIGGER_HELP = "googlefight";
     private static final String TRIGGER_VS = " <vs> ";
     private static final int CONN_TIMEOUT = 10000; // ms
 
-    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
-        return TRIGGER_HELP;
+    public GoogleFight(ModuleHandler moduleHandler) {
+        moduleHandler.addTriggerListener(TRIGGER, this);
+        moduleHandler.registerHelp(TRIGGER_HELP, "Google fight:\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER + " [1st search]" + TRIGGER_VS + "[2nd search]");
+        System.out.println("Googlefight module loaded.");
     }
 
-    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
-        if(message.equals(TRIGGER_HELP)) {
-            return "Google fight:\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER + "<1st search>" + TRIGGER_VS + "<2nd search>\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_ALT + "<1st search>" + TRIGGER_VS + "<2nd search>";
-        }
-        return null;
-    }
-
-    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-        // do nothing
-    }
-
-    public void trigger(String channel, String sender, String login, String hostname, String message) {
-
-        String line;
-        if(message.startsWith(TRIGGER)) {
-            line = message.substring(TRIGGER.length());
-        } else if(message.startsWith(TRIGGER_ALT)) {
-            line = message.substring(TRIGGER_ALT.length());
-        } else {
-            return;
-        }
-
+    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
 
         if(!message.contains(TRIGGER_VS)) {
             Grouphug.getInstance().sendMessage(sender+", try "+Grouphug.MAIN_TRIGGER+Grouphug.HELP_TRIGGER+" "+TRIGGER_HELP, false);
             return;
         }
 
-        String query1 = line.substring(0, line.indexOf(TRIGGER_VS));
-        String query2 = line.substring(line.indexOf(TRIGGER_VS) + TRIGGER_VS.length());
+        String query1 = message.substring(0, message.indexOf(TRIGGER_VS));
+        String query2 = message.substring(message.indexOf(TRIGGER_VS) + TRIGGER_VS.length());
 
         try {
             String hits1 = search(query1);

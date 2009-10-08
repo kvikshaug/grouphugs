@@ -1,7 +1,8 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
-import grouphug.GrouphugModule;
+import grouphug.ModuleHandler;
+import grouphug.listeners.TriggerListener;
 import grouphug.util.Web;
 
 import java.io.BufferedReader;
@@ -11,46 +12,28 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class Insulter implements GrouphugModule {
+public class Insulter implements TriggerListener {
 
     private static final String TRIGGER = "insult";
     private static final String TRIGGER_HELP = "insult";
     private static final int CONN_TIMEOUT = 10000; // ms
 
-
-    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
-        return TRIGGER_HELP;
+    public Insulter(ModuleHandler moduleHandler) {
+        moduleHandler.addTriggerListener(TRIGGER, this);
+        moduleHandler.registerHelp(TRIGGER_HELP, "Insult someone you don't like:\n" +
+                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <person>\n" +
+                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
+        System.out.println("Insult module loaded.");
     }
 
-    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
-        if(message.equals(TRIGGER_HELP)) {
-            return "Insult someone you don't like:\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <person>\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER;
-        }
-        return null;
-    }
 
-    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-        // do nothing
-    }
-
-    public void trigger(String channel, String sender, String login, String hostname, String message) {
-
-        if(!message.startsWith(TRIGGER))
-            return;
-
-        String insulted = "";
-        if(message.length() > TRIGGER.length() + 1) {
-          insulted = message.substring(TRIGGER.length()+1);
-        }
-
+    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
         String searchQ = "<td bordercolor=\"#FFFFFF\"><font face=\"Verdana\" size=\"4\"><strong><i>";
 
         String insultSite = Web.fetchHTML("http://www.randominsults.net/");
         if(insultSite == null) {
-            if(insulted.length() > 0) {
-                Grouphug.getInstance().sendMessage("Sorry, sunn's webconnection class failed on me. It wasn't my fault. Maybe it was "+insulted+"'s fault.", false);
+            if(message.length() > 0) {
+                Grouphug.getInstance().sendMessage("Sorry, sunn's webconnection class failed on me. It wasn't my fault. Maybe it was "+message+"'s fault.", false);
             } else {
                 Grouphug.getInstance().sendMessage("Sorry, sunn's webconnection class failed on me. It wasn't my fault.", false);
             }
@@ -60,8 +43,8 @@ public class Insulter implements GrouphugModule {
         int insultEnd = insultSite.indexOf('<', insultStart);
         String insult = insultSite.substring(insultStart, insultEnd);
 
-        if(insulted.length() > 0) {
-            Grouphug.getInstance().sendMessage(insulted+": "+insult, false);
+        if(message.length() > 0) {
+            Grouphug.getInstance().sendMessage(message+": "+insult, false);
         } else {
             Grouphug.getInstance().sendMessage(insult, false);
         }

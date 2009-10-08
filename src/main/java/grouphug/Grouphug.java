@@ -33,8 +33,8 @@ import java.util.ArrayList;
 public class Grouphug extends PircBot {
 
     // Channel and server
-    public static final String CHANNEL = "#grouphugs";
-    public static final String SERVER = "irc.homelien.no";
+    public static final String CHANNEL = "#grouphugers";
+    public static final String SERVER = "irc.efnet.ru";
 
     // The trigger characters (as Strings since startsWith takes String)
     public static final String MAIN_TRIGGER = "!";
@@ -58,11 +58,11 @@ public class Grouphug extends PircBot {
     // The file to log all messages to
     private static File logfile = new File("log-current");
 
-    // A list over all loaded modules
-    private static ArrayList<GrouphugModule> modules = new ArrayList<GrouphugModule>();
-
     // Used to specify if it is ok to spam a large message to the channel
     private static boolean spamOK = false;
+
+    // Handles modules
+    private static ModuleHandler moduleHandler;
 
     // A static reference and getter to our bot
     private static Grouphug bot;
@@ -72,7 +72,6 @@ public class Grouphug extends PircBot {
 
     @Override
     protected void onMessage(String channel, String sender, String login, String hostname, String message) {
-
         // Old reboot/reload functions - this is strictly not necessary, but maybe these
         // should be reimplemented properly sometime?
         if(message.equals("!reboot") || message.equals("!reload")) {
@@ -80,67 +79,38 @@ public class Grouphug extends PircBot {
             return;
         }
 
-        // First check for help trigger
-        checkForHelpTrigger(channel, sender, login, hostname, message);
+        // First, check for the universal normal help-trigger
+        if(message.startsWith(MAIN_TRIGGER + HELP_TRIGGER)) {
+            // we send the message, however trimming the help trigger itself
+            moduleHandler.onHelp(message.substring(MAIN_TRIGGER.length() + HELP_TRIGGER.length()).trim());
+        }
 
-        // Then, check if the message starts with a normal or spam-trigger
+        // First check if the message starts with a normal or spam-trigger
         if(message.startsWith(MAIN_TRIGGER) || message.startsWith(SPAM_TRIGGER)) {
-            // Check if spam has been triggered
-            if(message.startsWith(MAIN_TRIGGER)) {
-                spamOK = false;
-            } else {
-                if(sender.contains("icc") || login.contains("icc")) {
-                    sendMessage(CHANNEL, "icc, you are not allowed to use the spam trigger.");
-                    return;
-                }
-                spamOK = true;
+            // Enable spam if triggered
+            spamOK = message.startsWith(SPAM_TRIGGER);
+
+            // But not for everyone
+            if(spamOK && (sender.contains("icc") || login.contains("icc"))) {
+                sendMessage(CHANNEL, "icc, you are not allowed to use the spam trigger.");
+                return;
             }
 
-            // For each module, call the trigger-method with the sent message
-            for(GrouphugModule m : modules) {
-                m.trigger(channel, sender, login, hostname, message.substring(1));
-            }
+            // Now send the call to the module handler (stripping the trigger character)
+            moduleHandler.onTrigger(channel, sender, login, hostname, message.substring(1));
         }
 
-        // run the specialTrigger() method for special modules who might want to
-        // react on messages without trigger
-        for(GrouphugModule m : modules) {
-            m.specialTrigger(channel, sender, login, hostname, message);
-        }
+        moduleHandler.onMessage(channel, sender, login, hostname, message);
     }
 
     @Override
     protected void onPrivateMessage(String sender, String login, String hostname, String message) {
-        // Help triggers will also activate in PM
-        checkForHelpTrigger(null, sender, login, hostname, message);
-        // TODO if the message was unrecognized, say something like "hi, i'm a bot. visit
-        // TODO the people in #grouphugs to ask about me, or say !help to learn what i can do."
-    }
-
-    private void checkForHelpTrigger(String channel, String sender, String login, String hostname, String message) {
-        // First, check for the universal normal help-trigger
-        if(message.equals(MAIN_TRIGGER + HELP_TRIGGER)) {
-            sendMessage("Currently implemented modules on "+this.getNick()+":", false);
-            String helpString = "reboot, reload";
-            for(GrouphugModule m : modules) {
-                helpString += ", ";
-                helpString += m.helpMainTrigger(channel, sender, login, hostname, message);
-            }
-            sendMessage(helpString, false);
-            sendMessage("Use \"!help <module>\" for more specific info. This will also work in PM.", false);
-        }
-        // if not, check if help is triggered with a special module
-        else if(message.startsWith(MAIN_TRIGGER+HELP_TRIGGER+" ")) {
-            boolean replied = false;
-            for(GrouphugModule m : modules) {
-                String reply = m.helpSpecialTrigger(channel, sender, login, hostname, message.substring(MAIN_TRIGGER.length() + HELP_TRIGGER.length() + 1));
-                if(reply != null) {
-                    bot.sendMessage(reply, false);
-                    replied = true;
-                }
-            }
-            if(!replied)
-                sendMessage("No one has implemented a "+message.substring(MAIN_TRIGGER.length() + HELP_TRIGGER.length() + 1)+" module yet.", false);
+        if(message.equalsIgnoreCase("Hi, my name is " + sender + " and I'm completely retarded")) {
+            sendMessage(sender, "haha, you sure are");
+            sendMessage("guys, i just got this in pm:", false);
+            sendMessage("<" + sender + "> " + message, false);
+        } else {
+            sendMessage(sender, "Hi! I'm a bot. Say \"Hi, my name is " + sender + " and I'm completely retarded\" to me for more information.");
         }
     }
 
@@ -265,27 +235,7 @@ public class Grouphug extends PircBot {
         bot.setVerbose(true);
         bot.setEncoding("UTF-8");
 
-        // Load up modules
-        modules.add(new grouphug.modules.Bofh());
-        modules.add(new grouphug.modules.Confession());
-        modules.add(new grouphug.modules.Decider());
-        modules.add(new grouphug.modules.Define());
-        modules.add(new grouphug.modules.EightBall());
-        modules.add(new grouphug.modules.Factoid());
-        modules.add(new grouphug.modules.Google());
-        modules.add(new grouphug.modules.GoogleCalc());
-        modules.add(new grouphug.modules.GoogleFight());
-        modules.add(new grouphug.modules.IMDb());
-        modules.add(new grouphug.modules.Insulter());
-        modules.add(new grouphug.modules.IsSiteUp());
-        modules.add(new grouphug.modules.Karma());
-        modules.add(new grouphug.modules.Seen());
-        modules.add(new grouphug.modules.Slang());
-        modules.add(new grouphug.modules.Tracking());
-        modules.add(new grouphug.modules.Translate());
-        modules.add(new grouphug.modules.Upload());
-        modules.add(new grouphug.modules.URLCatcher());
-        modules.add(new grouphug.modules.WordCount());
+        moduleHandler = new ModuleHandler(bot);
 
         // Start own threads
         new Thread(new LogFlusher(bot)).start();
@@ -296,6 +246,7 @@ public class Grouphug extends PircBot {
         nicks.add("hugger");
         nicks.add("klemZ");
 
+        System.out.println("\nOk, attempting connection to '"+SERVER+"'...");
         try {
             connect(bot, false);
         } catch(IrcException e) {

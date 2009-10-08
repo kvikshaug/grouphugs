@@ -1,7 +1,8 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
-import grouphug.GrouphugModule;
+import grouphug.ModuleHandler;
+import grouphug.listeners.TriggerListener;
 import grouphug.util.Web;
 
 import java.io.BufferedReader;
@@ -11,43 +12,29 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class IMDb implements GrouphugModule {
+public class IMDb implements TriggerListener {
 
-    private static final String TRIGGER = "imdb ";
+    private static final String TRIGGER = "imdb";
     private static final String TRIGGER_HELP = "imdb";
 
-
-    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
-        return TRIGGER_HELP;
+    public IMDb(ModuleHandler moduleHandler) {
+        moduleHandler.addTriggerListener(TRIGGER, this);
+        moduleHandler.registerHelp(TRIGGER_HELP, "IMDb: Show IMDb info for a movie\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<movie name>");
+        System.out.println("IMDb module loaded.");
     }
 
-    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
-        if(message.equals(TRIGGER_HELP)) {
-            return "IMDb: Show IMDb info for a movie\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<movie name>";
-        }
-        return null;
-    }
 
-    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-        // do nothing
-    }
-
-    public void trigger(String channel, String sender, String login, String hostname, String message) {
-        if(!message.startsWith(IMDb.TRIGGER))
-            return;
-
-        String query = message.substring(IMDb.TRIGGER.length());
-
+    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
         URL imdbURL;
         try {
-            imdbURL = Google.search(query+"+site:www.imdb.com");
+            imdbURL = Google.search(message+"+site:www.imdb.com");
         } catch(IOException e) {
             Grouphug.getInstance().sendMessage("But I don't want to. (IOException)", false);
             return;
         }
         if(imdbURL == null) {
-            Grouphug.getInstance().sendMessage("Sorry, I didn't find "+query+" on IMDb.", false);
+            Grouphug.getInstance().sendMessage("Sorry, I didn't find "+message+" on IMDb.", false);
             return;
         }
 

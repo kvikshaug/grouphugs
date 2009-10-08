@@ -2,7 +2,8 @@ package grouphug.modules;
 
 
 import grouphug.Grouphug;
-import grouphug.GrouphugModule;
+import grouphug.ModuleHandler;
+import grouphug.listeners.TriggerListener;
 import grouphug.util.FileDataDownload;
 import grouphug.util.SQLHandler;
 
@@ -10,50 +11,44 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class Upload implements GrouphugModule {
+public class Upload implements TriggerListener {
 
     private static final String TRIGGER_HELP = "upload";
-    private static final String TRIGGER = "upload ";
+    private static final String TRIGGER = "upload";
     private static final String UPLOAD_DB= "upload";
-    private static final String TRIGGER_RANDOM = "uploadrandom";
     private static final String TRIGGER_KEYWORD = "keyword ";
+    private static final String IMAGE_DIRECTORY = "img";
 
     private SQLHandler sqlHandler;
 
-    public Upload() {
+    // TODO fix for the new server
+
+    public Upload(ModuleHandler moduleHandler) {
+        System.err.println("Upload module has not been configured for its new server yet.");
+        /*
         try {
             sqlHandler = SQLHandler.getSQLHandler();
+            // moduleHandler.addMessageListener(this);
+            moduleHandler.addTriggerListener(TRIGGER, this);
+            moduleHandler.registerHelp(TRIGGER_HELP, " A module to upload pictures and other things to gh\n" +
+                    " To use the module type " +Grouphug.MAIN_TRIGGER + TRIGGER + "<url> <keyword>\n" +
+                    " To get links associated with a keyword type "+ Grouphug.MAIN_TRIGGER + TRIGGER_KEYWORD+"<keyword>");
         } catch(ClassNotFoundException ex) {
             System.err.println("Upload module startup error: SQL unavailable!");
-            // TODO should disable this module at this point.
         }
+        */
     }
 
 
-    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
-        return TRIGGER_HELP;
-    }
-
-    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
-        if(message.equals(TRIGGER_HELP)) {
-            return " A module to upload pictures and other things to gh\n" +
-                    " To use the module type " +Grouphug.MAIN_TRIGGER + TRIGGER + "<url> <keyword>\n" +
-                    " To get links associated with a keyword type "+ Grouphug.MAIN_TRIGGER + TRIGGER_KEYWORD+"<keyword>";
-        }
-        return null;
-    }
-
-    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
+    public void onMessage(String channel, String sender, String login, String hostname, String message) {
         //TODO upload pictures and the like
         //Only does something when asked
-}
+    }
 
-    public void trigger(String channel, String sender, String login, String hostname, String message) {
+    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
         if(message.startsWith(TRIGGER)){
             insert(message.substring(TRIGGER.length()), sender);
         }
-        else if(message.equals(TRIGGER_RANDOM))
-            showRandom();
         else if(message.startsWith(TRIGGER_KEYWORD))
             showUploads(message.substring(TRIGGER_KEYWORD.length()));
 
@@ -75,10 +70,6 @@ public class Upload implements GrouphugModule {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
         }
-    }
-
-    private void showRandom() {
-        Grouphug.getInstance().sendMessage("Throwing 'Not yet implemented'-Exception",false);
     }
 
     private void insert(String message, String sender) {
@@ -108,16 +99,16 @@ public class Upload implements GrouphugModule {
             Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
         }
         //Now we download the file, at least we hope so
-        FileDataDownload.fileDownload(parts[0],"/home/DT2006/murray/public_html/gh/up/");
+        FileDataDownload.fileDownload(parts[0], IMAGE_DIRECTORY);
 
         // And fix the permissions
         try {
-            Runtime.getRuntime().exec("chmod o+r /home/DT2006/murray/public_html/gh/up/"+filename);
+            Runtime.getRuntime().exec("chmod o+r "+IMAGE_DIRECTORY+filename);
         } catch(IOException ex) {
             System.err.println(ex);
         }
         // Prints the URL to the uploaded file to the channel
-        Grouphug.getInstance().sendMessage("http://hinux.hin.no/~murray/gh/up/"+filename,false);
+        Grouphug.getInstance().sendMessage("http://gh.kvikshaug.no/?/"+filename,false);
 
     }
 }

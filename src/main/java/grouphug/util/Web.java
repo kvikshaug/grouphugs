@@ -42,7 +42,7 @@ public class Web
         urlString = urlString.replace(" ", "%20");
 
         URL url = new URL(urlString);
-        System.out.println("Opening: " + urlString + " ...");
+        System.out.println("Web util opening: '" + urlString + "'...");
         URLConnection urlConn = url.openConnection();
 
         urlConn.setConnectTimeout(timeout);
@@ -164,6 +164,7 @@ public class Web
                 .replace("&Oslash;", "Ø")
                 .replace("&aring;", "å")
                 .replace("&Aring;", "Å")
+                .replace("&#x27;", "'")
                 .replace("&#34;", "\"")
                 .replace("&#39;", "'")
                 .replace("&#039;", "'")
