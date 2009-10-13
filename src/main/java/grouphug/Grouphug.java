@@ -33,7 +33,7 @@ import java.util.ArrayList;
 public class Grouphug extends PircBot {
 
     // Channel and server
-    public static final String CHANNEL = "#grouphugers";
+    public static final String CHANNEL = "#grouphugs";
     public static final String SERVER = "irc.efnet.ru";
 
     // The trigger characters (as Strings since startsWith takes String)
@@ -150,7 +150,7 @@ public class Grouphug extends PircBot {
     }
 
     /**
-     * Sends a message to a channel or a private message to a user.
+     * Sends a message to the main channel.
      *
      * The messages are splitted by maximum line number characters and by the newline character (\n), then
      * each line is sent to the pircbot sendMessage function, which adds the lines to the outgoing message queue
