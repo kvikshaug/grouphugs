@@ -17,8 +17,8 @@ public class Tracking implements TriggerListener, Runnable {
 
     private static final String TRIGGER = "track";
     private static final String TRIGGER_HELP = "tracking";
-    private static final String TRIGGER_LIST = "-list";
-    private static final String TRIGGER_DEL = "-d";
+    private static final String TRIGGER_LIST = "-ls";
+    private static final String TRIGGER_DEL = "-rm";
     private static final String DB_NAME = "tracking";
     private static final int POLLING_TIME = 30; // minutes
 
