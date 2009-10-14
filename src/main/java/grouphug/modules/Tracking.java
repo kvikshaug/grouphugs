@@ -12,6 +12,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Vector;
 
 public class Tracking implements TriggerListener, Runnable {
 
@@ -22,7 +23,9 @@ public class Tracking implements TriggerListener, Runnable {
     private static final String DB_NAME = "tracking";
     private static final int POLLING_TIME = 30; // minutes
 
-    private ArrayList<TrackingItem> items = new ArrayList<TrackingItem>();
+    private boolean threadWorking = false;
+
+    private Vector<TrackingItem> items = new Vector<TrackingItem>();
     private SQLHandler sqlHandler;
 
     public Tracking(ModuleHandler moduleHandler) {
@@ -65,6 +68,11 @@ public class Tracking implements TriggerListener, Runnable {
         } else if(message.startsWith(TRIGGER_DEL)) {
             for(int i=0; i<items.size(); i++) {
                 if(items.get(i).getTrackingNumber().equals(message.replace(TRIGGER_DEL, "").trim())) {
+                    if(threadWorking) {
+                        Grouphug.getInstance().sendMessage("Sorry, I'm currently polling for updates. Modifying the " +
+                                "package list now would make me go haywire. Please try again in a minute or so.", false);
+                        return;
+                    }
                     try {
                         ArrayList<String> params = new ArrayList<String>();
                         params.add(String.valueOf(items.get(i).getId()));
@@ -94,6 +102,11 @@ public class Tracking implements TriggerListener, Runnable {
                         }
                         return;
                     }
+                }
+                if(threadWorking) {
+                    Grouphug.getInstance().sendMessage("Sorry, I'm currently polling for updates. Modifying the " +
+                            "package list now would make me go haywire. Please try again in a minute or so.", false);
+                    return;
                 }
                 Grouphug.getInstance().sendMessage("Adding package '" + message + "' to tracking list.", false);
                 TrackingItem newItem = new TrackingItem(message.trim().replace(" ", ""), sender);
@@ -130,6 +143,7 @@ public class Tracking implements TriggerListener, Runnable {
         }
         while(true) {
             try {
+                threadWorking = true;
                 for(TrackingItem ti : items) {
                     if(ti.update()) {
                         Grouphug.getInstance().sendMessage(ti.getOwner() + ": Package '" + ti.getTrackingNumber() + "' has exciting new changes!", false);
@@ -137,11 +151,12 @@ public class Tracking implements TriggerListener, Runnable {
                     }
                     // let's sleep a few seconds between each item and go easy on the web server
                     try {
-                        Thread.sleep(10 * 1000);
+                        Thread.sleep(5 * 1000);
                     } catch(InterruptedException ex) {
-                        // just continue
+                        // continue
                     }
                 }
+                threadWorking = false;
             } catch(IOException ex) {
                 Grouphug.getInstance().sendMessage("Hi guys, just thought I should let you know that the " +
                         "package tracking module caught an IOException when polling for changes.\n" +
@@ -151,6 +166,11 @@ public class Tracking implements TriggerListener, Runnable {
                 Grouphug.getInstance().sendMessage("Hi guys, just thought I should let you know that the " +
                         "package tracking module caught an SQLException when polling for changes.\n" +
                         "You might want to check your package status manually.", false);
+                ex.printStackTrace();
+            } catch(Exception ex) {
+                System.err.println("Tracking module thread caught an exception.");
+                System.err.println("I will pretend like nothing happened and try again soon, " +
+                        "let's hope it is recoverable.");
                 ex.printStackTrace();
             }
             try {
