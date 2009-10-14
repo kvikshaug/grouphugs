@@ -107,13 +107,13 @@ public class Slang implements TriggerListener {
             }
         }
         is.close();
-        if(buffer.length == bytesRead) {
+        //if(buffer.length == bytesRead) {
             return new String(buffer);
-        } else {
+        /*} else {
             byte[] response = new byte[bytesRead];
             System.arraycopy(buffer, 0, response, 0, bytesRead);
-            return new String(buffer).replace("&amp;", "&");
-        }
+            return new String(buffer);
+        }*/
     }
 
     // TODO isn't this able to fail somewhere? throw exception?
