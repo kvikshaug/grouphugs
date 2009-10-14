@@ -9,12 +9,6 @@ class LogFlusher implements Runnable {
     // calling flush() does nothing, so this isn't really that much
     private static final int SLEEP_TIME = 1000;
 
-    private Grouphug bot;
-
-    LogFlusher(Grouphug bot) {
-        this.bot = bot;
-    }
-
     private boolean run = true; // should be set to false when we want to stop this thread.
     protected void stop() {
         run = false;

@@ -238,7 +238,7 @@ public class Grouphug extends PircBot {
         moduleHandler = new ModuleHandler(bot);
 
         // Start own threads
-        new Thread(new LogFlusher(bot)).start();
+        new Thread(new LogFlusher()).start();
 
         // Save the nicks we want, in prioritized order
         nicks.add("gh");
