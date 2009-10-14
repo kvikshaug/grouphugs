@@ -13,12 +13,14 @@ import java.util.ArrayList;
 
 public class Tracking implements TriggerListener, Runnable {
 
+    // TODO make items persistent (save them in SQL)
+
     private static final String TRIGGER = "track";
     private static final String TRIGGER_HELP = "tracking";
     private static final String TRIGGER_LIST = "-list";
     private static final String TRIGGER_DEL = "-d";
     private static final int CONN_TIMEOUT = 10000; // ms
-    private static final int POLLING_TIME = 60; // minutes
+    private static final int POLLING_TIME = 30; // minutes
 
     private ArrayList<TrackingItem> items = new ArrayList<TrackingItem>();
 
