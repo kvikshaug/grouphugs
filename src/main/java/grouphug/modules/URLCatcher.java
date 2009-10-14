@@ -47,7 +47,7 @@ public class URLCatcher implements MessageListener {
                     title = title.substring(0, TITLE_MAX_LENGTH);
                     title = title.concat(" (...)");
                 }
-                Grouphug.getInstance().sendMessage("Title: " + Web.entitiesToChars(title) /*+ " :: " + url*/, false);
+                Grouphug.getInstance().sendMessage("Title: " + Web.entitiesToChars(title.trim()) /*+ " :: " + url*/, false);
             }
         }
     }
