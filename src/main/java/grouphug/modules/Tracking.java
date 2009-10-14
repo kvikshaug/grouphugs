@@ -237,9 +237,14 @@ public class Tracking implements TriggerListener, Runnable {
 
                 if(errorIndex != -1) {
                     // no results
-                    String oldResult = getStatus();
-                    setStatus("The package ID is invalid (according to the tracking service)");
-                    return !oldResult.equals(getStatus());
+                    String newStatus = "The package ID is invalid (according to the tracking service)";
+                    String oldStatus = getStatus();
+                    if(!oldStatus.equals(newStatus)) {
+                        setStatus(newStatus);
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
 
                 if (status == 0) {
@@ -258,8 +263,13 @@ public class Tracking implements TriggerListener, Runnable {
                 }
             }
             String oldStatus = getStatus();
-            setStatus(output.replace("<br/>", " - ").trim());
-            return !oldStatus.equals(getStatus());
+            String newStatus = output.replace("<br/>", " - ").trim();
+            if(!oldStatus.equals(newStatus)) {
+                setStatus(newStatus);
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 }
