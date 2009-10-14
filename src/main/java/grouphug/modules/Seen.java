@@ -37,20 +37,20 @@ public class Seen implements TriggerListener, MessageListener {
         try {
             ArrayList<String> params = new ArrayList<String>();
             params.add(sender);
-            Object[] row = sqlHandler.selectSingle("SELECT id, nick FROM "+ SEEN_DB +" WHERE nick='?' ;", params);
+            Object[] row = sqlHandler.selectSingle("SELECT id FROM "+ SEEN_DB +" WHERE nick='?';", params);
 
             if(row == null) {
                 params.clear();
                 params.add(sender);
                 params.add(SQL.dateToSQLDateTime(new Date()));
                 params.add(message);
-                sqlHandler.insert("INSERT INTO "+SEEN_DB+" (nick, date, lastwords) VALUES ('?', '?', '?');");
+                sqlHandler.insert("INSERT INTO "+SEEN_DB+" (nick, date, lastwords) VALUES ('?', '?', '?');", params);
             } else {
                 params.clear();
                 params.add(SQL.dateToSQLDateTime(new Date()));
                 params.add(message);
                 params.add(row[0] + "");
-                sqlHandler.update("UPDATE "+SEEN_DB+" SET date='?', lastwords='?' WHERE id='?' ;");
+                sqlHandler.update("UPDATE "+SEEN_DB+" SET date='?', lastwords='?' WHERE id='?' ;", params);
             }
 
             /* The following is some good-faith attempt to do SQL properly
@@ -78,14 +78,16 @@ public class Seen implements TriggerListener, MessageListener {
 
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, unable to update Seen DB, an SQL error occured.", false);
         }
 
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message) {
-        try{
-            Object[] row = sqlHandler.selectSingle("SELECT id, nick, date, lastwords FROM "+SEEN_DB+" WHERE nick='"+ message +"';");
+        try {
+            ArrayList<String> params = new ArrayList<String>();
+            params.add(message);
+            Object[] row = sqlHandler.selectSingle("SELECT id, nick, date, lastwords FROM "+SEEN_DB+" WHERE nick='?';", params);
 
             if(row == null) {
                 Grouphug.getInstance().sendMessage(message + " hasn't said anything yet.", false);
