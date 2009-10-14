@@ -46,16 +46,14 @@ public class SQLHandler {
         this.verbose = verbose;
         // the following is just for gh's version, because we only need one database, so no modules
         // will ever need to specify connection values
-        setConnection("grouphugs.db");
+        setConnection();
     }
 
     /**
      * Initiates an SQL connection. Should always be called before any query is attempted.
      * This method was originally public, however for the gh project it is not needed.
-     * @param dbFile the database filename for this connection
      */
-    private void setConnection(String dbFile) {
-        sql.setDefaults(dbFile);
+    private void setConnection() {
         try {
             reconnect();
             connectionOK = true;
@@ -88,7 +86,7 @@ public class SQLHandler {
             }
             throw ex;
         }
-        sql.connect();
+        sql.connect("jdbc:sqlite:grouphugs.db");
     }
 
     /**
