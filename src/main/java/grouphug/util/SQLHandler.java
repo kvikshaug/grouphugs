@@ -196,21 +196,8 @@ public class SQLHandler {
                 rows.add(sql.getRow().clone()); // clone the object since the reference will change
             }
             return rows;
-        } catch(SQLSyntaxErrorException ex) {
-            if(verbose) {
-                System.err.println("SQL: SQL syntax error!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
-            }
-            throw ex;
         } catch(SQLException ex) {
-            if(verbose) {
-                System.err.println("SQL: SQL error!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
-            }
+            printExceptionOutput(ex);
             throw ex;
         }
     }
@@ -241,21 +228,8 @@ public class SQLHandler {
         try {
             attemptQuery(query, parameters);
             return sql.getLastInsertID();
-        } catch(SQLSyntaxErrorException ex) {
-            if(verbose) {
-                System.err.println("SQL: SQL syntax error!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
-            }
-            throw ex;
         } catch(SQLException ex) {
-            if(verbose) {
-                System.err.println("SQL: SQL error!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
-            }
+            printExceptionOutput(ex);
             throw ex;
         }
     }
@@ -286,21 +260,8 @@ public class SQLHandler {
         try {
             attemptQuery(query, parameters);
             return sql.getAffectedRows();
-        } catch(SQLSyntaxErrorException ex) {
-            if(verbose) {
-                System.err.println("SQL: SQL syntax error!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
-            }
-            throw ex;
         } catch(SQLException ex) {
-            if(verbose) {
-                System.err.println("SQL: SQL error!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
-            }
+            printExceptionOutput(ex);
             throw ex;
         }
     }
@@ -331,22 +292,26 @@ public class SQLHandler {
         try {
             attemptQuery(query, parameters);
             return sql.getAffectedRows();
-        } catch(SQLSyntaxErrorException ex) {
-            if(verbose) {
-                System.err.println("SQL: SQL syntax error!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
-            }
-            throw ex;
         } catch(SQLException ex) {
-            if(verbose) {
-                System.err.println("SQL: SQL error!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
-            }
+            printExceptionOutput(ex);
             throw ex;
+        }
+    }
+
+
+    private void printExceptionOutput(SQLException ex) {
+        if(verbose) {
+            if(ex instanceof SQLSyntaxErrorException) {
+                System.err.println("sql> SQL syntax error!");
+                System.err.println("sql> Message: "+ex.getMessage());
+                System.err.println("sql> Cause: "+ex.getCause());
+                System.err.println("sql> "+ex);
+            } else {
+                System.err.println("sql> SQL error!");
+                System.err.println("sql> Message: "+ex.getMessage());
+                System.err.println("sql> Cause: "+ex.getCause());
+                System.err.println("sql> "+ex);
+            }
         }
     }
 }
