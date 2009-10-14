@@ -100,7 +100,7 @@ public class Seen implements TriggerListener, MessageListener {
 
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, unable to look up the requested data; an SQL error occured.", false);
         } catch (ParseException e) {
             System.err.println(" > Unable to parse the SQL date! This was very unexpected.");
             e.printStackTrace();

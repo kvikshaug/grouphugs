@@ -120,7 +120,7 @@ public class Karma implements TriggerListener, MessageListener {
             }
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, an SQL error occurred.", false);
+            Grouphug.getInstance().sendMessage("Sorry, unable to change karma value; an SQL error occurred.", false);
         }
     }
 
@@ -164,7 +164,7 @@ public class Karma implements TriggerListener, MessageListener {
             Grouphug.getInstance().sendMessage(reply, false);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, unable to gather karma records; an SQL error occured.", false);
         }
     }
 

@@ -62,7 +62,7 @@ public class WordCount implements TriggerListener, MessageListener {
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             e.printStackTrace();
-            Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, unable to update WordCounter DB; an SQL error occured.", false);
         }
     }
 
@@ -136,7 +136,7 @@ public class WordCount implements TriggerListener, MessageListener {
 
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, unable to fetch WordCount data; an SQL error occured.", false);
         } catch(ParseException e) {
             System.err.println("Unable to parse the SQL datetime!");
             Grouphug.getInstance().sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.", false);
