@@ -35,6 +35,8 @@ public class SQLHandler {
     private boolean connectionOK = false;
     private boolean verbose;
 
+    private final String connectionUrl = "jdbc:sqlite:grouphugs.db";
+
     /**
      * Constructs a new SQLHandler object
      * @param verbose if true, this class will output information about its actions, and (mostly) error handling,
@@ -44,8 +46,6 @@ public class SQLHandler {
     public SQLHandler(boolean verbose) throws ClassNotFoundException {
         sql = new SQL();
         this.verbose = verbose;
-        // the following is just for gh's version, because we only need one database, so no modules
-        // will ever need to specify connection values
         setConnection();
     }
 
@@ -59,10 +59,10 @@ public class SQLHandler {
             connectionOK = true;
         } catch(SQLException ex) {
             if(verbose) {
-                System.err.println("SQL: Failed to connect to the SQL database!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
+                System.err.println("sql> Failed to connect to the SQL database!");
+                System.err.println("sql> Message: "+ex.getMessage());
+                System.err.println("sql> Cause: "+ex.getCause());
+                System.err.println("sql> "+ex);
             }
             connectionOK = false;
         }
@@ -79,14 +79,14 @@ public class SQLHandler {
             sql.disconnect();
         } catch(SQLException ex) {
             if(verbose) {
-                System.err.println("SQL: Failed to clean up old SQL database connection!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
+                System.err.println("sql> Failed to clean up old SQL database connection!");
+                System.err.println("sql> Message: "+ex.getMessage());
+                System.err.println("sql> Cause: "+ex.getCause());
+                System.err.println("sql> "+ex);
             }
             throw ex;
         }
-        sql.connect("jdbc:sqlite:grouphugs.db");
+        sql.connect(connectionUrl);
     }
 
     /**
@@ -125,7 +125,7 @@ public class SQLHandler {
         } catch(SQLException ex) {
             if(firstAttempt) {
                 if(verbose) {
-                    System.err.println("SQL: SQL query failed (timeout?), attempting reconnection...");
+                    System.err.println("sql> SQL query failed (timeout?), attempting reconnection...");
                 }
                 attemptQuery(query, parameters, false);
             } else {
