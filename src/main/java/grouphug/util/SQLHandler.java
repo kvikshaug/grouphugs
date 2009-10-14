@@ -224,7 +224,7 @@ public class SQLHandler {
      * @return the database ID of the last inserted row
      * @throws SQLException if a database error occurs
      */
-    public long insert(String query) throws SQLException {
+    public int insert(String query) throws SQLException {
         return insert(query, null);
     }
 
@@ -239,7 +239,7 @@ public class SQLHandler {
      * @return the database ID of the last inserted row
      * @throws SQLException if a database error occurs
      */
-    public long insert(String query, ArrayList<String> parameters) throws SQLException {
+    public int insert(String query, ArrayList<String> parameters) throws SQLException {
         try {
             attemptQuery(query, parameters);
             return sql.getLastInsertID();

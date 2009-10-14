@@ -70,7 +70,7 @@ import java.util.ArrayList;
  * This will hide some of the JDBC functionality and expect that the user just wants a
  * simple and fast way to execute some SQL queries.
  *
- * See also the SQLHandler class which wraps this class, and the JDBC API, even further. 
+ * See also the SQLHandler class which wraps this class, and the JDBC API, even further.
  *
  * Authors: Alex Kvikshaug and Øyvind Øvergaard
  */
@@ -230,13 +230,13 @@ public class SQL {
      * Returns the last generated ID in the database from the last INSERT query.
      * @return the last generated ID
      */
-    public long getLastInsertID() {
+    public int getLastInsertID() {
         return lastInsertID;
     }
 
     /**
      * Returns the number of affected rows in the database from the last executed
-     * UPDATE, INSERT or DELETE query.  
+     * UPDATE, INSERT or DELETE query.
      * @return the number of affected rows
      */
     public int getAffectedRows() {
