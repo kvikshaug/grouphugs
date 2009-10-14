@@ -174,7 +174,7 @@ public class ModuleHandler {
          * @return true if the message triggers this listener, false if not
          */
         private boolean trigger(String message) {
-            return message.startsWith(trigger) && message.charAt(trigger.length()) == ' ';
+            return message.startsWith(trigger) && (message.length() == trigger.length() || message.charAt(trigger.length()) == ' ');
         }
     }
 }
