@@ -23,7 +23,12 @@ public class Tracking implements TriggerListener, Runnable {
     private static final String DB_NAME = "tracking";
     private static final int POLLING_TIME = 30; // minutes
 
+    private static final int NOT_CHANGED = 0;
+    private static final int CHANGED = 1;
+    private static final int DELIVERED = 2;
+
     private boolean threadWorking = false;
+    private int itemsRemaining = 0;
 
     private Vector<TrackingItem> items = new Vector<TrackingItem>();
     private SQLHandler sqlHandler;
@@ -70,17 +75,14 @@ public class Tracking implements TriggerListener, Runnable {
                 if(items.get(i).getTrackingNumber().equals(message.replace(TRIGGER_DEL, "").trim())) {
                     if(threadWorking) {
                         Grouphug.getInstance().sendMessage("Sorry, I'm currently polling for updates. Modifying the " +
-                                "package list now would make me go haywire. Please try again in a minute or so.", false);
+                                "package list now would make me go haywire. I have " + itemsRemaining + " packages left to check, " +
+                                "count to 10 for each of them and try again.", false);
                         return;
                     }
                     try {
-                        ArrayList<String> params = new ArrayList<String>();
-                        params.add(String.valueOf(items.get(i).getId()));
-                        sqlHandler.delete("delete from " + DB_NAME + " where id='?';", params);
-
                         // i know it's wrong to say that it's done before you do it but we need the trackingnumber before it's really removed!
                         Grouphug.getInstance().sendMessage("Ok, stopped tracking package '" + items.get(i).getTrackingNumber() + "'.", false);
-                        items.remove(i);
+                        items.get(i).remove();
                     } catch (SQLException e) {
                         Grouphug.getInstance().sendMessage("I have the package but failed to remove it from the SQL db for some reason!", false);
                         e.printStackTrace();
@@ -93,24 +95,42 @@ public class Tracking implements TriggerListener, Runnable {
         } else {
             // User wants to add a new item for tracking, but check if we're already tracking it
             try {
+                TrackingItem arrived = null;
                 for(TrackingItem ti : items) {
                     if(ti.getTrackingNumber().equals(message)) {
-                        if(ti.update()) {
+                        int result = ti.update();
+                        if(result == CHANGED) {
                             Grouphug.getInstance().sendMessage("New status for '" + message + "': " + ti.getStatus(), true);
-                        } else {
-                            Grouphug.getInstance().sendMessage("No change for '" + message + "': " + ti.getStatus(), true);
+                            return;
+                        } else if(result == NOT_CHANGED) {
+                                Grouphug.getInstance().sendMessage("No change for '" + message + "': " + ti.getStatus(), true);
+                            return;
+                        } else if(result == DELIVERED) {
+                            arrived = ti;
+                            break;
                         }
-                        return;
                     }
                 }
                 if(threadWorking) {
                     Grouphug.getInstance().sendMessage("Sorry, I'm currently polling for updates. Modifying the " +
-                            "package list now would make me go haywire. Please try again in a minute or so.", false);
+                            "package list now would make me go haywire. I have " + itemsRemaining + " packages left " +
+                            "to check, count to 10 for each of them and try again.", false);
+                    return;
+                }
+                if(arrived != null) {
+                    Grouphug.getInstance().sendMessage("Your package has been delivered. Removing it from my list.", false);
+                    Grouphug.getInstance().sendMessage("Status: " + arrived.getStatus(), false);
+                    arrived.remove();
+                    Grouphug.getInstance().sendMessage("Now tracking " + items.size() + " packages.", false);
+                    return;
+                }
+                TrackingItem newItem = new TrackingItem(message.trim(), sender);
+                if(newItem.update() == DELIVERED) {
+                    Grouphug.getInstance().sendMessage("Your package has already been delivered. I will not track it further.", false);
+                    Grouphug.getInstance().sendMessage("Status: " + newItem.getStatus(), false);
                     return;
                 }
                 Grouphug.getInstance().sendMessage("Adding package '" + message + "' to tracking list.", false);
-                TrackingItem newItem = new TrackingItem(message.trim().replace(" ", ""), sender);
-                newItem.update();
                 ArrayList<String> params = new ArrayList<String>();
                 params.add(newItem.getTrackingNumber());
                 params.add(newItem.getStatus());
@@ -141,13 +161,27 @@ public class Tracking implements TriggerListener, Runnable {
         } catch(InterruptedException ex) {
             // just continue
         }
+        Vector<TrackingItem> itemsToRemove = new Vector<TrackingItem>();
         while(true) {
             try {
                 threadWorking = true;
+                itemsRemaining = items.size();
                 for(TrackingItem ti : items) {
-                    if(ti.update()) {
-                        Grouphug.getInstance().sendMessage(ti.getOwner() + ": Package '" + ti.getTrackingNumber() + "' has exciting new changes!", false);
-                        Grouphug.getInstance().sendMessage(ti.getStatus(), true);
+                    switch(ti.update()) {
+                        case CHANGED:
+                            Grouphug.getInstance().sendMessage(ti.getOwner() + ": Package '" + ti.getTrackingNumber() + "' has exciting new changes!", false);
+                            Grouphug.getInstance().sendMessage(ti.getStatus(), true);
+                            break;
+
+                        case NOT_CHANGED:
+                            break;
+
+                        case DELIVERED:
+                            Grouphug.getInstance().sendMessage(ti.getOwner() + " has just picked up his/her package '" + ti.getTrackingNumber() + "':", false);
+                            Grouphug.getInstance().sendMessage(ti.getStatus(), true);
+                            itemsToRemove.add(ti);
+                            Grouphug.getInstance().sendMessage("Removing this one from my list. Currently tracking " + (items.size() - itemsToRemove.size()) + " packages.", false);
+                            break;
                     }
                     // let's sleep a few seconds between each item and go easy on the web server
                     try {
@@ -156,6 +190,11 @@ public class Tracking implements TriggerListener, Runnable {
                         // continue
                     }
                 }
+                for(TrackingItem toRemove : itemsToRemove) {
+                    toRemove.remove();
+                }
+                itemsToRemove.clear();
+                itemsRemaining--;
                 threadWorking = false;
             } catch(IOException ex) {
                 Grouphug.getInstance().sendMessage("Hi guys, just thought I should let you know that the " +
@@ -229,12 +268,23 @@ public class Tracking implements TriggerListener, Runnable {
         }
 
         /**
+         * Removes this item from memory and db
+         * @throws SQLException if SQL fails
+         */
+        public void remove() throws SQLException {
+            ArrayList<String> params = new ArrayList<String>();
+            params.add(String.valueOf(getId()));
+            sqlHandler.delete("delete from " + DB_NAME + " where id='?';", params);
+            items.remove(this);
+        }
+
+        /**
          * Updates the result of this tracking item. Use when polling.
-         * @return true if a change was detected, false if it has the same status
+         * @return CHANGED, NOT_CHANGED or DELIVERED according to its status change
          * @throws IOException if IO fails
          * @throws java.sql.SQLException if SQL fails
          */
-        public boolean update() throws IOException, SQLException {
+        public int update() throws IOException, SQLException {
             URLConnection urlConn;
             urlConn = new URL("http", "sporing.posten.no", "/Sporing/KMSporingInternett.aspx?ShipmentNumber="+trackingNumber).openConnection();
 
@@ -261,9 +311,9 @@ public class Tracking implements TriggerListener, Runnable {
                     String oldStatus = getStatus();
                     if(!oldStatus.equals(newStatus)) {
                         setStatus(newStatus);
-                        return true;
+                        return CHANGED;
                     } else {
-                        return false;
+                        return NOT_CHANGED;
                     }
                 }
 
@@ -284,11 +334,13 @@ public class Tracking implements TriggerListener, Runnable {
             }
             String oldStatus = getStatus();
             String newStatus = output.replace("<br/>", " - ").trim();
-            if(!oldStatus.equals(newStatus)) {
-                setStatus(newStatus);
-                return true;
+            setStatus(newStatus);
+            if(newStatus.contains("UTLEVERT")) {
+                return DELIVERED;
+            } else if(!oldStatus.equals(newStatus)) {
+                return CHANGED;
             } else {
-                return false;
+                return NOT_CHANGED;
             }
         }
     }
