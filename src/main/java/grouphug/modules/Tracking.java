@@ -334,10 +334,11 @@ public class Tracking implements TriggerListener, Runnable {
             }
             String oldStatus = getStatus();
             String newStatus = output.replace("<br/>", " - ").trim();
-            setStatus(newStatus);
             if(newStatus.contains("UTLEVERT")) {
+                setStatus(newStatus);
                 return DELIVERED;
             } else if(!oldStatus.equals(newStatus)) {
+                setStatus(newStatus);
                 return CHANGED;
             } else {
                 return NOT_CHANGED;
