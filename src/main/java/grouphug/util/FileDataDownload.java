@@ -1,6 +1,8 @@
 package grouphug.util;
+
 import java.io.*;
-import java.net.*;
+import java.net.URL;
+import java.net.URLConnection;
 
 //http://www.javajazzup.com/issue3/page65.shtml
 //More or less copypasted from there
@@ -8,16 +10,16 @@ public class FileDataDownload {
 
 	//Run this method, finds the filename and extension for you
 	public static void fileDownload(String fileAddress, String destinationDir){
-		
+
 		// Find the index of last occurrence of character '/' and '.'.
-		
+
 		int lastIndexOfSlash = fileAddress.lastIndexOf('/');
 		int lastIndexOfPeriod = fileAddress.lastIndexOf('.');
-		
+
 		// Find the name of file to be downloaded from the address.
-		
+
 		String fileName=fileAddress.substring(lastIndexOfSlash + 1);
-		
+
 		if (lastIndexOfPeriod >=1 && lastIndexOfSlash >= 0 && lastIndexOfSlash < fileAddress.length()-1){
 			FileDownload(fileAddress,fileName, destinationDir);
 		}
@@ -25,7 +27,7 @@ public class FileDataDownload {
 			System.err.println("Specify correct path or file name.");
 		}
 	}
-	
+
 	public static void FileDownload(String fileAddress, String localFileName, String destinationDir) {
 		final int size=1024;
 		OutputStream os = null;
@@ -40,7 +42,7 @@ public class FileDataDownload {
 			int ByteRead,ByteWritten=0;
 			fileUrl= new URL(fileAddress);
 			os = new BufferedOutputStream(new FileOutputStream(destinationDir+"/"+localFileName));
-			//The URLConnection object is created by invoking the 	 	
+			//The URLConnection object is created by invoking the
 			// openConnection method on a URL.
 
 			URLConn = fileUrl.openConnection();
@@ -61,6 +63,6 @@ public class FileDataDownload {
 			}
 			catch (IOException e) {
 				e.printStackTrace();
-			}}} 
+			}}}
 
 }

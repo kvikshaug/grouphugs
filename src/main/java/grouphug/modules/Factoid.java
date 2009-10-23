@@ -1,7 +1,8 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
-import grouphug.GrouphugModule;
+import grouphug.ModuleHandler;
+import grouphug.listeners.MessageListener;
 import grouphug.util.SQLHandler;
 
 import java.sql.SQLException;
@@ -16,7 +17,7 @@ import java.util.Random;
  * to the channel, we maintain a local list in memory, and just keep the SQL db synchronized, so
  * that on startup we can fetch all the factoids back.
  */
-public class Factoid implements GrouphugModule {
+public class Factoid implements MessageListener {
 
     // TODO - dynamic reply, with username, more?
     // TODO - more details of factiod ? time ?
@@ -25,14 +26,14 @@ public class Factoid implements GrouphugModule {
 
     private static final String TRIGGER_HELP = "factoid";
 
-    private static final String TRIGGER_MAIN = "factoid ";
-    private static final String TRIGGER_RANDOM = "randomfactoid";
+    private static final String TRIGGER_MAIN = "!factoid";
+    private static final String TRIGGER_RANDOM = "random";
 
     private static final String TRIGGER_MAIN_ADD = "<on> ";
     private static final String TRIGGER_MAIN_DEL = "<forget> ";
 
-    private static final String TRIGGER_SHORT_ADD = "on ";
-    private static final String TRIGGER_SHORT_DEL = "forget ";
+    private static final String TRIGGER_SHORT_ADD = "!on ";
+    private static final String TRIGGER_SHORT_DEL = "!forget ";
 
     private static final String SEPARATOR_MESSAGE = " <say> ";
     private static final String SEPARATOR_ACTION = " <do> ";
@@ -45,7 +46,7 @@ public class Factoid implements GrouphugModule {
 
     private SQLHandler sqlHandler;
 
-    public Factoid() {
+    public Factoid(ModuleHandler moduleHandler) {
         // Load up all existing factoids from sql
         try {
             sqlHandler = new SQLHandler(true);
@@ -54,6 +55,17 @@ public class Factoid implements GrouphugModule {
                 boolean message = row[0].equals("message");
                 factoids.add(new FactoidItem(message, (String)row[1], (String)row[2], (String)row[3]));
             }
+            moduleHandler.addMessageListener(this);
+            moduleHandler.registerHelp(TRIGGER_HELP, "Factoid: Make me say or do \"reply\" when someone says \"trigger\".\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_SHORT_ADD + "trigger <say> reply\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_SHORT_ADD + "trigger <do> reply\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_SHORT_DEL + "trigger\n" +
+                   "Other triggers, to view info, or get a random factoid:\n" +
+                   //"  "+Grouphug.MAIN_TRIGGER+TRIGGER_MAIN + " trigger\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_MAIN + " " + TRIGGER_RANDOM + "\n" +
+                   " - The string \"$sender\" will be replaced with the nick of the one triggering the factoid.\n" +
+                   " - A star (*) can be any string of characters.\n" +
+                   " - Regex can be used, but 1) remember that * is replaced with .* and 2) this will probably change very soon.");
 
         } catch(ClassNotFoundException ex) {
             System.err.println("Factoid startup: SQL unavailable!");
@@ -63,29 +75,7 @@ public class Factoid implements GrouphugModule {
         }
     }
 
-    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
-        return TRIGGER_HELP;
-    }
-
-    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
-        if(message.equals(TRIGGER_HELP)) {
-            return "Factoid: Make me say or do \"reply\" when someone says \"trigger\".\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_SHORT_ADD + "trigger <say> reply\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_SHORT_ADD + "trigger <do> reply\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_SHORT_DEL + "trigger\n" +
-                   "Other triggers, to view info, or get a random factoid:\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_MAIN + "trigger\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_RANDOM + "\n" +
-                   " - The string \"$sender\" will be replaced with the nick of the one triggering the factoid.\n" +
-                   " - A star (*) can be any string of characters.\n" +
-                   " - Regex can be used, but 1) remember that * is replaced with .* and 2) this will probably change very soon.";
-        }
-        return null;
-    }
-
-
-    // Remember that this is only run on a line starting with the Grouphug.MAIN_TRIGGER (! at the time of writing) (
-    public void trigger(String channel, String sender, String login, String hostname, String message) {
+    public void onMessage(String channel, String sender, String login, String hostname, String message) {
 
         // If trying to ADD a NEW factoid (with the main trigger !factoid <on> or the shorttrigger !on)
         if(message.startsWith(TRIGGER_MAIN + TRIGGER_MAIN_ADD) || message.startsWith(TRIGGER_SHORT_ADD)){
@@ -158,10 +148,6 @@ public class Factoid implements GrouphugModule {
         else if(message.startsWith(TRIGGER_RANDOM)) {
             factoids.get(random.nextInt(factoids.size())).send(sender);
         }
-    }
-
-    // this is run for every message sent to the channel - it checks if the line matches any factoid
-    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
 
         if ((System.nanoTime() - lastAddedTime) < (2 * Math.pow(10.0,9.0))) {
             return; // HACK to avoid specialTrigger being called on the same line used to add the trigger in the first place

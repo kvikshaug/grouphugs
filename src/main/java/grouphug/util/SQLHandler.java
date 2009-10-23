@@ -35,6 +35,8 @@ public class SQLHandler {
     private boolean connectionOK = false;
     private boolean verbose;
 
+    private final String connectionUrl = "jdbc:sqlite:grouphugs.db";
+
     /**
      * Constructs a new SQLHandler object
      * @param verbose if true, this class will output information about its actions, and (mostly) error handling,
@@ -44,27 +46,23 @@ public class SQLHandler {
     public SQLHandler(boolean verbose) throws ClassNotFoundException {
         sql = new SQL();
         this.verbose = verbose;
-        // the following is just for gh's version, because we only need one database, so no modules
-        // will ever need to specify connection values
-        setConnection("grouphugs.db");
+        setConnection();
     }
 
     /**
      * Initiates an SQL connection. Should always be called before any query is attempted.
      * This method was originally public, however for the gh project it is not needed.
-     * @param dbFile the database filename for this connection
      */
-    private void setConnection(String dbFile) {
-        sql.setDefaults(dbFile);
+    private void setConnection() {
         try {
             reconnect();
             connectionOK = true;
         } catch(SQLException ex) {
             if(verbose) {
-                System.err.println("SQL: Failed to connect to the SQL database!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
+                System.err.println("sql> Failed to connect to the SQL database!");
+                System.err.println("sql> Message: "+ex.getMessage());
+                System.err.println("sql> Cause: "+ex.getCause());
+                System.err.println("sql> "+ex);
             }
             connectionOK = false;
         }
@@ -81,14 +79,14 @@ public class SQLHandler {
             sql.disconnect();
         } catch(SQLException ex) {
             if(verbose) {
-                System.err.println("SQL: Failed to clean up old SQL database connection!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
+                System.err.println("sql> Failed to clean up old SQL database connection!");
+                System.err.println("sql> Message: "+ex.getMessage());
+                System.err.println("sql> Cause: "+ex.getCause());
+                System.err.println("sql> "+ex);
             }
             throw ex;
         }
-        sql.connect();
+        sql.connect(connectionUrl);
     }
 
     /**
@@ -127,7 +125,7 @@ public class SQLHandler {
         } catch(SQLException ex) {
             if(firstAttempt) {
                 if(verbose) {
-                    System.err.println("SQL: SQL query failed (timeout?), attempting reconnection...");
+                    System.err.println("sql> SQL query failed (timeout?), attempting reconnection...");
                 }
                 attemptQuery(query, parameters, false);
             } else {
@@ -198,21 +196,8 @@ public class SQLHandler {
                 rows.add(sql.getRow().clone()); // clone the object since the reference will change
             }
             return rows;
-        } catch(SQLSyntaxErrorException ex) {
-            if(verbose) {
-                System.err.println("SQL: SQL syntax error!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
-            }
-            throw ex;
         } catch(SQLException ex) {
-            if(verbose) {
-                System.err.println("SQL: SQL error!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
-            }
+            printExceptionOutput(ex);
             throw ex;
         }
     }
@@ -224,7 +209,7 @@ public class SQLHandler {
      * @return the database ID of the last inserted row
      * @throws SQLException if a database error occurs
      */
-    public long insert(String query) throws SQLException {
+    public int insert(String query) throws SQLException {
         return insert(query, null);
     }
 
@@ -239,25 +224,12 @@ public class SQLHandler {
      * @return the database ID of the last inserted row
      * @throws SQLException if a database error occurs
      */
-    public long insert(String query, ArrayList<String> parameters) throws SQLException {
+    public int insert(String query, ArrayList<String> parameters) throws SQLException {
         try {
             attemptQuery(query, parameters);
             return sql.getLastInsertID();
-        } catch(SQLSyntaxErrorException ex) {
-            if(verbose) {
-                System.err.println("SQL: SQL syntax error!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
-            }
-            throw ex;
         } catch(SQLException ex) {
-            if(verbose) {
-                System.err.println("SQL: SQL error!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
-            }
+            printExceptionOutput(ex);
             throw ex;
         }
     }
@@ -288,21 +260,8 @@ public class SQLHandler {
         try {
             attemptQuery(query, parameters);
             return sql.getAffectedRows();
-        } catch(SQLSyntaxErrorException ex) {
-            if(verbose) {
-                System.err.println("SQL: SQL syntax error!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
-            }
-            throw ex;
         } catch(SQLException ex) {
-            if(verbose) {
-                System.err.println("SQL: SQL error!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
-            }
+            printExceptionOutput(ex);
             throw ex;
         }
     }
@@ -333,22 +292,26 @@ public class SQLHandler {
         try {
             attemptQuery(query, parameters);
             return sql.getAffectedRows();
-        } catch(SQLSyntaxErrorException ex) {
-            if(verbose) {
-                System.err.println("SQL: SQL syntax error!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
-            }
-            throw ex;
         } catch(SQLException ex) {
-            if(verbose) {
-                System.err.println("SQL: SQL error!");
-                System.err.println("SQL: Message: "+ex.getMessage());
-                System.err.println("SQL: Cause: "+ex.getCause());
-                System.err.println("SQL: "+ex);
-            }
+            printExceptionOutput(ex);
             throw ex;
+        }
+    }
+
+
+    private void printExceptionOutput(SQLException ex) {
+        if(verbose) {
+            if(ex instanceof SQLSyntaxErrorException) {
+                System.err.println("sql> SQL syntax error!");
+                System.err.println("sql> Message: "+ex.getMessage());
+                System.err.println("sql> Cause: "+ex.getCause());
+                System.err.println("sql> "+ex);
+            } else {
+                System.err.println("sql> SQL error!");
+                System.err.println("sql> Message: "+ex.getMessage());
+                System.err.println("sql> Cause: "+ex.getCause());
+                System.err.println("sql> "+ex);
+            }
         }
     }
 }

@@ -1,7 +1,9 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
-import grouphug.GrouphugModule;
+import grouphug.ModuleHandler;
+import grouphug.listeners.MessageListener;
+import grouphug.listeners.TriggerListener;
 import grouphug.util.SQL;
 import grouphug.util.SQLHandler;
 
@@ -14,77 +16,68 @@ import java.util.ArrayList;
 import java.util.Date;
 
 
-public class WordCount implements GrouphugModule {
+public class WordCount implements TriggerListener, MessageListener {
 
     private static final String TRIGGER_HELP = "wordcount";
-	private static final String TRIGGER = "wordcount ";
-	private static final String WORDS_DB= "words";
-    private static final String TRIGGER_TOP = "wordcounttop";
-    private static final String TRIGGER_BOTTOM = "wordcountbottom";
+    private static final String TRIGGER = "wc";
+    private static final String TRIGGER_TOP = "wctop";
+    private static final String TRIGGER_BOTTOM = "wcbottom";
+    private static final String WORDS_DB= "words";
     private static final int LIMIT = 5;
-    private static final DateFormat df = new SimpleDateFormat("d. MMMMM");
+    private static final DateFormat df = new SimpleDateFormat("d. MMMMM yyyy");
 
     private SQLHandler sqlHandler;
 
-    public WordCount() {
+    public WordCount(ModuleHandler moduleHandler) {
         try {
             sqlHandler = SQLHandler.getSQLHandler();
+            moduleHandler.addTriggerListener(TRIGGER, this);
+            moduleHandler.addMessageListener(this);
+            moduleHandler.registerHelp(TRIGGER_HELP, "Counts the number of words/lines a person has said\n" +
+                    "To check how many words someone has said, use " +Grouphug.MAIN_TRIGGER + TRIGGER + " <nick>\n" +
+                    "Top 5: " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP + "\n" +
+                    "Bottom 5: " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM);
         } catch(ClassNotFoundException ex) {
             System.err.println("WordCount startup error: SQL unavailable!");
-            // TODO should disable this module at this point.
         }
     }
-
-	
-	public void addWords(String sender, String message) {
+    public void addWords(String sender, String message) {
         // This method to count words should be more or less failsafe:
         int newWords = message.trim().replaceAll(" {2,}+", " ").split(" ").length;
 
-		try{
-			Object[] row = sqlHandler.selectSingle("SELECT id, words, `lines` FROM "+WORDS_DB+" WHERE nick='"+sender+"';");
-			if(row == null) {
+        try{
+            Object[] row = sqlHandler.selectSingle("SELECT id, words, `lines` FROM "+WORDS_DB+" WHERE nick='"+sender+"';");
+            if(row == null) {
                 ArrayList<String> params = new ArrayList<String>();
                 params.add(sender);
                 params.add(newWords + "");
                 params.add(SQL.dateToSQLDateTime(new Date()));
-				sqlHandler.insert("INSERT INTO "+WORDS_DB+" (nick, words, `lines`, since) VALUES ('?', '?', '1', '?');", params);
-			} else {
+                sqlHandler.insert("INSERT INTO "+WORDS_DB+" (nick, words, `lines`, since) VALUES ('?', '?', '1', '?');", params);
+            } else {
                 long existingWords = ((Integer)row[1]);
                 long existingLines = ((Integer)row[2]);
-				sqlHandler.update("UPDATE "+WORDS_DB+" SET words='"+(existingWords + newWords)+"', `lines`='"+(existingLines + 1)+"' WHERE id='"+row[0]+"';");
-			}
+                sqlHandler.update("UPDATE "+WORDS_DB+" SET words='"+(existingWords + newWords)+"', `lines`='"+(existingLines + 1)+"' WHERE id='"+row[0]+"';");
+            }
 
-		} catch(SQLException e) {
+        } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             e.printStackTrace();
-            Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, unable to update WordCounter DB; an SQL error occured.", false);
         }
-	}
-	
-	public void specialTrigger(String channel, String sender, String login, String hostname, String message){
-		addWords(sender, message);
-	}
-	public void trigger(String channel, String sender, String login, String hostname, String message){
-        if(message.startsWith(TRIGGER)){
-            print(message);
-        }
-        else if(message.equals(TRIGGER_TOP))
-            showScore(true);
-        else if(message.equals(TRIGGER_BOTTOM))
-            showScore(false);
-
-
-	}
-	public String helpMainTrigger(String channel, String sender, String login, String hostname, String message){
-        return TRIGGER_HELP;
     }
-	public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message){
-		if(message.equals(TRIGGER_HELP)) {
-            return "Counts the number of words/lines a person has said\n" +
-                   "To check how many words someone has said, use " +Grouphug.MAIN_TRIGGER + TRIGGER + "<nick>";
+
+    public void onMessage(String channel, String sender, String login, String hostname, String message) {
+        if(message.equals(Grouphug.MAIN_TRIGGER + TRIGGER_TOP)) {
+            showScore(true);
+        } else if(message.equals(Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM)) {
+            showScore(false);
         }
-        return null;
-	}
+        addWords(sender, message);
+    }
+
+    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+        print(message);
+    }
 
     // TODO some duplicated code in the following two methods, can this be simplified ?
 
@@ -125,26 +118,25 @@ public class WordCount implements GrouphugModule {
     }
 
     private void print(String message){
-        String nick = message.substring(10, message.length());
         try{
-            Object[] row = sqlHandler.selectSingle("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick='"+nick+"';");
+            Object[] row = sqlHandler.selectSingle("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick='"+ message +"';");
 
             if(row == null) {
-                Grouphug.getInstance().sendMessage(nick + " doesn't have any words counted.", false);
+                Grouphug.getInstance().sendMessage(message + " doesn't have any words counted.", false);
             } else {
                 long words = ((Integer)row[2]);
                 long lines = ((Integer)row[3]);
                 Date since = SQL.sqlDateTimeToDate((String)row[4]);
                 double wpl = (double)words / (double)lines;
 
-                Grouphug.getInstance().sendMessage(nick + " has uttered "+words+ " words in "+lines+" lines ("+
+                Grouphug.getInstance().sendMessage(message + " has uttered "+words+ " words in "+lines+" lines ("+
                         (new DecimalFormat("0.0")).format(wpl)+
                         " wpl) since "+df.format(since), false);
             }
 
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, unable to fetch WordCount data; an SQL error occured.", false);
         } catch(ParseException e) {
             System.err.println("Unable to parse the SQL datetime!");
             Grouphug.getInstance().sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.", false);

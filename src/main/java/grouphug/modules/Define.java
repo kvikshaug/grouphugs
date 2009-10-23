@@ -1,47 +1,35 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
-import grouphug.GrouphugModule;
+import grouphug.ModuleHandler;
+import grouphug.listeners.TriggerListener;
+import grouphug.util.Web;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.MalformedURLException;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
-public class Define implements GrouphugModule {
+public class Define implements TriggerListener {
 
-    private static final String TRIGGER = "define ";
+    private static final String TRIGGER = "define";
     private static final String TRIGGER_HELP = "define";
     private static final int CONN_TIMEOUT = 10000; // ms
 
-
-    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-        // do nothing
-    }
-
-    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
-        return TRIGGER_HELP;
-    }
-
-    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
-        if(message.equals(TRIGGER_HELP)) {
-            return "Define: Use google to give a proper definition of a word.\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<keyword>";
-        }
-        return null;
+    public Define(ModuleHandler moduleHandler) {
+        moduleHandler.addTriggerListener(TRIGGER, this);
+        moduleHandler.registerHelp(TRIGGER_HELP, "Define: Use google to give a proper definition of a word.\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<keyword>");
+        System.out.println("Define module loaded.");
     }
 
 
-    public void trigger(String channel, String sender, String login, String hostname, String message) {
-        if(!message.startsWith(TRIGGER))
-            return;
-
+    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
         String answer;
-
         try {
-            answer = Define.search(message.substring(TRIGGER.length()));
+            answer = Define.search(message);
         } catch(IOException e) {
             Grouphug.getInstance().sendMessage("The intartubes seems to be clogged up (IOException).", false);
             System.err.println(e.getMessage()+"\n"+e.getCause());
@@ -51,7 +39,7 @@ public class Define implements GrouphugModule {
         if(answer == null)
             Grouphug.getInstance().sendMessage("No definition found for "+message.substring(TRIGGER.length())+".", false);
         else
-            Grouphug.getInstance().sendMessage(Grouphug.entitiesToChars(answer), false);
+            Grouphug.getInstance().sendMessage(Web.entitiesToChars(answer), false);
     }
 
     public static String search(String query) throws IOException {

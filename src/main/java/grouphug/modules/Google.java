@@ -1,46 +1,34 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
-import grouphug.GrouphugModule;
+import grouphug.ModuleHandler;
+import grouphug.listeners.TriggerListener;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.MalformedURLException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
 
-public class Google implements GrouphugModule {
+public class Google implements TriggerListener {
 
-    private static final String TRIGGER = "google ";
+    private static final String TRIGGER = "google";
     private static final String TRIGGER_HELP = "google";
     private static final int CONN_TIMEOUT = 10000; // ms
 
-
-    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
-        return TRIGGER_HELP;
+    public Google(ModuleHandler moduleHandler) {
+        moduleHandler.addTriggerListener(TRIGGER, this);
+        moduleHandler.registerHelp(TRIGGER_HELP, "Google search:\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<searchword(s)>");
+        System.out.println("Google module loaded.");
     }
 
-    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
-        if(message.equals(TRIGGER_HELP)) {
-            return "Google search:\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<searchword(s)>";
-        }
-        return null;
-    }
 
-    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-        // do nothing
-    }
-
-    public void trigger(String channel, String sender, String login, String hostname, String message) {
-
-        if(!message.startsWith(TRIGGER))
-            return;
-
+    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
         URL url;
         try {
-            url = Google.search(message.substring(TRIGGER.length()));
+            url = Google.search(message);
         } catch(IOException e) {
             Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)", false);
             System.err.println(e.getMessage()+"\n"+e.getCause());
@@ -48,7 +36,7 @@ public class Google implements GrouphugModule {
         }
 
         if(url == null) {
-            Grouphug.getInstance().sendMessage("No results for "+message.substring(TRIGGER.length())+".", false);
+            Grouphug.getInstance().sendMessage("No results for "+message+".", false);
         } else {
             Grouphug.getInstance().sendMessage(url.toString(), false);
         }
@@ -81,7 +69,7 @@ public class Google implements GrouphugModule {
         } while(line != null && !line.contains(parseSearch));
         if(line == null)
           return null;
-        
+
         int startIndex = line.indexOf(parseSearch);
 
         // if -1, then the phrase wasn't found - should return error here, not "not found"

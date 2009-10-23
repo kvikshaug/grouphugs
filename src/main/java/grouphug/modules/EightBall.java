@@ -1,20 +1,21 @@
 package grouphug.modules;
 
 import grouphug.Grouphug;
-import grouphug.GrouphugModule;
+import grouphug.ModuleHandler;
+import grouphug.listeners.TriggerListener;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class EightBall implements GrouphugModule {
+public class EightBall implements TriggerListener {
 
     private static final String TRIGGER = "8ball";
     private static final String TRIGGER_HELP = "8ball";
     private Random random = new Random(System.currentTimeMillis());
     private List<String> answerDb = new ArrayList<String>();
 
-    public EightBall() {
+    public EightBall(ModuleHandler moduleHandler) {
         answerDb.add("As I see it, yes.");
         answerDb.add("It is certain.");
         answerDb.add("It is decidedly so.");
@@ -35,27 +36,15 @@ public class EightBall implements GrouphugModule {
         answerDb.add("My sources say no.");
         answerDb.add("Outlook not so good.");
         answerDb.add("Very doubtful.");
-    }
 
-    public void trigger(String channel, String sender, String login, String hostname, String message) {
-        if(message.startsWith(TRIGGER))
-            Grouphug.getInstance().sendMessage(sender+": "+answerDb.get(random.nextInt(answerDb.size())), false);
-    }
-
-    public void specialTrigger(String channel, String sender, String login, String hostname, String message) {
-        // no special action
-    }
-
-    public String helpMainTrigger(String channel, String sender, String login, String hostname, String message) {
-        return TRIGGER_HELP;
-    }
-
-    public String helpSpecialTrigger(String channel, String sender, String login, String hostname, String message) {
-        if(message.equals(TRIGGER_HELP)) {
-            return "Seek advice from the magic 8-ball fortuneteller!\n" +
+        moduleHandler.addTriggerListener(TRIGGER, this);
+        moduleHandler.registerHelp(TRIGGER_HELP, "Seek advice from the magic 8-ball fortuneteller!\n" +
                     "  "+ Grouphug.MAIN_TRIGGER+TRIGGER+" <yes/no question>\n" +
-                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER+" am I a bad person?";
-        }
-        return null;
+                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER+" am I a bad person?");
+        System.out.println("8ball module loaded.");
+    }
+
+    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+        Grouphug.getInstance().sendMessage(sender+": "+answerDb.get(random.nextInt(answerDb.size())), false);
     }
 }

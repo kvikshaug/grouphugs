@@ -42,7 +42,7 @@ public class Web
         urlString = urlString.replace(" ", "%20");
 
         URL url = new URL(urlString);
-        System.out.println("Opening: " + urlString + " ...");
+        System.out.println("Web util opening: '" + urlString + "'...");
         URLConnection urlConn = url.openConnection();
 
         urlConn.setConnectTimeout(timeout);
@@ -141,4 +141,39 @@ public class Web
         return uris;
     }
 
+    /**
+     * Convert HTML entities to their respective characters
+     * @param str The unconverted string
+     * @return The converted string
+     */
+    public static String entitiesToChars(String str) {
+        return str.replace("&amp;", "&")
+                .replace("&nbsp;", " ")
+                .replace("&quot;", "\"")
+                .replace("&apos;", "'")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&mdash;", " - ")
+                .replace("&laquo;", "«")
+                .replace("&lsaquo;", "‹")
+                .replace("&raquo;", "»")
+                .replace("&rsaquo;", "›")
+                .replace("&aelig;", "æ")
+                .replace("&Aelig;", "Æ")
+                .replace("&oslash;", "ø")
+                .replace("&Oslash;", "Ø")
+                .replace("&aring;", "å")
+                .replace("&Aring;", "Å")
+                .replace("&#x27;", "'")
+                .replace("&#34;", "\"")
+                .replace("&#39;", "'")
+                .replace("&#039;", "'")
+                .replace("&#228;", "ä")
+                .replace("&#8212;", " - ")
+                .replace("&#8216;", "'")
+                .replace("&#8217;", "'")
+                .replace("&#8220;", "\"")
+                .replace("&#8221;", "\"")
+                .replace("&#8230;", "...");
+    }
 }

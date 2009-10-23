@@ -12,3 +12,5 @@ target/**
 *.class
 .classpath
 .project
+grouphugs.db
+log-current

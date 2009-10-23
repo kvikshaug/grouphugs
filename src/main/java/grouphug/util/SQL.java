@@ -70,26 +70,22 @@ import java.util.ArrayList;
  * This will hide some of the JDBC functionality and expect that the user just wants a
  * simple and fast way to execute some SQL queries.
  *
- * See also the SQLHandler class which wraps this class, and the JDBC API, even further. 
+ * See also the SQLHandler class which wraps this class, and the JDBC API, even further.
  *
  * Authors: Alex Kvikshaug and Øyvind Øvergaard
  */
 public class SQL {
     private static final DateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    // default host, db, login credentials
-    private String defaultDBFile;
-
     private int affectedRows;
     private int lastInsertID;
     private Object row[];
 
     private Connection connection;
-    private Statement statement;
     private ResultSet resultset;
 
     /**
-     * Constructs a new SQL object
+     * Constructs a new SQL object if the JDBC driver is successfully loaded
      * @throws ClassNotFoundException if the JDBC driver is not linked to this application
      */
     public SQL() throws ClassNotFoundException {
@@ -97,33 +93,12 @@ public class SQL {
     }
 
     /**
-     * Sets the default connection data before connecting.
-     * @param defaultSQLDB the default database
-     */
-    public void setDefaults(String defaultSQLDB) {
-        this.defaultDBFile = defaultSQLDB;
-    }
-
-    /**
-     * Connects to the default database
-     * @throws SQLException - if we were unable to connect to the database
-     */
-    public void connect() throws SQLException {
-        try {
-            connect(defaultDBFile);
-        } catch(NullPointerException ex) {
-            throw new SQLException("Trying to connect to unspecified default values.");
-        }
-    }
-
-    /**
      * Connects to the specified database
-     * @param dbFile - Name of the database to open
+     * @param jdbcUrl - The JDBC URL to connect to
      * @throws SQLException - if we were unable to connect to the database
      */
-    public void connect(String dbFile) throws SQLException {
-        connection = DriverManager.getConnection ("jdbc:sqlite:" + dbFile);
-        statement = connection.createStatement();
+    public void connect(String jdbcUrl) throws SQLException {
+        connection = DriverManager.getConnection(jdbcUrl);
     }
 
     /**
@@ -138,13 +113,8 @@ public class SQL {
         if (resultset != null) {
             resultset.close();
         }
-
-        if (statement != null) {
-            statement.close();
-        }
         connection = null;
         resultset = null;
-        statement = null;
     }
 
     /**
@@ -164,31 +134,36 @@ public class SQL {
      * @throws SQLException - if the query failed
      */
     public void query(String query, ArrayList<String> parameters) throws SQLException {
-        if(statement == null) {
-            throw new SQLException("Connection does not seem to be initialized.");
-        }
+
+        // remove quotes in case they were added
+        query = query.replace("'?'", "?").replace("\"?\"", "?");
+
+        PreparedStatement statement = connection.prepareStatement(query);
 
         if(parameters != null) {
-            for (int i = 0; i < parameters.size(); i++) {
-                parameters.set(i, escapeQuotes(parameters.get(i)));
-            }
-            int paramIndex;
-            for(int i=0; (paramIndex = query.indexOf("?")) != -1; i++) {
-                query = query.substring(0, paramIndex) + parameters.get(i) + query.substring(paramIndex + 1);
-                //query = query.replaceFirst("\\?", parameters.get(i));
+            for(int i=0; i<parameters.size(); i++) {
+                statement.setString((i+1), parameters.get(i));
             }
         }
 
-        // this line can be useful to measure the query sequence in an app
-        //System.out.println("Running query: "+query);
-        // if execute() returns true, the query was a SELECT statement, so we want to retrieve the result set
-        if (statement.execute(query)) {
+        // this can be useful to measure the query sequence in an app
+        String params = "";
+        if(parameters != null) {
+            params += "(";
+            for(String s : parameters) {
+                params += s + ", ";
+            }
+            params = params.substring(0, params.length()-2) + ")";
+        }
+        System.out.println("sql> " + query + " " + params);
+
+        if (statement.execute()) {
+            // if execute() returns true, the query was a SELECT statement, so we want to retrieve the result set
             resultset = statement.getResultSet();
             row = new Object[resultset.getMetaData().getColumnCount()];
-        }
-        // if execute() returns false, the query was either an UPDATE, INSERT or DELETE statement,
-        // so we retrieve the number of rows affected
-        else {
+        } else {
+            // if execute() returns false, the query was either an UPDATE, INSERT or DELETE statement,
+            // so we retrieve the number of rows affected
             affectedRows = statement.getUpdateCount();
             ResultSet key = statement.getGeneratedKeys();
             if(key != null && key.next()) {
@@ -230,13 +205,13 @@ public class SQL {
      * Returns the last generated ID in the database from the last INSERT query.
      * @return the last generated ID
      */
-    public long getLastInsertID() {
+    public int getLastInsertID() {
         return lastInsertID;
     }
 
     /**
      * Returns the number of affected rows in the database from the last executed
-     * UPDATE, INSERT or DELETE query.  
+     * UPDATE, INSERT or DELETE query.
      * @return the number of affected rows
      */
     public int getAffectedRows() {
@@ -262,59 +237,5 @@ public class SQL {
     public static java.util.Date sqlDateTimeToDate(String dateTime) throws ParseException {
         return SQL_DATE_FORMAT.parse(dateTime);
     }
-
-
-    /**
-     * Escapes quotes that are not already escaped.
-     * @param string the string to escape quotes
-     * @return the string with escaped quotes
-     */
-    private String escapeQuotes(String string) {
-        int quoteIndex = 0;
-        while((quoteIndex = string.indexOf("'", quoteIndex)) != -1) {
-            string = string.substring(0, quoteIndex) + "\\'" + string.substring(quoteIndex + 1);
-            quoteIndex += 2;
-        }
-        quoteIndex = 0;
-        while((quoteIndex = string.indexOf("\"", quoteIndex)) != -1) {
-            string = string.substring(0, quoteIndex) + "\\\"" + string.substring(quoteIndex + 1);
-            quoteIndex += 2;
-        }
-        return string;
-    }
-
-
-    /**
-     * getConnection()
-     * Returns the current connection for excentric classes who wishes to prepare their own statements.
-     * @return the current connection
-     */
-    /*
-    public Connection getConnection() {
-        return connection;
-    }
-    */
-
-    /*
-    public void executePreparedUpdate(PreparedStatement statement) throws SQLException{
-    	statement.executeUpdate();
-    }
-    public void executePreparedSelect(PreparedStatement statement) throws SQLException{
-    	if(statement.execute()){
-    		resultset = statement.getResultSet();
-            row = new Object[resultset.getMetaData().getColumnCount()];
-    	}
-    }
-    */
-    /**
-     * Returns the result set returned from a SQL query
-     * @return resultset
-     */
-    /*
-    public ResultSet getResultset() {
-        return resultset;
-    }
-    */
-
 }
 
