@@ -155,6 +155,7 @@ public class Tracking implements TriggerListener, Runnable {
      * This is the posten.no poller
      */
     public void run() {
+        int fails = 0;
         // we're started before the bot has connected, so sleep a while first
         try {
             Thread.sleep(30 * 1000);
@@ -196,21 +197,24 @@ public class Tracking implements TriggerListener, Runnable {
                 itemsToRemove.clear();
                 itemsRemaining--;
                 threadWorking = false;
+                fails = 0;
             } catch(IOException ex) {
-                Grouphug.getInstance().sendMessage("Hi guys, just thought I should let you know that the " +
-                        "package tracking module caught an IOException when polling for changes.\n" +
-                        "You might want to check your package status manually.", false);
+                fails++;
                 ex.printStackTrace();
             } catch (SQLException ex) {
-                Grouphug.getInstance().sendMessage("Hi guys, just thought I should let you know that the " +
-                        "package tracking module caught an SQLException when polling for changes.\n" +
-                        "You might want to check your package status manually.", false);
+                fails++;
                 ex.printStackTrace();
             } catch(Exception ex) {
+                fails++;
                 System.err.println("Tracking module thread caught an exception.");
                 System.err.println("I will pretend like nothing happened and try again soon, " +
                         "let's hope it is recoverable.");
                 ex.printStackTrace();
+            }
+            if(fails > 5) {
+                fails = 0;
+                Grouphug.getInstance().sendMessage("The package tracking module has now failed 5 times in a row. " +
+                        "If this continues, you might want to check the logs and your package status manually.", false);
             }
             try {
                 Thread.sleep(POLLING_TIME * 60 * 1000);
@@ -334,10 +338,11 @@ public class Tracking implements TriggerListener, Runnable {
             }
             String oldStatus = getStatus();
             String newStatus = output.replace("<br/>", " - ").trim();
-            setStatus(newStatus);
             if(newStatus.contains("UTLEVERT")) {
+                setStatus(newStatus);
                 return DELIVERED;
             } else if(!oldStatus.equals(newStatus)) {
+                setStatus(newStatus);
                 return CHANGED;
             } else {
                 return NOT_CHANGED;
