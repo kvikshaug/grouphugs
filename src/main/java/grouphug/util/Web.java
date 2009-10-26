@@ -164,6 +164,7 @@ public class Web
                 .replace("&Oslash;", "Ø")
                 .replace("&aring;", "å")
                 .replace("&Aring;", "Å")
+                .replace("&#x22;", "\"")
                 .replace("&#x27;", "'")
                 .replace("&#34;", "\"")
                 .replace("&#39;", "'")

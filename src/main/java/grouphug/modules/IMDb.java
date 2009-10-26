@@ -39,20 +39,20 @@ public class IMDb implements TriggerListener {
         }
 
         String title = "";
-        double score = 0;
+        String score = "";
         String votes = "";
         String tagline = "";
         String plot = "";
         String commentTitle = "";
 
         URLConnection urlConn;
+        String line = "(uninitialized)";
+
         try {
             urlConn = imdbURL.openConnection();
             urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Trick google into thinking we're a proper browser. ;)
 
             BufferedReader imdb = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
-
-            String line;
 
             String titleString = "<title>";
             String scoreString = "<div class=\"meta\">";
@@ -68,10 +68,18 @@ public class IMDb implements TriggerListener {
                 }
                 if(line.trim().equals(scoreString)) {
                     line = imdb.readLine();
-                    score = Double.parseDouble(line.substring(line.indexOf("<b>") + 3, line.indexOf("/")));
+                    if(line.contains("<b>")) {
+                        // we parse to double and get back the string because we want to verify that it indeed
+                        // is a number, even though we save and show it as a string.
+                        score = String.valueOf(Double.parseDouble(line.substring(line.indexOf("<b>") + 3, line.indexOf("/")))) + "/10";
+                    } else if(line.contains("<small>")) {
+                        score = line.substring(line.indexOf("<small>") + 7, line.indexOf("</small>"));
+                    } else {
+                        score = "Unkown score";
+                    }
                 }
                 if(line.startsWith(votesString)) {
-                    votes = line.substring(votesString.length()).substring(0, line.substring(votesString.length()).indexOf(" "));
+                    votes = " (" + line.substring(votesString.length()).substring(0, line.substring(votesString.length()).indexOf(" ")) + " votes)";
                 }
                 if(line.startsWith(taglineString)) {
                     tagline = imdb.readLine().trim();
@@ -100,21 +108,31 @@ public class IMDb implements TriggerListener {
             }
 
         } catch(StringIndexOutOfBoundsException ex) {
+            System.err.println("Couldn't parse IMDb site!");
+            ex.printStackTrace();
+            System.err.println("I was parsing the following line:");
+            System.err.println(line);
             Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.", false);
             return;
         } catch(NumberFormatException ex) {
+            System.err.println("Couldn't parse IMDb site!");
+            ex.printStackTrace();
+            System.err.println("I was parsing the following line:");
+            System.err.println(line);
             Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.", false);
             return;
         } catch(MalformedURLException ex) {
+            ex.printStackTrace();
             Grouphug.getInstance().sendMessage("Wtf just happened? I caught a MalformedURLException.", false);
             return;
         } catch(IOException ex) {
+            ex.printStackTrace();
             Grouphug.getInstance().sendMessage("Sorry, the intartubes seem to be clogged up.", false);
             return;
         }
 
         try {
-            Grouphug.getInstance().sendMessage(title+tagline+"\n"+plot+"\n"+"Comment: "+commentTitle+"\n"+score+"/10 ("+votes+" votes) - "+imdbURL.toString(), false);
+            Grouphug.getInstance().sendMessage(title+tagline+"\n"+plot+"\n"+"Comment: "+commentTitle+"\n"+score+votes+" - "+imdbURL.toString(), false);
         } catch(NullPointerException ex) {
             Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.", false);
         }
