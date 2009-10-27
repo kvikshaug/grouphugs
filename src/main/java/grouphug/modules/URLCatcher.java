@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 public class URLCatcher implements MessageListener {
 
     private static final String[] URI_SCHEMES = new String[]{"http://", "https://"};
-    private static final Pattern TITLE_BEGIN = Pattern.compile("<title>|<TITLE>");
+    private static final Pattern TITLE_BEGIN = Pattern.compile("<title.*?>|<TITLE.*?>");
     private static final Pattern TITLE_END = Pattern.compile("</title>|</TITLE>");
     private static final String HELP_TRIGGER = "urlcatcher";
     private static final int TITLE_MAX_LENGTH = 100;
@@ -33,12 +33,6 @@ public class URLCatcher implements MessageListener {
     }
 
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
-        /*if (message.startsWith(HTTP_URI) || message.startsWith(HTTPS_URI))
-        {
-            String title = getHTMLTitle(message);
-            if (title != null)
-                bot.sendMessage("URLCatcher: " + title, false);
-        }*/
         ArrayList<String> urls = findAllUrls(message);
         for (String url : urls) {
             String title = getHTMLTitle(url);
@@ -47,7 +41,7 @@ public class URLCatcher implements MessageListener {
                     title = title.substring(0, TITLE_MAX_LENGTH);
                     title = title.concat(" (...)");
                 }
-                Grouphug.getInstance().sendMessage("Title: " + Web.entitiesToChars(title.trim()) /*+ " :: " + url*/, false);
+                Grouphug.getInstance().sendMessage("Title: " + Web.entitiesToChars(title.trim()), false);
             }
         }
     }
