@@ -1,10 +1,10 @@
 package grouphug;
 
 /**
- * This class runs as its own thread, its purpose is to reclaim our main nick if
- * it's taken when we first connect.
+ * This class runs a thread which reclaims our main nick if
+ * it happens to be taken when we connect to irc.
  */
-class NickPoller implements Runnable {
+public class NickPoller implements Runnable {
 
     // How long we wait between each time we try to recapture our nick
     private static int RETRY_TIME = 3 * 60 * 1000; // in ms - every 3 minutes, should be pretty reasonable?
