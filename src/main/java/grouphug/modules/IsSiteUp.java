@@ -7,7 +7,6 @@ import grouphug.util.Web;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,7 +36,7 @@ public class IsSiteUp implements TriggerListener {
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message) {
         try {
-            String result = parseHTML(Web.fetchHtmlLines(DFEOJM_URI + '/' + cleanURI(message)));
+            String result = parseHTML(Web.fetchHtmlLine(DFEOJM_URI + '/' + cleanURI(message)));
             Grouphug.getInstance().sendMessage(message + " :: " + result, false);
         } catch(ParseException ex) {
             Grouphug.getInstance().sendMessage("Sorry, I was unable to parse downforeveryoneorjustme.com.", false);
@@ -65,19 +64,11 @@ public class IsSiteUp implements TriggerListener {
     /**
      * Parses the html retrieved from downforeveryoneorjustme.com, to fetch the message returned by the site.
      *
-     * @param lines a list of strings containing the site html.
+     * @param html the site html
      * @return the message returned by the site.
      * @throws java.text.ParseException if unable to parse
      */
-    private String parseHTML(ArrayList<String> lines) throws ParseException {
-        // the original code used one large string, so instead of modifying it too much we just make that string
-        StringBuilder sb = new StringBuilder();
-        for(String line : lines) {
-            sb.append(line);
-        }
-        String html = sb.toString();
-
-
+    private String parseHTML(String html) throws ParseException {
         int msgStartIndex;
         int msgEndIndex;
 

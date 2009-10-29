@@ -46,8 +46,40 @@ public class Web {
     }
 
     /**
+     * Fetches a web page for you and returns a long string containing the full html source
+     * when the whole thing has loaded. This method has a default timeout value of 20 seconds.
+     * @param urlString the url you want to look up.
+     * @return a string containing the entire html source
+     * @throws java.io.IOException sometimes
+     */
+    public static String fetchHtmlLine(String urlString) throws IOException {
+        return fetchHtmlLine(urlString, 20000);
+    }
+
+    /**
+     * Fetches a web page for you and returns a long string containing the full html source
+     * when the whole thing has loaded.
+     * @param urlString the url you want to look up.
+     * @param timeout an int that specifies the connect timeout value in milliseconds - if this time passes,
+     * a SocketTimeoutException is raised.
+     * @return an arraylist containing each line of the web site html
+     * @throws java.io.IOException sometimes
+     */
+    public static String fetchHtmlLine(String urlString, int timeout) throws IOException {
+        BufferedReader input = prepareBufferedReader(urlString, timeout);
+
+        StringBuilder sb = new StringBuilder();
+        String htmlLine;
+        while ((htmlLine = input.readLine()) != null) {
+            sb.append(htmlLine);
+        }
+        input.close();
+        return sb.toString();
+    }
+
+    /**
      * Prepares a buffered reader for the inputstream of the specified website.
-     * This will return as soon as the connection is ready.
+     * This will return as soon as the connection is ready. Remember to close the reader!
      * @param urlString the url you want to look up.
      * @param timeout an int that specifies the connect timeout value in milliseconds - if this time passes,
      * a SocketTimeoutException is raised.
