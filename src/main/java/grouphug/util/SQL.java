@@ -147,6 +147,7 @@ public class SQL {
         }
 
         // this can be useful to measure the query sequence in an app
+        /*
         String params = "";
         if(parameters != null) {
             params += "(";
@@ -156,6 +157,7 @@ public class SQL {
             params = params.substring(0, params.length()-2) + ")";
         }
         System.out.println("sql> " + query + " " + params);
+        */
 
         if (statement.execute()) {
             // if execute() returns true, the query was a SELECT statement, so we want to retrieve the result set
