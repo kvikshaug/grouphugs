@@ -1,5 +1,6 @@
 package grouphug.util;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.util.ArrayList;
@@ -44,6 +45,10 @@ public class SQLHandler {
      * @throws ClassNotFoundException if the JDBC driver is not linked to this application
      */
     public SQLHandler(boolean verbose) throws ClassNotFoundException {
+        File db = new File("grouphugs.db");
+        if(!db.exists()) {
+            throw new ClassNotFoundException("Unable to find the database file (expected in: " + db.getAbsolutePath() + ")");
+        }
         sql = new SQL();
         this.verbose = verbose;
         setConnection();
