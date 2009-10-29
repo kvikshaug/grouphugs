@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 
 public class Insulter implements TriggerListener {
 
@@ -28,25 +29,46 @@ public class Insulter implements TriggerListener {
 
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+        String insulted = null;
+        if(!message.equals("")) {
+            insulted = message;
+        }
         String searchQ = "<td bordercolor=\"#FFFFFF\"><font face=\"Verdana\" size=\"4\"><strong><i>";
 
-        String insultSite = Web.fetchHTML("http://www.randominsults.net/");
-        if(insultSite == null) {
-            if(message.length() > 0) {
-                Grouphug.getInstance().sendMessage("Sorry, sunn's webconnection class failed on me. It wasn't my fault. Maybe it was "+message+"'s fault.", false);
-            } else {
-                Grouphug.getInstance().sendMessage("Sorry, sunn's webconnection class failed on me. It wasn't my fault.", false);
-            }
-            return;
-        }
-        int insultStart = insultSite.indexOf(searchQ) + searchQ.length();
-        int insultEnd = insultSite.indexOf('<', insultStart);
-        String insult = insultSite.substring(insultStart, insultEnd);
+        try {
+            ArrayList<String> lines = Web.fetchHtmlList("http://www.randominsults.net/");
+            for(String line : lines) {
+                int insultStart = line.indexOf(searchQ);
+                if(insultStart == -1) {
+                    continue;
+                }
+                int insultEnd = line.indexOf('<', insultStart + searchQ.length());
+                if(insultEnd == -1) {
+                    continue;
+                }
+                String insult = line.substring(insultStart + searchQ.length(), insultEnd);
 
-        if(message.length() > 0) {
-            Grouphug.getInstance().sendMessage(message+": "+insult, false);
-        } else {
-            Grouphug.getInstance().sendMessage(insult, false);
+                if(insulted != null) {
+                    Grouphug.getInstance().sendMessage(insulted+": "+insult, false);
+                } else {
+                    Grouphug.getInstance().sendMessage(insult, false);
+                }
+                return;
+            }
+            if(insulted != null) {
+                Grouphug.getInstance().sendMessage("Sorry, I was unable to parse randominsults.net because I was too " +
+                    "busy throwing up by " + insulted + "'s ghastly presence.", false);
+            } else {
+                Grouphug.getInstance().sendMessage("Sorry, I was unable to parse randominsults.net because I was too " +
+                        "busy throwing up by your ghastly presence.", false);
+            }
+        } catch(IOException ex) {
+            if(insulted != null) {
+                Grouphug.getInstance().sendMessage("Sorry, " + insulted + "'s ghastly presence made me throw up an IOException.", false);
+            } else {
+                Grouphug.getInstance().sendMessage("Sorry, your ghastly presence made me throw up an IOException.", false);
+            }
+            ex.printStackTrace();
         }
     }
 
