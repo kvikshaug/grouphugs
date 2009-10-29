@@ -28,10 +28,10 @@ public class IMDb implements TriggerListener {
         try {
             imdbURL = Web.googleSearch(message+"+site:www.imdb.com").get(0);
         } catch(ArrayIndexOutOfBoundsException ex) {
-            Grouphug.getInstance().sendMessage("Sorry, I didn't find "+message+" on IMDb.", false);
+            Grouphug.getInstance().sendMessage("Sorry, I didn't find "+message+" on IMDb.");
             return;
         } catch(IOException e) {
-            Grouphug.getInstance().sendMessage("But I don't want to. (IOException)", false);
+            Grouphug.getInstance().sendMessage("But I don't want to. (IOException)");
             return;
         }
 
@@ -105,29 +105,29 @@ public class IMDb implements TriggerListener {
             ex.printStackTrace();
             System.err.println("I was parsing the following line:");
             System.err.println(line);
-            Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.", false);
+            Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.");
             return;
         } catch(NumberFormatException ex) {
             System.err.println("Couldn't parse IMDb site!");
             ex.printStackTrace();
             System.err.println("I was parsing the following line:");
             System.err.println(line);
-            Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.", false);
+            Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.");
             return;
         } catch(MalformedURLException ex) {
             ex.printStackTrace();
-            Grouphug.getInstance().sendMessage("Wtf just happened? I caught a MalformedURLException.", false);
+            Grouphug.getInstance().sendMessage("Wtf just happened? I caught a MalformedURLException.");
             return;
         } catch(IOException ex) {
             ex.printStackTrace();
-            Grouphug.getInstance().sendMessage("Sorry, the intartubes seem to be clogged up.", false);
+            Grouphug.getInstance().sendMessage("Sorry, the intartubes seem to be clogged up.");
             return;
         }
 
         try {
-            Grouphug.getInstance().sendMessage(title+tagline+"\n"+plot+"\n"+"Comment: "+commentTitle+"\n"+score+votes+" - "+imdbURL.toString(), false);
+            Grouphug.getInstance().sendMessage(title+tagline+"\n"+plot+"\n"+"Comment: "+commentTitle+"\n"+score+votes+" - "+imdbURL.toString());
         } catch(NullPointerException ex) {
-            Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.", false);
+            Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.");
         }
     }
 }

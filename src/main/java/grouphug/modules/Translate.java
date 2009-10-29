@@ -54,7 +54,7 @@ public class Translate implements TriggerListener {
                 }
             }
         } catch(IOException ex) {
-            Grouphug.getInstance().sendMessage("Sorry, the intertubes seem to be clogged up (IOException)", false);
+            Grouphug.getInstance().sendMessage("Sorry, the intertubes seem to be clogged up (IOException)");
             ex.printStackTrace();
         }
 

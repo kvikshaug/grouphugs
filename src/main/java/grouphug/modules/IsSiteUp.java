@@ -37,11 +37,11 @@ public class IsSiteUp implements TriggerListener {
     public void onTrigger(String channel, String sender, String login, String hostname, String message) {
         try {
             String result = parseHTML(Web.fetchHtmlLine(DFEOJM_URI + '/' + cleanURI(message)));
-            Grouphug.getInstance().sendMessage(message + " :: " + result, false);
+            Grouphug.getInstance().sendMessage(message + " :: " + result);
         } catch(ParseException ex) {
-            Grouphug.getInstance().sendMessage("Sorry, I was unable to parse downforeveryoneorjustme.com.", false);
+            Grouphug.getInstance().sendMessage("Sorry, I was unable to parse downforeveryoneorjustme.com.");
         } catch (IOException ex) {
-            Grouphug.getInstance().sendMessage("Sorry, I caught an IOException in my throat.", false);
+            Grouphug.getInstance().sendMessage("Sorry, I caught an IOException in my throat.");
         }
     }
 

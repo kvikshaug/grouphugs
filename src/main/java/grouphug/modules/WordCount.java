@@ -63,7 +63,7 @@ public class WordCount implements TriggerListener, MessageListener {
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             e.printStackTrace();
-            Grouphug.getInstance().sendMessage("Sorry, unable to update WordCounter DB; an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, unable to update WordCounter DB; an SQL error occured.");
         }
     }
 
@@ -108,13 +108,13 @@ public class WordCount implements TriggerListener, MessageListener {
                 reply += "I think they are going to need a new keyboard soon.";
             else
                 reply += "Lazy bastards...";
-            Grouphug.getInstance().sendMessage(reply, false);
+            Grouphug.getInstance().sendMessage(reply);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.");
         } catch(ParseException e) {
             System.err.println("Unable to parse the SQL datetime!");
-            Grouphug.getInstance().sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.", false);
+            Grouphug.getInstance().sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
         }
     }
 
@@ -123,7 +123,7 @@ public class WordCount implements TriggerListener, MessageListener {
             Object[] row = sqlHandler.selectSingle("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick='"+ message +"';");
 
             if(row == null) {
-                Grouphug.getInstance().sendMessage(message + " doesn't have any words counted.", false);
+                Grouphug.getInstance().sendMessage(message + " doesn't have any words counted.");
             } else {
                 long words = ((Integer)row[2]);
                 long lines = ((Integer)row[3]);
@@ -132,15 +132,15 @@ public class WordCount implements TriggerListener, MessageListener {
 
                 Grouphug.getInstance().sendMessage(message + " has uttered "+words+ " words in "+lines+" lines ("+
                         (new DecimalFormat("0.0")).format(wpl)+
-                        " wpl) since "+df.format(since), false);
+                        " wpl) since "+df.format(since));
             }
 
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, unable to fetch WordCount data; an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, unable to fetch WordCount data; an SQL error occured.");
         } catch(ParseException e) {
             System.err.println("Unable to parse the SQL datetime!");
-            Grouphug.getInstance().sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.", false);
+            Grouphug.getInstance().sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
         }
     }
 }

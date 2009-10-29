@@ -40,13 +40,13 @@ public class Confession implements TriggerListener {
             }
 
             if(conf == null) {
-                Grouphug.getInstance().sendMessage(errorConfession, false);
+                Grouphug.getInstance().sendMessage(errorConfession);
             } else {
                 Grouphug.getInstance().sendMessage(conf.toString(), true);
             }
         } catch(IOException ex) {
             Grouphug.getInstance().sendMessage("Sorry, the intertubes seem to be clogged up, " +
-                    "I catched an IOException.", false);
+                    "I catched an IOException.");
             ex.printStackTrace();
         }
     }

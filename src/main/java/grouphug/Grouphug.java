@@ -150,6 +150,27 @@ public class Grouphug extends PircBot {
     /**
      * Sends a message to the main channel.
      *
+     * The message will NOT be protected against spam.
+     *
+     * The messages are splitted by maximum line number characters and by the newline character (\n), then
+     * each line is sent to the pircbot sendMessage function, which adds the lines to the outgoing message queue
+     * and sends them at the earliest possible opportunity.
+     *
+     * @param message - The message to send
+     */
+    public void sendMessage(String message) {
+        sendMessage(message, false);
+    }
+
+    /**
+     * Sends a message to the main channel.
+     *
+     * If verifySpam is true, the message will not be sent if it is longer than Grouphug.MAX_SPAM_LINES,
+     * but instead replaced with a message telling the user to use the spam trigger (@) instead.
+     *
+     * verifySpam should not be used if the output is random, because then using the spam trigger obviously
+     * won't resend the message that was too long.
+     *
      * The messages are splitted by maximum line number characters and by the newline character (\n), then
      * each line is sent to the pircbot sendMessage function, which adds the lines to the outgoing message queue
      * and sends them at the earliest possible opportunity.

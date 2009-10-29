@@ -43,24 +43,24 @@ public class Insulter implements TriggerListener {
                 String insult = line.substring(insultStart + searchQ.length(), insultEnd);
 
                 if(insulted != null) {
-                    Grouphug.getInstance().sendMessage(insulted+": "+insult, false);
+                    Grouphug.getInstance().sendMessage(insulted+": "+insult);
                 } else {
-                    Grouphug.getInstance().sendMessage(insult, false);
+                    Grouphug.getInstance().sendMessage(insult);
                 }
                 return;
             }
             if(insulted != null) {
                 Grouphug.getInstance().sendMessage("Sorry, I was unable to parse randominsults.net because I was too " +
-                    "busy throwing up by " + insulted + "'s ghastly presence.", false);
+                    "busy throwing up by " + insulted + "'s ghastly presence.");
             } else {
                 Grouphug.getInstance().sendMessage("Sorry, I was unable to parse randominsults.net because I was too " +
-                        "busy throwing up by your ghastly presence.", false);
+                        "busy throwing up by your ghastly presence.");
             }
         } catch(IOException ex) {
             if(insulted != null) {
-                Grouphug.getInstance().sendMessage("Sorry, " + insulted + "'s ghastly presence made me throw up an IOException.", false);
+                Grouphug.getInstance().sendMessage("Sorry, " + insulted + "'s ghastly presence made me throw up an IOException.");
             } else {
-                Grouphug.getInstance().sendMessage("Sorry, your ghastly presence made me throw up an IOException.", false);
+                Grouphug.getInstance().sendMessage("Sorry, your ghastly presence made me throw up an IOException.");
             }
             ex.printStackTrace();
         }

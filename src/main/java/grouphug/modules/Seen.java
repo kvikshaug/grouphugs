@@ -79,7 +79,7 @@ public class Seen implements TriggerListener, MessageListener {
 
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, unable to update Seen DB, an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, unable to update Seen DB, an SQL error occured.");
         }
 
     }
@@ -91,17 +91,17 @@ public class Seen implements TriggerListener, MessageListener {
             Object[] row = sqlHandler.selectSingle("SELECT id, nick, date, lastwords FROM "+SEEN_DB+" WHERE nick='?';", params);
 
             if(row == null) {
-                Grouphug.getInstance().sendMessage(message + " hasn't said anything yet.", false);
+                Grouphug.getInstance().sendMessage(message + " hasn't said anything yet.");
             } else {
                 Date last = SQL.sqlDateTimeToDate((String)row[2]);
                 String lastwords = (String)row[3];
 
-                Grouphug.getInstance().sendMessage(message + " uttered \""+ lastwords+ "\" on " +last, false);
+                Grouphug.getInstance().sendMessage(message + " uttered \""+ lastwords+ "\" on " +last);
             }
 
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, unable to look up the requested data; an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, unable to look up the requested data; an SQL error occured.");
         } catch (ParseException e) {
             System.err.println(" > Unable to parse the SQL date! This was very unexpected.");
             e.printStackTrace();

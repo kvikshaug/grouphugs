@@ -43,7 +43,7 @@ public class URLCatcher implements MessageListener {
                         title = title.substring(0, TITLE_MAX_LENGTH - 6); // minus the 6 ' (...)'-chars
                         title = title.concat(" (...)");
                     }
-                    Grouphug.getInstance().sendMessage("Title: " + Web.entitiesToChars(title.trim()), false);
+                    Grouphug.getInstance().sendMessage("Title: " + Web.entitiesToChars(title.trim()));
                 }
             }
         } catch(IOException ex) {
@@ -52,7 +52,7 @@ public class URLCatcher implements MessageListener {
             ex.printStackTrace();
             // Maybe it's not a good idea to talk when an error occurs; people may very well paste
             // invalid lines and we wouldn't want gh to complain every time that happens now would we?
-            //Grouphug.getInstance().sendMessage("Sorry, couldn't fetch the title for you, I caught an IOException.", false);
+            //Grouphug.getInstance().sendMessage("Sorry, couldn't fetch the title for you, I caught an IOException.");
         }
     }
 

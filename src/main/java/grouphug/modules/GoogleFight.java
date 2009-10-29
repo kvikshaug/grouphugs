@@ -24,7 +24,7 @@ public class GoogleFight implements TriggerListener {
     public void onTrigger(String channel, String sender, String login, String hostname, String message) {
 
         if(!message.contains(TRIGGER_VS)) {
-            Grouphug.getInstance().sendMessage(sender+", try "+Grouphug.MAIN_TRIGGER+Grouphug.HELP_TRIGGER+" "+TRIGGER_HELP, false);
+            Grouphug.getInstance().sendMessage(sender+", try "+Grouphug.MAIN_TRIGGER+Grouphug.HELP_TRIGGER+" "+TRIGGER_HELP);
             return;
         }
 
@@ -40,10 +40,10 @@ public class GoogleFight implements TriggerListener {
             if(hits2 == null)
                 hits2 = "no";
 
-            Grouphug.getInstance().sendMessage(query1+": "+hits1+" results\n"+query2+": "+hits2+" results", false);
+            Grouphug.getInstance().sendMessage(query1+": "+hits1+" results\n"+query2+": "+hits2+" results");
 
         } catch(IOException e) {
-            Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)", false);
+            Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)");
             System.err.println(e.getMessage()+"\n"+e.getCause());
         }
     }

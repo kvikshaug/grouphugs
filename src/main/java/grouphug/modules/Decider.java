@@ -22,6 +22,6 @@ public class Decider implements TriggerListener {
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message) {
         String[] choices = message.split(" ");
-        Grouphug.getInstance().sendMessage("The roll of the dice picks: "+choices[random.nextInt(choices.length)], false);
+        Grouphug.getInstance().sendMessage("The roll of the dice picks: "+choices[random.nextInt(choices.length)]);
     }
 }

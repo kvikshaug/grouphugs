@@ -48,24 +48,24 @@ public class Google implements TriggerListener {
             }
 
             if(urls.size() == 0) {
-                Grouphug.getInstance().sendMessage("No results for " + query + ".", false);
+                Grouphug.getInstance().sendMessage("No results for " + query + ".");
             }
 
             for(int i=1; i<=resultCount; i++) {
-                Grouphug.getInstance().sendMessage(urls.get(i-1).toString(), false);
+                Grouphug.getInstance().sendMessage(urls.get(i-1).toString());
                 if(urls.size() == i && resultCount > i) {
                     if(i == 1) {
-                        Grouphug.getInstance().sendMessage("This was the only result.", false);
+                        Grouphug.getInstance().sendMessage("This was the only result.");
                     } else if(i == 10) {
-                        Grouphug.getInstance().sendMessage("Google only provides 10 results per page.", false);
+                        Grouphug.getInstance().sendMessage("Google only provides 10 results per page.");
                     } else {
-                        Grouphug.getInstance().sendMessage("There were only these " + i + " results.", false);
+                        Grouphug.getInstance().sendMessage("There were only these " + i + " results.");
                     }
                     return;
                 }
             }
         } catch(IOException ex) {
-            Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)", false);
+            Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)");
             ex.printStackTrace();
         }
     }
