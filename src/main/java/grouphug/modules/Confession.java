@@ -84,7 +84,7 @@ public class Confession implements TriggerListener {
 
         String confession = "";
         System.out.println("Confession: Opening '"+urlString+"'...");
-        ArrayList<String> lines = Web.fetchHtmlList(urlString);
+        ArrayList<String> lines = Web.fetchHtmlLines(urlString);
 
         // we dig from the BOTTOM and up, searching for the first confession we find
         int line = 0;

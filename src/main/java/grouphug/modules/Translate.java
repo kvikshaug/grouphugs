@@ -43,7 +43,7 @@ public class Translate implements TriggerListener {
         message = message.trim();
 
         try {
-            ArrayList<String> lines = Web.fetchHtmlList("http://translate.google.com/translate_t?hl=no&text=" + message +
+            ArrayList<String> lines = Web.fetchHtmlLines("http://translate.google.com/translate_t?hl=no&text=" + message +
                     "&file=&sl=" + fromLanguage + "&tl=" + toLanguage + "&history_state0=#");
             for(String line : lines) {
                 if(line.contains("<div id=result_box dir=\"ltr\">")) {

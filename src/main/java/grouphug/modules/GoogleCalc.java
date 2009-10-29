@@ -21,7 +21,7 @@ public class GoogleCalc implements TriggerListener {
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message) {
         try {
-            ArrayList<String> lines = Web.fetchHtmlList("http://www.google.no/search?q=" + message.replace(" ", "+"));
+            ArrayList<String> lines = Web.fetchHtmlLines("http://www.google.no/search?q=" + message.replace(" ", "+"));
             String reply = null;
             for(String line : lines) {
                 if(line.contains("<h2 class=r style=\"font-size:138%\"><b>")) {

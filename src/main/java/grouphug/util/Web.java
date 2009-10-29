@@ -3,10 +3,8 @@ package grouphug.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 /**
@@ -22,8 +20,8 @@ public class Web {
      * @return an arraylist containing each line of the web site html
      * @throws java.io.IOException sometimes
      */
-    public static ArrayList<String> fetchHtmlList(String urlString) throws IOException {
-        return fetchHtmlList(urlString, 20000);
+    public static ArrayList<String> fetchHtmlLines(String urlString) throws IOException {
+        return fetchHtmlLines(urlString, 20000);
     }
 
     /**
@@ -35,7 +33,7 @@ public class Web {
      * @return an arraylist containing each line of the web site html
      * @throws java.io.IOException sometimes
      */
-    public static ArrayList<String> fetchHtmlList(String urlString, int timeout) throws IOException {
+    public static ArrayList<String> fetchHtmlLines(String urlString, int timeout) throws IOException {
         BufferedReader input = prepareBufferedReader(urlString, timeout);
 
         ArrayList<String> lines = new ArrayList<String>();
@@ -69,55 +67,6 @@ public class Web {
         return new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
     }
 
-
-    /**
-     * Tries to fetch a HTML page from a URL.
-     * @param url the url we want to look up.
-     * @return the HTML of the page located at url stored in a String. null if something unexpected happens, like having
-     *         to catch a IOException or a MalformedURLException.
-     */
-    public static String fetchHTML(String url)
-    {
-        URL realURL;
-        try
-        {
-            realURL = new URL(url);
-        }
-        catch (MalformedURLException mURLe)
-        {
-            System.err.println("The URL passed to fetchHTML was not well-formed: " + mURLe);
-            mURLe.printStackTrace(System.err);
-
-            return null;
-        }
-
-        StringBuilder html = new StringBuilder();
-        BufferedReader input = null;
-        try
-        {
-            input = new BufferedReader(new InputStreamReader(realURL.openStream()));
-
-            String htmlLine;
-            while ((htmlLine = input.readLine()) != null) {
-                html.append(htmlLine);
-            }
-        }
-        catch (UnknownHostException uhe)
-        {
-            //System.err.println("No site found at:" + url);
-            return null; // fail silently
-        }
-        catch (IOException ioe)
-        {
-            //ioe.printStackTrace(System.err); //TODO proper IOException handling
-            return null; // fail silently
-        }
-        finally {
-            try { if(input != null) input.close(); } catch (IOException ioeIsIgnored) { /*IDEA code inspection nags*/ }
-        }
-
-        return html.toString();
-    }
 
     /**
      * Find all URIs with a specific URI scheme in a String

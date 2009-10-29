@@ -67,7 +67,7 @@ public class URLCatcher implements MessageListener {
     private String getHTMLTitle(String url) throws IOException {
         // the original code used one large string, so instead of modifying it too much we just make that string
         StringBuilder sb = new StringBuilder();
-        for(String line : Web.fetchHtmlList(url)) {
+        for(String line : Web.fetchHtmlLines(url)) {
             sb.append(line);
         }
         String html = sb.toString();

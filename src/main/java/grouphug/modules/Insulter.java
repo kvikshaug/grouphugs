@@ -36,7 +36,7 @@ public class Insulter implements TriggerListener {
         String searchQ = "<td bordercolor=\"#FFFFFF\"><font face=\"Verdana\" size=\"4\"><strong><i>";
 
         try {
-            ArrayList<String> lines = Web.fetchHtmlList("http://www.randominsults.net/");
+            ArrayList<String> lines = Web.fetchHtmlLines("http://www.randominsults.net/");
             for(String line : lines) {
                 int insultStart = line.indexOf(searchQ);
                 if(insultStart == -1) {
