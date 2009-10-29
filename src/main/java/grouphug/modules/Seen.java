@@ -2,6 +2,7 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.ModuleHandler;
+import grouphug.exceptions.SQLUnavailableException;
 import grouphug.listeners.MessageListener;
 import grouphug.listeners.TriggerListener;
 import grouphug.util.SQL;
@@ -28,7 +29,7 @@ public class Seen implements TriggerListener, MessageListener {
             moduleHandler.registerHelp(TRIGGER_HELP, "Seen: When someone last said something in this channel\n" +
                     "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<nick>\n");
             System.out.println("Seen module loaded.");
-        } catch(ClassNotFoundException ex) {
+        } catch(SQLUnavailableException ex) {
             System.err.println("Seen module startup error: SQL is unavailable!");
         }
     }

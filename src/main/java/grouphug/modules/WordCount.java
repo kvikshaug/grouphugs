@@ -2,6 +2,7 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.ModuleHandler;
+import grouphug.exceptions.SQLUnavailableException;
 import grouphug.listeners.MessageListener;
 import grouphug.listeners.TriggerListener;
 import grouphug.util.SQL;
@@ -37,8 +38,8 @@ public class WordCount implements TriggerListener, MessageListener {
                     "To check how many words someone has said, use " +Grouphug.MAIN_TRIGGER + TRIGGER + " <nick>\n" +
                     "Top 5: " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP + "\n" +
                     "Bottom 5: " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM);
-        } catch(ClassNotFoundException ex) {
-            System.err.println("WordCount startup error: SQL unavailable!");
+        } catch(SQLUnavailableException ex) {
+            System.err.println("WordCount startup error: SQL is unavailable!");
         }
     }
     public void addWords(String sender, String message) {

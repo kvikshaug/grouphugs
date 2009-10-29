@@ -2,6 +2,7 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.ModuleHandler;
+import grouphug.exceptions.SQLUnavailableException;
 import grouphug.listeners.TriggerListener;
 import grouphug.util.SQLHandler;
 
@@ -55,12 +56,12 @@ public class Bofh implements TriggerListener {
                     Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " returns a random excuse.\n" +
                     Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " " + SPECIFIC_TRIGGER + " returns an excuse by number. (\\d+ means any digit, 1-n times)");
             System.out.println("BOFH module loaded.");
+        } catch (SQLUnavailableException ex) {
+            System.err.println("BOFH failed to start: SQL is unavailable!");
         } catch (SQLException se) {
             System.err.println("BOFH failed to start: SQL exception while fetching initial excuses!\n" +
                     "SQL said: " + se);
             se.printStackTrace();
-        } catch (ClassNotFoundException ex) {
-            System.err.println("BOFH failed to start: SQL is unavailable (class not loaded)!");
         }
     }
 

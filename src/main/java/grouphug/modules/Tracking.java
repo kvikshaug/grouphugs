@@ -2,6 +2,7 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.ModuleHandler;
+import grouphug.exceptions.SQLUnavailableException;
 import grouphug.listeners.TriggerListener;
 import grouphug.util.SQLHandler;
 
@@ -51,8 +52,8 @@ public class Tracking implements TriggerListener, Runnable {
                     "Adding a package that's already added will force an update on its status.");
             new Thread(this).start();
             System.out.println("Package tracking module loaded.");
-        } catch(ClassNotFoundException ex) {
-            System.err.println("Package tracking module unable to load because the SQL driver is unavailable.");
+        } catch(SQLUnavailableException ex) {
+            System.err.println("Package tracking module unable to load because SQL is unavailable.");
         } catch (SQLException e) {
             System.err.println("Package tracking module unable to load because it was unable to load " +
                     "existing package list from SQL!");

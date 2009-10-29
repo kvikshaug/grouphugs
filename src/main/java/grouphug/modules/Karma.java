@@ -2,6 +2,7 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.ModuleHandler;
+import grouphug.exceptions.SQLUnavailableException;
 import grouphug.listeners.MessageListener;
 import grouphug.listeners.TriggerListener;
 import grouphug.util.SQLHandler;
@@ -36,8 +37,8 @@ public class Karma implements TriggerListener, MessageListener {
                     "  " + Grouphug.MAIN_TRIGGER + " " + TRIGGER_TOP+"\n" +
                     "  " + Grouphug.MAIN_TRIGGER + " " + TRIGGER_BOTTOM+"\n" +
                     "  " + Grouphug.MAIN_TRIGGER + " " + TRIGGER_RESET + " <object>" + " if resetting is enabled");
-        } catch(ClassNotFoundException ex) {
-            System.err.println("Karma startup error: SQL unavailable!");
+        } catch(SQLUnavailableException ex) {
+            System.err.println("Karma startup error: SQL is unavailable!");
         }
     }
 
