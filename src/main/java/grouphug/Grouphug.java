@@ -4,7 +4,8 @@ import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
 import org.jibble.pircbot.PircBot;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 /**
@@ -54,9 +55,6 @@ public class Grouphug extends PircBot {
 
     // How often to try to reconnect to the server when disconnected, in ms
     private static final int RECONNECT_TIME = 15000;
-
-    // The file to log all messages to
-    private static File logfile = new File("log-current");
 
     // Used to specify if it is ok to spam a large message to the channel
     private static boolean spamOK = false;
@@ -213,22 +211,6 @@ public class Grouphug extends PircBot {
      * @throws UnsupportedEncodingException very rarely since the encoding is almost never changed
      */
     public static void main(String[] args) throws UnsupportedEncodingException {
-
-        // Redirect standard output to logfile
-        try {
-            System.out.println("Standard input will be redirected the following logfile:");
-            System.out.println("'"+logfile.getAbsolutePath()+"'.");
-            if(!logfile.createNewFile()) {
-                System.out.println("Note: The logfile already exists, any existing data will be overwritten.");
-            }
-            PrintStream stdOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(logfile)));
-            System.setOut(stdOut);
-            System.setErr(stdOut);
-        } catch(IOException e) {
-            System.err.println("WARNING: Unable to load or create logfile \""+logfile.toString()+"\" in default dir.\n" +
-                    "Reported problem: " + e + "\n" +
-                    "I will continue WITHOUT a logfile, and let stdout/stderr go straight to console.\n");
-        }
 
         // Load up the bot, enable debugging output, and specify encoding
         Grouphug.bot = new Grouphug();
