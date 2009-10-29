@@ -3,20 +3,16 @@ package grouphug.modules;
 import grouphug.Grouphug;
 import grouphug.ModuleHandler;
 import grouphug.listeners.TriggerListener;
+import grouphug.util.Web;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 
 public class GoogleFight implements TriggerListener {
 
     private static final String TRIGGER = "gf";
     private static final String TRIGGER_HELP = "googlefight";
     private static final String TRIGGER_VS = " <vs> ";
-    private static final int CONN_TIMEOUT = 10000; // ms
 
     public GoogleFight(ModuleHandler moduleHandler) {
         moduleHandler.addTriggerListener(TRIGGER, this);
@@ -54,21 +50,7 @@ public class GoogleFight implements TriggerListener {
 
     // TODO uhm, review this whole file, it was done in a hurry just to see if it'd work
     public String search(String query) throws IOException {
-
-        query = query.replace(' ', '+');
-
-        URLConnection urlConn;
-        try {
-            urlConn = new URL("http", "www.google.com", "/search?q="+query+"").openConnection();
-        } catch(MalformedURLException ex) {
-            System.err.println("Google search error: MalformedURLException in partially dynamic URL in search()!");
-            return null;
-        }
-
-        urlConn.setConnectTimeout(CONN_TIMEOUT);
-        urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Trick google into thinking we're a proper browser. ;)
-
-        BufferedReader google = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
+        BufferedReader google = Web.prepareBufferedReader("http://www.google.com/search?q="+query.replace(' ', '+'));
 
         String line;
         String search = "</b> of about <b>";

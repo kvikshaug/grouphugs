@@ -34,7 +34,7 @@ import java.util.ArrayList;
 public class Grouphug extends PircBot {
 
     // Channel and server
-    public static final String CHANNEL = "#grouphugs";
+    public static final String CHANNEL = "#grouphugers";
     public static final String SERVER = "irc.efnet.ru";
 
     // The trigger characters (as Strings since startsWith takes String)
@@ -223,7 +223,7 @@ public class Grouphug extends PircBot {
         new Thread(new LogFlusher()).start();
 
         // Save the nicks we want, in prioritized order
-        nicks.add("gh");
+        nicks.add("gh2");
         nicks.add("gh`");
         nicks.add("hugger");
         nicks.add("klemZ");

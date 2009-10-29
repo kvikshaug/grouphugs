@@ -5,12 +5,10 @@ import grouphug.ModuleHandler;
 import grouphug.exceptions.SQLUnavailableException;
 import grouphug.listeners.TriggerListener;
 import grouphug.util.SQLHandler;
+import grouphug.util.Web;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Vector;
@@ -290,13 +288,7 @@ public class Tracking implements TriggerListener, Runnable {
          * @throws java.sql.SQLException if SQL fails
          */
         public int update() throws IOException, SQLException {
-            URLConnection urlConn;
-            urlConn = new URL("http", "sporing.posten.no", "/Sporing/KMSporingInternett.aspx?ShipmentNumber="+trackingNumber).openConnection();
-
-            urlConn.setConnectTimeout(10000);
-            urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Trick google into thinking we're a proper browser. ;)
-
-            BufferedReader posten = new BufferedReader(new InputStreamReader(urlConn.getInputStream(), "UTF-8"));
+            BufferedReader posten = Web.prepareBufferedReader("http://sporing.posten.no/Sporing/KMSporingInternett.aspx?ShipmentNumber="+trackingNumber);
 
             // phear teh ugly hax <3
             String curLine;

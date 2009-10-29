@@ -78,6 +78,18 @@ public class Web {
     }
 
     /**
+     * Prepares a buffered reader for the inputstream of the specified website with a default
+     * timeout value of 20 seconds.
+     * This will return as soon as the connection is ready. Remember to close the reader!
+     * @param urlString the url you want to look up.
+     * @return the buffered reader for reading the input stream from the specified website
+     * @throws java.io.IOException sometimes
+     */
+    public static BufferedReader prepareBufferedReader(String urlString) throws IOException {
+        return prepareBufferedReader(urlString, 20000);
+    }
+
+    /**
      * Prepares a buffered reader for the inputstream of the specified website.
      * This will return as soon as the connection is ready. Remember to close the reader!
      * @param urlString the url you want to look up.
@@ -94,9 +106,30 @@ public class Web {
         URLConnection urlConn = url.openConnection();
 
         urlConn.setConnectTimeout(timeout);
+        // test Opera/9.80 (X11; Linux i686; U; en) Presto/2.2.15 Version/10.01
         urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Pretend we're a proper browser :)
 
-        return new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
+        // TODO encoding should be specified dependent on what the site says it is! but we just assume utf-8 :)
+        return new BufferedReader(new InputStreamReader(urlConn.getInputStream(), "UTF-8"));
+    }
+
+    /**
+     * Perform a search on google
+     * @param query the query to search for
+     * @return a list over all URLs google provided
+     * @throws IOException if I/O fails
+     */
+    public static ArrayList<URL> googleSearch(String query) throws IOException {
+        String googleHtml = fetchHtmlLine("http://www.google.com/search?q="+query.replace(' ', '+'));
+
+        String parseSearch = "<h3 class=r><a href=\"";
+        int searchIndex = 0;
+
+        ArrayList<URL> urls = new ArrayList<URL>();
+        while((searchIndex = googleHtml.indexOf(parseSearch, searchIndex+1)) != -1) {
+            urls.add(new URL(googleHtml.substring(searchIndex + parseSearch.length(), googleHtml.indexOf('"', searchIndex + parseSearch.length()))));
+        }
+        return urls;
     }
 
 

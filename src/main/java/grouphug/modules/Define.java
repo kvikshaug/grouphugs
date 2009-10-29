@@ -7,16 +7,11 @@ import grouphug.util.Web;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 
 public class Define implements TriggerListener {
 
     private static final String TRIGGER = "define";
     private static final String TRIGGER_HELP = "define";
-    private static final int CONN_TIMEOUT = 10000; // ms
 
     public Define(ModuleHandler moduleHandler) {
         moduleHandler.addTriggerListener(TRIGGER, this);
@@ -43,24 +38,7 @@ public class Define implements TriggerListener {
     }
 
     public static String search(String query) throws IOException {
-
-        query = query.replace(' ', '+');
-        System.out.print("Opening google connection... ");
-
-        URLConnection urlConn;
-        try {
-            urlConn = new URL("http", "www.google.com", "/search?q=define:"+query+"").openConnection();
-        } catch(MalformedURLException ex) {
-            System.err.println("Define search error: MalformedURLException in partially dynamic URL in search()!");
-            return null;
-        }
-
-        urlConn.setConnectTimeout(CONN_TIMEOUT);
-        urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Trick google into thinking we're a proper browser. ;)
-
-        BufferedReader google = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
-
-        System.out.println("OK");
+        BufferedReader google = Web.prepareBufferedReader("http://www.google.com/search?q=define:"+query.replace(' ', '+'));
 
         // Search for some hardcoded stuff to try to parse a definition. this is fugly
         String line;

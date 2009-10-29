@@ -7,10 +7,8 @@ import grouphug.util.Web;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 
 public class IMDb implements TriggerListener {
 
@@ -28,13 +26,12 @@ public class IMDb implements TriggerListener {
     public void onTrigger(String channel, String sender, String login, String hostname, String message) {
         URL imdbURL;
         try {
-            imdbURL = Google.search(message+"+site:www.imdb.com");
+            imdbURL = Web.googleSearch(message+"+site:www.imdb.com").get(0);
+        } catch(ArrayIndexOutOfBoundsException ex) {
+            Grouphug.getInstance().sendMessage("Sorry, I didn't find "+message+" on IMDb.", false);
+            return;
         } catch(IOException e) {
             Grouphug.getInstance().sendMessage("But I don't want to. (IOException)", false);
-            return;
-        }
-        if(imdbURL == null) {
-            Grouphug.getInstance().sendMessage("Sorry, I didn't find "+message+" on IMDb.", false);
             return;
         }
 
@@ -45,14 +42,10 @@ public class IMDb implements TriggerListener {
         String plot = "";
         String commentTitle = "";
 
-        URLConnection urlConn;
         String line = "(uninitialized)";
 
         try {
-            urlConn = imdbURL.openConnection();
-            urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Trick google into thinking we're a proper browser. ;)
-
-            BufferedReader imdb = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
+            BufferedReader imdb = Web.prepareBufferedReader(imdbURL.toString());
 
             String titleString = "<title>";
             String scoreString = "<div class=\"meta\">";

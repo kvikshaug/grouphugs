@@ -52,8 +52,8 @@ public class ModuleHandler {
         new WordCount(this);
 
         System.out.println();
-        System.out.println(helpers.size() + " help responses loaded");
-        System.out.println(triggerListeners.size() + " modules are listening for triggers");
+        System.out.println(helpers.size() + " help responses registered");
+        System.out.println(triggerListeners.size() + " triggers registered");
         System.out.println(messageListeners.size() + " modules are listening for anything");
     }
 
