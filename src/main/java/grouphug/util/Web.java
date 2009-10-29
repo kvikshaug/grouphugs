@@ -106,8 +106,8 @@ public class Web {
         URLConnection urlConn = url.openConnection();
 
         urlConn.setConnectTimeout(timeout);
-        // test Opera/9.80 (X11; Linux i686; U; en) Presto/2.2.15 Version/10.01
-        urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Pretend we're a proper browser :)
+        // Pretend we're using a proper browser and OS :)
+        urlConn.setRequestProperty("User-Agent", "Opera/9.80 (X11; Linux i686; U; en) Presto/2.2.15 Version/10.01");
 
         // TODO encoding should be specified dependent on what the site says it is! but we just assume utf-8 :)
         return new BufferedReader(new InputStreamReader(urlConn.getInputStream(), "UTF-8"));
