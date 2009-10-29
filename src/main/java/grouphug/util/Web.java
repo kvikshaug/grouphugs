@@ -10,13 +10,10 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 /**
- * Utilities for interacting with web pages etc.
- *
- * Feel free to add useful methods here.
- *
+ * Web contains useful methods often performed by modules, like fetching the contents of a website,
+ * performing a search on Google and anything else that might be handy to have here.
  */
-public class Web
-{
+public class Web {
 
     /**
      * Fetches a web page for you and returns a nicely formatted arraylist when the whole
@@ -39,6 +36,27 @@ public class Web
      * @throws java.io.IOException sometimes
      */
     public static ArrayList<String> fetchHtmlList(String urlString, int timeout) throws IOException {
+        BufferedReader input = prepareBufferedReader(urlString, timeout);
+
+        ArrayList<String> lines = new ArrayList<String>();
+        String htmlLine;
+        while ((htmlLine = input.readLine()) != null) {
+            lines.add(htmlLine);
+        }
+        input.close();
+        return lines;
+    }
+
+    /**
+     * Prepares a buffered reader for the inputstream of the specified website.
+     * This will return as soon as the connection is ready.
+     * @param urlString the url you want to look up.
+     * @param timeout an int that specifies the connect timeout value in milliseconds - if this time passes,
+     * a SocketTimeoutException is raised.
+     * @return the buffered reader for reading the input stream from the specified website
+     * @throws java.io.IOException sometimes
+     */
+    public static BufferedReader prepareBufferedReader(String urlString, int timeout) throws IOException {
         urlString = urlString.replace(" ", "%20");
 
         URL url = new URL(urlString);
@@ -48,15 +66,7 @@ public class Web
         urlConn.setConnectTimeout(timeout);
         urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Pretend we're a proper browser :)
 
-        BufferedReader input = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
-
-        ArrayList<String> lines = new ArrayList<String>();
-        String htmlLine;
-        while ((htmlLine = input.readLine()) != null) {
-            lines.add(htmlLine);
-        }
-        input.close();
-        return lines;
+        return new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
     }
 
 
@@ -116,13 +126,11 @@ public class Web
      * @param string the String to look for URIs in.
      * @return An ArrayList containing any URIs found.
      */
-    public static ArrayList<String> findURIs(String uriScheme, String string)
-    {
+    public static ArrayList<String> findURIs(String uriScheme, String string) {
         ArrayList<String> uris = new ArrayList<String>();
 
         int index = 0;
-        do
-        {
+        do {
             index = string.indexOf(uriScheme, index); // find the start index of a URL
 
             if (index == -1) // if indexOf returned -1, we didn't find any urls
@@ -135,8 +143,7 @@ public class Web
             uris.add(string.substring(index, endIndex));
 
             index = endIndex; // start at the end of the URL we just added
-        }
-        while (true);
+        } while (true);
 
         return uris;
     }
