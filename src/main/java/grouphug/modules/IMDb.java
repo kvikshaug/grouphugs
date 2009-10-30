@@ -27,7 +27,7 @@ public class IMDb implements TriggerListener {
         URL imdbURL;
         try {
             imdbURL = Web.googleSearch(message+"+site:www.imdb.com").get(0);
-        } catch(ArrayIndexOutOfBoundsException ex) {
+        } catch(IndexOutOfBoundsException ex) {
             Grouphug.getInstance().sendMessage("Sorry, I didn't find "+message+" on IMDb.");
             return;
         } catch(IOException e) {

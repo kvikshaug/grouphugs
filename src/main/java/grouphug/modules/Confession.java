@@ -70,7 +70,7 @@ public class Confession implements TriggerListener {
         try {
             URL confessionURL = Web.googleSearch(query+"+site:grouphug.us/confessions/").get(0);
             return getConfession(confessionURL.toString());
-        } catch(ArrayIndexOutOfBoundsException ex) {
+        } catch(IndexOutOfBoundsException ex) {
             return new ConfessionItem("No one has confessed about their "+query+" problem yet.");
         }
     }
