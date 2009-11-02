@@ -18,7 +18,7 @@ public class Translate implements TriggerListener {
         moduleHandler.registerHelp("translate", "Uses Google Translate to translate a string. Usage:\n" +
                     "!translate <string>\n" +
                     "!translate f=<from_lang> t=<to_lang> <string>\n" +
-                    "Norwegian to english is default. Languages has to be specified by their 2-letter code (en, no, etc.); check translate.google.com for these.");
+                    "Norwegian to english is default. Languages has to be specified by their 2-letter code (en, no, etc.); check http://translate.google.com for these.");
         System.out.println("Translate module loaded.");
     }
 
