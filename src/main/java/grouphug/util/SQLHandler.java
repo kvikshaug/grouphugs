@@ -1,5 +1,8 @@
 package grouphug.util;
 
+import grouphug.exceptions.SQLUnavailableException;
+
+import java.io.File;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.util.ArrayList;
@@ -25,8 +28,23 @@ import java.util.ArrayList;
  */
 public class SQLHandler {
 
-    public static SQLHandler getSQLHandler() throws ClassNotFoundException {
-        return sqlHandler == null ? sqlHandler = new SQLHandler(true) : sqlHandler;
+    private static SQLUnavailableException sqlUnavailableException = null;
+
+    public static SQLHandler getSQLHandler() throws SQLUnavailableException {
+        if(sqlUnavailableException != null) {
+            throw sqlUnavailableException;
+        }
+        try {
+            return sqlHandler == null ? sqlHandler = new SQLHandler(true) : sqlHandler;
+        } catch(SQLUnavailableException ex) {
+            // we catch it the first time, so that we're able to display an error message this one time
+            System.err.println("Couldn't load SQL!");
+            System.err.println(ex.getMessage());
+            System.err.println("Modules requiring SQL will be disabled.");
+            System.err.println();
+            sqlUnavailableException = ex;
+            throw ex;
+        }
     }
 
     private static SQLHandler sqlHandler;
@@ -41,12 +59,20 @@ public class SQLHandler {
      * Constructs a new SQLHandler object
      * @param verbose if true, this class will output information about its actions, and (mostly) error handling,
      * to System.err.
-     * @throws ClassNotFoundException if the JDBC driver is not linked to this application
+     * @throws SQLUnavailableException if SQL is unavailable
      */
-    public SQLHandler(boolean verbose) throws ClassNotFoundException {
-        sql = new SQL();
-        this.verbose = verbose;
-        setConnection();
+    public SQLHandler(boolean verbose) throws SQLUnavailableException {
+        try {
+            File db = new File("grouphugs.db");
+            if(!db.exists()) {
+                throw new SQLUnavailableException("Unable to find the database file (expected in: " + db.getAbsolutePath() + ")");
+            }
+            sql = new SQL();
+            this.verbose = verbose;
+            setConnection();
+        } catch (ClassNotFoundException e) {
+            throw new SQLUnavailableException("Unable to load the SQL JDBC driver.");
+        }
     }
 
     /**

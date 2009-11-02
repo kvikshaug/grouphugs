@@ -2,6 +2,7 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.ModuleHandler;
+import grouphug.exceptions.SQLUnavailableException;
 import grouphug.listeners.MessageListener;
 import grouphug.listeners.TriggerListener;
 import grouphug.util.SQLHandler;
@@ -36,8 +37,8 @@ public class Karma implements TriggerListener, MessageListener {
                     "  " + Grouphug.MAIN_TRIGGER + " " + TRIGGER_TOP+"\n" +
                     "  " + Grouphug.MAIN_TRIGGER + " " + TRIGGER_BOTTOM+"\n" +
                     "  " + Grouphug.MAIN_TRIGGER + " " + TRIGGER_RESET + " <object>" + " if resetting is enabled");
-        } catch(ClassNotFoundException ex) {
-            System.err.println("Karma startup error: SQL unavailable!");
+        } catch(SQLUnavailableException ex) {
+            System.err.println("Karma startup error: SQL is unavailable!");
         }
     }
 
@@ -86,18 +87,19 @@ public class Karma implements TriggerListener, MessageListener {
             ki = find(sqlName);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage(name+" has probably bad karma, because an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage(name+" has probably bad karma, because an SQL error occured.");
             return;
         }
-        if(ki == null)
-            Grouphug.getInstance().sendMessage(name+" has neutral karma.", false);
-        else
-            Grouphug.getInstance().sendMessage(ki.getName()+" has "+ki.getKarma()+" karma.", false);
+        if(ki == null) {
+            Grouphug.getInstance().sendMessage(name+" has neutral karma.");
+        } else {
+            Grouphug.getInstance().sendMessage(ki.getName()+" has "+ki.getKarma()+" karma.");
+        }
     }
 
     private void add(String sender, String name, int karma) {
         if(name.equals(sender)) {
-            Grouphug.getInstance().sendMessage(sender+", self karma is bad karma.", false);
+            Grouphug.getInstance().sendMessage(sender+", self karma is bad karma.");
             return;
         }
 
@@ -120,7 +122,7 @@ public class Karma implements TriggerListener, MessageListener {
             }
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, unable to change karma value; an SQL error occurred.", false);
+            Grouphug.getInstance().sendMessage("Sorry, unable to change karma value; an SQL error occurred.");
         }
     }
 
@@ -161,10 +163,10 @@ public class Karma implements TriggerListener, MessageListener {
             } else {
                 reply += "May they burn forever in the pits of "+ Grouphug.CHANNEL+".";
             }
-            Grouphug.getInstance().sendMessage(reply, false);
+            Grouphug.getInstance().sendMessage(reply);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, unable to gather karma records; an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, unable to gather karma records; an SQL error occured.");
         }
     }
 

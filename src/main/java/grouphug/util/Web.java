@@ -3,20 +3,15 @@ package grouphug.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 /**
- * Utilities for interacting with web pages etc.
- *
- * Feel free to add useful methods here.
- *
+ * Web contains useful methods often performed by modules, like fetching the contents of a website,
+ * performing a search on Google and anything else that might be handy to have here.
  */
-public class Web
-{
+public class Web {
 
     /**
      * Fetches a web page for you and returns a nicely formatted arraylist when the whole
@@ -25,8 +20,8 @@ public class Web
      * @return an arraylist containing each line of the web site html
      * @throws java.io.IOException sometimes
      */
-    public static ArrayList<String> fetchHtmlList(String urlString) throws IOException {
-        return fetchHtmlList(urlString, 20000);
+    public static ArrayList<String> fetchHtmlLines(String urlString) throws IOException {
+        return fetchHtmlLines(urlString, 20000);
     }
 
     /**
@@ -38,17 +33,8 @@ public class Web
      * @return an arraylist containing each line of the web site html
      * @throws java.io.IOException sometimes
      */
-    public static ArrayList<String> fetchHtmlList(String urlString, int timeout) throws IOException {
-        urlString = urlString.replace(" ", "%20");
-
-        URL url = new URL(urlString);
-        System.out.println("Web util opening: '" + urlString + "'...");
-        URLConnection urlConn = url.openConnection();
-
-        urlConn.setConnectTimeout(timeout);
-        urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Pretend we're a proper browser :)
-
-        BufferedReader input = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
+    public static ArrayList<String> fetchHtmlLines(String urlString, int timeout) throws IOException {
+        BufferedReader input = prepareBufferedReader(urlString, timeout);
 
         ArrayList<String> lines = new ArrayList<String>();
         String htmlLine;
@@ -59,55 +45,93 @@ public class Web
         return lines;
     }
 
+    /**
+     * Fetches a web page for you and returns a long string containing the full html source
+     * when the whole thing has loaded. This method has a default timeout value of 20 seconds.
+     * @param urlString the url you want to look up.
+     * @return a string containing the entire html source
+     * @throws java.io.IOException sometimes
+     */
+    public static String fetchHtmlLine(String urlString) throws IOException {
+        return fetchHtmlLine(urlString, 20000);
+    }
 
     /**
-     * Tries to fetch a HTML page from a URL.
-     * @param url the url we want to look up.
-     * @return the HTML of the page located at url stored in a String. null if something unexpected happens, like having
-     *         to catch a IOException or a MalformedURLException.
+     * Fetches a web page for you and returns a long string containing the full html source
+     * when the whole thing has loaded.
+     * @param urlString the url you want to look up.
+     * @param timeout an int that specifies the connect timeout value in milliseconds - if this time passes,
+     * a SocketTimeoutException is raised.
+     * @return an arraylist containing each line of the web site html
+     * @throws java.io.IOException sometimes
      */
-    public static String fetchHTML(String url)
-    {
-        URL realURL;
-        try
-        {
-            realURL = new URL(url);
-        }
-        catch (MalformedURLException mURLe)
-        {
-            System.err.println("The URL passed to fetchHTML was not well-formed: " + mURLe);
-            mURLe.printStackTrace(System.err);
+    public static String fetchHtmlLine(String urlString, int timeout) throws IOException {
+        BufferedReader input = prepareBufferedReader(urlString, timeout);
 
-            return null;
+        StringBuilder sb = new StringBuilder();
+        String htmlLine;
+        while ((htmlLine = input.readLine()) != null) {
+            sb.append(htmlLine);
         }
-
-        StringBuilder html = new StringBuilder();
-        BufferedReader input = null;
-        try
-        {
-            input = new BufferedReader(new InputStreamReader(realURL.openStream()));
-
-            String htmlLine;
-            while ((htmlLine = input.readLine()) != null) {
-                html.append(htmlLine);
-            }
-        }
-        catch (UnknownHostException uhe)
-        {
-            //System.err.println("No site found at:" + url);
-            return null; // fail silently
-        }
-        catch (IOException ioe)
-        {
-            //ioe.printStackTrace(System.err); //TODO proper IOException handling
-            return null; // fail silently
-        }
-        finally {
-            try { if(input != null) input.close(); } catch (IOException ioeIsIgnored) { /*IDEA code inspection nags*/ }
-        }
-
-        return html.toString();
+        input.close();
+        return sb.toString();
     }
+
+    /**
+     * Prepares a buffered reader for the inputstream of the specified website with a default
+     * timeout value of 20 seconds.
+     * This will return as soon as the connection is ready. Remember to close the reader!
+     * @param urlString the url you want to look up.
+     * @return the buffered reader for reading the input stream from the specified website
+     * @throws java.io.IOException sometimes
+     */
+    public static BufferedReader prepareBufferedReader(String urlString) throws IOException {
+        return prepareBufferedReader(urlString, 20000);
+    }
+
+    /**
+     * Prepares a buffered reader for the inputstream of the specified website.
+     * This will return as soon as the connection is ready. Remember to close the reader!
+     * @param urlString the url you want to look up.
+     * @param timeout an int that specifies the connect timeout value in milliseconds - if this time passes,
+     * a SocketTimeoutException is raised.
+     * @return the buffered reader for reading the input stream from the specified website
+     * @throws java.io.IOException sometimes
+     */
+    public static BufferedReader prepareBufferedReader(String urlString, int timeout) throws IOException {
+        urlString = urlString.replace(" ", "%20");
+
+        URL url = new URL(urlString);
+        System.out.println("Web util opening: '" + urlString + "'...");
+        URLConnection urlConn = url.openConnection();
+
+        urlConn.setConnectTimeout(timeout);
+        // test Opera/9.80 (X11; Linux i686; U; en) Presto/2.2.15 Version/10.01
+        urlConn.setRequestProperty("User-Agent", "Firefox/3.0"); // Pretend we're a proper browser :)
+
+        // TODO encoding should be specified dependent on what the site says it is! but we just assume utf-8 :)
+        return new BufferedReader(new InputStreamReader(urlConn.getInputStream(), "UTF-8"));
+    }
+
+    /**
+     * Perform a search on google
+     * @param query the query to search for
+     * @return a list over all URLs google provided
+     * @throws IOException if I/O fails
+     */
+    public static ArrayList<URL> googleSearch(String query) throws IOException {
+        String googleHtml = fetchHtmlLine("http://www.google.com/search?q="+query.replace(' ', '+'));
+
+        String parseSearch = "<h3 class=r><a href=\"";
+        int searchIndex = 0;
+
+        ArrayList<URL> urls = new ArrayList<URL>();
+        while((searchIndex = googleHtml.indexOf(parseSearch, searchIndex+1)) != -1) {
+            urls.add(new URL(googleHtml.substring(searchIndex + parseSearch.length(), googleHtml.indexOf('"', searchIndex + parseSearch.length()))));
+        }
+        return urls;
+    }
+
 
     /**
      * Find all URIs with a specific URI scheme in a String
@@ -116,13 +140,11 @@ public class Web
      * @param string the String to look for URIs in.
      * @return An ArrayList containing any URIs found.
      */
-    public static ArrayList<String> findURIs(String uriScheme, String string)
-    {
+    public static ArrayList<String> findURIs(String uriScheme, String string) {
         ArrayList<String> uris = new ArrayList<String>();
 
         int index = 0;
-        do
-        {
+        do {
             index = string.indexOf(uriScheme, index); // find the start index of a URL
 
             if (index == -1) // if indexOf returned -1, we didn't find any urls
@@ -135,8 +157,7 @@ public class Web
             uris.add(string.substring(index, endIndex));
 
             index = endIndex; // start at the end of the URL we just added
-        }
-        while (true);
+        } while (true);
 
         return uris;
     }
@@ -164,6 +185,7 @@ public class Web
                 .replace("&Oslash;", "Ø")
                 .replace("&aring;", "å")
                 .replace("&Aring;", "Å")
+                .replace("&#x22;", "\"")
                 .replace("&#x27;", "'")
                 .replace("&#34;", "\"")
                 .replace("&#39;", "'")

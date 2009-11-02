@@ -2,6 +2,7 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.ModuleHandler;
+import grouphug.exceptions.SQLUnavailableException;
 import grouphug.listeners.MessageListener;
 import grouphug.util.SQLHandler;
 
@@ -67,9 +68,8 @@ public class Factoid implements MessageListener {
                    " - A star (*) can be any string of characters.\n" +
                    " - Regex can be used, but 1) remember that * is replaced with .* and 2) this will probably change very soon.");
 
-        } catch(ClassNotFoundException ex) {
-            System.err.println("Factoid startup: SQL unavailable!");
-            // TODO should disable this module at this point
+        } catch(SQLUnavailableException ex) {
+            System.err.println("Factoid startup: SQL is unavailable!");
         } catch (SQLException e) {
             System.err.println("Factoid startup: SQL Exception: "+e);
         }
@@ -101,17 +101,17 @@ public class Factoid implements MessageListener {
                 reply = line.substring(line.indexOf(SEPARATOR_ACTION) + SEPARATOR_ACTION.length());
             } else {
                 // If it's neither a message nor an action
-                Grouphug.getInstance().sendMessage("What? Don't give me that nonsense, "+sender+".", false);
+                Grouphug.getInstance().sendMessage("What? Don't give me that nonsense, "+sender+".");
                 return;
             }
 
             // add() returns true if the factoid is added, or false if the trigger is already taken
             if(add(replyMessage, trigger, reply, sender)) {
-                Grouphug.getInstance().sendMessage("OK, "+sender+".", false);
+                Grouphug.getInstance().sendMessage("OK, "+sender+".");
 
                 lastAddedTime = System.nanoTime(); // HACK to avoid specialTrigger() being called on the same line
             } else {
-                Grouphug.getInstance().sendMessage("But, "+sender+", "+trigger+".", false);
+                Grouphug.getInstance().sendMessage("But, "+sender+", "+trigger+".");
             }
 
         }
@@ -127,9 +127,9 @@ public class Factoid implements MessageListener {
 
             // and try to remove it - del() returns true if it's removed, false if there is no such trigger
             if(del(trigger)) {
-                Grouphug.getInstance().sendMessage("I no longer know of this "+trigger+" that you speak of.", false);
+                Grouphug.getInstance().sendMessage("I no longer know of this "+trigger+" that you speak of.");
             } else {
-                Grouphug.getInstance().sendMessage(sender+", I can't remember "+trigger+" in the first place.", false);
+                Grouphug.getInstance().sendMessage(sender+", I can't remember "+trigger+" in the first place.");
             }
 
         }
@@ -138,9 +138,9 @@ public class Factoid implements MessageListener {
             FactoidItem factoid;
             String trigger = message.substring(TRIGGER_MAIN.length());
             if((factoid = find(trigger, false)) != null) {
-                Grouphug.getInstance().sendMessage("Factoid: [ trigger = "+factoid.getTrigger()+" ] [ reply = "+factoid.getReply()+" ] [ author = "+factoid.getAuthor()+" ]", false);
+                Grouphug.getInstance().sendMessage("Factoid: [ trigger = "+factoid.getTrigger()+" ] [ reply = "+factoid.getReply()+" ] [ author = "+factoid.getAuthor()+" ]");
             } else {
-                Grouphug.getInstance().sendMessage(sender+", I do not know of this "+trigger+" that you speak of.", false);
+                Grouphug.getInstance().sendMessage(sender+", I do not know of this "+trigger+" that you speak of.");
             }
 
         }
@@ -197,7 +197,7 @@ public class Factoid implements MessageListener {
             try {
                 if(sqlHandler.delete("DELETE FROM " + FACTOID_TABLE + "  WHERE `trigger` = '"+trigger+"';") == 0) {
                     System.err.println("Factoid deletion warning: Item was found in local arraylist, but not in SQL DB!");
-                    Grouphug.getInstance().sendMessage("OMG inconsistency; I have the factoid in memory but not in the SQL db.", false);
+                    Grouphug.getInstance().sendMessage("OMG inconsistency; I have the factoid in memory but not in the SQL db.");
                     return false;
 
                 }

@@ -59,16 +59,16 @@ public class Upload implements TriggerListener {
             ArrayList<Object[]> rows = sqlHandler.select("SELECT url, nick FROM "+ UPLOAD_DB+" WHERE keyword='"+keyword+"';");
 
             if(rows.size() == 0) {
-                Grouphug.getInstance().sendMessage("Nothing has been uploaded with keyword "+keyword, false);
+                Grouphug.getInstance().sendMessage("Nothing has been uploaded with keyword "+keyword);
             } else {
                 for(Object[] row : rows) {
                     //Prints the URL(s) associated with the keyword
-                    Grouphug.getInstance().sendMessage(row[1] + " uploaded http://hinux.hin.no/~murray/gh/up/"+ row[0], false);
+                    Grouphug.getInstance().sendMessage(row[1] + " uploaded http://hinux.hin.no/~murray/gh/up/"+ row[0]);
                 }
             }
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.");
         }
     }
 
@@ -96,7 +96,7 @@ public class Upload implements TriggerListener {
 
 		} catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.");
         }
         //Now we download the file, at least we hope so
         FileDataDownload.fileDownload(parts[0], IMAGE_DIRECTORY);

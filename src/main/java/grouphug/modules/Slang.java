@@ -58,13 +58,13 @@ public class Slang implements TriggerListener {
         try {
             si = parseXML(getSlangXML(message), number);
         } catch(IOException e) {
-            Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)", false);
+            Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)");
             System.err.println(e);
             return;
         } catch(Exception e) {
             // TODO small hack (better than the previous one): A general Exception is only thrown
             // TODO by us when no slang was found
-            Grouphug.getInstance().sendMessage("No slang found for "+message+".", false);
+            Grouphug.getInstance().sendMessage("No slang found for "+message+".");
             return;
         }
 

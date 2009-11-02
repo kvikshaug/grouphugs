@@ -2,6 +2,7 @@ package grouphug.modules;
 
 import grouphug.Grouphug;
 import grouphug.ModuleHandler;
+import grouphug.exceptions.SQLUnavailableException;
 import grouphug.listeners.MessageListener;
 import grouphug.listeners.TriggerListener;
 import grouphug.util.SQL;
@@ -28,7 +29,7 @@ public class Seen implements TriggerListener, MessageListener {
             moduleHandler.registerHelp(TRIGGER_HELP, "Seen: When someone last said something in this channel\n" +
                     "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<nick>\n");
             System.out.println("Seen module loaded.");
-        } catch(ClassNotFoundException ex) {
+        } catch(SQLUnavailableException ex) {
             System.err.println("Seen module startup error: SQL is unavailable!");
         }
     }
@@ -78,7 +79,7 @@ public class Seen implements TriggerListener, MessageListener {
 
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, unable to update Seen DB, an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, unable to update Seen DB, an SQL error occured.");
         }
 
     }
@@ -90,17 +91,17 @@ public class Seen implements TriggerListener, MessageListener {
             Object[] row = sqlHandler.selectSingle("SELECT id, nick, date, lastwords FROM "+SEEN_DB+" WHERE nick='?';", params);
 
             if(row == null) {
-                Grouphug.getInstance().sendMessage(message + " hasn't said anything yet.", false);
+                Grouphug.getInstance().sendMessage(message + " hasn't said anything yet.");
             } else {
                 Date last = SQL.sqlDateTimeToDate((String)row[2]);
                 String lastwords = (String)row[3];
 
-                Grouphug.getInstance().sendMessage(message + " uttered \""+ lastwords+ "\" on " +last, false);
+                Grouphug.getInstance().sendMessage(message + " uttered \""+ lastwords+ "\" on " +last);
             }
 
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, unable to look up the requested data; an SQL error occured.", false);
+            Grouphug.getInstance().sendMessage("Sorry, unable to look up the requested data; an SQL error occured.");
         } catch (ParseException e) {
             System.err.println(" > Unable to parse the SQL date! This was very unexpected.");
             e.printStackTrace();

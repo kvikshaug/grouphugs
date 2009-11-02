@@ -40,13 +40,13 @@ public class Confession implements TriggerListener {
             }
 
             if(conf == null) {
-                Grouphug.getInstance().sendMessage(errorConfession, false);
+                Grouphug.getInstance().sendMessage(errorConfession);
             } else {
                 Grouphug.getInstance().sendMessage(conf.toString(), true);
             }
         } catch(IOException ex) {
             Grouphug.getInstance().sendMessage("Sorry, the intertubes seem to be clogged up, " +
-                    "I catched an IOException.", false);
+                    "I catched an IOException.");
             ex.printStackTrace();
         }
     }
@@ -67,11 +67,12 @@ public class Confession implements TriggerListener {
      * @throws java.io.IOException sometimes
      */
     private ConfessionItem search(String query) throws IOException {
-        URL confessionURL = Google.search(query+"+site:grouphug.us/confessions/");
-        if(confessionURL == null)
-            return new ConfessionItem("No one has confessed about their "+query+" problem yet.");
-        else
+        try {
+            URL confessionURL = Web.googleSearch(query+"+site:grouphug.us/confessions/").get(0);
             return getConfession(confessionURL.toString());
+        } catch(ArrayIndexOutOfBoundsException ex) {
+            return new ConfessionItem("No one has confessed about their "+query+" problem yet.");
+        }
     }
 
     /**
@@ -83,8 +84,7 @@ public class Confession implements TriggerListener {
     private ConfessionItem getConfession(String urlString) throws IOException {
 
         String confession = "";
-        System.out.println("Confession: Opening '"+urlString+"'...");
-        ArrayList<String> lines = Web.fetchHtmlList(urlString);
+        ArrayList<String> lines = Web.fetchHtmlLines(urlString);
 
         // we dig from the BOTTOM and up, searching for the first confession we find
         int line = 0;
