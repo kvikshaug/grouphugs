@@ -32,7 +32,7 @@ public class Define implements TriggerListener {
         }
 
         if(answer == null)
-            Grouphug.getInstance().sendMessage("No definition found for "+message.substring(TRIGGER.length())+".");
+            Grouphug.getInstance().sendMessage("No definition found for "+message+".");
         else
             Grouphug.getInstance().sendMessage(Web.entitiesToChars(answer));
     }
