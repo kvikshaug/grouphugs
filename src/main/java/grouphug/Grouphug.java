@@ -35,7 +35,7 @@ public class Grouphug extends PircBot {
 
     // Channel and server
     public static final String CHANNEL = "#grouphugs";
-    public static final String SERVER = "irc.efnet.ru";
+    public static final String SERVER = "irc.inet.tele.dk";
 
     // The trigger characters (as Strings since startsWith takes String)
     public static final String MAIN_TRIGGER = "!";
