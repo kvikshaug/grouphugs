@@ -19,7 +19,7 @@ public class Upload implements TriggerListener {
     private static final String TRIGGER_HELP = "upload";
     private static final String TRIGGER = "upload";
     private static final String UPLOAD_DB= "uploads";
-    //private static final String TRIGGER_KEYWORD = "keyword ";
+    private static final String TRIGGER_KEYWORD = "keyword";
     private static final String DESTINATION_DIR = "/var/www/gh/public/images/up/";
 
     private SQLHandler sqlHandler;
@@ -29,9 +29,10 @@ public class Upload implements TriggerListener {
             sqlHandler = SQLHandler.getSQLHandler();
             // moduleHandler.addMessageListener(this);
             moduleHandler.addTriggerListener(TRIGGER, this);
+            moduleHandler.addTriggerListener(TRIGGER_KEYWORD, this);
             moduleHandler.registerHelp(TRIGGER_HELP, " A module to upload pictures and other things to gh\n" +
-                    " To use the module type " +Grouphug.MAIN_TRIGGER + TRIGGER + " <url> <keyword>"//\n" +
-                    /*" To get links associated with a keyword type "+ Grouphug.MAIN_TRIGGER + TRIGGER_KEYWORD+"<keyword>"*/);
+                    " To use the module type " +Grouphug.MAIN_TRIGGER + TRIGGER + " <url> <keyword>\n" +
+                    " To search for a keyword or image name, use: "+ Grouphug.MAIN_TRIGGER + TRIGGER_KEYWORD+" <searchphrase>");
         } catch(SQLUnavailableException ex) {
             System.err.println("Upload module startup error: SQL is unavailable!");
         }
@@ -43,30 +44,35 @@ public class Upload implements TriggerListener {
     }*/
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
-        //if(message.startsWith(TRIGGER)) {
+        if(trigger.equals(TRIGGER)) {
             insert(message, sender);
-        /*} else if(message.startsWith(TRIGGER_KEYWORD)) {
-            showUploads(message.substring(TRIGGER_KEYWORD.length()));
-        }*/
+        } else if(trigger.equals(TRIGGER_KEYWORD)) {
+            showUploads(message);
+        }
     }
 
-    /*private void showUploads(String keyword) {
+    private void showUploads(String keyword) {
         try {
-            ArrayList<Object[]> rows = sqlHandler.select("SELECT url, nick FROM "+ UPLOAD_DB+" WHERE keyword='"+keyword+"';");
+            if(keyword.length() <= 1) {
+                Grouphug.getInstance().sendMessage("Please use at least 2 search characters.");
+            }
+            ArrayList<Object[]> rows = sqlHandler.select("SELECT filename, nick, keyword FROM "+ UPLOAD_DB+" WHERE " +
+                    "keyword LIKE '%"+keyword+"%' OR filename LIKE '%"+keyword+"%';");
 
             if(rows.size() == 0) {
-                Grouphug.getInstance().sendMessage("Nothing has been uploaded with keyword "+keyword);
+                Grouphug.getInstance().sendMessage("No results for '" + keyword + "'.");
             } else {
                 for(Object[] row : rows) {
                     //Prints the URL(s) associated with the keyword
-                    Grouphug.getInstance().sendMessage(row[1] + " uploaded http://hinux.hin.no/~murray/gh/up/"+ row[0]);
+                    Grouphug.getInstance().sendMessage("http://gh.kvikshaug.no/images/up/" + row[0] +
+                            " ('" + row[2] + "' by " + row[1] + ")");
                 }
             }
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.");
         }
-    }*/
+    }
 
     private void insert(String message, String sender) {
         //Split the message into URL and keyword, URL first
@@ -118,13 +124,7 @@ public class Upload implements TriggerListener {
             return;
         }
 
-        // And fix the permissions
-        /*try {
-            Runtime.getRuntime().exec("chmod o+r "+IMAGE_DIRECTORY+filename);
-        } catch(IOException ex) {
-            System.err.println(ex);
-        }*/
-        // Prints the URL to the uploaded file to the channel
+        // Print the URL to the uploaded file to the channel
         Grouphug.getInstance().sendMessage("Saved to http://gh.kvikshaug.no/images/up/" + filename);
     }
 }
