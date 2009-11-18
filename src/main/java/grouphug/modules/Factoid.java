@@ -68,7 +68,7 @@ public class Factoid implements MessageListener {
                    " - The string \"$sender\" will be replaced with the nick of the one triggering the factoid.\n" +
                    " - A star (*) can be any string of characters.\n" +
                    " - Regex can be used, but 1) remember that * is replaced with .* and 2) this will probably change very soon.");
-
+            System.out.println("Factoid module loaded.");
         } catch(SQLUnavailableException ex) {
             System.err.println("Factoid startup: SQL is unavailable!");
         } catch (SQLException e) {

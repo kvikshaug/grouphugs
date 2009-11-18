@@ -33,6 +33,7 @@ public class Upload implements TriggerListener {
             moduleHandler.registerHelp(TRIGGER_HELP, " A module to upload pictures and other things to gh\n" +
                     " To use the module type " +Grouphug.MAIN_TRIGGER + TRIGGER + " <url> <keyword>\n" +
                     " To search for a keyword or image name, use: "+ Grouphug.MAIN_TRIGGER + TRIGGER_KEYWORD+" <searchphrase>");
+            System.out.println("Upload module loaded.");
         } catch(SQLUnavailableException ex) {
             System.err.println("Upload module startup error: SQL is unavailable!");
         }
