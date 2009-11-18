@@ -56,6 +56,7 @@ public class Factoid implements MessageListener {
                 boolean message = row[0].equals("message");
                 factoids.add(new FactoidItem(message, (String)row[1], (String)row[2], (String)row[3]));
             }
+            // TODO use triggers where appropriate; register multiple trigger words instead of just using onMessage
             moduleHandler.addMessageListener(this);
             moduleHandler.registerHelp(TRIGGER_HELP, "Factoid: Make me say or do \"reply\" when someone says \"trigger\".\n" +
                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER_SHORT_ADD + "trigger <say> reply\n" +
