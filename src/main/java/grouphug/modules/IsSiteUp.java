@@ -34,7 +34,7 @@ public class IsSiteUp implements TriggerListener {
         System.out.println("IsSiteUp module loaded.");
     }
 
-    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+    public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         try {
             String result = parseHTML(Web.fetchHtmlLine(DFEOJM_URI + '/' + cleanURI(message)));
             Grouphug.getInstance().sendMessage(message + " :: " + result);

@@ -22,7 +22,7 @@ public class Insulter implements TriggerListener {
     }
 
 
-    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+    public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         String insulted = null;
         if(!message.equals("")) {
             insulted = message;

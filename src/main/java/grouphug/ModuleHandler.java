@@ -103,7 +103,8 @@ public class ModuleHandler {
         for(TriggerListener listener : triggerListeners) {
             if(listener.trigger(message)) {
                 // we trim the trigger and any following whitespace from the message
-                listener.getListener().onTrigger(channel, sender, login, hostname, message.substring(listener.getTrigger().length()).trim());
+                listener.getListener().onTrigger(channel, sender, login, hostname,
+                        message.substring(listener.getTrigger().length()).trim(), listener.getTrigger());
             }
         }
     }

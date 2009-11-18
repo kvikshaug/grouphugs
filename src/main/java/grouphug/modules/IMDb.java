@@ -23,7 +23,7 @@ public class IMDb implements TriggerListener {
     }
 
 
-    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+    public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         URL imdbURL;
         try {
             imdbURL = Web.googleSearch(message+"+site:www.imdb.com").get(0);

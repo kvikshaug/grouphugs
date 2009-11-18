@@ -24,7 +24,7 @@ public class Confession implements TriggerListener {
     }
 
 
-    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+    public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         try {
             // Check if argument is provided
             ConfessionItem conf;

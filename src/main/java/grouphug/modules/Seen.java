@@ -84,7 +84,7 @@ public class Seen implements TriggerListener, MessageListener {
 
     }
 
-    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+    public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         try {
             ArrayList<String> params = new ArrayList<String>();
             params.add(message);

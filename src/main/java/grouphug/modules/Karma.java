@@ -56,7 +56,7 @@ public class Karma implements TriggerListener, MessageListener {
         }
     }
 
-    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+    public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         print(message);
     }
 

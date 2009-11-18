@@ -21,7 +21,7 @@ public class GoogleFight implements TriggerListener {
         System.out.println("Googlefight module loaded.");
     }
 
-    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+    public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
 
         if(!message.contains(TRIGGER_VS)) {
             Grouphug.getInstance().sendMessage(sender+", try "+Grouphug.MAIN_TRIGGER+Grouphug.HELP_TRIGGER+" "+TRIGGER_HELP);

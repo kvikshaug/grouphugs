@@ -14,7 +14,10 @@ public interface TriggerListener {
      * @param message the message sent from the user, excluding the trigger character, trigger string and
      * any leading or trailing whitespace. So a '!trigger hi all'-message will be sent to the module as
      * 'hi all'.
+     * @param trigger the trigger string that led to this module being triggered, this is useful if the module
+     * has registered more than one trigger
      */
-    public abstract void onTrigger(String channel, String sender, String login, String hostname, String message);
+    public abstract void onTrigger(String channel, String sender, String login, String hostname, String message,
+                                   String trigger);
 
 }

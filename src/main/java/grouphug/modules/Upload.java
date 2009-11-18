@@ -42,7 +42,7 @@ public class Upload implements TriggerListener {
         TODO always upload pictures when posted
     }*/
 
-    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+    public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         //if(message.startsWith(TRIGGER)) {
             insert(message, sender);
         /*} else if(message.startsWith(TRIGGER_KEYWORD)) {

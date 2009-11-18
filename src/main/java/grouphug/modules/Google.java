@@ -30,7 +30,7 @@ public class Google implements TriggerListener {
     }
 
 
-    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+    public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         try {
             int resultCount;
             ArrayList<URL> urls;

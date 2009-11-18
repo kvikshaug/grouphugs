@@ -59,7 +59,7 @@ public class Tracking implements TriggerListener, Runnable {
         }
     }
 
-    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+    public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         if(message.equals(TRIGGER_LIST)) {
             if(items.size() == 0) {
                 Grouphug.getInstance().sendMessage("No packages are being tracked. What's wrong with you people?");

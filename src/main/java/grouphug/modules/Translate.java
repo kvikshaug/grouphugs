@@ -22,7 +22,7 @@ public class Translate implements TriggerListener {
         System.out.println("Translate module loaded.");
     }
 
-    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+    public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         String fromLanguage = "no";
         String toLanguage = "en";
 

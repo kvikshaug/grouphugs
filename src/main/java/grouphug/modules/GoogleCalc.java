@@ -19,7 +19,7 @@ public class GoogleCalc implements TriggerListener {
         System.out.println("Google calculator module loaded.");
     }
 
-    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+    public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         try {
             ArrayList<String> lines = Web.fetchHtmlLines("http://www.google.no/search?q=" + message.replace(" ", "+"));
             String reply = null;

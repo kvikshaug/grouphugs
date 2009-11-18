@@ -29,7 +29,7 @@ public class Slang implements TriggerListener {
         System.out.println("Slang module loaded.");
     }
 
-    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+    public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         boolean includeExample;
         if(message.contains(TRIGGER_EXAMPLE)) {
             includeExample = true;

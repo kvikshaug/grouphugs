@@ -20,7 +20,7 @@ public class Decider implements TriggerListener {
         System.out.println("Decider module loaded.");
     }
 
-    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
+    public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         String[] choices = message.split(" ");
         Grouphug.getInstance().sendMessage("The roll of the dice picks: "+choices[random.nextInt(choices.length)]);
     }
