@@ -1,8 +1,6 @@
 package grouphug.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -161,6 +159,30 @@ public class Web {
 
         return uris;
     }
+
+    /**
+     * Save a remote file on the local filesystem
+     * @param remoteFile The full path to the remote file
+     * @param localFileName The name of the locally saved file (a number will be appended if it exists)
+     * @param destinationDir The directory of which the local file will be saved
+     * @throws IOException if an I/O error occurs
+     */
+    public static void downloadFile(String remoteFile, String localFileName, String destinationDir) throws IOException {
+        URLConnection connection = new URL(remoteFile).openConnection();
+        BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(destinationDir + "/" + localFileName));
+        InputStream is = connection.getInputStream();
+        int bytesRead, bytesWritten = 0;
+        byte[] buf = new byte[1024];
+        while((bytesRead = is.read(buf)) != -1) {
+            os.write(buf, 0, bytesRead);
+            bytesWritten += bytesRead;
+        }
+        System.out.println("Downloaded file '"+remoteFile+"' to '"+destinationDir+'/'+localFileName+"' ("+
+                bytesWritten+" bytes).");
+        is.close();
+        os.close();
+    }
+
 
     /**
      * Convert HTML entities to their respective characters
