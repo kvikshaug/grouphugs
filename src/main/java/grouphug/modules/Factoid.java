@@ -4,6 +4,7 @@ import grouphug.Grouphug;
 import grouphug.ModuleHandler;
 import grouphug.exceptions.SQLUnavailableException;
 import grouphug.listeners.MessageListener;
+import grouphug.listeners.TriggerListener;
 import grouphug.util.SQLHandler;
 
 import java.sql.SQLException;
@@ -18,7 +19,7 @@ import java.util.Random;
  * to the channel, we maintain a local list in memory, and just keep the SQL db synchronized, so
  * that on startup we can fetch all the factoids back.
  */
-public class Factoid implements MessageListener {
+public class Factoid implements MessageListener, TriggerListener {
 
     // TODO - dynamic reply, with username, more?
     // TODO - more details of factiod ? time ?
@@ -40,8 +41,6 @@ public class Factoid implements MessageListener {
 
     private static Random random = new Random(System.nanoTime());
 
-    private long lastAddedTime; // HACK to avoid specialTrigger() being called on the same line
-
     private SQLHandler sqlHandler;
 
     public Factoid(ModuleHandler moduleHandler) {
@@ -53,14 +52,17 @@ public class Factoid implements MessageListener {
                 boolean message = row[0].equals("message");
                 factoids.add(new FactoidItem(message, (String)row[1], (String)row[2], (String)row[3]));
             }
-            // TODO use triggers where appropriate; register multiple trigger words instead of just using onMessage
+            moduleHandler.addTriggerListener(TRIGGER_MAIN, this);
+            moduleHandler.addTriggerListener(TRIGGER_ADD, this);
+            moduleHandler.addTriggerListener(TRIGGER_DEL, this);
+            moduleHandler.addTriggerListener(TRIGGER_RANDOM, this);
             moduleHandler.addMessageListener(this);
             moduleHandler.registerHelp(TRIGGER_HELP, "Factoid: Make me say or do \"reply\" when someone says \"trigger\".\n" +
                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER_ADD +    " trigger <say> reply\n" +
                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER_ADD +    " trigger <do> something\n" +
                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER_DEL +    " trigger\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_MAIN +   " trigger    -> show information about a factoid\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_RANDOM + "            -> trigger a random factoid\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_MAIN +   " trigger    > show information about a factoid\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_RANDOM + "      > trigger a random factoid\n" +
                    " - The string \"$sender\" will be replaced with the nick of the one triggering the factoid.\n" +
                    " - A star (*) can be any string of characters.\n" +
                    " - Regex can be used, but remember that * is replaced with .*");
@@ -72,25 +74,22 @@ public class Factoid implements MessageListener {
         }
     }
 
-    public void onMessage(String channel, String sender, String login, String hostname, String message) {
+    public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
 
-        // If trying to ADD a NEW factoid
-        if(message.startsWith(TRIGGER_ADD)){
-
-            // First parse the line to find the trigger, reply, and if it's a message or action
-            String line = message.substring(TRIGGER_ADD.length());
+        if(trigger.equals(TRIGGER_ADD)) {
+            // Trying to add a new factoid
 
             boolean replyMessage;
-            String trigger, reply;
+            String factoidTrigger, reply;
 
-            if(line.contains(SEPARATOR_MESSAGE)) {
+            if(message.contains(SEPARATOR_MESSAGE)) {
                 replyMessage = true;
-                trigger = line.substring(0, line.indexOf(SEPARATOR_MESSAGE));
-                reply = line.substring(line.indexOf(SEPARATOR_MESSAGE) + SEPARATOR_MESSAGE.length());
-            } else if(line.contains(SEPARATOR_ACTION)) {
+                factoidTrigger = message.substring(0, message.indexOf(SEPARATOR_MESSAGE));
+                reply = message.substring(message.indexOf(SEPARATOR_MESSAGE) + SEPARATOR_MESSAGE.length());
+            } else if(message.contains(SEPARATOR_ACTION)) {
                 replyMessage = false;
-                trigger = line.substring(0, line.indexOf(SEPARATOR_ACTION));
-                reply = line.substring(line.indexOf(SEPARATOR_ACTION) + SEPARATOR_ACTION.length());
+                factoidTrigger = message.substring(0, message.indexOf(SEPARATOR_ACTION));
+                reply = message.substring(message.indexOf(SEPARATOR_ACTION) + SEPARATOR_ACTION.length());
             } else {
                 // If it's neither a message nor an action
                 Grouphug.getInstance().sendMessage("What? Don't give me that nonsense, "+sender+".");
@@ -98,44 +97,39 @@ public class Factoid implements MessageListener {
             }
 
             // add() returns true if the factoid is added, or false if the trigger is already taken
-            if(add(replyMessage, trigger, reply, sender)) {
+            if(add(replyMessage, factoidTrigger, reply, sender)) {
                 Grouphug.getInstance().sendMessage("OK, "+sender+".");
-
-                lastAddedTime = System.nanoTime(); // HACK to avoid specialTrigger() being called on the same line
             } else {
-                Grouphug.getInstance().sendMessage("But, "+sender+", "+trigger+".");
+                Grouphug.getInstance().sendMessage("But, "+sender+", "+factoidTrigger+".");
             }
-
-        }
-        // Not trying to ADD a new factoid, so check if we're trying to REMOVE one
-        else if(message.startsWith(TRIGGER_DEL)) {
-            String trigger = message.substring(TRIGGER_DEL.length());
-            // try to remove it - del() returns true if it's removed, false if there is no such trigger
-            if(del(trigger)) {
-                Grouphug.getInstance().sendMessage("I no longer know of this "+trigger+" that you speak of.");
+        } else if(trigger.equals(TRIGGER_DEL)) {
+            // Trying to remove a factoid
+            // del() returns true if it's removed, false if there is no such trigger
+            if(del(message)) {
+                Grouphug.getInstance().sendMessage("I no longer know of this "+ message +" that you speak of.");
             } else {
-                Grouphug.getInstance().sendMessage(sender+", I can't remember "+trigger+" in the first place.");
+                Grouphug.getInstance().sendMessage(sender+", I can't remember "+ message +" in the first place.");
             }
-
-        }
-        // Ok, neither ADDing nor REMOVING, so check if we're just trying to see data about a factoid
-        else if(message.startsWith(TRIGGER_MAIN)) {
+        } else if(trigger.equals(TRIGGER_MAIN)) {
+            // Trying to view data about a factoid
             FactoidItem factoid;
-            String trigger = message.substring(TRIGGER_MAIN.length());
-            if((factoid = find(trigger, false)) != null) {
-                Grouphug.getInstance().sendMessage("Factoid: [ trigger = "+factoid.getTrigger()+" ] [ reply = "+factoid.getReply()+" ] [ author = "+factoid.getAuthor()+" ]");
+            if((factoid = find(message, false)) != null) {
+                Grouphug.getInstance().sendMessage("Factoid: [ trigger = "+factoid.getTrigger()+" ] [ reply = "+
+                        factoid.getReply()+" ] [ type = "+(factoid.isMessage() ? "message" : "action")+
+                        " ]  [ author = "+factoid.getAuthor()+" ]");
             } else {
-                Grouphug.getInstance().sendMessage(sender+", I do not know of this "+trigger+" that you speak of.");
+                Grouphug.getInstance().sendMessage(sender+", I do not know of this "+message+" that you speak of.");
             }
-
-        }
-        // The last triggered alternative would be the trigger for getting a random factoid
-        else if(message.startsWith(TRIGGER_RANDOM)) {
+        } else if(trigger.equals(TRIGGER_RANDOM)) {
             factoids.get(random.nextInt(factoids.size())).send(sender);
         }
+    }
 
-        if ((System.nanoTime() - lastAddedTime) < (2 * Math.pow(10.0,9.0))) {
-            return; // HACK to avoid specialTrigger being called on the same line used to add the trigger in the first place
+    public void onMessage(String channel, String sender, String login, String hostname, String message) {
+        // avoid outputting when the trigger is being added or removed
+        if(message.startsWith(Grouphug.MAIN_TRIGGER + TRIGGER_ADD) ||
+                message.startsWith(Grouphug.MAIN_TRIGGER + TRIGGER_DEL)) {
+            return;
         }
 
         FactoidItem factoid;
