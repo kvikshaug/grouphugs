@@ -30,6 +30,7 @@ public class Factoid implements MessageListener, TriggerListener {
 
     private static final String TRIGGER_MAIN = "factoid";
     private static final String TRIGGER_RANDOM = "randomfactoid";
+    private static final String TRIGGER_FOR = "trigger";
 
     private static final String TRIGGER_ADD = "on";
     private static final String TRIGGER_DEL = "forget";
@@ -56,13 +57,16 @@ public class Factoid implements MessageListener, TriggerListener {
             moduleHandler.addTriggerListener(TRIGGER_ADD, this);
             moduleHandler.addTriggerListener(TRIGGER_DEL, this);
             moduleHandler.addTriggerListener(TRIGGER_RANDOM, this);
+            moduleHandler.addTriggerListener(TRIGGER_FOR, this);
             moduleHandler.addMessageListener(this);
             moduleHandler.registerHelp(TRIGGER_HELP, "Factoid: Make me say or do \"reply\" when someone says \"trigger\".\n" +
                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER_ADD +    " trigger <say> reply\n" +
                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER_ADD +    " trigger <do> something\n" +
                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER_DEL +    " trigger\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_MAIN +   " trigger    > show information about a factoid\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_RANDOM + "      > trigger a random factoid\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_MAIN +   " trigger      - show information about a factoid\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_RANDOM + "        - trigger a random factoid\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_FOR + " <expression> - show what factoid, if any, that is " +
+                    "triggered by that expression\n" +
                    " - The string \"$sender\" will be replaced with the nick of the one triggering the factoid.\n" +
                    " - A star (*) can be any string of characters.\n" +
                    " - Regex can be used, but remember that * is replaced with .*");
@@ -122,13 +126,23 @@ public class Factoid implements MessageListener, TriggerListener {
             }
         } else if(trigger.equals(TRIGGER_RANDOM)) {
             factoids.get(random.nextInt(factoids.size())).send(sender);
+        } else if(trigger.equals(TRIGGER_FOR)) {
+            FactoidItem factoid;
+            if((factoid = find(message, true)) != null) {
+                Grouphug.getInstance().sendMessage("Factoid: [ trigger = "+factoid.getTrigger()+" ] [ reply = "+
+                        factoid.getReply()+" ] [ type = "+(factoid.isMessage() ? "message" : "action")+
+                        " ]  [ author = "+factoid.getAuthor()+" ]");
+            } else {
+                Grouphug.getInstance().sendMessage("Sorry, that expression doesn't ring any bell.");
+            }
         }
     }
 
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
-        // avoid outputting when the trigger is being added or removed
+        // avoid outputting when the trigger is being added, removed or searched for
         if(message.startsWith(Grouphug.MAIN_TRIGGER + TRIGGER_ADD) ||
-                message.startsWith(Grouphug.MAIN_TRIGGER + TRIGGER_DEL)) {
+                message.startsWith(Grouphug.MAIN_TRIGGER + TRIGGER_DEL) ||
+                message.startsWith(Grouphug.MAIN_TRIGGER + TRIGGER_FOR)) {
             return;
         }
 
