@@ -7,8 +7,6 @@ import grouphug.util.Web;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * URLCatcher module
@@ -20,8 +18,6 @@ import java.util.regex.Pattern;
 public class URLCatcher implements MessageListener {
 
     private static final String[] URI_SCHEMES = new String[]{"http://", "https://"};
-    private static final Pattern TITLE_BEGIN = Pattern.compile("<title.*?>|<TITLE.*?>");
-    private static final Pattern TITLE_END = Pattern.compile("</title>|</TITLE>");
     private static final String HELP_TRIGGER = "urlcatcher";
     private static final int TITLE_MAX_LENGTH = 100;
 
@@ -35,11 +31,10 @@ public class URLCatcher implements MessageListener {
 
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
         try {
-            ArrayList<String> urls = findAllUrls(message);
-            for (String url : urls) {
-                String title = getHTMLTitle(url);
+            for(String url : findAllUrls(message)) {
+                String title = Web.fetchTitle(url);
                 if(!title.equals("")) {
-                    if (title.length() > TITLE_MAX_LENGTH) {
+                    if(title.length() > TITLE_MAX_LENGTH) {
                         title = title.substring(0, TITLE_MAX_LENGTH - 6); // minus the 6 ' (...)'-chars
                         title = title.concat(" (...)");
                     }
@@ -56,37 +51,6 @@ public class URLCatcher implements MessageListener {
         }
     }
 
-
-    /**
-     * Try to find the title of the html document that maybe is at url.
-     *
-     * @param url the url that maybe points to a html document.
-     * @return the title of the html document (if it's there, obviously).
-     * @throws java.io.IOException if we run in to trouble somewhere.
-     */
-    private String getHTMLTitle(String url) throws IOException {
-        String html = Web.fetchHtmlLine(url);
-
-        int titleBeginIndex, titleEndIndex;
-        Matcher titleBegin = TITLE_BEGIN.matcher(html);
-        Matcher titleEnd = TITLE_END.matcher(html);
-
-        //  find the index at which <title> ends in html ( if it's there at all )
-        if (titleBegin.find()) {
-            titleBeginIndex = titleBegin.end();
-        } else {
-            throw new IOException("No start tag for title was found.");
-        }
-
-        // find the index at which </title> starts in html ( if it's there at all )
-        if (titleEnd.find()) {
-            titleEndIndex = titleEnd.start();
-        } else {
-            throw new IOException("No end tag for title was found.");
-        }
-
-        return html.substring(titleBeginIndex, titleEndIndex);
-    }
 
     /**
      * Find all urls matching a URI scheme in URI_SCHEMES in string.

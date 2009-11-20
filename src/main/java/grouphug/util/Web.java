@@ -130,6 +130,45 @@ public class Web {
         return urls;
     }
 
+    /**
+     * Fetch the title for the specified URL
+     * @param URL the url to find a title in
+     * @return the parsed title
+     * @throws java.io.IOException if I/O fails
+     */
+    public static String fetchTitle(String URL) throws IOException {
+        BufferedReader input = prepareBufferedReader(URL, 20000);
+
+        String htmlLine;
+        int titleIndex;
+        while ((htmlLine = input.readLine()) != null) {
+            if((titleIndex = htmlLine.indexOf("<title")) != -1) {
+                String title;
+                int startIndex = htmlLine.indexOf('>', titleIndex) + 1;
+                int endIndex;
+                if((endIndex = htmlLine.indexOf('<', startIndex)) != -1) {
+                    // title is on one line
+                    title = htmlLine.substring(startIndex, endIndex);
+                } else {
+                    // title spans multiple lines (booo *throws tomatoes at website*)
+                    title = htmlLine.substring(startIndex);
+                    htmlLine = input.readLine();
+                    while((endIndex = htmlLine.indexOf('<')) == -1) {
+                        title += htmlLine + "\n";
+                        htmlLine = input.readLine();
+                        if(htmlLine == null) {
+                            throw new IOException("Unable to find end tag for title (this is highly unusual!)");
+                        }
+                    }
+                    title += htmlLine.substring(0, endIndex);
+                }
+                input.close();
+                return title.replaceAll("\\s+", " ").trim();
+            }
+        }
+        throw new IOException("Unable to find title start tag.");
+    }
+
 
     /**
      * Find all URIs with a specific URI scheme in a String
