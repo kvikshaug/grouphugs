@@ -142,7 +142,9 @@ public class Web {
         String htmlLine;
         int titleIndex;
         while ((htmlLine = input.readLine()) != null) {
-            if((titleIndex = htmlLine.indexOf("<title")) != -1) {
+            if((titleIndex = htmlLine.indexOf("<title")) != -1 ||
+                    (titleIndex = htmlLine.indexOf("<TITLE")) != -1 ||
+                    (titleIndex = htmlLine.indexOf("<Title")) != -1) {
                 String title;
                 int startIndex = htmlLine.indexOf('>', titleIndex) + 1;
                 int endIndex;
@@ -163,7 +165,7 @@ public class Web {
                     title += htmlLine.substring(0, endIndex);
                 }
                 input.close();
-                return title.replaceAll("\\s+", " ").trim();
+                return entitiesToChars(title.replaceAll("\\s+", " ").trim());
             }
         }
         throw new IOException("Unable to find title start tag.");

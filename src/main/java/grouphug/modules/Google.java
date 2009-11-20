@@ -17,6 +17,7 @@ public class Google implements TriggerListener {
     private static final String TRIGGER = "google";
     private static final String TRIGGER_ALT = "g";
     private static final String TRIGGER_HELP = "google";
+    private static final int TITLE_MAX_LENGTH = 40;
 
     public Google(ModuleHandler moduleHandler) {
         moduleHandler.addTriggerListener(TRIGGER, this);
@@ -49,10 +50,17 @@ public class Google implements TriggerListener {
 
             if(urls.size() == 0) {
                 Grouphug.getInstance().sendMessage("No results for " + query + ".");
+                return;
             }
 
             for(int i=1; i<=resultCount; i++) {
-                Grouphug.getInstance().sendMessage(urls.get(i-1).toString());
+                String title = Web.fetchTitle(urls.get(i-1).toString());
+                if(title.length() > TITLE_MAX_LENGTH) {
+                    title = title.substring(0, TITLE_MAX_LENGTH - 6); // minus the 6 ' (...)'-chars
+                    title = title.concat(" (...)");
+                }
+
+                Grouphug.getInstance().sendMessage(urls.get(i-1).toString() + " - " + title);
                 if(urls.size() == i && resultCount > i) {
                     if(i == 1) {
                         Grouphug.getInstance().sendMessage("This was the only result.");
@@ -66,6 +74,7 @@ public class Google implements TriggerListener {
             }
         } catch(IOException ex) {
             Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)");
+            System.err.println(ex);
             ex.printStackTrace();
         }
     }
