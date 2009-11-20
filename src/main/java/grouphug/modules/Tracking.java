@@ -7,7 +7,6 @@ import grouphug.listeners.TriggerListener;
 import grouphug.util.SQLHandler;
 import grouphug.util.Web;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -288,50 +287,45 @@ public class Tracking implements TriggerListener, Runnable {
          * @throws java.sql.SQLException if SQL fails
          */
         public int update() throws IOException, SQLException {
-            BufferedReader posten = Web.prepareBufferedReader("http://sporing.posten.no/Sporing/KMSporingInternett.aspx?ShipmentNumber="+trackingNumber);
+            String posten = Web.fetchHtmlLine("http://sporing.posten.no/sporing.html?q="+trackingNumber);
 
-            // phear teh ugly hax <3
-            String curLine;
-            int status = 0;
-            String output = "";
-            while (status < 5) {
-                curLine = posten.readLine();
-                if (curLine == null) {
-                    throw new IOException("Unable to parse target site, have they changed their layout or something?");
-                }
-                String errorSearch = "SporingUserControl_ErrorMessage";
-                int errorIndex = curLine.indexOf(errorSearch);
+            // first find the event field
+            int startIndex = posten.indexOf("<div class=\"sporing-sendingandkolli-latestevent-text\">");
+            int endIndex = posten.indexOf("</div>", startIndex);
 
-                if(errorIndex != -1) {
-                    // no results
-                    String newStatus = "The package ID is invalid (according to the tracking service)";
-                    String oldStatus = getStatus();
-                    if(!oldStatus.equals(newStatus)) {
-                        setStatus(newStatus);
-                        return CHANGED;
-                    } else {
-                        return NOT_CHANGED;
-                    }
-                }
-
-                if (status == 0) {
-                    String resultSearch = "TH colspan=";
-                    int resultIndex = curLine.indexOf(resultSearch);
-                    if (resultIndex != -1) {
-                        status = 1;
-                    }
+            if(startIndex == -1) {
+                // no results
+                String newStatus = "The package ID is invalid (according to the tracking service)";
+                String oldStatus = getStatus();
+                if(!oldStatus.equals(newStatus)) {
+                    setStatus(newStatus);
+                    return CHANGED;
                 } else {
-                    String resultSearch = "<td>";
-                    int resultIndex = curLine.indexOf(resultSearch);
-                    if (resultIndex != -1) {
-                        output += posten.readLine().trim() + " ";
-                        status++;
-                    }
+                    return NOT_CHANGED;
                 }
             }
+            if(endIndex == -1) {
+                throw new IOException("Unable to parse target site, have they changed their layout or something?");
+            }
+
+            // remove all tags, whitespace - and trim
+            String newStatus = posten.substring(startIndex, endIndex)
+                    .replaceAll("\\<.*?\\>","").replaceAll("\\s+", " ").trim();
+
+            // now find the date field
+            startIndex = posten.indexOf("<div class=\"sporing-sendingandkolli-latestevent-date\">", startIndex);
+            endIndex = posten.indexOf("</div>", startIndex);
+
+            if(startIndex == -1 || endIndex == -1) {
+                throw new IOException("Unable to parse target site, have they changed their layout or something?");
+            }
+
+            // remove all tags, whitespace - and trim
+            newStatus += " " + posten.substring(startIndex, endIndex)
+                    .replaceAll("\\<.*?\\>","").replaceAll("\\s+", " ").trim();
+
             String oldStatus = getStatus();
-            String newStatus = output.replace("<br/>", " - ").trim();
-            if(newStatus.contains("UTLEVERT")) {
+            if(newStatus.startsWith("Sendingen er utlevert")) {
                 setStatus(newStatus);
                 return DELIVERED;
             } else if(!oldStatus.equals(newStatus)) {
