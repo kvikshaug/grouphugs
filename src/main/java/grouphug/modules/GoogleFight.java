@@ -22,7 +22,6 @@ public class GoogleFight implements TriggerListener {
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
-
         if(!message.contains(TRIGGER_VS)) {
             Grouphug.getInstance().sendMessage(sender+", try "+Grouphug.MAIN_TRIGGER+Grouphug.HELP_TRIGGER+" "+TRIGGER_HELP);
             return;
@@ -35,20 +34,21 @@ public class GoogleFight implements TriggerListener {
             String hits1 = search(query1);
             String hits2 = search(query2);
 
-            if(hits1 == null)
+            if(hits1 == null) {
                 hits1 = "no";
-            if(hits2 == null)
+            }
+            if(hits2 == null) {
                 hits2 = "no";
+            }
 
             Grouphug.getInstance().sendMessage(query1+": "+hits1+" results\n"+query2+": "+hits2+" results");
-
         } catch(IOException e) {
             Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)");
             System.err.println(e.getMessage()+"\n"+e.getCause());
+            e.printStackTrace(System.err);
         }
     }
 
-    // TODO uhm, review this whole file, it was done in a hurry just to see if it'd work
     public String search(String query) throws IOException {
         BufferedReader google = Web.prepareBufferedReader("http://www.google.com/search?q="+query.replace(' ', '+'));
 
