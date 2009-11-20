@@ -23,6 +23,7 @@ public class WordCount implements TriggerListener, MessageListener {
     private static final String TRIGGER = "wc";
     private static final String TRIGGER_TOP = "wctop";
     private static final String TRIGGER_BOTTOM = "wcbottom";
+    private static final String TRIGGER_REMOVE = "wcrm";
     private static final String WORDS_DB= "words";
     private static final int LIMIT = 5;
     private static final DateFormat df = new SimpleDateFormat("d. MMMMM yyyy");
@@ -35,11 +36,13 @@ public class WordCount implements TriggerListener, MessageListener {
             moduleHandler.addTriggerListener(TRIGGER, this);
             moduleHandler.addTriggerListener(TRIGGER_TOP, this);
             moduleHandler.addTriggerListener(TRIGGER_BOTTOM, this);
+            moduleHandler.addTriggerListener(TRIGGER_REMOVE, this);
             moduleHandler.addMessageListener(this);
             moduleHandler.registerHelp(TRIGGER_HELP, "Counts the number of words/lines a person has said\n" +
                     "To check how many words someone has said, use " +Grouphug.MAIN_TRIGGER + TRIGGER + " <nick>\n" +
                     "Top 5: " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP + "\n" +
-                    "Bottom 5: " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM);
+                    "Bottom 5: " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM + "\n" +
+                    "Remove stats count: " + Grouphug.MAIN_TRIGGER + TRIGGER_REMOVE + " <nick>");
             System.out.println("Wordcount module loaded.");
         } catch(SQLUnavailableException ex) {
             System.err.println("WordCount startup error: SQL is unavailable!");
@@ -71,7 +74,9 @@ public class WordCount implements TriggerListener, MessageListener {
     }
 
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
-        addWords(sender, message);
+        if(!message.startsWith(Grouphug.MAIN_TRIGGER + TRIGGER_REMOVE) || !message.endsWith(sender)) {
+            addWords(sender, message);
+        }
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
@@ -81,6 +86,25 @@ public class WordCount implements TriggerListener, MessageListener {
             showScore(true);
         } else if(trigger.equals(TRIGGER_BOTTOM)) {
             showScore(false);
+        } else if(trigger.equals(TRIGGER_REMOVE)) {
+            if(!sender.equalsIgnoreCase(message)) {
+                Grouphug.getInstance().sendMessage("Sorry, as a safety precaution, this function can only be used " +
+                        "by a user with the same nick as the one that's being removed.");
+            } else {
+                try {
+                    ArrayList<String> params = new ArrayList<String>();
+                    params.add(message);
+                    if(sqlHandler.delete("delete from "+WORDS_DB+" where nick=?;", params) == 0) {
+                        Grouphug.getInstance().sendMessage("DB reports that no such nick has been recorded.");
+                    } else {
+                        Grouphug.getInstance().sendMessage(sender+", you now have no words counted.");
+                    }
+                } catch(SQLException ex) {
+                    Grouphug.getInstance().sendMessage("Crap, SQL barfed on me. Check the logs if you wanna know why.");
+                    System.err.println(ex);
+                    ex.printStackTrace(System.err);
+                }
+            }
         }
     }
 
