@@ -12,14 +12,13 @@ import java.util.ArrayList;
 public class Confession implements TriggerListener {
     private static final String TRIGGER = "gh";
     private static final String KEYWORD_NEWEST = "-newest";
-    private static String errorConfession = "I have nothing to confess at the moment, please try again later.";
 
     public Confession(ModuleHandler moduleHandler) {
         moduleHandler.addTriggerListener(TRIGGER, this);
         moduleHandler.registerHelp("confession", "Confession: Outputs a confession: random, newest or by search.\n" +
-                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER+"\n" +
-                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" -newest\n" +
-                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <searchword(s)>");
+                "  "+Grouphug.MAIN_TRIGGER+TRIGGER+"\n" +
+                "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" -newest\n" +
+                "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <searchword(s)>");
         System.out.println("Confession module loaded.");
     }
 
@@ -29,49 +28,27 @@ public class Confession implements TriggerListener {
             // Check if argument is provided
             ConfessionItem conf;
             if(message.contains(KEYWORD_NEWEST)) {
-                conf = newest();
+                conf = getConfession("http://confessions.grouphug.us/confessions/new");
             } else {
                 // check for search-words
                 if(!message.equals("")) {
-                    conf = search(message);
+                    try {
+                        URL confessionURL = Web.googleSearch(message+"+site:grouphug.us/confessions/").get(0);
+                        conf = getConfession(confessionURL.toString());
+                    } catch(IndexOutOfBoundsException ex) {
+                        Grouphug.getInstance().sendMessage("No one has confessed about their "+message+" problem yet.");
+                        return;
+                    }
                 } else {
-                    conf = random();
+                    conf = getConfession("http://confessions.grouphug.us/random");
                 }
             }
 
-            if(conf == null) {
-                Grouphug.getInstance().sendMessage(errorConfession);
-            } else {
-                Grouphug.getInstance().sendMessage(conf.toString(), true);
-            }
+            Grouphug.getInstance().sendMessage(conf.toString(), true);
         } catch(IOException ex) {
             Grouphug.getInstance().sendMessage("Sorry, the intertubes seem to be clogged up, " +
                     "I catched an IOException.");
             ex.printStackTrace();
-        }
-    }
-
-    private ConfessionItem random() throws IOException {
-        return getConfession("http://confessions.grouphug.us/random");
-    }
-
-    private ConfessionItem newest() throws IOException {
-        return getConfession("http://confessions.grouphug.us/confessions/new");
-    }
-
-    // TODO - this should not "invent" a new ConfessionItem in order to provide an error message.
-    /**
-     * Searches for a keyword in a confession.
-     * @param query the keyword(s) to search for
-     * @return the first confession found with the keyword
-     * @throws java.io.IOException sometimes
-     */
-    private ConfessionItem search(String query) throws IOException {
-        try {
-            URL confessionURL = Web.googleSearch(query+"+site:grouphug.us/confessions/").get(0);
-            return getConfession(confessionURL.toString());
-        } catch(IndexOutOfBoundsException ex) {
-            return new ConfessionItem("No one has confessed about their "+query+" problem yet.");
         }
     }
 
