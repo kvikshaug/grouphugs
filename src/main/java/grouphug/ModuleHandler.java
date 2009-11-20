@@ -46,7 +46,6 @@ public class ModuleHandler {
         new Seen(this);
         new Slang(this);
         new Tracking(this);
-        new Translate(this);
         new Upload(this);
         new URLCatcher(this);
         new WordCount(this);
