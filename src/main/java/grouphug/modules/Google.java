@@ -54,10 +54,19 @@ public class Google implements TriggerListener {
             }
 
             for(int i=1; i<=resultCount; i++) {
-                String title = Web.fetchTitle(urls.get(i-1).toString());
-                if(title.length() > TITLE_MAX_LENGTH) {
-                    title = title.substring(0, TITLE_MAX_LENGTH - 6); // minus the 6 ' (...)'-chars
-                    title = title.concat(" (...)");
+                String title;
+                try {
+                    title = Web.fetchTitle(urls.get(i-1).toString());
+                    if(title.length() > TITLE_MAX_LENGTH) {
+                        title = title.substring(0, TITLE_MAX_LENGTH - 6); // minus the 6 ' (...)'-chars
+                        title = title.concat(" (...)");
+                    }
+                } catch(IllegalArgumentException ex) {
+                    title = "(image/audio/video)";
+                } catch(IOException ex) {
+                    title = "(unable to fetch title)";
+                    System.err.println(ex);
+                    ex.printStackTrace(System.err);
                 }
 
                 Grouphug.getInstance().sendMessage(urls.get(i-1).toString() + " - " + title);

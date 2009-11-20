@@ -41,9 +41,10 @@ public class URLCatcher implements MessageListener {
                     Grouphug.getInstance().sendMessage("Title: " + Web.entitiesToChars(title.trim()));
                 }
             }
+        } catch(IllegalArgumentException ex) {
+            System.err.println("URLCatcher was unable to fetch title: " + ex.getMessage());
         } catch(IOException ex) {
             System.err.println("URLCatcher was unable to fetch title, ignoring this URL.");
-            System.err.println("Note: This error is pretty much harmless.");
             ex.printStackTrace();
             // Maybe it's not a good idea to talk when an error occurs; people may very well paste
             // invalid lines and we wouldn't want gh to complain every time that happens now would we?

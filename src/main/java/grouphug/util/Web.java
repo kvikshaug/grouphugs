@@ -132,12 +132,30 @@ public class Web {
 
     /**
      * Fetch the title for the specified URL
-     * @param URL the url to find a title in
+     * @param urlString the url to find a title in
      * @return the parsed title
      * @throws java.io.IOException if I/O fails
      */
-    public static String fetchTitle(String URL) throws IOException {
-        BufferedReader input = prepareBufferedReader(URL, 20000);
+    public static String fetchTitle(String urlString) throws IOException {
+        urlString = urlString.replace(" ", "%20");
+
+        URL url = new URL(urlString);
+        System.out.println("Web util opening: '" + urlString + "'...");
+        URLConnection urlConn = url.openConnection();
+
+        urlConn.setConnectTimeout(20000); // set to 20 seconds, we're GUESSING that that's what we want
+        // Pretend we're using a proper browser and OS :)
+        urlConn.setRequestProperty("User-Agent", "Opera/9.80 (X11; Linux i686; U; en) Presto/2.2.15 Version/10.01");
+
+        if(urlConn.getContentType().startsWith("image") ||
+                urlConn.getContentType().startsWith("audio") ||
+                urlConn.getContentType().startsWith("video")) {
+            throw new IllegalArgumentException("URL of content-type " + urlConn.getContentType() + " isn't likely " +
+                    "to contain an html title.");
+        }
+
+        // assume utf-8, we're still GUESSING
+        BufferedReader input = new BufferedReader(new InputStreamReader(urlConn.getInputStream(), "UTF-8"));
 
         String htmlLine;
         int titleIndex;
