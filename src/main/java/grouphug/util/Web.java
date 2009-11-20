@@ -147,15 +147,16 @@ public class Web {
         // Pretend we're using a proper browser and OS :)
         urlConn.setRequestProperty("User-Agent", "Opera/9.80 (X11; Linux i686; U; en) Presto/2.2.15 Version/10.01");
 
+        // assume utf-8, we're still GUESSING
+        BufferedReader input = new BufferedReader(new InputStreamReader(urlConn.getInputStream(), "UTF-8"));
+
+        // check the content-type
         if(urlConn.getContentType().startsWith("image") ||
                 urlConn.getContentType().startsWith("audio") ||
                 urlConn.getContentType().startsWith("video")) {
             throw new IllegalArgumentException("URL of content-type " + urlConn.getContentType() + " isn't likely " +
                     "to contain an html title.");
         }
-
-        // assume utf-8, we're still GUESSING
-        BufferedReader input = new BufferedReader(new InputStreamReader(urlConn.getInputStream(), "UTF-8"));
 
         String htmlLine;
         int titleIndex;
