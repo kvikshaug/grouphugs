@@ -27,14 +27,11 @@ public class Factoid implements MessageListener {
 
     private static final String TRIGGER_HELP = "factoid";
 
-    private static final String TRIGGER_MAIN = "!factoid";
-    private static final String TRIGGER_RANDOM = "random";
+    private static final String TRIGGER_MAIN = "factoid";
+    private static final String TRIGGER_RANDOM = "randomfactoid";
 
-    private static final String TRIGGER_MAIN_ADD = "<on> ";
-    private static final String TRIGGER_MAIN_DEL = "<forget> ";
-
-    private static final String TRIGGER_SHORT_ADD = "!on ";
-    private static final String TRIGGER_SHORT_DEL = "!forget ";
+    private static final String TRIGGER_ADD = "on";
+    private static final String TRIGGER_DEL = "forget";
 
     private static final String SEPARATOR_MESSAGE = " <say> ";
     private static final String SEPARATOR_ACTION = " <do> ";
@@ -59,15 +56,14 @@ public class Factoid implements MessageListener {
             // TODO use triggers where appropriate; register multiple trigger words instead of just using onMessage
             moduleHandler.addMessageListener(this);
             moduleHandler.registerHelp(TRIGGER_HELP, "Factoid: Make me say or do \"reply\" when someone says \"trigger\".\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_SHORT_ADD + "trigger <say> reply\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_SHORT_ADD + "trigger <do> reply\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_SHORT_DEL + "trigger\n" +
-                   "Other triggers, to view info, or get a random factoid:\n" +
-                   //"  "+Grouphug.MAIN_TRIGGER+TRIGGER_MAIN + " trigger\n" +
-                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_MAIN + " " + TRIGGER_RANDOM + "\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_ADD +    " trigger <say> reply\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_ADD +    " trigger <do> something\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_DEL +    " trigger\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_MAIN +   " trigger    -> show information about a factoid\n" +
+                   "  "+Grouphug.MAIN_TRIGGER+TRIGGER_RANDOM + "            -> trigger a random factoid\n" +
                    " - The string \"$sender\" will be replaced with the nick of the one triggering the factoid.\n" +
                    " - A star (*) can be any string of characters.\n" +
-                   " - Regex can be used, but 1) remember that * is replaced with .* and 2) this will probably change very soon.");
+                   " - Regex can be used, but remember that * is replaced with .*");
             System.out.println("Factoid module loaded.");
         } catch(SQLUnavailableException ex) {
             System.err.println("Factoid startup: SQL is unavailable!");
@@ -78,16 +74,11 @@ public class Factoid implements MessageListener {
 
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
 
-        // If trying to ADD a NEW factoid (with the main trigger !factoid <on> or the shorttrigger !on)
-        if(message.startsWith(TRIGGER_MAIN + TRIGGER_MAIN_ADD) || message.startsWith(TRIGGER_SHORT_ADD)){
+        // If trying to ADD a NEW factoid
+        if(message.startsWith(TRIGGER_ADD)){
 
             // First parse the line to find the trigger, reply, and if it's a message or action
-            // Do this based on what kind of trigger that was used
-            String line;
-            if(message.startsWith(TRIGGER_MAIN + TRIGGER_MAIN_ADD))
-                line = message.substring(TRIGGER_MAIN.length()+TRIGGER_MAIN_ADD.length());
-            else
-                line = message.substring(TRIGGER_SHORT_ADD.length());
+            String line = message.substring(TRIGGER_ADD.length());
 
             boolean replyMessage;
             String trigger, reply;
@@ -117,16 +108,9 @@ public class Factoid implements MessageListener {
 
         }
         // Not trying to ADD a new factoid, so check if we're trying to REMOVE one
-        else if(message.startsWith(TRIGGER_MAIN + TRIGGER_MAIN_DEL) || message.startsWith(TRIGGER_SHORT_DEL)) {
-
-            // Parse the line, based on what kind of trigger that was used
-            String trigger;
-            if(message.startsWith(TRIGGER_MAIN + TRIGGER_MAIN_DEL))
-                trigger = message.substring(TRIGGER_MAIN.length()+ TRIGGER_MAIN_DEL.length());
-            else
-                trigger = message.substring(TRIGGER_SHORT_DEL.length());
-
-            // and try to remove it - del() returns true if it's removed, false if there is no such trigger
+        else if(message.startsWith(TRIGGER_DEL)) {
+            String trigger = message.substring(TRIGGER_DEL.length());
+            // try to remove it - del() returns true if it's removed, false if there is no such trigger
             if(del(trigger)) {
                 Grouphug.getInstance().sendMessage("I no longer know of this "+trigger+" that you speak of.");
             } else {
