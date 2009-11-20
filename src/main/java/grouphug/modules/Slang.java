@@ -36,6 +36,7 @@ public class Slang implements TriggerListener {
             message = message.replace("-ex", "").trim();
         } else {
             includeExample = false;
+            message = message.trim();
         }
 
         // Check if the line ends with a number - in which case a specified slangitem is to be extracted
@@ -49,10 +50,9 @@ public class Slang implements TriggerListener {
             // do nothing - if the number hasn't been set, we know it didn't work
         }
 
-        message = message.trim();
-
-        if(number <= 0)
+        if(number <= 0) {
             number = 1;
+        }
 
         SlangItem si;
         try {
@@ -61,22 +61,19 @@ public class Slang implements TriggerListener {
             Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)");
             System.err.println(e);
             return;
-        } catch(Exception e) {
-            // TODO small hack (better than the previous one): A general Exception is only thrown
-            // TODO by us when no slang was found
+        } catch(NullPointerException ex) {
             Grouphug.getInstance().sendMessage("No slang found for "+message+".");
             return;
         }
 
         String reply;
-        if(includeExample)
+        if(includeExample) {
             reply = si.getExample();
-        else
+        } else {
             reply = si.getWord()+" ("+si.getNumber()+" of "+Slang.slangCount+"): "+ si.getDefinition();
+        }
 
-        reply = Web.entitiesToChars(reply);
-
-        Grouphug.getInstance().sendMessage(reply, true);
+        Grouphug.getInstance().sendMessage(Web.entitiesToChars(reply), true);
     }
 
     private String getSlangXML(String query) throws IOException {
@@ -107,16 +104,9 @@ public class Slang implements TriggerListener {
             }
         }
         is.close();
-        //if(buffer.length == bytesRead) {
-            return new String(buffer);
-        /*} else {
-            byte[] response = new byte[bytesRead];
-            System.arraycopy(buffer, 0, response, 0, bytesRead);
-            return new String(buffer);
-        }*/
+        return new String(buffer);
     }
 
-    // TODO isn't this able to fail somewhere? throw exception?
     private SlangItem parseXML(String xml, int number) {
 
         String wordXMLStart = "<word xsi:type=\"xsd:string\">", wordXMLEnd = "</word>";
@@ -132,10 +122,10 @@ public class Slang implements TriggerListener {
         }
         Slang.slangCount = slangCount;
 
-        if(number > slangCount)
+        if(number > slangCount) {
             number = slangCount;
+        }
 
-        // TODO hack, because number decrements, we copy it for use further down...
         int orgNumber = number;
 
         // Search through the definitions for the number we want, "</example>" defining the end scope of one definition
@@ -145,11 +135,14 @@ public class Slang implements TriggerListener {
             number--;
         }
 
-        String word = xml.substring(xml.indexOf(wordXMLStart, index) + wordXMLStart.length(), xml.indexOf(wordXMLEnd, index));
-        String definition = xml.substring(xml.indexOf(definitionXMLStart, index) + definitionXMLStart.length(), xml.indexOf(definitionXMLEnd, index));
-        String example = xml.substring(xml.indexOf(exampleXMLStart, index) + exampleXMLStart.length(), xml.indexOf(exampleXMLEnd, index));
-
-        return new SlangItem(orgNumber, word, definition, example);
+        try {
+            String word = xml.substring(xml.indexOf(wordXMLStart, index) + wordXMLStart.length(), xml.indexOf(wordXMLEnd, index));
+            String definition = xml.substring(xml.indexOf(definitionXMLStart, index) + definitionXMLStart.length(), xml.indexOf(definitionXMLEnd, index));
+            String example = xml.substring(xml.indexOf(exampleXMLStart, index) + exampleXMLStart.length(), xml.indexOf(exampleXMLEnd, index));
+            return new SlangItem(orgNumber, word, definition, example);
+        } catch(StringIndexOutOfBoundsException ex) {
+            throw new NullPointerException("This is a replacement NPE in order to detect a non-existing slang.");
+        }
     }
 
     private static class SlangItem {
