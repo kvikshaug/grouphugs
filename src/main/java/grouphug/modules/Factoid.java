@@ -21,9 +21,6 @@ import java.util.Random;
  */
 public class Factoid implements MessageListener, TriggerListener {
 
-    // TODO - dynamic reply, with username, more?
-    // TODO - more details of factiod ? time ?
-
     private ArrayList<FactoidItem> factoids = new ArrayList<FactoidItem>();
 
     private static final String TRIGGER_HELP = "factoid";
