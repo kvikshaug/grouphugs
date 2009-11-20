@@ -33,6 +33,8 @@ public class WordCount implements TriggerListener, MessageListener {
         try {
             sqlHandler = SQLHandler.getSQLHandler();
             moduleHandler.addTriggerListener(TRIGGER, this);
+            moduleHandler.addTriggerListener(TRIGGER_TOP, this);
+            moduleHandler.addTriggerListener(TRIGGER_BOTTOM, this);
             moduleHandler.addMessageListener(this);
             moduleHandler.registerHelp(TRIGGER_HELP, "Counts the number of words/lines a person has said\n" +
                     "To check how many words someone has said, use " +Grouphug.MAIN_TRIGGER + TRIGGER + " <nick>\n" +
@@ -69,30 +71,31 @@ public class WordCount implements TriggerListener, MessageListener {
     }
 
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
-        if(message.equals(Grouphug.MAIN_TRIGGER + TRIGGER_TOP)) {
-            showScore(true);
-        } else if(message.equals(Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM)) {
-            showScore(false);
-        }
         addWords(sender, message);
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
-        print(message);
+        if(trigger.equals(TRIGGER)) {
+            print(message);
+        } else if(trigger.equals(TRIGGER_TOP)) {
+            showScore(true);
+        } else if(trigger.equals(TRIGGER_BOTTOM)) {
+            showScore(false);
+        }
     }
-
-    // TODO some duplicated code in the following two methods, can this be simplified ?
 
     private void showScore(boolean top) {
         String reply;
-        if(top)
+        if(top) {
             reply = "The biggest losers are:\n";
-        else
+        } else {
             reply = "The laziest idlers are:\n";
+        }
         try {
             String query = ("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" ORDER BY words ");
-            if(top)
+            if(top) {
                 query += "DESC ";
+            }
             query += "LIMIT "+LIMIT+";";
             ArrayList<Object[]> rows = sqlHandler.select(query);
             int place = 1;
@@ -103,12 +106,13 @@ public class WordCount implements TriggerListener, MessageListener {
                 Date since = SQL.sqlDateTimeToDate((String)row[4]);
                 reply += (place++)+". "+row[1]+ " ("+words+" words, "+lines+" lines, "+
                         (new DecimalFormat("0.0")).format(wpl)+
-                        " wpl) since "+df.format(since)+"\n";
+                        " wpl)\n";// since "+df.format(since)+"\n";
             }
-            if(top)
+            if(top) {
                 reply += "I think they are going to need a new keyboard soon.";
-            else
+            } else {
                 reply += "Lazy bastards...";
+            }
             Grouphug.getInstance().sendMessage(reply);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
@@ -133,7 +137,7 @@ public class WordCount implements TriggerListener, MessageListener {
 
                 Grouphug.getInstance().sendMessage(message + " has uttered "+words+ " words in "+lines+" lines ("+
                         (new DecimalFormat("0.0")).format(wpl)+
-                        " wpl) since "+df.format(since));
+                        " wpl)");// since "+df.format(since));
             }
 
         } catch(SQLException e) {
