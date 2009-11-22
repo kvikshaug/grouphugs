@@ -56,6 +56,7 @@ public class Upload implements TriggerListener {
         try {
             if(keyword.length() <= 1) {
                 Grouphug.getInstance().sendMessage("Please use at least 2 search characters.");
+                return;
             }
             ArrayList<Object[]> rows = sqlHandler.select("SELECT filename, nick, keyword FROM "+ UPLOAD_DB+" WHERE " +
                     "keyword LIKE '%"+keyword+"%' OR filename LIKE '%"+keyword+"%';");
