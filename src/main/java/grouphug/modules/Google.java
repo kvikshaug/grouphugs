@@ -17,7 +17,7 @@ public class Google implements TriggerListener {
     private static final String TRIGGER = "google";
     private static final String TRIGGER_ALT = "g";
     private static final String TRIGGER_HELP = "google";
-    private static final int TITLE_MAX_LENGTH = 40;
+    private static final int TITLE_MAX_LENGTH = 80;
 
     public Google(ModuleHandler moduleHandler) {
         moduleHandler.addTriggerListener(TRIGGER, this);
