@@ -25,7 +25,7 @@ define "gh" do
   compile.options.target = '1.6'
 
   # compile against maven artifacts
-  compile.with artifacts(:sqlite, :pircbot, :jdom)
+  compile.with artifacts(:sqlite, :pircbot, :jdom, :tagsoup)
 
 
   ############################################################################
@@ -33,5 +33,5 @@ define "gh" do
   ############################################################################
   # package against maven artifacts
   package(:jar).with :manifest => {"Main-Class" => "grouphug.Grouphug",
-                                   "Class-Path" => artifacts(:sqlite, :pircbot, :jdom).each(&:invoke).map(&:name).join(" ")  }
+                                   "Class-Path" => artifacts(:sqlite, :pircbot, :jdom, :tagsoup).each(&:invoke).map(&:name).join(" ")  }
 end
