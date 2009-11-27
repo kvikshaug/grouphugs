@@ -9,8 +9,13 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.jdom.Document;
 import org.jdom.xpath.XPath;
+import org.mozilla.intl.chardet.HtmlCharsetDetector;
+import org.mozilla.intl.chardet.nsDetector;
+import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
+import org.mozilla.intl.chardet.nsPSMDetector;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
@@ -35,7 +40,7 @@ public class URLCatcher implements MessageListener {
 
     @Override
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
-        for(String url : findAllUrls(message)) {
+        for(URL url : findAllUrls(message)) {
             String title = null;
             try {
                 title = getHTMLTitle(url);
@@ -64,11 +69,9 @@ public class URLCatcher implements MessageListener {
      * @throws java.io.IOException if we run in to trouble somewhere.
      * @throws org.jdom.JDOMException if parsing fails
      */
-    private String getHTMLTitle(String url) throws IOException, JDOMException {
-        URL realURL = new URL(url);
-
+    private String getHTMLTitle(URL url) throws IOException, JDOMException {
         SAXBuilder builder = new SAXBuilder("org.ccil.cowan.tagsoup.Parser"); // build a JDOM tree from the SAX stream provided by tagsoup
-        Document doc = builder.build(realURL);
+        Document doc = builder.build(url);
 
         XPath titlePath = XPath.newInstance("/h:html/h:head/h:title"); // find the <title> element using XPath
         titlePath.addNamespace("h","http://www.w3.org/1999/xhtml");
@@ -81,11 +84,15 @@ public class URLCatcher implements MessageListener {
      * @param string the strings to look for urls in.
      * @return any urls found, in a List.
      */
-    private List<String> findAllUrls(String string) {
-        ArrayList<String> urls = new ArrayList<String>();
+    private List<URL> findAllUrls(String string) {
+        ArrayList<URL> urls = new ArrayList<URL>();
 
-        for (String s : URI_SCHEMES) {
-            urls.addAll(Web.findURIs(s, string));
+        for (String scheme : URI_SCHEMES) {
+            for (String url : Web.findURIs(scheme, string)) {
+                try {
+                    urls.add(new URL(url));
+                } catch (MalformedURLException murle) {/* do not want */}
+            }
         }
 
         return urls;
