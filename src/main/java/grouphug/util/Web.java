@@ -261,6 +261,7 @@ public class Web {
                 .replace("&lsaquo;", "‹")
                 .replace("&raquo;", "»")
                 .replace("&rsaquo;", "›")
+                .replace("&rsquo;", "'")
                 .replace("&aelig;", "æ")
                 .replace("&Aelig;", "Æ")
                 .replace("&oslash;", "ø")
