@@ -69,8 +69,8 @@ public class URLCatcher implements MessageListener {
             title = title.trim();
 
             // strip newlines
-            title = title.replaceAll("\n", " ");
             title = title.replaceAll("\r\n", " ");
+            title = title.replaceAll("\n", " ");
 
             // strip tabs
             title = title.replaceAll("\t", " ");
