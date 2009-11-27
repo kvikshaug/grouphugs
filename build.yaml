@@ -3,3 +3,4 @@ artifacts:
     pircbot: pircbot:pircbot:jar:1.4.2
     jdom: org.jdom:jdom:jar:1.1
     tagsoup: org.ccil.cowan.tagsoup:tagsoup:jar:1.1.3
+    jaxen: jaxen:jaxen:jar:1.1.1
