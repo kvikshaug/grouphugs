@@ -1,8 +1,7 @@
 package grouphug.util;
 
-import org.apache.commons.io.IOUtils;
-
-import static org.apache.commons.io.IOUtils.*;
+import static org.apache.commons.io.IOUtils.closeQuietly;
+import static org.apache.commons.io.IOUtils.toByteArray;
 import org.mozilla.intl.chardet.nsDetector;
 import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
 import org.mozilla.intl.chardet.nsPSMDetector;
