@@ -14,9 +14,6 @@ import java.net.URL;
  * in turn, is based on the Mozilla universal character detection library.
  */
 public class CharEncoding {
-    /**
-     * Assume this encoding if we're unable to guess an encoding.
-     */
     public static final int BYTE_ARR_SIZE = 1024;
 
     /**
