@@ -3,6 +3,7 @@ package grouphug.modules;
 import grouphug.Grouphug;
 import grouphug.ModuleHandler;
 import grouphug.listeners.MessageListener;
+import grouphug.util.CharEncoding;
 import grouphug.util.Web;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -26,6 +27,9 @@ public class URLCatcher implements MessageListener {
     private static final String[] URI_SCHEMES = new String[]{"http://", "https://"};
     private static final String HELP_TRIGGER = "urlcatcher";
     private static final int TITLE_MAX_LENGTH = 100;
+    public static final String DEFAULT_ENCODING = "UTF-8";
+
+
     public URLCatcher(ModuleHandler moduleHandler) {
         moduleHandler.addMessageListener(this);
         moduleHandler.registerHelp(HELP_TRIGGER, "URLCatcher tries to catch http:// or https:// URLs in messages to the channel, tries " +
@@ -51,8 +55,26 @@ public class URLCatcher implements MessageListener {
     }
 
     private String getTitle(URL url) {
-        String encoding = Web.guessEncoding(url);
+
+        String encoding = null;
+        try {
+            encoding = CharEncoding.guessEncoding(url, DEFAULT_ENCODING);
+        } catch (IOException e) {
+            encoding = DEFAULT_ENCODING;
+        }
+
         Reader r = setUpInputReader(url, encoding);
+
+        /* XXX TODO FIXME BROKEN ATM
+        Reader r = null;
+        try {
+            r = CharEncoding.getReaderWithEncoding(url, "UTF-8");
+        } catch (IOException ioe) {
+            try {
+                r.close();
+            } catch (IOException ignored) {}
+        }
+        */
 
         String title = null;
         try {

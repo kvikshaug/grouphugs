@@ -1,9 +1,5 @@
 package grouphug.util;
 
-import org.mozilla.intl.chardet.nsDetector;
-import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
-import org.mozilla.intl.chardet.nsPSMDetector;
-
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
@@ -284,78 +280,5 @@ public class Web {
                 .replace("&#8220;", "\"")
                 .replace("&#8221;", "\"")
                 .replace("&#8230;", "...");
-    }
-
-    /**
-     * Tries to guess the character encoding of the document located at url.
-     *
-     * @param url the url to examine
-     * @return the character encoding detected.
-     */
-    public static String guessEncoding(URL url) {
-        CharsetDetectionObserver cdo = new CharsetDetectionObserver();
-        return guessEncoding(url, cdo);
-    }
-
-    private static String guessEncoding(URL url, CharsetDetectionObserver cdo) {
-        // Initialize the nsDetector() ;
-        nsDetector det = new nsDetector(nsPSMDetector.ALL) ;
-
-        // Set an observer...
-        det.Init(cdo);
-
-        BufferedInputStream imp = null;
-        try {
-            imp = new BufferedInputStream(url.openStream());
-        } catch (IOException e) {
-            System.err.println("[guessEncoding]: caught IOException while trying to guess encoding");
-        }
-
-        byte[] buf = new byte[1024];
-        int len;
-        boolean done = false ;
-        boolean isAscii = true ;
-
-        if (imp == null) { return cdo.getEncoding(); } /* will return UTF-8 */
-
-        try {
-            while((len = imp.read(buf, 0, buf.length)) != -1) {
-                // Check if the stream is only ascii.
-                if (isAscii)
-                    isAscii = det.isAscii(buf,len);
-
-                // DoIt if non-ascii and not done yet.
-                if (!isAscii && !done)
-                    done = det.DoIt(buf, len, false);
-            }
-        } catch (IOException e) {
-            System.err.println("[guessEncoding]: caught IOException while trying to guess encoding");
-        }
-        det.DataEnd();
-
-        return ((CharsetDetectionObserver)cdo).getEncoding();
-    }
-
-    /**
-     * Used for the guessEncoding method.
-     */
-    static class CharsetDetectionObserver implements nsICharsetDetectionObserver {
-        private String encoding = "UTF-8";
-
-        /*
-         * will be called when a matching encoding is found.
-         */
-        @Override
-        public void Notify(String s) {
-            this.encoding = s;
-            System.out.println("[URLCatcher]: found encoding: " + s);
-        }
-
-        /**
-         * @return returns the detected encoding, UTF-8 if no encoding was detected
-         */
-        public String getEncoding() {
-            return this.encoding;
-        }
     }
 }

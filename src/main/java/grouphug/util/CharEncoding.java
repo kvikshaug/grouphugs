@@ -4,14 +4,14 @@ import org.mozilla.intl.chardet.nsDetector;
 import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
 import org.mozilla.intl.chardet.nsPSMDetector;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 
 /**
+ * General utility class for handling different character encodings.
  *
+ * CharEncoding uses the jchardet library for most of the hard bits. jchardet,
+ * in turn, is based on the Mozilla universal character detection library.
  */
 public class CharEncoding {
     /**
@@ -31,6 +31,19 @@ public class CharEncoding {
     }
 
     /**
+     *
+     * @param url
+     * @param defaultEncoding
+     * @return
+     * @throws IOException
+     *
+     * XXX TODO FIXME BROKEN DO NOT USE!
+     */
+    public static Reader getReaderWithEncoding(URL url, String defaultEncoding) throws IOException {
+        return openStreamWithGuessedEncoding(url.openStream(), defaultEncoding);
+    }
+
+    /**
      * Try to guess the character encoding of the document located at url
      * @param url the url to examine
      * @param defaultEncoding the encoding to assume if guessing is
@@ -40,7 +53,7 @@ public class CharEncoding {
      * @throws IOException if we're unable to open the document at url, or if
      * reading the document fails at any point in time
      */
-    private static String guessEncoding(URL url, String defaultEncoding) throws IOException {
+    public static String guessEncoding(URL url, String defaultEncoding) throws IOException {
         return guessEncoding(url.openStream(), defaultEncoding);
     }
 
@@ -71,6 +84,66 @@ public class CharEncoding {
         return guessEncoding(is, defaultEncoding);
     }
 
+    /**
+     * Try to guess the character encoding of the bytes in the stream is, and
+     * return a Reader for the stream is using said encoding
+     * @param is the stream of bytes to examine
+     * @return a Reader using the guessed encoding, or the system default
+     * encoding if guessing is unsuccessful
+     * @throws IOException if we're unable to read is for whatever reason
+     *
+     * * XXX TODO FIXME this method is currently broken!
+     */
+    public static Reader openStreamWithGuessedEncoding(InputStream is) throws IOException {
+        return openStreamWithGuessedEncoding(is, null);
+    }
+
+    /**
+     * Try to guess the character encoding of the bytes in the stream is, and
+     * return a Reader for the stream is using said encoding
+     * @param is the stream of bytes to examine
+     * @param defaultEncoding the character encoding to assume if guessing is
+     * unsuccessful. If null, don't make any assumptions, return a Reader with
+     * the system default encoding
+     * @return a Reader using the guessed encoding, or defaultEncoding if
+     * guessing is unsuccessful. if defaultEncoding is null and guessing is
+     * unsuccessful, a Reader using the system default encoding will be
+     * returned
+     * @throws IOException if we're unable to read is for whatever reason
+     *
+     * XXX TODO FIXME this method is currently broken! see comment below
+     */
+    public static Reader openStreamWithGuessedEncoding(InputStream is, String defaultEncoding) throws IOException {
+        String encoding = guessEncoding(is, defaultEncoding);
+
+        // At this point, is is "broken", that is, it does no longer contain
+        // all the bytes it initially did. This means that if we try to use
+        // the stream for anything useful -- like we're doing below, we're
+        // likely to get bogus results.
+
+        Reader r = null;
+        if (encoding != null) {
+            r = new BufferedReader(new InputStreamReader(is, encoding));
+        } else {
+            if (defaultEncoding != null) {
+                r = new BufferedReader(new InputStreamReader(is, defaultEncoding));
+            } else {
+                r = new BufferedReader(new InputStreamReader(is));
+            }
+        }
+
+        return r;
+    }
+
+    /**
+     * Try to guess the character encoding of the bytes in the stream is
+     * @param is the stream of bytes to examine
+     * @return the name of the encoding we guessed
+     * @throws IOException if we're unable to read is for whatever reason
+     */
+    public static String guessEncoding(InputStream is) throws IOException {
+        return guessEncoding(is, null);
+    }
 
     /**
      * Try to guess the character encoding of the bytes in the stream is
