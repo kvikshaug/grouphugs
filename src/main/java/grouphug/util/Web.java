@@ -1,5 +1,12 @@
 package grouphug.util;
 
+import static org.apache.commons.io.IOUtils.closeQuietly;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+import org.jdom.xpath.XPath;
+
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
@@ -10,6 +17,8 @@ import java.util.ArrayList;
  * performing a search on Google and anything else that might be handy to have here.
  */
 public class Web {
+
+    public static final String DEFAULT_ENCODING = "UTF-8";
 
     /**
      * Fetches a web page for you and returns a nicely formatted arraylist when the whole
@@ -135,61 +144,57 @@ public class Web {
      * @param urlString the url to find a title in
      * @return the parsed title
      * @throws java.io.IOException if I/O fails
+     * @throws org.jdom.JDOMException if parsing HTML fails
      */
-    public static String fetchTitle(String urlString) throws IOException {
-        urlString = urlString.replace(" ", "%20");
-
+    public static String fetchTitle(String urlString) throws IOException, JDOMException {
         URL url = new URL(urlString);
-        System.out.println("Web util opening: '" + urlString + "'...");
-        URLConnection urlConn = url.openConnection();
-
-        urlConn.setConnectTimeout(20000); // set to 20 seconds, we're GUESSING that that's what we want
-        // Pretend we're using a proper browser and OS :)
-        urlConn.setRequestProperty("User-Agent", "Opera/9.80 (X11; Linux i686; U; en) Presto/2.2.15 Version/10.01");
-
-        // assume utf-8, we're still GUESSING
-        BufferedReader input = new BufferedReader(new InputStreamReader(urlConn.getInputStream(), "UTF-8"));
-
-        // check the content-type
-        if(urlConn.getContentType().startsWith("image") ||
-                urlConn.getContentType().startsWith("audio") ||
-                urlConn.getContentType().startsWith("video")) {
-            throw new IllegalArgumentException("URL of content-type " + urlConn.getContentType() + " isn't likely " +
-                    "to contain an html title.");
-        }
-
-        String htmlLine;
-        int titleIndex;
-        while ((htmlLine = input.readLine()) != null) {
-            if((titleIndex = htmlLine.indexOf("<title")) != -1 ||
-                    (titleIndex = htmlLine.indexOf("<TITLE")) != -1 ||
-                    (titleIndex = htmlLine.indexOf("<Title")) != -1) {
-                String title;
-                int startIndex = htmlLine.indexOf('>', titleIndex) + 1;
-                int endIndex;
-                if((endIndex = htmlLine.indexOf('<', startIndex)) != -1) {
-                    // title is on one line
-                    title = htmlLine.substring(startIndex, endIndex);
-                } else {
-                    // title spans multiple lines (booo *throws tomatoes at website*)
-                    title = htmlLine.substring(startIndex);
-                    htmlLine = input.readLine();
-                    while((endIndex = htmlLine.indexOf('<')) == -1) {
-                        title += htmlLine + "\n";
-                        htmlLine = input.readLine();
-                        if(htmlLine == null) {
-                            throw new IOException("Unable to find end tag for title (this is highly unusual!)");
-                        }
-                    }
-                    title += htmlLine.substring(0, endIndex);
-                }
-                input.close();
-                return entitiesToChars(title.replaceAll("\\s+", " ").trim());
-            }
-        }
-        throw new IOException("Unable to find title start tag.");
+        return fetchTitle(url);
     }
 
+    /**
+     * Fetch the title for the specified URL
+     * @param url the url to find a title in
+     * @return the parsed title
+     * @throws java.io.IOException if I/O fails
+     * @throws org.jdom.JDOMException if parsing HTML fails
+     */
+    public static String fetchTitle(URL url) throws JDOMException, IOException {
+        Reader r = null;
+        try {
+            r = CharEncoding.getReaderWithEncoding(url, DEFAULT_ENCODING);
+        } catch (IOException ioe) {
+            closeQuietly(r);
+        }
+
+        String title = null;
+
+        // build a JDOM tree from the SAX stream provided by tagsoup
+        SAXBuilder builder = new SAXBuilder("org.ccil.cowan.tagsoup.Parser");
+        Document doc = builder.build(r);
+
+        // find the <title> element using XPath
+        XPath titlePath = XPath.newInstance("/h:html/h:head/h:title");
+        titlePath.addNamespace("h","http://www.w3.org/1999/xhtml");
+
+        title = ((Element)titlePath.selectSingleNode(doc)).getText();
+
+        closeQuietly(r);
+
+        // do some tidying up
+        if (title != null) {
+            // strip trailing whitespace
+            title = title.trim();
+
+            // strip newlines
+            title = title.replaceAll("\r\n", " ");
+            title = title.replaceAll("\n", " ");
+
+            // strip tabs
+            title = title.replaceAll("\t", " ");
+        }
+
+        return title;
+    }
 
     /**
      * Find all URIs with a specific URI scheme in a String

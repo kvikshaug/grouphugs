@@ -4,6 +4,7 @@ import grouphug.Grouphug;
 import grouphug.ModuleHandler;
 import grouphug.listeners.TriggerListener;
 import grouphug.util.Web;
+import org.jdom.JDOMException;
 
 import java.io.IOException;
 import java.net.URL;
@@ -64,6 +65,10 @@ public class Google implements TriggerListener {
                 } catch(IllegalArgumentException ex) {
                     title = "(image/audio/video)";
                 } catch(IOException ex) {
+                    title = "(unable to fetch title)";
+                    System.err.println(ex);
+                    ex.printStackTrace(System.err);
+                } catch(JDOMException ex) {
                     title = "(unable to fetch title)";
                     System.err.println(ex);
                     ex.printStackTrace(System.err);
