@@ -20,8 +20,6 @@ public class URLCatcher implements MessageListener {
     private static final String[] URI_SCHEMES = new String[]{"http://", "https://"};
     private static final String HELP_TRIGGER = "urlcatcher";
     private static final int TITLE_MAX_LENGTH = 100;
-    public static final String DEFAULT_ENCODING = "UTF-8";
-
 
     public URLCatcher(ModuleHandler moduleHandler) {
         moduleHandler.addMessageListener(this);
