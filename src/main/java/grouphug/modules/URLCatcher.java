@@ -5,6 +5,7 @@ import grouphug.ModuleHandler;
 import grouphug.listeners.MessageListener;
 import grouphug.util.CharEncoding;
 import grouphug.util.Web;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -55,26 +56,12 @@ public class URLCatcher implements MessageListener {
     }
 
     private String getTitle(URL url) {
-
-        String encoding = null;
-        try {
-            encoding = CharEncoding.guessEncoding(url, DEFAULT_ENCODING);
-        } catch (IOException e) {
-            encoding = DEFAULT_ENCODING;
-        }
-
-        Reader r = setUpInputReader(url, encoding);
-
-        /* XXX TODO FIXME BROKEN ATM
         Reader r = null;
         try {
-            r = CharEncoding.getReaderWithEncoding(url, "UTF-8");
+            r = CharEncoding.getReaderWithEncoding(url, DEFAULT_ENCODING);
         } catch (IOException ioe) {
-            try {
-                r.close();
-            } catch (IOException ignored) {}
+            closeQuietly(r);
         }
-        */
 
         String title = null;
         try {
@@ -98,17 +85,9 @@ public class URLCatcher implements MessageListener {
             title = title.replaceAll("\t", " ");
         }
 
-        return title;
-    }
+        closeQuietly(r);
 
-    private Reader setUpInputReader(URL url, String encoding) {
-        InputStreamReader isr = null;
-        try {
-            isr = new InputStreamReader(url.openStream(), encoding);
-        } catch (IOException e) {
-            System.err.println("[URLCatcher]: caught IOException while initializing reader for parsing");
-        }
-        return isr;
+        return title;
     }
 
     /**
