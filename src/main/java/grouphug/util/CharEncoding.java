@@ -188,11 +188,11 @@ public class CharEncoding {
         }
 
         /**
-         * @param encoding the CharsetDetectionObserver assumes encoding if no
-         * encoding can be found.
+         * @param defaultEncoding the CharsetDetectionObserver assumes defaultEncoding if no
+         * defaultEncoding can be found.
          */
-        CharsetDetectionObserver(String encoding) {
-            this.encoding = encoding;
+        CharsetDetectionObserver(String defaultEncoding) {
+            this.encoding = defaultEncoding;
         }
 
         /*
