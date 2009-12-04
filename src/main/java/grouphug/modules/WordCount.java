@@ -149,7 +149,7 @@ public class WordCount implements TriggerListener, MessageListener {
 
     private void print(String message){
         try{
-            Object[] row = sqlHandler.selectSingle("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick='"+ message +"';");
+            Object[] row = sqlHandler.selectSingle("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick LIKE'"+ message +"';");
 
             if(row == null) {
                 Grouphug.getInstance().sendMessage(message + " doesn't have any words counted.");
