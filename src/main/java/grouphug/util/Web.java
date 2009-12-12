@@ -115,6 +115,9 @@ public class Web {
         urlConn.setConnectTimeout(timeout);
         // Pretend we're using a proper browser and OS :)
         urlConn.setRequestProperty("User-Agent", "Opera/9.80 (X11; Linux i686; U; en) Presto/2.2.15 Version/10.01");
+        // alternative:
+        // "MSIE 4.01; Digital AlphaServer 1000A 4/233; Windows NT; Powered By 64-Bit Alpha Processor"
+        // (just saying)
 
         // TODO encoding should be specified dependent on what the site says it is! but we just assume utf-8 :)
         return new BufferedReader(new InputStreamReader(urlConn.getInputStream(), "UTF-8"));
