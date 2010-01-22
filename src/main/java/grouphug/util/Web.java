@@ -157,6 +157,9 @@ public class Web {
             searchIndex = searchHtml.indexOf("\"");
             searchHtml = searchHtml.substring(0,searchIndex);
 
+            if (searchHtml.equals("E%20html%20PUBLIC%20")) // Ugly bug catcher
+                    return "";
+            
             String rssUrl = "http://www.yr.no" + searchHtml + "varsel.rss";
             rssUrl = rssUrl.replace("æ", "%C3%A6");
             rssUrl = rssUrl.replace("ø", "%C3%B8");
