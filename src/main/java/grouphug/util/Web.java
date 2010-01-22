@@ -143,6 +143,31 @@ public class Web {
     }
 
     /**
+     * Find the temperature of a given location using yr.no's rss.
+     * NOTE: Available cities are hard coded for now.
+     * @param location to get temperature for
+     * @return the temperature given in degree celsius
+     * @throws IOException if I/O fails
+     */
+    public static String temperature(String location) throws IOException {
+        String rssUrl = "http://www.yr.no/sted/Norge/Troms/Troms%C3%B8/Troms%C3%B8_lufthavn/varsel.rss";
+
+        if (location.equals("Trondheim"))
+            rssUrl = "http://www.yr.no/sted/Norge/S%C3%B8r-Tr%C3%B8ndelag/Trondheim/Trondheim/varsel.rss";
+        else if (location.equals("Grimstad"))
+            rssUrl = "http://www.yr.no/sted/Norge/Aust-Agder/Grimstad/Grimstad/varsel.rss";
+        else if (location.equals("Oslo"))
+            rssUrl = "http://www.yr.no/sted/Norge/Oslo/Oslo/Oslo/varsel.rss";
+
+        String rssContent = fetchHtmlLine(rssUrl);
+
+        int locationIndex = rssContent.indexOf("kl.");
+        rssContent = rssContent.substring(locationIndex-8, locationIndex-1);
+        locationIndex = rssContent.indexOf(".");
+        return rssContent.substring(locationIndex+2)+"C ";
+    }
+
+    /**
      * Fetch the title for the specified URL
      * @param urlString the url to find a title in
      * @return the parsed title
