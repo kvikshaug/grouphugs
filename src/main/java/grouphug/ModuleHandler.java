@@ -49,7 +49,7 @@ public class ModuleHandler {
         new Upload(this);
         new URLCatcher(this);
         new WordCount(this);
-        new Temperature(this);
+        new Weather(this);
 
         System.out.println();
         System.out.println(helpers.size() + " help responses registered");

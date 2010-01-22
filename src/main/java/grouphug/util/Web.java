@@ -143,29 +143,31 @@ public class Web {
     }
 
     /**
-     * Find the temperature of a given location using yr.no's rss.
-     * NOTE: Available cities are hard coded for now.
-     * @param location to get temperature for
-     * @return the temperature given in degree celsius
+     * Presents the next weather forecast for a given location using yr.no's rss.
+     * @param the location to find the weather forecast for
+     * @return the weather forecast or blank if location not found.
      * @throws IOException if I/O fails
      */
-    public static String temperature(String location) throws IOException {
-        String rssUrl = "http://www.yr.no/sted/Norge/Troms/Troms%C3%B8/Troms%C3%B8_lufthavn/varsel.rss";
-        location = location.toLowerCase();
+    public static String weather(String location) throws IOException {
+        String searchHtml = fetchHtmlLine("http://www.yr.no/soek.aspx?sted="+location.replace(' ', '+'));
         
-        if (location.equals("trondheim"))
-            rssUrl = "http://www.yr.no/sted/Norge/S%C3%B8r-Tr%C3%B8ndelag/Trondheim/Trondheim/varsel.rss";
-        else if (location.equals("grimstad"))
-            rssUrl = "http://www.yr.no/sted/Norge/Aust-Agder/Grimstad/Grimstad/varsel.rss";
-        else if (location.equals("oslo"))
-            rssUrl = "http://www.yr.no/sted/Norge/Oslo/Oslo/Oslo/varsel.rss";
+        try {
+            int searchIndex = searchHtml.indexOf("<a href=\"/sted/");
+            searchHtml = searchHtml.substring(searchIndex+9,searchIndex+100);
+            searchIndex = searchHtml.indexOf("\"");
+            searchHtml = searchHtml.substring(0,searchIndex);
 
-        String rssContent = fetchHtmlLine(rssUrl);
+            String rssUrl = "http://www.yr.no" + searchHtml + "varsel.rss";
+            searchHtml = fetchHtmlLine(rssUrl);
 
-        int locationIndex = rssContent.indexOf("kl.");
-        rssContent = rssContent.substring(locationIndex-8, locationIndex-1);
-        locationIndex = rssContent.indexOf(".");
-        return rssContent.substring(locationIndex+2)+"C ";
+            searchIndex = searchHtml.indexOf("</title>\n      <description>");
+            searchHtml = searchHtml.substring(searchIndex+28);
+            searchIndex = searchHtml.indexOf("</description>");
+
+            return location + ": " + searchHtml.substring(0,searchIndex);
+        } catch (java.lang.StringIndexOutOfBoundsException e) {
+            return "";
+        }
     }
 
     /**
