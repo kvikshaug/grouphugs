@@ -158,10 +158,15 @@ public class Web {
             searchHtml = searchHtml.substring(0,searchIndex);
 
             String rssUrl = "http://www.yr.no" + searchHtml + "varsel.rss";
+            rssUrl = rssUrl.replace("æ", "%C3%A6");
+            rssUrl = rssUrl.replace("ø", "%C3%B8");
+            rssUrl = rssUrl.replace("å", "%C3%85");
             searchHtml = fetchHtmlLine(rssUrl);
 
-            searchIndex = searchHtml.indexOf("</title>\n      <description>");
-            searchHtml = searchHtml.substring(searchIndex+28);
+            searchIndex = searchHtml.indexOf("<description>");
+            searchHtml = searchHtml.substring(searchIndex+2);
+            searchIndex = searchHtml.indexOf("<description>");
+            searchHtml = searchHtml.substring(searchIndex+13);
             searchIndex = searchHtml.indexOf("</description>");
 
             return location + ": " + searchHtml.substring(0,searchIndex);
