@@ -151,12 +151,13 @@ public class Web {
      */
     public static String temperature(String location) throws IOException {
         String rssUrl = "http://www.yr.no/sted/Norge/Troms/Troms%C3%B8/Troms%C3%B8_lufthavn/varsel.rss";
-
-        if (location.equals("Trondheim"))
+        location = location.toLowerCase();
+        
+        if (location.equals("trondheim"))
             rssUrl = "http://www.yr.no/sted/Norge/S%C3%B8r-Tr%C3%B8ndelag/Trondheim/Trondheim/varsel.rss";
-        else if (location.equals("Grimstad"))
+        else if (location.equals("grimstad"))
             rssUrl = "http://www.yr.no/sted/Norge/Aust-Agder/Grimstad/Grimstad/varsel.rss";
-        else if (location.equals("Oslo"))
+        else if (location.equals("oslo"))
             rssUrl = "http://www.yr.no/sted/Norge/Oslo/Oslo/Oslo/varsel.rss";
 
         String rssContent = fetchHtmlLine(rssUrl);

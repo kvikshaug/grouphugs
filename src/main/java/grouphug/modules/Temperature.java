@@ -4,10 +4,8 @@ import grouphug.Grouphug;
 import grouphug.ModuleHandler;
 import grouphug.listeners.TriggerListener;
 import grouphug.util.Web;
-//import org.jdom.JDOMException;
-a
-import java.io.IOException;
 
+import java.io.IOException;
 
 /**
  * Give the temperature of the given location to the channel.
