@@ -157,9 +157,8 @@ public class Web {
             searchIndex = searchHtml.indexOf("\"");
             searchHtml = searchHtml.substring(0,searchIndex);
 
-            System.out.println("DEBUG: Location: " + searchHtml);
-
-            if (searchHtml.equals("E%20html%20PUBLIC%20")) // Ugly bug catcher
+            // All locations should start with a slash.
+            if (!searchHtml.startsWith("/"))
                     return "";
             
             String rssUrl = "http://www.yr.no" + searchHtml + "varsel.rss";
