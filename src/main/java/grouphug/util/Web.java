@@ -157,6 +157,8 @@ public class Web {
             searchIndex = searchHtml.indexOf("\"");
             searchHtml = searchHtml.substring(0,searchIndex);
 
+            System.out.println("DEBUG: Location: " + searchHtml);
+
             if (searchHtml.equals("E%20html%20PUBLIC%20")) // Ugly bug catcher
                     return "";
             
