@@ -78,7 +78,6 @@ public class Web {
      */
     public static InputStream prepareInputStream(URL url) throws IOException {
         System.out.println("Web util opening: '" + url.toString() + "'...");
-        //try { throw new Exception(); } catch(Exception e) { e.printStackTrace(); }
         URLConnection urlConn = url.openConnection();
         urlConn.setConnectTimeout(DEFAULT_URLCONNECTION_TIMEOUT);
 

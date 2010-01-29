@@ -200,7 +200,6 @@ public class CharEncoding {
         closeQuietly(is);
 
         System.out.println("CharEncoding guesses '"+cdo.getEncoding()+"'.");
-        try { throw new Exception(); } catch(Exception e) { e.printStackTrace(); }
         return cdo.getEncoding();
     }
 
