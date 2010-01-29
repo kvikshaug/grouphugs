@@ -40,8 +40,10 @@ public class IsSiteUp implements TriggerListener {
             Grouphug.getInstance().sendMessage(message + " :: " + result);
         } catch(ParseException ex) {
             Grouphug.getInstance().sendMessage("Sorry, I was unable to parse downforeveryoneorjustme.com.");
+            System.err.println(ex);
         } catch (IOException ex) {
             Grouphug.getInstance().sendMessage("Sorry, I caught an IOException in my throat.");
+            System.err.println(ex);
         }
     }
 
