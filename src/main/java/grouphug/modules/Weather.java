@@ -34,17 +34,19 @@ public class Weather implements TriggerListener {
             Grouphug.getInstance().sendMessage("Try \"!help weather\".");
         else {  
             String[] split = message.split(" ", 2);
+            boolean isSplited = false;
             int n = 0;
             try {
                 n = Integer.parseInt(split[0]) - 1;
+                isSplited = true;
             } catch (NumberFormatException ex) { }
 
             ArrayList<String[]> results = new ArrayList<String[]>();
             try {
-                if (n == 0)
-                    results = Web.weatherLocationSearch(message);
-                else
+                if (isSplited)
                     results = Web.weatherLocationSearch(split[1]);
+                else
+                    results = Web.weatherLocationSearch(message);
 
                 String[] location = results.get(n)[0].split("/");
                 String output = location[4] + "(" + location[3] + ", " +
@@ -66,9 +68,11 @@ public class Weather implements TriggerListener {
             catch (IndexOutOfBoundsException ex) {
                 Grouphug.getInstance().sendMessage("Sorry, I could only find " + results.size() +
                                                    " locations matching \"" + message + "\".");
+                ex.printStackTrace();
             }
             catch (IOException ex) {
                 Grouphug.getInstance().sendMessage("Sorry, yr.no seems to be broken.");
+                ex.printStackTrace();
             }
         }
     }
