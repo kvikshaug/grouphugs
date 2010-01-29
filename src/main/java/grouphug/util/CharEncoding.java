@@ -148,6 +148,12 @@ public class CharEncoding {
 
     /**
      * Try to guess the character encoding of the bytes in the stream is
+     * 
+     * NOTE that this method reads bytes from and closes is, making it
+     * useless after it returns. So if you need the data in is, you have to
+     * buffer it. Take a look at openStreamWithGuessedEncoding() if you want
+     * an example of how to do that.
+     *
      * @param is the stream of bytes to examine
      * @return the name of the encoding we guessed
      * @throws IOException if we're unable to read is for whatever reason
