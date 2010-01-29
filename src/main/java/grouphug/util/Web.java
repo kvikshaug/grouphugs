@@ -206,7 +206,7 @@ public class Web {
             closeQuietly(r);
         }
 
-        String title = null;
+        String title;
 
         // build a JDOM tree from the SAX stream provided by tagsoup
         SAXBuilder builder = new SAXBuilder("org.ccil.cowan.tagsoup.Parser");
