@@ -6,6 +6,8 @@ import grouphug.listeners.TriggerListener;
 import grouphug.util.Web;
 
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.util.ArrayList;
 
 /**
  * Find a weather forecast for the given location and send it to the channel.
@@ -28,22 +30,43 @@ public class Weather implements TriggerListener {
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
-        try {
-            if (message.equals(""))
-                Grouphug.getInstance().sendMessage("Try \"!help weather\".");
-            else {
-                String forecast = Web.weather(message);
+        if (message.equals(""))
+            Grouphug.getInstance().sendMessage("Try \"!help weather\".");
+        else {  
+            String[] split = message.split(" ");
+            int n = 0;
+            try {
+                n = Integer.parseInt(split[0]) - 1;
+            } catch (NumberFormatException ex) { }
+
+            ArrayList<String[]> results = new ArrayList<String[]>();
+            try {
+                results = Web.weatherLocationSearch(message);
+
+                String[] location = results.get(n)[0].split("/");
+                String output = location[4] + "(" + location[3] + ", " +
+                                location[2] + ") " + results.get(n)[2];
+
+                if (!results.get(n)[1].equals(""))
+                    output = output + " " + results.get(n)[1] + " moh";
+
+                String forecast = "";
+                try {
+                    forecast = Web.weatherForecast(results.get(n)[0]);
+                } catch (IOException ex) {}
 
                 if (forecast.equals(""))
-                    Grouphug.getInstance().sendMessage("Sorry no weather forecast for \"" + message + "\".");
-                else
-                    Grouphug.getInstance().sendMessage(forecast);
+                    forecast = "No forecast.";
+
+                Grouphug.getInstance().sendMessage(output + ": "+ forecast);
             }
-            
-        } catch(IOException ex) {
-            Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)");
-            System.err.println(ex);
-            ex.printStackTrace();
+            catch (IndexOutOfBoundsException ex) {
+                Grouphug.getInstance().sendMessage("Sorry, I could only find " + results.size() +
+                                                   " locations matching \"" + message + "\".");
+            }
+            catch (IOException ex) {
+                Grouphug.getInstance().sendMessage("Sorry, yr.no seems to be broken.");
+            }
         }
     }
 }

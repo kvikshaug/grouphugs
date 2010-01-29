@@ -145,38 +145,85 @@ public class Web {
     /**
      * Presents the next weather forecast for a given location using yr.no's rss.
      * @param the location to find the weather forecast for
-     * @return the weather forecast or blank if location not found.
+     * @return the next weather forecast from the rss.
      * @throws IOException if I/O fails
      */
-    public static String weather(String location) throws IOException {
+    public static String weatherForecast(String location) throws IOException {
+        String rssUrl = "http://www.yr.no" + location + "varsel.rss";
+        rssUrl = rssUrl.replace("æ", "%C3%A6");
+        rssUrl = rssUrl.replace("ø", "%C3%B8");
+        rssUrl = rssUrl.replace("å", "%C3%85");
+        String searchHtml = fetchHtmlLine(rssUrl);
+
+        int searchIndex = searchHtml.indexOf("<description>");
+        searchHtml = searchHtml.substring(searchIndex+2);
+        searchIndex = searchHtml.indexOf("<description>");
+        searchHtml = searchHtml.substring(searchIndex+13);
+        searchIndex = searchHtml.indexOf("</description>");
+
+        return searchHtml.substring(0,searchIndex);
+    }
+
+    /**
+     * Searches for a valid yr.no's weather location.
+     * @param the location to find.
+     * @return A list with the results.
+     * @throws IOException if I/O fails
+     */
+    public static ArrayList<String[]> weatherLocationSearch(String location) throws IOException {
         String searchHtml = fetchHtmlLine("http://www.yr.no/soek.aspx?sted="+location.replace(' ', '+'));
-        
-        try {
-            int searchIndex = searchHtml.indexOf("<a href=\"/sted/");
-            searchHtml = searchHtml.substring(searchIndex+9,searchIndex+100);
-            searchIndex = searchHtml.indexOf("\"");
-            searchHtml = searchHtml.substring(0,searchIndex);
+        ArrayList<String[]> results = new ArrayList<String[]>();
 
-            // All locations should start with a slash.
-            if (!searchHtml.startsWith("/"))
-                    return "";
-            
-            String rssUrl = "http://www.yr.no" + searchHtml + "varsel.rss";
-            rssUrl = rssUrl.replace("æ", "%C3%A6");
-            rssUrl = rssUrl.replace("ø", "%C3%B8");
-            rssUrl = rssUrl.replace("å", "%C3%85");
-            searchHtml = fetchHtmlLine(rssUrl);
+        if (searchHtml.indexOf("gav 0 treff") > -1)
+            return results;
 
-            searchIndex = searchHtml.indexOf("<description>");
-            searchHtml = searchHtml.substring(searchIndex+2);
-            searchIndex = searchHtml.indexOf("<description>");
-            searchHtml = searchHtml.substring(searchIndex+13);
-            searchIndex = searchHtml.indexOf("</description>");
+        String[] name = new String[3];
+        int searchIndex = searchHtml.indexOf("<title>");
 
-            return location + ": " + searchHtml.substring(0,searchIndex);
-        } catch (java.lang.StringIndexOutOfBoundsException e) {
-            return "";
+        if (searchHtml.substring(searchIndex + 7, searchIndex + 8).equals("S")) {
+            // If we have multiple results.
+            while (searchIndex > -1) {
+                // Location
+                searchIndex = searchHtml.indexOf("<a href=\"/sted/", searchIndex);
+                name[0] = searchHtml.substring(searchIndex + 9, searchHtml.indexOf("\"", searchIndex + 9));
+
+                // Altitude
+                searchIndex = searchHtml.indexOf("<td>", searchIndex);
+                name[1] = searchHtml.substring(searchIndex + 4, searchHtml.indexOf("</td>", searchIndex));
+
+                // Description
+                searchIndex = searchHtml.indexOf("<td>", searchIndex + 4);
+                name[2] = searchHtml.substring(searchIndex + 4, searchHtml.indexOf("</td>", searchIndex));
+
+                results.add(name);
+                name = new String[3];
+
+                // This is a fix for non-norwegian locations.
+                searchIndex = searchHtml.indexOf("</td>", searchIndex);
+                int c = 4;
+                if (searchHtml.substring(searchIndex + 13, searchIndex + 19).equals("<td />"))
+                    c--;
+                // Let's skip ahead to the next result.
+                for (int i = 0; i < c; i++)
+                    searchIndex = searchHtml.indexOf("<a href=\"/sted/", searchIndex+1);
+            }
         }
+        else if (searchHtml.substring(searchIndex + 7, searchIndex + 8).equals("V")) {
+            // If we only have one result.
+            searchIndex = searchHtml.indexOf("href=\"/place/");
+            name[0] = searchHtml.substring(searchIndex + 6, searchHtml.indexOf("\"", searchIndex + 6));
+
+            searchIndex = searchHtml.indexOf("over havet");
+            name[1] = searchHtml.substring(searchIndex + 28, searchHtml.indexOf(" ", searchIndex + 28));
+
+            searchIndex = searchHtml.indexOf("Kategori");
+            name[2] = searchHtml.substring(searchIndex + 25, searchHtml.indexOf("</li>", searchIndex + 28));
+
+            name[2] = name[2].trim();
+            results.add(name);
+        }
+
+        return results;
     }
 
     /**
