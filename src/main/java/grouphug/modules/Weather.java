@@ -33,7 +33,7 @@ public class Weather implements TriggerListener {
         if (message.equals(""))
             Grouphug.getInstance().sendMessage("Try \"!help weather\".");
         else {  
-            String[] split = message.split(" ");
+            String[] split = message.split(" ", 2);
             int n = 0;
             try {
                 n = Integer.parseInt(split[0]) - 1;
@@ -41,7 +41,10 @@ public class Weather implements TriggerListener {
 
             ArrayList<String[]> results = new ArrayList<String[]>();
             try {
-                results = Web.weatherLocationSearch(message);
+                if (n == 0)
+                    results = Web.weatherLocationSearch(message);
+                else
+                    results = Web.weatherLocationSearch(split[1]);
 
                 String[] location = results.get(n)[0].split("/");
                 String output = location[4] + "(" + location[3] + ", " +
