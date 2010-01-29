@@ -7,6 +7,7 @@ import grouphug.util.Web;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URL;
 
 public class GoogleFight implements TriggerListener {
 
@@ -50,7 +51,7 @@ public class GoogleFight implements TriggerListener {
     }
 
     public String search(String query) throws IOException {
-        BufferedReader google = Web.prepareBufferedReader("http://www.google.com/search?q="+query.replace(' ', '+'));
+        BufferedReader google = Web.prepareEncodedBufferedReader(new URL("http://www.google.com/search?q="+query.replace(' ', '+')));
 
         String line;
         String search = "</b> of about <b>";

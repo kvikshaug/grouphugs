@@ -7,6 +7,7 @@ import grouphug.util.Web;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URL;
 
 public class Define implements TriggerListener {
 
@@ -38,7 +39,7 @@ public class Define implements TriggerListener {
     }
 
     public static String search(String query) throws IOException {
-        BufferedReader google = Web.prepareBufferedReader("http://www.google.com/search?q=define:"+query.replace(' ', '+'));
+        BufferedReader google = Web.prepareEncodedBufferedReader(new URL("http://www.google.com/search?q=define:"+query.replace(' ', '+')));
 
         // Search for some hardcoded stuff to try to parse a definition. this is fugly
         String line;

@@ -57,7 +57,7 @@ public class Google implements TriggerListener {
             for(int i=1; i<=resultCount; i++) {
                 String title;
                 try {
-                    title = Web.fetchTitle(urls.get(i-1).toString());
+                    title = Web.fetchTitle(urls.get(i-1));
                     if(title.length() > TITLE_MAX_LENGTH) {
                         title = title.substring(0, TITLE_MAX_LENGTH - 6); // minus the 6 ' (...)'-chars
                         title = title.concat(" (...)");

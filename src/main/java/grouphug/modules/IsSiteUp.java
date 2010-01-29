@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.net.URL;
 
 /**
  * isup - parses http://downforeveryoneorjustme.com/some.url.tld to check if a website is up or down.
@@ -36,7 +37,7 @@ public class IsSiteUp implements TriggerListener {
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         try {
-            String result = parseHTML(Web.fetchHtmlLine(DFEOJM_URI + '/' + cleanURI(message)));
+            String result = parseHTML(Web.fetchHtmlLine(new URL(DFEOJM_URI + '/' + cleanURI(message))).replace("\n", ""));
             Grouphug.getInstance().sendMessage(message + " :: " + result);
         } catch(ParseException ex) {
             Grouphug.getInstance().sendMessage("Sorry, I was unable to parse downforeveryoneorjustme.com.");

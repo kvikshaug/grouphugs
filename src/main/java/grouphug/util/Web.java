@@ -1,7 +1,10 @@
 package grouphug.util;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
+import org.apache.commons.io.IOUtils;
+
 import org.jdom.Document;
+
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
@@ -22,80 +25,70 @@ public class Web {
     public static final int DEFAULT_URLCONNECTION_TIMEOUT = 20000; // ms
 
     /**
-     * Fetches a web page for you and returns a nicely formatted arraylist when the whole
-     * thing has loaded.
-     * @param urlString the url you want to look up.
+     * Fetches a web page for you and returns a nicely formatted arraylist with each
+     * line as its own entry when the whole thing has loaded.
+     * @param url the url you want to look up.
      * @return an arraylist containing each line of the web site html
      * @throws java.io.IOException sometimes
      */
-    public static ArrayList<String> fetchHtmlLines(String urlString) throws IOException {
-        BufferedReader input = prepareBufferedReader(urlString, DEFAULT_URLCONNECTION_TIMEOUT);
-
+    public static ArrayList<String> fetchHtmlLines(URL url) throws IOException {
+        BufferedReader input = prepareEncodedBufferedReader(url);
         ArrayList<String> lines = new ArrayList<String>();
         String htmlLine;
         while ((htmlLine = input.readLine()) != null) {
             lines.add(htmlLine);
         }
-        input.close();
+        closeQuietly(input);
         return lines;
     }
 
     /**
      * Fetches a web page for you and returns a long string containing the full html source
-     * when the whole thing has loaded.
-     * @param urlString the url you want to look up.
-     * @return an arraylist containing each line of the web site html
+     * when the whole thing has loaded, including newline characters.
+     * @param url the url you want to look up.
+     * @return a long string containing the full html source of the specified url
      * @throws java.io.IOException sometimes
      */
-    public static String fetchHtmlLine(String urlString) throws IOException {
-        BufferedReader input = prepareBufferedReader(urlString, DEFAULT_URLCONNECTION_TIMEOUT);
-
-        StringBuilder sb = new StringBuilder();
-        String htmlLine;
-        while ((htmlLine = input.readLine()) != null) {
-            sb.append(htmlLine);
-        }
-        input.close();
-        return sb.toString();
+    public static String fetchHtmlLine(URL url) throws IOException {
+        InputStream in = prepareInputStream(url);
+        String line = IOUtils.toString(in, CharEncoding.guessEncoding(url));
+        closeQuietly(in);
+        return line;
     }
 
     /**
-     * Prepares a buffered reader for the inputstream of the specified website with a default
-     * timeout value of 20 seconds.
+     * Prepares a correctly encoded (if the encoding is guessed correctly) buffered reader
+     * for the inputstream of the specified website.
      * This will return as soon as the connection is ready. Remember to close the reader!
-     * @param urlString the url you want to look up.
+     * @param url the url you want to look up.
      * @return the buffered reader for reading the input stream from the specified website
      * @throws java.io.IOException sometimes
      */
-    public static BufferedReader prepareBufferedReader(String urlString) throws IOException {
-        return prepareBufferedReader(urlString, DEFAULT_URLCONNECTION_TIMEOUT);
+    public static BufferedReader prepareEncodedBufferedReader(URL url) throws IOException {
+        return (BufferedReader)CharEncoding.openStreamWithGuessedEncoding(
+                prepareInputStream(url), DEFAULT_ENCODING);
     }
 
     /**
-     * Prepares a buffered reader for the inputstream of the specified website.
-     * This will return as soon as the connection is ready. Remember to close the reader!
-     * @param urlString the url you want to look up.
-     * @param timeout an int that specifies the connect timeout value in milliseconds - if this time passes,
-     * a SocketTimeoutException is raised.
-     * @return the buffered reader for reading the input stream from the specified website
-     * @throws java.io.IOException sometimes
+     * Prepares an inputstream for the specified URL, faking a user-agent request property.
+     * Remember to close the inputstream! 
+     * @param url the url you want to look up
+     * @return a ready-to-read inputstream for the URL-connection
+     * @throws IOException if I/O fails
      */
-    public static BufferedReader prepareBufferedReader(String urlString, int timeout) throws IOException {
-        urlString = urlString.replace(" ", "%20");
-
-        URL url = new URL(urlString);
-        System.out.println("Web util opening: '" + urlString + "'...");
+    public static InputStream prepareInputStream(URL url) throws IOException {
+        System.out.println("Web util opening: '" + url.toString() + "'...");
+        //try { throw new Exception(); } catch(Exception e) { e.printStackTrace(); }
         URLConnection urlConn = url.openConnection();
+        urlConn.setConnectTimeout(DEFAULT_URLCONNECTION_TIMEOUT);
 
-        urlConn.setConnectTimeout(timeout);
         // Pretend we're using a proper browser and OS :)
         urlConn.setRequestProperty("User-Agent", "Opera/9.80 (X11; Linux i686; U; en) Presto/2.2.15 Version/10.01");
         // alternative:
         // "MSIE 4.01; Digital AlphaServer 1000A 4/233; Windows NT; Powered By 64-Bit Alpha Processor"
         // (just saying)
 
-        // TODO encoding should be specified dependent on what the site says it is! but we just assume utf-8 :)
-        return new BufferedReader(new InputStreamReader(urlConn.getInputStream(), "UTF-8"));
+        return urlConn.getInputStream();
     }
 
     /**
@@ -105,7 +98,7 @@ public class Web {
      * @throws IOException if I/O fails
      */
     public static ArrayList<URL> googleSearch(String query) throws IOException {
-        String googleHtml = fetchHtmlLine("http://www.google.com/search?q="+query.replace(' ', '+'));
+        String googleHtml = fetchHtmlLine(new URL("http://www.google.com/search?q="+query.replace(' ', '+'))).replace("\n", "");
 
         String parseSearch = "<h3 class=r><a href=\"";
         int searchIndex = 0;
@@ -124,7 +117,7 @@ public class Web {
      * @throws IOException if I/O fails
      */
     public static String weather(String location) throws IOException {
-        String searchHtml = fetchHtmlLine("http://www.yr.no/soek.aspx?sted="+location.replace(' ', '+'));
+        String searchHtml = fetchHtmlLine(new URL("http://www.yr.no/soek.aspx?sted="+location.replace(' ', '+'))).replace("\n", "");
         
         try {
             int searchIndex = searchHtml.indexOf("<a href=\"/sted/");
@@ -140,7 +133,7 @@ public class Web {
             rssUrl = rssUrl.replace("æ", "%C3%A6");
             rssUrl = rssUrl.replace("ø", "%C3%B8");
             rssUrl = rssUrl.replace("å", "%C3%85");
-            searchHtml = fetchHtmlLine(rssUrl);
+            searchHtml = fetchHtmlLine(new URL(rssUrl)).replace("\n", "");
 
             searchIndex = searchHtml.indexOf("<description>");
             searchHtml = searchHtml.substring(searchIndex+2);
@@ -155,19 +148,9 @@ public class Web {
     }
 
     /**
-     * Fetch the title for the specified URL
-     * @param urlString the url to find a title in
-     * @return the parsed title
-     * @throws java.io.IOException if I/O fails
-     * @throws org.jdom.JDOMException if parsing HTML fails
-     */
-    public static String fetchTitle(String urlString) throws IOException, JDOMException {
-        URL url = new URL(urlString);
-        return fetchTitle(url);
-    }
-
-    /**
-     * Fetch the title for the specified URL
+     * Fetch the title for the specified URL.
+     * Note that two new connections will be opened to the specified URL, one
+     * to guess its encoding and another to read in the title.
      * @param url the url to find a title in
      * @return the parsed title
      * @throws java.io.IOException if I/O fails

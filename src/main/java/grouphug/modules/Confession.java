@@ -61,7 +61,7 @@ public class Confession implements TriggerListener {
     private ConfessionItem getConfession(String urlString) throws IOException {
 
         String confession = "";
-        ArrayList<String> lines = Web.fetchHtmlLines(urlString);
+        ArrayList<String> lines = Web.fetchHtmlLines(new URL(urlString));
 
         // we dig from the BOTTOM and up, searching for the first confession we find
         int line = 0;

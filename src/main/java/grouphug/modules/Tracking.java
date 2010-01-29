@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Vector;
+import java.net.URL;
 
 public class Tracking implements TriggerListener, Runnable {
 
@@ -287,7 +288,7 @@ public class Tracking implements TriggerListener, Runnable {
          * @throws java.sql.SQLException if SQL fails
          */
         public int update() throws IOException, SQLException {
-            String posten = Web.fetchHtmlLine("http://sporing.posten.no/sporing.html?q="+trackingNumber);
+            String posten = Web.fetchHtmlLine(new URL("http://sporing.posten.no/sporing.html?q="+trackingNumber)).replace("\n", "");
 
             // first find the event field
             int startIndex = posten.indexOf("<div class=\"sporing-sendingandkolli-latestevent-text\">");

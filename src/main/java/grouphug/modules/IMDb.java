@@ -45,7 +45,7 @@ public class IMDb implements TriggerListener {
         String line = "(uninitialized)";
 
         try {
-            BufferedReader imdb = Web.prepareBufferedReader(imdbURL.toString());
+            BufferedReader imdb = Web.prepareEncodedBufferedReader(imdbURL);
 
             String titleString = "<title>";
             String scoreString = "<div class=\"meta\">";
