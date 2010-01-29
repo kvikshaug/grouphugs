@@ -144,7 +144,7 @@ public class Web {
 
     /**
      * Presents the next weather forecast for a given location using yr.no's rss.
-     * @param the location to find the weather forecast for
+     * @param location the location to find the weather forecast for
      * @return the weather forecast or blank if location not found.
      * @throws IOException if I/O fails
      */
