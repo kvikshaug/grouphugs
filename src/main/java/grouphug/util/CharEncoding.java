@@ -135,18 +135,15 @@ public class CharEncoding {
 
         String encoding = guessEncoding(guessStream, defaultEncoding);
 
-        Reader r = null;
         if (encoding != null) {
-            r = new BufferedReader(new InputStreamReader(readerStream, encoding));
+            return new BufferedReader(new InputStreamReader(readerStream, encoding));
         } else {
             if (defaultEncoding != null) {
-                r = new BufferedReader(new InputStreamReader(readerStream, defaultEncoding));
+                return new BufferedReader(new InputStreamReader(readerStream, defaultEncoding));
             } else {
-                r = new BufferedReader(new InputStreamReader(readerStream));
+                return new BufferedReader(new InputStreamReader(readerStream));
             }
         }
-
-        return r;
     }
 
     /**
