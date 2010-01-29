@@ -19,29 +19,17 @@ import java.util.ArrayList;
 public class Web {
 
     public static final String DEFAULT_ENCODING = "UTF-8";
-
-    /**
-     * Fetches a web page for you and returns a nicely formatted arraylist when the whole
-     * thing has loaded. This method has a default timeout value of 20 seconds.
-     * @param urlString the url you want to look up.
-     * @return an arraylist containing each line of the web site html
-     * @throws java.io.IOException sometimes
-     */
-    public static ArrayList<String> fetchHtmlLines(String urlString) throws IOException {
-        return fetchHtmlLines(urlString, 20000);
-    }
+    public static final int DEFAULT_URLCONNECTION_TIMEOUT = 20000; // ms
 
     /**
      * Fetches a web page for you and returns a nicely formatted arraylist when the whole
      * thing has loaded.
      * @param urlString the url you want to look up.
-     * @param timeout an int that specifies the connect timeout value in milliseconds - if this time passes,
-     * a SocketTimeoutException is raised.
      * @return an arraylist containing each line of the web site html
      * @throws java.io.IOException sometimes
      */
-    public static ArrayList<String> fetchHtmlLines(String urlString, int timeout) throws IOException {
-        BufferedReader input = prepareBufferedReader(urlString, timeout);
+    public static ArrayList<String> fetchHtmlLines(String urlString) throws IOException {
+        BufferedReader input = prepareBufferedReader(urlString, DEFAULT_URLCONNECTION_TIMEOUT);
 
         ArrayList<String> lines = new ArrayList<String>();
         String htmlLine;
@@ -54,26 +42,13 @@ public class Web {
 
     /**
      * Fetches a web page for you and returns a long string containing the full html source
-     * when the whole thing has loaded. This method has a default timeout value of 20 seconds.
-     * @param urlString the url you want to look up.
-     * @return a string containing the entire html source
-     * @throws java.io.IOException sometimes
-     */
-    public static String fetchHtmlLine(String urlString) throws IOException {
-        return fetchHtmlLine(urlString, 20000);
-    }
-
-    /**
-     * Fetches a web page for you and returns a long string containing the full html source
      * when the whole thing has loaded.
      * @param urlString the url you want to look up.
-     * @param timeout an int that specifies the connect timeout value in milliseconds - if this time passes,
-     * a SocketTimeoutException is raised.
      * @return an arraylist containing each line of the web site html
      * @throws java.io.IOException sometimes
      */
-    public static String fetchHtmlLine(String urlString, int timeout) throws IOException {
-        BufferedReader input = prepareBufferedReader(urlString, timeout);
+    public static String fetchHtmlLine(String urlString) throws IOException {
+        BufferedReader input = prepareBufferedReader(urlString, DEFAULT_URLCONNECTION_TIMEOUT);
 
         StringBuilder sb = new StringBuilder();
         String htmlLine;
@@ -93,7 +68,7 @@ public class Web {
      * @throws java.io.IOException sometimes
      */
     public static BufferedReader prepareBufferedReader(String urlString) throws IOException {
-        return prepareBufferedReader(urlString, 20000);
+        return prepareBufferedReader(urlString, DEFAULT_URLCONNECTION_TIMEOUT);
     }
 
     /**
