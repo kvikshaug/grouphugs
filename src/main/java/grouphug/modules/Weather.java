@@ -66,8 +66,12 @@ public class Weather implements TriggerListener {
                 Grouphug.getInstance().sendMessage(output + ": "+ forecast);
             }
             catch (IndexOutOfBoundsException ex) {
-                Grouphug.getInstance().sendMessage("Sorry, I could only find " + results.size() +
-                                                   " locations matching \"" + message + "\".");
+                if (isSplited)
+                    Grouphug.getInstance().sendMessage("Sorry, I could only find " + results.size() +
+                                                       " locations matching \"" + split[1] + "\".");
+                else
+                    Grouphug.getInstance().sendMessage("Sorry, I could only find " + results.size() +
+                                                       " locations matching \"" + message + "\".");
             }
             catch (IOException ex) {
                 Grouphug.getInstance().sendMessage("Sorry, yr.no seems to be broken.");
