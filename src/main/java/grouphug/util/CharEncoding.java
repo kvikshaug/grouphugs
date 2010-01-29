@@ -57,7 +57,7 @@ public class CharEncoding {
      * @throws IOException if we're unable to read is for whatever reason
      */
     public static Reader getReaderWithEncoding(URL url, String defaultEncoding) throws IOException {
-        return openStreamWithGuessedEncoding(url.openStream(), defaultEncoding);
+        return openStreamWithGuessedEncoding(Web.prepareInputStream(url), defaultEncoding);
     }
 
     /**
@@ -71,7 +71,7 @@ public class CharEncoding {
      * reading the document fails at any point in time
      */
     public static String guessEncoding(URL url, String defaultEncoding) throws IOException {
-        return guessEncoding(url.openStream(), defaultEncoding);
+        return guessEncoding(Web.prepareInputStream(url), defaultEncoding);
     }
 
 
@@ -199,6 +199,8 @@ public class CharEncoding {
 
         closeQuietly(is);
 
+        System.out.println("CharEncoding guesses '"+cdo.getEncoding()+"'.");
+        try { throw new Exception(); } catch(Exception e) { e.printStackTrace(); }
         return cdo.getEncoding();
     }
 
