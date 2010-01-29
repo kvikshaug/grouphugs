@@ -157,13 +157,7 @@ public class Web {
      * @throws org.jdom.JDOMException if parsing HTML fails
      */
     public static String fetchTitle(URL url) throws JDOMException, IOException {
-        Reader r = null;
-        try {
-            r = CharEncoding.getReaderWithEncoding(url, DEFAULT_ENCODING);
-        } catch (IOException ioe) {
-            closeQuietly(r);
-        }
-
+        Reader r = prepareEncodedBufferedReader(url);
         String title;
 
         // build a JDOM tree from the SAX stream provided by tagsoup
