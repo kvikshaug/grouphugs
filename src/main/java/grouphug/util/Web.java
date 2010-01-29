@@ -149,6 +149,7 @@ public class Web {
      * @throws IOException if I/O fails
      */
     public static String weatherForecast(String location) throws IOException {
+        try {
         String rssUrl = "http://www.yr.no" + location + "varsel.rss";
         rssUrl = rssUrl.replace("æ", "%C3%A6");
         rssUrl = rssUrl.replace("ø", "%C3%B8");
@@ -162,6 +163,7 @@ public class Web {
         searchIndex = searchHtml.indexOf("</description>");
 
         return searchHtml.substring(0,searchIndex);
+        } catch (IndexOutOfBoundsException ex) { return ""; }
     }
 
     /**
