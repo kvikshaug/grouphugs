@@ -1,6 +1,7 @@
 package grouphug;
 
 import grouphug.listeners.MessageListener;
+import grouphug.listeners.JoinListener;
 import grouphug.modules.*;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class ModuleHandler {
     private HashMap<String, String> helpers = new HashMap<String, String>();
     private ArrayList<TriggerListener> triggerListeners = new ArrayList<TriggerListener>();
     private ArrayList<MessageListener> messageListeners = new ArrayList<MessageListener>();
+    private ArrayList<JoinListener> joinListeners = new ArrayList<JoinListener>();
 
     public ModuleHandler(Grouphug bot) {
         this.bot = bot;
@@ -53,8 +55,9 @@ public class ModuleHandler {
 
         System.out.println();
         System.out.println(helpers.size() + " help responses registered");
-        System.out.println(triggerListeners.size() + " triggers registered");
-        System.out.println(messageListeners.size() + " modules are listening for anything");
+        System.out.println(triggerListeners.size() + " message triggers registered");
+        System.out.println(messageListeners.size() + " modules are listening for any message");
+        System.out.println(joinListeners.size() + " modules are listening for channel joins");
     }
 
     /**
@@ -86,6 +89,16 @@ public class ModuleHandler {
      */
     public void addMessageListener(MessageListener listener) {
         messageListeners.add(listener);
+    }
+
+    /**
+     * Modules that want to react to someone joining our channel should implement the
+     * JoinListener interface and then call this method with a reference to themselves.
+     * The onJoin method in that interface will be called upon any join.
+     * @param listener the listener to call
+     */
+    public void addJoinListener(JoinListener listener) {
+        joinListeners.add(listener);
     }
 
     /**
@@ -145,6 +158,19 @@ public class ModuleHandler {
             } else {
                 bot.sendMessage(text);
             }
+        }
+    }
+
+    /**
+     * Every time someone joins our channel, registered modules will be notified
+     * @param channel The channel which somebody joined.
+     * @param sender The nick of the user who joined the channel.
+     * @param login The login of the user who joined the channel.
+     * @param hostname The hostname of the user who joined the channel.
+     */
+    public void onJoin(String channel, String sender, String login, String hostname) {
+        for(JoinListener listener : joinListeners) {
+            listener.onJoin(channel, sender, login, hostname);
         }
     }
 

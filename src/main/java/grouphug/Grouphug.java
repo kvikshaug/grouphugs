@@ -102,6 +102,19 @@ public class Grouphug extends PircBot {
     }
 
     @Override
+    /**
+     * This method is called whenever someone (possibly us) joins a channel
+     * which we are on.
+     * @param channel The channel which somebody joined.
+     * @param sender The nick of the user who joined the channel.
+     * @param login The login of the user who joined the channel.
+     * @param hostname The hostname of the user who joined the channel.
+     */
+    protected void onJoin(String channel, String sender, String login, String hostname) {
+        moduleHandler.onJoin(channel, sender, login, hostname);
+    }
+
+    @Override
     protected void onPrivateMessage(String sender, String login, String hostname, String message) {
         if(message.equalsIgnoreCase("Hi, my name is " + sender + " and I'm completely retarded")) {
             sendMessage(sender, "haha, you sure are");
