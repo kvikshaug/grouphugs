@@ -37,8 +37,10 @@ public class URLCatcher implements MessageListener {
                 title = Web.fetchTitle(url);
             } catch (JDOMException e) {
                 System.err.println("[URLCatcher]: unable to fetch title (JDOMException)");
+                e.printStackTrace();
             } catch (IOException e) {
                 System.err.println("[URLCatcher]: unable to fetch title (IOException)");
+                e.printStackTrace();
             }
 
             if (title != null && title.length() > 0) {

@@ -6,7 +6,6 @@ import grouphug.listeners.TriggerListener;
 import grouphug.util.Web;
 
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 
 /**
