@@ -73,7 +73,7 @@ public class Grouphug extends PircBot {
         // Old reboot/reload functions - this is strictly not necessary, but maybe these
         // should be reimplemented properly sometime?
         if(message.equals("!reboot") || message.equals("!reload")) {
-            bot.sendMessage("Sorry, this functionality has been disabled. Patches are welcome though :)", false);
+            bot.sendMessage("Sorry, this functionality has been disabled. Patches are welcome though :)");
             return;
         }
 
@@ -105,8 +105,8 @@ public class Grouphug extends PircBot {
     protected void onPrivateMessage(String sender, String login, String hostname, String message) {
         if(message.equalsIgnoreCase("Hi, my name is " + sender + " and I'm completely retarded")) {
             sendMessage(sender, "haha, you sure are");
-            sendMessage("guys, i just got this in pm:", false);
-            sendMessage("<" + sender + "> " + message, false);
+            sendMessage("guys, i just got this in pm:");
+            sendMessage("<" + sender + "> " + message);
         } else {
             sendMessage(sender, "Hi! I'm a bot. Say \"Hi, my name is " + sender + " and I'm completely retarded\" to me for more information.");
         }
