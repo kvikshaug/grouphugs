@@ -9,6 +9,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URL;
 
+import org.apache.commons.io.IOUtils;
+
 public class GoogleFight implements TriggerListener {
 
     private static final String TRIGGER = "gf";
@@ -57,6 +59,7 @@ public class GoogleFight implements TriggerListener {
         String search = "</b> of about <b>";
         while((line = google.readLine()) != null) {
             if(line.contains(search)) {
+                IOUtils.closeQuietly(google);
                 return line.substring(line.indexOf(search) + search.length(), line.indexOf("</b>", line.indexOf(search) + search.length()));
             }
         }

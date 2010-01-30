@@ -115,7 +115,7 @@ public class Upload implements TriggerListener {
             sqlHandler.insert("INSERT INTO "+UPLOAD_DB+" (keyword, nick, filename, date) VALUES (?,?,?,?);", params);
         } catch (IOException e) {
             System.err.println("Failed to copy the file to the local filesystem.");
-            Grouphug.getInstance().sendMessage("Why am I expected to be able to upload everything?");
+            Grouphug.getInstance().sendMessage("Why am I expected to be able to upload anything?");
             e.printStackTrace();
             return;
         } catch(SQLException e) {

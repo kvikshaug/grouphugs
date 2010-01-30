@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.apache.commons.io.IOUtils;
+
 public class IMDb implements TriggerListener {
 
     private static final String TRIGGER = "imdb";
@@ -43,9 +45,9 @@ public class IMDb implements TriggerListener {
         String commentTitle = "";
 
         String line = "(uninitialized)";
-
+        BufferedReader imdb = null;
         try {
-            BufferedReader imdb = Web.prepareEncodedBufferedReader(imdbURL);
+            imdb = Web.prepareEncodedBufferedReader(imdbURL);
 
             String titleString = "<title>";
             String scoreString = "<div class=\"meta\">";
@@ -99,8 +101,9 @@ public class IMDb implements TriggerListener {
                     commentTitle = Web.entitiesToChars(commentTitle.replace("|", " "));
                 }
             }
-
+            IOUtils.closeQuietly(imdb);
         } catch(StringIndexOutOfBoundsException ex) {
+            IOUtils.closeQuietly(imdb);
             System.err.println("Couldn't parse IMDb site!");
             ex.printStackTrace();
             System.err.println("I was parsing the following line:");
@@ -108,6 +111,7 @@ public class IMDb implements TriggerListener {
             Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.");
             return;
         } catch(NumberFormatException ex) {
+            IOUtils.closeQuietly(imdb);
             System.err.println("Couldn't parse IMDb site!");
             ex.printStackTrace();
             System.err.println("I was parsing the following line:");
@@ -115,10 +119,12 @@ public class IMDb implements TriggerListener {
             Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.");
             return;
         } catch(MalformedURLException ex) {
+            IOUtils.closeQuietly(imdb);
             ex.printStackTrace();
             Grouphug.getInstance().sendMessage("Wtf just happened? I caught a MalformedURLException.");
             return;
         } catch(IOException ex) {
+            IOUtils.closeQuietly(imdb);
             ex.printStackTrace();
             Grouphug.getInstance().sendMessage("Sorry, the intartubes seem to be clogged up.");
             return;
