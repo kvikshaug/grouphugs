@@ -134,6 +134,18 @@ public class Grouphug extends PircBot {
     }
 
     /**
+     * This method is called whenever someone (possibly us) changes nick on any of the channels that we are on.
+     * @param oldNick The old nick
+     * @param login The login of the user
+     * @param hostname The hostname of the user
+     * @param newNick The new nick
+     */
+    @Override
+    protected void onNickChange(String oldNick, String login, String hostname, String newNick) {
+        moduleHandler.onNickChange(oldNick, login, hostname, newNick);
+    }
+
+    /**
      * This method carries out the actions to be performed when the PircBot gets disconnected. This may happen if the
      * PircBot quits from the server, or if the connection is unexpectedly lost.
      * Disconnection from the IRC server is detected immediately if either we or the server close the connection

@@ -2,6 +2,7 @@ package grouphug;
 
 import grouphug.listeners.MessageListener;
 import grouphug.listeners.JoinListener;
+import grouphug.listeners.NickChangeListener;
 import grouphug.modules.*;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class ModuleHandler {
     private ArrayList<TriggerListener> triggerListeners = new ArrayList<TriggerListener>();
     private ArrayList<MessageListener> messageListeners = new ArrayList<MessageListener>();
     private ArrayList<JoinListener> joinListeners = new ArrayList<JoinListener>();
+    private ArrayList<NickChangeListener> nickChangeListeners = new ArrayList<NickChangeListener>();
 
     public ModuleHandler(Grouphug bot) {
         this.bot = bot;
@@ -59,6 +61,7 @@ public class ModuleHandler {
         System.out.println(triggerListeners.size() + " message triggers registered");
         System.out.println(messageListeners.size() + " modules are listening for any message");
         System.out.println(joinListeners.size() + " modules are listening for channel joins");
+        System.out.println(nickChangeListeners.size() + " modules are listening for nick changes");
     }
 
     /**
@@ -100,6 +103,16 @@ public class ModuleHandler {
      */
     public void addJoinListener(JoinListener listener) {
         joinListeners.add(listener);
+    }
+
+    /**
+     * Modules that want to react to someone changing their nick should implement the
+     * NickChangeListener interface and then call this method with a reference to themselves.
+     * The onNickChange method in that interface will be called upon any join.
+     * @param listener the listener to call
+     */
+    public void addNickChangeListener(NickChangeListener listener) {
+        nickChangeListeners.add(listener);
     }
 
     /**
@@ -163,7 +176,7 @@ public class ModuleHandler {
     }
 
     /**
-     * Every time someone joins our channel, registered modules will be notified
+     * Every time someone joins our channel, registered listeners will be notified via this method
      * @param channel The channel which somebody joined.
      * @param sender The nick of the user who joined the channel.
      * @param login The login of the user who joined the channel.
@@ -172,6 +185,19 @@ public class ModuleHandler {
     public void onJoin(String channel, String sender, String login, String hostname) {
         for(JoinListener listener : joinListeners) {
             listener.onJoin(channel, sender, login, hostname);
+        }
+    }
+
+    /**
+     * Every time someone changes their nick, registered listeners will be notified via this method
+     * @param oldNick The old nick
+     * @param login The login of the user
+     * @param hostname The hostname of the user
+     * @param newNick The new nick
+     */
+    public void onNickChange(String oldNick, String login, String hostname, String newNick) {
+        for(NickChangeListener listener : nickChangeListeners) {
+            listener.onNickChange(oldNick, login, hostname, newNick);
         }
     }
 
