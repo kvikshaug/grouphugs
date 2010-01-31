@@ -1,6 +1,7 @@
 package grouphug.modules;
 
 import grouphug.listeners.JoinListener;
+import grouphug.listeners.NickChangeListener;
 import grouphug.ModuleHandler;
 import grouphug.Grouphug;
 
@@ -9,13 +10,14 @@ import java.util.ArrayList;
 
 import org.jibble.pircbot.User;
 
-public class Operator implements JoinListener {
+public class Operator implements JoinListener, NickChangeListener {
 
     private ArrayList<UserMask> ops = new ArrayList<UserMask>();
     private Grouphug bot;
 
     public Operator(ModuleHandler handler) {
         handler.addJoinListener(this);
+        handler.addNickChangeListener(this);
         bot = Grouphug.getInstance();
 
         // add the users to be opped
@@ -38,6 +40,24 @@ public class Operator implements JoinListener {
             return;
         }
 
+        opIfInList(sender, login, hostname);
+    }
+
+    @Override
+    public void onNickChange(String oldNick, String login, String hostname, String newNick) {
+        // first check if it's me who's changing nick (can happen)
+        // hmm, could getNick() return the old nick if it for some reason isn't updated? just in case:
+        if(oldNick.equals(bot.getNick())) {
+            return;
+        }
+        if(newNick.equals(bot.getNick())) {
+            return;
+        }
+
+        opIfInList(newNick, login, hostname);
+    }
+
+    private void opIfInList(String nick, String login, String hostname) {
         // all right, this looks a bit complicated but is really very easy:
         // for every user in the channel
         for(User user : bot.getUsers(Grouphug.CHANNEL)) {
@@ -48,8 +68,8 @@ public class Operator implements JoinListener {
                     // i have op, so check if the joining user is one to be oped
                     for(UserMask op : ops) {
                         // this is a user to be oped, so op him/her
-                        if(op.is(sender)) {
-                            bot.op(Grouphug.CHANNEL, sender);
+                        if(op.is(nick)) {
+                            bot.op(Grouphug.CHANNEL, nick);
                             break;
                         }
                     }
@@ -57,13 +77,13 @@ public class Operator implements JoinListener {
                     return;
                 } else {
                     // i don't have op, so complain
-                    bot.sendMessage("Why haven't anyone oped me, so I could have oped " + sender + " just now?");
+                    bot.sendMessage("Why haven't anyone oped me, so I could have oped " + nick + " just now?");
                     return;
                 }
             }
         }
         // if we reach this spot, then i'm not in the user list!
-        bot.sendMessage("Uhm, I'm not in the user list so I can't check if I have op status. " +
+        bot.sendMessage("Uhm, I'm not in the user list so I can't check if I have op status in order to op others. " +
                 "This might be a pircbot bug?");
     }
 
