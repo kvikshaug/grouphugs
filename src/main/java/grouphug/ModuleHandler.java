@@ -52,6 +52,7 @@ public class ModuleHandler {
         new URLCatcher(this);
         new WordCount(this);
         new Weather(this);
+        new Operator(this);
 
         System.out.println();
         System.out.println(helpers.size() + " help responses registered");
