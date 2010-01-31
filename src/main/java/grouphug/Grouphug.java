@@ -101,7 +101,6 @@ public class Grouphug extends PircBot {
         moduleHandler.onMessage(channel, sender, login, hostname, message);
     }
 
-    @Override
     /**
      * This method is called whenever someone (possibly us) joins a channel
      * which we are on.
@@ -110,6 +109,7 @@ public class Grouphug extends PircBot {
      * @param login The login of the user who joined the channel.
      * @param hostname The hostname of the user who joined the channel.
      */
+    @Override
     protected void onJoin(String channel, String sender, String login, String hostname) {
         moduleHandler.onJoin(channel, sender, login, hostname);
     }
