@@ -29,6 +29,7 @@ public class Operator implements JoinListener, NickChangeListener {
         ops.add(new UserMask("Twst", null, null));
         ops.add(new UserMask("Krashk", null, null));
         ops.add(new UserMask("Blaster", null, null));
+        ops.add(new UserMask("Blast|G4", null, null));
 
         System.out.println("Operator module loaded.");
     }
