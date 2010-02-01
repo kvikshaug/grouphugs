@@ -106,7 +106,6 @@ public class Timer implements TriggerListener {
         @Override
         public void run() {
             try {
-                System.out.println("sleeping " + sleepAmount + ".");
                 Thread.sleep(sleepAmount);
             } catch(InterruptedException e) {
                 bot.sendMessage(nick + ": Sorry, I caught an InterruptedException! I was supposed to highlight you " +
