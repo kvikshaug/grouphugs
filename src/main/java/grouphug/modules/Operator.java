@@ -60,32 +60,33 @@ public class Operator implements JoinListener, NickChangeListener {
 
     private void opIfInList(String nick, String login, String hostname) {
         // all right, this looks a bit complicated but is really very easy:
-        // for every user in the channel
-        for(User user : bot.getUsers(Grouphug.CHANNEL)) {
-            // if i (the bot) am that user...
-            if(user.getNick().equals(bot.getNick())) {
-                // ...then check if i (the bot) has op
-                if(user.isOp()) {
-                    // i have op, so check if the joining user is one to be oped
-                    for(UserMask op : ops) {
-                        // this is a user to be oped, so op him/her
-                        if(op.is(nick)) {
+        // first check if the joining user is one to be oped
+        for(UserMask op : ops) {
+            // if this is a user to be oped...
+            if(op.is(nick)) {
+                // then op him, but first check if I have op status to op the user
+                // for every user in the channel
+                for(User user : bot.getUsers(Grouphug.CHANNEL)) {
+                    // if i (the bot) am that user...
+                    if(user.getNick().equals(bot.getNick())) {
+                        // ...then check if i (the bot) has op
+                        if(user.isOp()) {
+                            // i have, so op the user
                             bot.op(Grouphug.CHANNEL, nick);
-                            break;
+                            return;
+                        } else {
+                            // i don't have op, so complain
+                            bot.sendMessage("Why haven't anyone oped me, so I could have oped " + nick + " just now?");
+                            return;
                         }
                     }
-                    // reaching here, the user is NOT to be oped
-                    return;
-                } else {
-                    // i don't have op, so complain
-                    bot.sendMessage("Why haven't anyone oped me, so I could have oped " + nick + " just now?");
-                    return;
                 }
+                // if we reach this spot, then i'm not in the user list!
+                bot.sendMessage("Uhm, I'm not in the user list so I can't check if I have op status in order to op others. " +
+                        "This might be a pircbot bug?");
             }
         }
-        // if we reach this spot, then i'm not in the user list!
-        bot.sendMessage("Uhm, I'm not in the user list so I can't check if I have op status in order to op others. " +
-                "This might be a pircbot bug?");
+        // reaching here, the user is NOT to be oped
     }
 
     private static class UserMask {
