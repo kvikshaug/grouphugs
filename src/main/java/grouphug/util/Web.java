@@ -57,6 +57,23 @@ public class Web {
     }
 
     /**
+     * Returns a JDOM document parsed via tagsoup
+     * @param url the url to return a document for
+     * @return a JDOM document parsed via tagsoup
+     * @throws IOException if IO fails
+     * @throws JDOMException when errors occur in parsing
+     */
+    public static Document getJDOMDocument(URL url) throws IOException, JDOMException {
+        Reader r = prepareEncodedBufferedReader(url);
+
+        // build a JDOM tree from the SAX stream provided by tagsoup
+        SAXBuilder builder = new SAXBuilder("org.ccil.cowan.tagsoup.Parser");
+        Document document = builder.build(r);
+        closeQuietly(r);
+        return document;
+    }
+
+    /**
      * Prepares a correctly encoded (if the encoding is guessed correctly) buffered reader
      * for the inputstream of the specified website.
      * This will return as soon as the connection is ready. Remember to close the reader!
@@ -205,20 +222,14 @@ public class Web {
      * @throws org.jdom.JDOMException if parsing HTML fails
      */
     public static String fetchTitle(URL url) throws JDOMException, IOException {
-        Reader r = prepareEncodedBufferedReader(url);
         String title;
-
-        // build a JDOM tree from the SAX stream provided by tagsoup
-        SAXBuilder builder = new SAXBuilder("org.ccil.cowan.tagsoup.Parser");
-        Document doc = builder.build(r);
+        Document doc = getJDOMDocument(url);
 
         // find the <title> element using XPath
         XPath titlePath = XPath.newInstance("/h:html/h:head/h:title");
         titlePath.addNamespace("h","http://www.w3.org/1999/xhtml");
 
         title = ((Element)titlePath.selectSingleNode(doc)).getText();
-
-        closeQuietly(r);
 
         // do some tidying up
         if (title != null) {
