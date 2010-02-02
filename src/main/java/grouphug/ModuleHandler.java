@@ -56,6 +56,7 @@ public class ModuleHandler {
         new Weather(this);
         new Operator(this);
         new Timer(this);
+        new SnowReport(this);
 
         System.out.println();
         System.out.println(helpers.size() + " help responses registered");
