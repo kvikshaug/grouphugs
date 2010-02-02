@@ -115,11 +115,20 @@ public class Karma implements TriggerListener, MessageListener {
             }
             KarmaItem ki = find(sqlName);
             if(ki == null) {
-                sqlHandler.insert("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('"+sqlName+"', '"+karma+"');");
+                ArrayList<String> params = new ArrayList<String>();
+                params.add(sqlName);
+                params.add(String.valueOf(karma));
+                sqlHandler.insert("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('?', '?');", params);
             } else if(karma == 0) {
-                sqlHandler.update("UPDATE "+KARMA_DB+" SET value='"+karma+"' WHERE id='"+ki.getID()+"';");
+                ArrayList<String> params = new ArrayList<String>();
+                params.add(String.valueOf(karma));
+                params.add(String.valueOf(ki.getID()));
+                sqlHandler.update("UPDATE "+KARMA_DB+" SET value='?' WHERE id='?';", params);
             } else {
-                sqlHandler.update("UPDATE "+KARMA_DB+" SET value='"+(ki.getKarma() + karma)+"' WHERE id='"+ki.getID()+"';");
+                ArrayList<String> params = new ArrayList<String>();
+                params.add(String.valueOf(ki.getKarma() + karma));
+                params.add(String.valueOf(ki.getID()));
+                sqlHandler.update("UPDATE "+KARMA_DB+" SET value='?' WHERE id='?';", params);
             }
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
@@ -134,7 +143,9 @@ public class Karma implements TriggerListener, MessageListener {
      * @throws SQLException - if an SQL error occured
      */
     private KarmaItem find(String karma) throws SQLException {
-        Object[] row = sqlHandler.selectSingle("SELECT id, name, value FROM "+KARMA_DB+" WHERE name='"+karma+"';");
+        ArrayList<String> params = new ArrayList<String>();
+        params.add(karma);
+        Object[] row = sqlHandler.selectSingle("SELECT id, name, value FROM "+KARMA_DB+" WHERE name='?';");
         if(row == null) {
             return null;
         }
