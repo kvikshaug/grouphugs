@@ -21,6 +21,7 @@ public class Upload implements TriggerListener {
     private static final String UPLOAD_DB= "uploads";
     private static final String TRIGGER_KEYWORD = "keyword";
     private static final String DESTINATION_DIR = "/var/www/gh/public/extras/uploads/";
+    private static final String PUBLIC_URL = "http://gh.kvikshaug.no/extras/uploads/";
 
     private SQLHandler sqlHandler;
 
@@ -66,7 +67,7 @@ public class Upload implements TriggerListener {
             } else {
                 for(Object[] row : rows) {
                     //Prints the URL(s) associated with the keyword
-                    Grouphug.getInstance().sendMessage("http://gh.kvikshaug.no/extras/uploads/" + row[0] +
+                    Grouphug.getInstance().sendMessage(PUBLIC_URL + row[0] +
                             " ('" + row[2] + "' by " + row[1] + ")");
                 }
             }
@@ -127,6 +128,6 @@ public class Upload implements TriggerListener {
         }
 
         // Print the URL to the uploaded file to the channel
-        Grouphug.getInstance().sendMessage("Saved to http://gh.kvikshaug.no/extras/uploads/" + filename);
+        Grouphug.getInstance().sendMessage("Saved to " + PUBLIC_URL + filename);
     }
 }
