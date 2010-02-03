@@ -65,11 +65,13 @@ public class Upload implements TriggerListener {
             if(rows.size() == 0) {
                 Grouphug.getInstance().sendMessage("No results for '" + keyword + "'.");
             } else {
+                StringBuilder allRows = new StringBuilder();
                 for(Object[] row : rows) {
-                    //Prints the URL(s) associated with the keyword
-                    Grouphug.getInstance().sendMessage(PUBLIC_URL + row[0] +
-                            " ('" + row[2] + "' by " + row[1] + ")");
+                    allRows.append(PUBLIC_URL).append(row[0]).append(" ('")
+                            .append(row[2]).append("' by ").append(row[1]).append(")\n");
                 }
+                //Prints the URL(s) associated with the keyword
+                Grouphug.getInstance().sendMessage(allRows.toString(), true);
             }
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
