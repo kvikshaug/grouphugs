@@ -13,6 +13,12 @@ import java.util.ArrayList;
 import java.util.Vector;
 import java.net.URL;
 
+import org.jdom.Document;
+import org.jdom.JDOMException;
+import org.jdom.Element;
+import org.jdom.Namespace;
+import org.jdom.xpath.XPath;
+
 public class Tracking implements TriggerListener, Runnable {
 
     private static final String TRIGGER = "track";
@@ -148,6 +154,9 @@ public class Tracking implements TriggerListener, Runnable {
             } catch (SQLException e) {
                 Grouphug.getInstance().sendMessage("Sorry, SQL failed on me. Please fix the problem and try again.");
                 e.printStackTrace();
+            } catch (JDOMException e) {
+                Grouphug.getInstance().sendMessage("Sorry, I was unable to build a JDOM tree. Go check what's up with posten.no.");
+                e.printStackTrace();
             }
         }
     }
@@ -204,6 +213,9 @@ public class Tracking implements TriggerListener, Runnable {
                 fails++;
                 ex.printStackTrace();
             } catch (SQLException ex) {
+                fails++;
+                ex.printStackTrace();
+            } catch(JDOMException ex) {
                 fails++;
                 ex.printStackTrace();
             } catch(Exception ex) {
@@ -294,15 +306,16 @@ public class Tracking implements TriggerListener, Runnable {
          * @return CHANGED, NOT_CHANGED or DELIVERED according to its status change
          * @throws IOException if IO fails
          * @throws java.sql.SQLException if SQL fails
+         * @throws org.jdom.JDOMException if JDOM-parsing fails
          */
-        public int update() throws IOException, SQLException {
-            String posten = Web.fetchHtmlLine(new URL("http://sporing.posten.no/sporing.html?q="+trackingNumber)).replace("\n", "");
+        public int update() throws IOException, SQLException, JDOMException {
+            Document postDocument = Web.getJDOMDocument(new URL("http://sporing.posten.no/sporing.html?q="+trackingNumber));
 
-            // first find the event field
-            int startIndex = posten.indexOf("<div class=\"sporing-sendingandkolli-latestevent-text\">");
-            int endIndex = posten.indexOf("</div>", startIndex);
+            XPath xpath = XPath.newInstance("//h:div[@class='sporing-sendingandkolli-latestevent-text-container']/h:div[@class='sporing-sendingandkolli-latestevent-text']/h:strong");
+            xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
 
-            if(startIndex == -1) {
+            Element content = (Element)xpath.selectSingleNode(postDocument);
+            if(content == null) {
                 // no results
                 String newStatus = "The package ID is invalid (according to the tracking service)";
                 String oldStatus = getStatus();
@@ -313,35 +326,47 @@ public class Tracking implements TriggerListener, Runnable {
                     return NOT_CHANGED;
                 }
             }
-            if(endIndex == -1) {
-                throw new IOException("Unable to parse target site, have they changed their layout or something?");
+
+            String message = content.getText().replaceAll("\\s+", " ").replaceAll("<.*>","").trim();
+
+            // try to find a signature url in the message (which is the case if the package has been delivered)
+            xpath = XPath.newInstance("//h:div[@class='sporing-sendingandkolli-latestevent-text-container']/h:div[@class='sporing-sendingandkolli-latestevent-text']/h:strong/h:a");
+            xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
+
+            content = (Element)xpath.selectSingleNode(postDocument);
+
+            if(content != null) {
+                // there is a signature element, first get the text content and add it to message
+                message += " " + content.getText().trim();
+
+                // now we want the href attribute in order to paste the signature url
+                signature = "http://sporing.posten.no/" + content.getAttribute("href").getValue();
+            }
+            // if there isn't a signature element, just don't assign the signature var, and it won't be outputted
+            // also, part of message won't be hidden in an element (hopefully - might be <strong>s and similar!?)
+
+
+            // now find the date
+            xpath = XPath.newInstance("//h:div[@class='sporing-sendingandkolli-latestevent-date']");
+            xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
+            
+            String date;
+            content = (Element)xpath.selectSingleNode(postDocument);
+            if(content == null) {
+                date = "";
+            } else {
+                String datePartOne = content.getText().replaceAll("\\s+", " ").replaceAll("<.*>","").trim();
+                Element dateSpan = content.getChild("span", Namespace.getNamespace("h", "http://www.w3.org/1999/xhtml"));
+                String datePartTwo;
+                if(dateSpan == null) {
+                    datePartTwo = "";
+                } else {
+                    datePartTwo = dateSpan.getText();
+                }
+                date = datePartOne + " " + datePartTwo;
             }
 
-            // remove all tags, whitespace - and trim
-            String newStatus = posten.substring(startIndex, endIndex)
-                    .replaceAll("\\<.*?\\>","").replaceAll("\\s+", " ").trim();
-
-            // now find the date field
-            startIndex = posten.indexOf("<div class=\"sporing-sendingandkolli-latestevent-date\">", startIndex);
-            endIndex = posten.indexOf("</div>", startIndex);
-
-            if(startIndex == -1 || endIndex == -1) {
-                throw new IOException("Unable to parse target site, have they changed their layout or something?");
-            }
-
-            // check if there is a link to the signature
-            int signatureIndex = newStatus.indexOf("signatur.png");
-            if(signatureIndex != -1) {
-                int signatureEndIndex = newStatus.indexOf("\"", signatureIndex);
-                signature = "http://sporing.posten.no/" + newStatus.substring(signatureIndex, signatureEndIndex)
-                        .replace("&amp;", "&");
-            }
-            System.out.println("sigindex: " + signatureIndex);
-            System.out.println("newstatus: " + newStatus);
-
-            // remove all tags, whitespace - and trim
-            newStatus += " " + posten.substring(startIndex, endIndex)
-                    .replaceAll("\\<.*?\\>","").replaceAll("\\s+", " ").trim();
+            String newStatus = message + " " + date;
 
             String oldStatus = getStatus();
             if(newStatus.startsWith("Sendingen er utlevert")) {
