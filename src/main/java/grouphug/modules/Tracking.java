@@ -327,7 +327,7 @@ public class Tracking implements TriggerListener, Runnable {
                 }
             }
 
-            String message = content.getText().replaceAll("\\s+", " ").replaceAll("<.*>","").trim();
+            String message = content.getText().replaceAll("\\s+", " ").replaceAll("<.*?>","").trim();
 
             // try to find a signature url in the message (which is the case if the package has been delivered)
             xpath = XPath.newInstance("//h:div[@class='sporing-sendingandkolli-latestevent-text-container']/h:div[@class='sporing-sendingandkolli-latestevent-text']/h:strong/h:a");
@@ -355,7 +355,7 @@ public class Tracking implements TriggerListener, Runnable {
             if(content == null) {
                 date = "";
             } else {
-                String datePartOne = content.getText().replaceAll("\\s+", " ").replaceAll("<.*>","").trim();
+                String datePartOne = content.getText().replaceAll("\\s+", " ").replaceAll("<.*?>","").trim();
                 Element dateSpan = content.getChild("span", Namespace.getNamespace("h", "http://www.w3.org/1999/xhtml"));
                 String datePartTwo;
                 if(dateSpan == null) {

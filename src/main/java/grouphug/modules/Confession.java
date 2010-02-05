@@ -82,7 +82,7 @@ public class Confession implements TriggerListener {
         }
 
         confession = Web.entitiesToChars(confession);
-        confession = confession.replaceAll("\\<.*?\\>",""); // strip html tags
+        confession = confession.replaceAll("<.*?>",""); // strip html tags
         confession = confession.substring(0, confession.length()-1);
 
         return new ConfessionItem(confession);

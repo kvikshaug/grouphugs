@@ -34,7 +34,7 @@ public class GoogleCalc implements TriggerListener {
             if(reply == null) {
                 Grouphug.getInstance().sendMessage("The google calculator had nothing to say about that.");
             } else {
-                Grouphug.getInstance().sendMessage(reply.replaceAll("\\<.*?\\>",""), true);
+                Grouphug.getInstance().sendMessage(reply.replaceAll("<.*?>",""), true);
             }
         } catch(IOException ex) {
             Grouphug.getInstance().sendMessage("The intertubes seem to be clogged up (I got an IOException)");
