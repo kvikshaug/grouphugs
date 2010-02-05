@@ -6,18 +6,18 @@ import grouphug.exceptions.SQLUnavailableException;
 import grouphug.listeners.TriggerListener;
 import grouphug.util.SQLHandler;
 import grouphug.util.Web;
-
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Vector;
-import java.net.URL;
-
 import org.jdom.Document;
-import org.jdom.JDOMException;
 import org.jdom.Element;
+import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import org.jdom.xpath.XPath;
+
+import java.io.IOException;
+import java.net.URL;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
 public class Tracking implements TriggerListener, Runnable {
 
@@ -41,7 +41,7 @@ public class Tracking implements TriggerListener, Runnable {
     public Tracking(ModuleHandler moduleHandler) {
         try {
             sqlHandler = SQLHandler.getSQLHandler();
-            ArrayList<Object[]> rows = sqlHandler.select("select * from " + DB_NAME + ";");
+            List<Object[]> rows = sqlHandler.select("select * from " + DB_NAME + ";");
             for(Object[] row : rows) {
                 items.add(new TrackingItem((Integer)row[0], (String)row[1], (String)row[2], (String)row[3]));
             }
@@ -138,7 +138,7 @@ public class Tracking implements TriggerListener, Runnable {
                     return;
                 }
                 Grouphug.getInstance().sendMessage("Adding package '" + message + "' to tracking list.");
-                ArrayList<String> params = new ArrayList<String>();
+                List<String> params = new ArrayList<String>();
                 params.add(newItem.getTrackingNumber());
                 params.add(newItem.getStatus());
                 params.add(newItem.getOwner());
@@ -264,7 +264,7 @@ public class Tracking implements TriggerListener, Runnable {
 
         public void setStatus(String status) throws SQLException {
             this.status = status;
-            ArrayList<String> params = new ArrayList<String>();
+            List<String> params = new ArrayList<String>();
             params.add(status);
             params.add(String.valueOf(id));
             sqlHandler.update("update " + DB_NAME + " set status='?' where id='?';", params);
@@ -295,7 +295,7 @@ public class Tracking implements TriggerListener, Runnable {
          * @throws SQLException if SQL fails
          */
         public void remove() throws SQLException {
-            ArrayList<String> params = new ArrayList<String>();
+            List<String> params = new ArrayList<String>();
             params.add(String.valueOf(getId()));
             sqlHandler.delete("delete from " + DB_NAME + " where id='?';", params);
             items.remove(this);

@@ -9,6 +9,7 @@ import grouphug.util.SQLHandler;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Karma implements TriggerListener, MessageListener {
 
@@ -115,17 +116,17 @@ public class Karma implements TriggerListener, MessageListener {
             }
             KarmaItem ki = find(sqlName);
             if(ki == null) {
-                ArrayList<String> params = new ArrayList<String>();
+                List<String> params = new ArrayList<String>();
                 params.add(sqlName);
                 params.add(String.valueOf(karma));
                 sqlHandler.insert("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('?', '?');", params);
             } else if(karma == 0) {
-                ArrayList<String> params = new ArrayList<String>();
+                List<String> params = new ArrayList<String>();
                 params.add(String.valueOf(karma));
                 params.add(String.valueOf(ki.getID()));
                 sqlHandler.update("UPDATE "+KARMA_DB+" SET value='?' WHERE id='?';", params);
             } else {
-                ArrayList<String> params = new ArrayList<String>();
+                List<String> params = new ArrayList<String>();
                 params.add(String.valueOf(ki.getKarma() + karma));
                 params.add(String.valueOf(ki.getID()));
                 sqlHandler.update("UPDATE "+KARMA_DB+" SET value='?' WHERE id='?';", params);
@@ -143,7 +144,7 @@ public class Karma implements TriggerListener, MessageListener {
      * @throws SQLException - if an SQL error occured
      */
     private KarmaItem find(String karma) throws SQLException {
-        ArrayList<String> params = new ArrayList<String>();
+        List<String> params = new ArrayList<String>();
         params.add(karma);
         Object[] row = sqlHandler.selectSingle("SELECT id, name, value FROM "+KARMA_DB+" WHERE name='?';", params);
         if(row == null) {
@@ -165,7 +166,7 @@ public class Karma implements TriggerListener, MessageListener {
                 query += "DESC ";
             }
             query += "LIMIT "+LIMIT+";";
-            ArrayList<Object[]> rows = sqlHandler.select(query);
+            List<Object[]> rows = sqlHandler.select(query);
             int place = 1;
             for(Object[] row : rows) {
                 reply += (place++)+". "+htmlEntitiesToNorwegianChars((String)row[0])+" ("+row[1]+")\n";

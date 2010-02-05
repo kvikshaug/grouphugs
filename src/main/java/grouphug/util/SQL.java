@@ -4,7 +4,7 @@ import java.sql.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides a simple wrapper for the JDBC api.
@@ -133,7 +133,7 @@ public class SQL {
      * @throws SQLSyntaxErrorException - if there was a syntax error in the query
      * @throws SQLException - if the query failed
      */
-    public void query(String query, ArrayList<String> parameters) throws SQLException {
+    public void query(String query, List<String> parameters) throws SQLException {
 
         // remove quotes in case they were added
         query = query.replace("'?'", "?").replace("\"?\"", "?");

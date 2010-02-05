@@ -6,8 +6,8 @@ import grouphug.listeners.TriggerListener;
 import grouphug.util.Web;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.net.URL;
+import java.util.List;
 
 public class Insulter implements TriggerListener {
 
@@ -31,7 +31,7 @@ public class Insulter implements TriggerListener {
         String searchQ = "<td bordercolor=\"#FFFFFF\"><font face=\"Verdana\" size=\"4\"><strong><i>";
 
         try {
-            ArrayList<String> lines = Web.fetchHtmlLines(new URL("http://www.randominsults.net/"));
+            List<String> lines = Web.fetchHtmlLines(new URL("http://www.randominsults.net/"));
             for(String line : lines) {
                 int insultStart = line.indexOf(searchQ);
                 if(insultStart == -1) {

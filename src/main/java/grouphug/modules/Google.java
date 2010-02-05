@@ -8,7 +8,7 @@ import org.jdom.JDOMException;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Perform a google search and display the results in the channel
@@ -35,7 +35,7 @@ public class Google implements TriggerListener {
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         try {
             int resultCount;
-            ArrayList<URL> urls;
+            List<URL> urls;
             String query;
             if(message.startsWith("-n")) {
                 int firstSpaceIndex = message.indexOf(' ');

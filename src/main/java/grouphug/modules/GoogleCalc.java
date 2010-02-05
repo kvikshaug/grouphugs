@@ -6,8 +6,8 @@ import grouphug.listeners.TriggerListener;
 import grouphug.util.Web;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.net.URL;
+import java.util.List;
 
 public class GoogleCalc implements TriggerListener {
 
@@ -22,7 +22,7 @@ public class GoogleCalc implements TriggerListener {
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         try {
-            ArrayList<String> lines = Web.fetchHtmlLines(new URL("http://www.google.no/search?q=" + message.replace(" ", "+")));
+            List<String> lines = Web.fetchHtmlLines(new URL("http://www.google.no/search?q=" + message.replace(" ", "+")));
             String reply = null;
             for(String line : lines) {
                 if(line.contains("<h2 class=r style=\"font-size:138%\"><b>")) {

@@ -8,6 +8,7 @@ import grouphug.util.SQLHandler;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -24,7 +25,7 @@ public class Bofh implements TriggerListener {
     public static final String HELP_TRIGGER = RANDOM_TRIGGER;
 
     private Random random;
-    private ArrayList<String> excuses;
+    private List<String> excuses;
 
     /**
      * Initializes the excuses arraylist by fetching all rows from the database and filling the arraylist with their
@@ -37,7 +38,7 @@ public class Bofh implements TriggerListener {
             SQLHandler sqlHandler = SQLHandler.getSQLHandler();
             excuses = new ArrayList<String>(500); // there's just short of 500 rows in the db at the moment.
 
-            ArrayList<Object[]> rows = sqlHandler.select("SELECT `excuse` FROM bofh;");
+            List<Object[]> rows = sqlHandler.select("SELECT `excuse` FROM bofh;");
 
             if(rows.size() == 0) {
                 throw new SQLException("Unable to find any rows in the excuse table.");
@@ -48,7 +49,8 @@ public class Bofh implements TriggerListener {
                 excuses.add("BOFH excuse #" + i + ": " + row[0]);
                 i++;
             }
-            excuses.trimToSize();
+            // Don't trim to size as this is a List and not an ArrayList
+            //excuses.trimToSize();
 
             moduleHandler.addTriggerListener(RANDOM_TRIGGER, this);
             moduleHandler.registerHelp(HELP_TRIGGER, "BOFH - Fend off lusers with Bastard Operator From Hell excuses for their system \"problems\".\n" +

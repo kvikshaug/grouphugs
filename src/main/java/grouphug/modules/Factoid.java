@@ -9,6 +9,7 @@ import grouphug.util.SQLHandler;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -21,7 +22,7 @@ import java.util.Random;
  */
 public class Factoid implements MessageListener, TriggerListener {
 
-    private ArrayList<FactoidItem> factoids = new ArrayList<FactoidItem>();
+    private List<FactoidItem> factoids = new ArrayList<FactoidItem>();
 
     private static final String TRIGGER_HELP = "factoid";
 
@@ -45,7 +46,7 @@ public class Factoid implements MessageListener, TriggerListener {
         // Load up all existing factoids from sql
         try {
             sqlHandler = new SQLHandler(true);
-            ArrayList<Object[]> rows = sqlHandler.select("SELECT `type`, `trigger`, `reply`, `author` FROM " + FACTOID_TABLE + ";");
+            List<Object[]> rows = sqlHandler.select("SELECT `type`, `trigger`, `reply`, `author` FROM " + FACTOID_TABLE + ";");
             for(Object[] row : rows) {
                 boolean message = row[0].equals("message");
                 factoids.add(new FactoidItem(message, (String)row[1], (String)row[2], (String)row[3]));
@@ -114,7 +115,7 @@ public class Factoid implements MessageListener, TriggerListener {
             Grouphug.getInstance().sendMessage("OK, "+sender+".");
         } else if(trigger.equals(TRIGGER_DEL)) {
             // Trying to remove a factoid
-            ArrayList<FactoidItem> factoids = find(message, false);
+            List<FactoidItem> factoids = find(message, false);
             if(factoids.size() == 0) {
                 Grouphug.getInstance().sendMessage(sender+", I can't remember "+ message +" in the first place.");
             } else if(factoids.size() != 1) {
@@ -144,7 +145,7 @@ public class Factoid implements MessageListener, TriggerListener {
             }
         } else if(trigger.equals(TRIGGER_MAIN)) {
             // Trying to view data about a factoid
-            ArrayList<FactoidItem> factoids = find(message, false);
+            List<FactoidItem> factoids = find(message, false);
             if(factoids.size() == 0) {
                 Grouphug.getInstance().sendMessage(sender+", I do not know of this "+message+" that you speak of.");
             } else {
@@ -155,7 +156,7 @@ public class Factoid implements MessageListener, TriggerListener {
         } else if(trigger.equals(TRIGGER_RANDOM)) {
             factoids.get(random.nextInt(factoids.size())).send(sender);
         } else if(trigger.equals(TRIGGER_FOR)) {
-            ArrayList<FactoidItem> factoids = find(message, true);
+            List<FactoidItem> factoids = find(message, true);
             if(factoids.size() == 0) {
                 Grouphug.getInstance().sendMessage("Sorry, that expression doesn't ring any bell.");
             } else {
@@ -175,7 +176,7 @@ public class Factoid implements MessageListener, TriggerListener {
             return;
         }
 
-        ArrayList<FactoidItem> factoids = find(message, true);
+        List<FactoidItem> factoids = find(message, true);
         for(FactoidItem factoid : factoids) {
             factoid.send(sender);
         }
@@ -187,8 +188,8 @@ public class Factoid implements MessageListener, TriggerListener {
      * @param regex true if a regex should be used to find the trigger, false if it should be exact search
      * @return The found FactoidItem, or null if no item was found
      */
-    private ArrayList<FactoidItem> find(String expression, boolean regex) {
-        ArrayList<FactoidItem> items = new ArrayList<FactoidItem>();
+    private List<FactoidItem> find(String expression, boolean regex) {
+        List<FactoidItem> items = new ArrayList<FactoidItem>();
         for(FactoidItem factoid : factoids) {
             if(regex) {
                 if(factoid.trigger(expression)) {

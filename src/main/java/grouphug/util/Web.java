@@ -1,10 +1,8 @@
 package grouphug.util;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
 import org.apache.commons.io.IOUtils;
-
+import static org.apache.commons.io.IOUtils.closeQuietly;
 import org.jdom.Document;
-
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
@@ -14,6 +12,7 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Web contains useful methods often performed by modules, like fetching the contents of a website,
@@ -28,12 +27,12 @@ public class Web {
      * Fetches a web page for you and returns a nicely formatted arraylist with each
      * line as its own entry when the whole thing has loaded.
      * @param url the url you want to look up.
-     * @return an arraylist containing each line of the web site html
+     * @return a list containing each line of the web site html
      * @throws java.io.IOException sometimes
      */
-    public static ArrayList<String> fetchHtmlLines(URL url) throws IOException {
+    public static List<String> fetchHtmlLines(URL url) throws IOException {
         BufferedReader input = prepareEncodedBufferedReader(url);
-        ArrayList<String> lines = new ArrayList<String>();
+        List<String> lines = new ArrayList<String>();
         String htmlLine;
         while ((htmlLine = input.readLine()) != null) {
             lines.add(htmlLine);
@@ -113,13 +112,13 @@ public class Web {
      * @return a list over all URLs google provided
      * @throws IOException if I/O fails
      */
-    public static ArrayList<URL> googleSearch(String query) throws IOException {
+    public static List<URL> googleSearch(String query) throws IOException {
         String googleHtml = fetchHtmlLine(new URL("http://www.google.com/search?q="+query.replace(' ', '+'))).replace("\n", "");
 
         String parseSearch = "<h3 class=r><a href=\"";
         int searchIndex = 0;
 
-        ArrayList<URL> urls = new ArrayList<URL>();
+        List<URL> urls = new ArrayList<URL>();
         while((searchIndex = googleHtml.indexOf(parseSearch, searchIndex+1)) != -1) {
             urls.add(new URL(googleHtml.substring(searchIndex + parseSearch.length(), googleHtml.indexOf('"', searchIndex + parseSearch.length()))));
         }
@@ -156,9 +155,9 @@ public class Web {
      * @return A list with the results.
      * @throws IOException if I/O fails
      */
-    public static ArrayList<String[]> weatherLocationSearch(String location) throws IOException {
+    public static List<String[]> weatherLocationSearch(String location) throws IOException {
         String searchHtml = fetchHtmlLine(new URL("http://www.yr.no/soek.aspx?sted="+location.replace(' ', '+')));
-        ArrayList<String[]> results = new ArrayList<String[]>();
+        List<String[]> results = new ArrayList<String[]>();
 
         if (searchHtml.indexOf("gav 0 treff") > -1)
             return results;
@@ -252,10 +251,10 @@ public class Web {
      *
      * @param uriScheme the URI scheme to look for. (http://, git:// svn://, etc.)
      * @param string the String to look for URIs in.
-     * @return An ArrayList containing any URIs found.
+     * @return A List containing any URIs found.
      */
-    public static ArrayList<String> findURIs(String uriScheme, String string) {
-        ArrayList<String> uris = new ArrayList<String>();
+    public static List<String> findURIs(String uriScheme, String string) {
+        List<String> uris = new ArrayList<String>();
 
         int index = 0;
         do {

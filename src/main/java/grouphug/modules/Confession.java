@@ -7,7 +7,7 @@ import grouphug.util.Web;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.List;
 
 public class Confession implements TriggerListener {
     private static final String TRIGGER = "gh";
@@ -61,7 +61,7 @@ public class Confession implements TriggerListener {
     private ConfessionItem getConfession(String urlString) throws IOException {
 
         String confession = "";
-        ArrayList<String> lines = Web.fetchHtmlLines(new URL(urlString));
+        List<String> lines = Web.fetchHtmlLines(new URL(urlString));
 
         // we dig from the BOTTOM and up, searching for the first confession we find
         int line = 0;
