@@ -119,6 +119,7 @@ public class Tracking implements TriggerListener, Runnable {
                 if(arrived != null) {
                     Grouphug.getInstance().sendMessage("Your package has been delivered. Removing it from my list.");
                     Grouphug.getInstance().sendMessage("Status: " + arrived.getStatus());
+                    Grouphug.getInstance().sendMessage(arrived.printSignature());
                     arrived.remove();
                     Grouphug.getInstance().sendMessage("Now tracking " + items.size() + " packages.");
                     return;
@@ -127,6 +128,7 @@ public class Tracking implements TriggerListener, Runnable {
                 if(newItem.update() == DELIVERED) {
                     Grouphug.getInstance().sendMessage("Your package has already been delivered. I will not track it further.");
                     Grouphug.getInstance().sendMessage("Status: " + newItem.getStatus());
+                    Grouphug.getInstance().sendMessage(newItem.printSignature());
                     return;
                 }
                 Grouphug.getInstance().sendMessage("Adding package '" + message + "' to tracking list.");
@@ -179,6 +181,7 @@ public class Tracking implements TriggerListener, Runnable {
                         case DELIVERED:
                             Grouphug.getInstance().sendMessage(ti.getOwner() + " has just picked up his/her package '" + ti.getTrackingNumber() + "':");
                             Grouphug.getInstance().sendMessage(ti.getStatus(), true);
+                            Grouphug.getInstance().sendMessage(ti.printSignature());
                             itemsToRemove.add(ti);
                             Grouphug.getInstance().sendMessage("Removing this one from my list. Currently tracking " + (items.size() - itemsToRemove.size()) + " packages.");
                             break;
@@ -229,6 +232,7 @@ public class Tracking implements TriggerListener, Runnable {
         private String trackingNumber;
         private String status;
         private String owner;
+        private String signature;
 
         public long getId() {
             return id;
@@ -256,6 +260,10 @@ public class Tracking implements TriggerListener, Runnable {
 
         public String getOwner() {
             return owner;
+        }
+
+        public String printSignature() {
+            return signature != null ? "Signature: " + signature : "";
         }
 
         private TrackingItem(String trackingNumber, String owner) {
@@ -320,6 +328,16 @@ public class Tracking implements TriggerListener, Runnable {
             if(startIndex == -1 || endIndex == -1) {
                 throw new IOException("Unable to parse target site, have they changed their layout or something?");
             }
+
+            // check if there is a link to the signature
+            int signatureIndex = newStatus.indexOf("signatur.png");
+            if(signatureIndex != -1) {
+                int signatureEndIndex = newStatus.indexOf("\"", signatureIndex);
+                signature = "http://sporing.posten.no/" + newStatus.substring(signatureIndex, signatureEndIndex)
+                        .replace("&amp;", "&");
+            }
+            System.out.println("sigindex: " + signatureIndex);
+            System.out.println("newstatus: " + newStatus);
 
             // remove all tags, whitespace - and trim
             newStatus += " " + posten.substring(startIndex, endIndex)
