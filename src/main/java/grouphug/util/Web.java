@@ -11,6 +11,7 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -88,15 +89,20 @@ public class Web {
 
     /**
      * Prepares an inputstream for the specified URL, faking a user-agent request property.
-     * Remember to close the inputstream! 
+     * Remember to close the inputstream!
      * @param url the url you want to look up
      * @return a ready-to-read inputstream for the URL-connection
      * @throws IOException if I/O fails
      */
     public static InputStream prepareInputStream(URL url) throws IOException {
         System.out.println("Web util opening: '" + url.toString() + "'...");
-        URLConnection urlConn = url.openConnection();
+        HttpURLConnection urlConn = (HttpURLConnection)url.openConnection();
         urlConn.setConnectTimeout(DEFAULT_URLCONNECTION_TIMEOUT);
+
+        // HACK to avoid redirection on Spotify links
+        if (url.getHost().equals("open.spotify.com")) {
+            urlConn.setInstanceFollowRedirects(false);
+        }
 
         // Pretend we're using a proper browser and OS :)
         urlConn.setRequestProperty("User-Agent", "Opera/9.80 (X11; Linux i686; U; en) Presto/2.2.15 Version/10.01");
