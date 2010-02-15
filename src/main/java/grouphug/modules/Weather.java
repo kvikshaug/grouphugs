@@ -7,6 +7,7 @@ import grouphug.util.Web;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Find a weather forecast for the given location and send it to the channel.
@@ -40,7 +41,7 @@ public class Weather implements TriggerListener {
                 isSplited = true;
             } catch (NumberFormatException ex) { }
 
-            ArrayList<String[]> results = new ArrayList<String[]>();
+            List<String[]> results = new ArrayList<String[]>();
             try {
                 if (isSplited)
                     results = Web.weatherLocationSearch(split[1]);

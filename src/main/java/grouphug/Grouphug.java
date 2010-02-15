@@ -7,6 +7,7 @@ import org.jibble.pircbot.PircBot;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Grouphug
@@ -43,7 +44,7 @@ public class Grouphug extends PircBot {
     public static final String HELP_TRIGGER = "help";
 
     // A list over all the nicknames we want
-    protected static ArrayList<String> nicks = new ArrayList<String>();
+    protected static List<String> nicks = new ArrayList<String>();
 
     // The number of characters upon which lines are splitted
     // Note that the 512 max limit includes the channel name, \r\n, and probably some other stuff.
@@ -206,7 +207,7 @@ public class Grouphug extends PircBot {
     public void sendMessage(String message, boolean verifySpam) {
 
         // First create a list of the lines we will send separately.
-        ArrayList<String> lines = new ArrayList<String>();
+        List<String> lines = new ArrayList<String>();
 
         // This will be used for searching.
         int index;

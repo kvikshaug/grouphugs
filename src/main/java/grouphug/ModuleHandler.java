@@ -1,13 +1,14 @@
 package grouphug;
 
-import grouphug.listeners.MessageListener;
 import grouphug.listeners.JoinListener;
+import grouphug.listeners.MessageListener;
 import grouphug.listeners.NickChangeListener;
 import grouphug.modules.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * The modulehandler handles modules by letting them register for trigger or message events
@@ -23,10 +24,10 @@ public class ModuleHandler {
     private Grouphug bot;
 
     private HashMap<String, String> helpers = new HashMap<String, String>();
-    private ArrayList<TriggerListener> triggerListeners = new ArrayList<TriggerListener>();
-    private ArrayList<MessageListener> messageListeners = new ArrayList<MessageListener>();
-    private ArrayList<JoinListener> joinListeners = new ArrayList<JoinListener>();
-    private ArrayList<NickChangeListener> nickChangeListeners = new ArrayList<NickChangeListener>();
+    private List<TriggerListener> triggerListeners = new ArrayList<TriggerListener>();
+    private List<MessageListener> messageListeners = new ArrayList<MessageListener>();
+    private List<JoinListener> joinListeners = new ArrayList<JoinListener>();
+    private List<NickChangeListener> nickChangeListeners = new ArrayList<NickChangeListener>();
 
     public ModuleHandler(Grouphug bot) {
         this.bot = bot;

@@ -15,6 +15,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 public class WordCount implements TriggerListener, MessageListener {
@@ -55,7 +56,7 @@ public class WordCount implements TriggerListener, MessageListener {
         try{
             Object[] row = sqlHandler.selectSingle("SELECT id, words, `lines` FROM "+WORDS_DB+" WHERE nick='"+sender+"';");
             if(row == null) {
-                ArrayList<String> params = new ArrayList<String>();
+                List<String> params = new ArrayList<String>();
                 params.add(sender);
                 params.add(newWords + "");
                 params.add(SQL.dateToSQLDateTime(new Date()));
@@ -92,7 +93,7 @@ public class WordCount implements TriggerListener, MessageListener {
                         "by a user with the same nick as the one that's being removed.");
             } else {
                 try {
-                    ArrayList<String> params = new ArrayList<String>();
+                    List<String> params = new ArrayList<String>();
                     params.add(message);
                     if(sqlHandler.delete("delete from "+WORDS_DB+" where nick=?;", params) == 0) {
                         Grouphug.getInstance().sendMessage("DB reports that no such nick has been recorded.");
@@ -121,7 +122,7 @@ public class WordCount implements TriggerListener, MessageListener {
                 query += "DESC ";
             }
             query += "LIMIT "+LIMIT+";";
-            ArrayList<Object[]> rows = sqlHandler.select(query);
+            List<Object[]> rows = sqlHandler.select(query);
             int place = 1;
             for(Object[] row : rows) {
                 long words = ((Integer)row[2]);

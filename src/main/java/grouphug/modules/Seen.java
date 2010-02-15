@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Seen implements TriggerListener, MessageListener {
 
@@ -36,7 +37,7 @@ public class Seen implements TriggerListener, MessageListener {
 
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
         try {
-            ArrayList<String> params = new ArrayList<String>();
+            List<String> params = new ArrayList<String>();
             params.add(sender);
             Object[] row = sqlHandler.selectSingle("SELECT id FROM "+ SEEN_DB +" WHERE nick='?';", params);
 
@@ -86,7 +87,7 @@ public class Seen implements TriggerListener, MessageListener {
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         try {
-            ArrayList<String> params = new ArrayList<String>();
+            List<String> params = new ArrayList<String>();
             params.add(message);
             Object[] row = sqlHandler.selectSingle("SELECT id, nick, date, lastwords FROM "+SEEN_DB+" WHERE nick='?';", params);
 

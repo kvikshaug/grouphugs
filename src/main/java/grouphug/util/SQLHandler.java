@@ -6,6 +6,7 @@ import java.io.File;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The SQLHandler is a wrapper for the SQL class. Together, these two provide
@@ -125,7 +126,7 @@ public class SQLHandler {
      * @param parameters the parameters belonging to the query
      * @throws SQLException if a database error occurs
      */
-    private void attemptQuery(String query, ArrayList<String> parameters) throws SQLException {
+    private void attemptQuery(String query, List<String> parameters) throws SQLException {
         attemptQuery(query, parameters, true);
     }
 
@@ -136,7 +137,7 @@ public class SQLHandler {
      * @param firstAttempt whether or not this is the first attempt
      * @throws SQLException if a database error occurs
      */
-    private void attemptQuery(String query, ArrayList<String> parameters, boolean firstAttempt) throws SQLException {
+    private void attemptQuery(String query, List<String> parameters, boolean firstAttempt) throws SQLException {
         if(!firstAttempt || !connectionOK) {
             try {
                 reconnect();
@@ -184,7 +185,7 @@ public class SQLHandler {
      * @return the data of the first row from the query
      * @throws SQLException if a database error occurs - debug information will already have been printed out.
      */
-    public Object[] selectSingle(String query, ArrayList<String> parameters) throws SQLException {
+    public Object[] selectSingle(String query, List<String> parameters) throws SQLException {
         try {
             return select(query, parameters).get(0);
         } catch(IndexOutOfBoundsException ex) {
@@ -199,7 +200,7 @@ public class SQLHandler {
      * @return an arraylist with the fetched rows
      * @throws SQLException if a database error occurs
      */
-    public ArrayList<Object[]> select(String query) throws SQLException {
+    public List<Object[]> select(String query) throws SQLException {
         return select(query, null);
     }
 
@@ -211,12 +212,12 @@ public class SQLHandler {
      * aren't already.
      * @param query the SELECT query to execute
      * @param parameters the parameters for the query
-     * @return an arraylist with the fetched rows
+     * @return a list with the fetched rows
      * @throws SQLException if a database error occurs
      */
-    public ArrayList<Object[]> select(String query, ArrayList<String> parameters) throws SQLException {
+    public List<Object[]> select(String query, List<String> parameters) throws SQLException {
         try {
-            ArrayList<Object[]> rows = new ArrayList<Object[]>();
+            List<Object[]> rows = new ArrayList<Object[]>();
             attemptQuery(query, parameters);
             while(sql.getNext()) {
                 rows.add(sql.getRow().clone()); // clone the object since the reference will change
@@ -250,7 +251,7 @@ public class SQLHandler {
      * @return the database ID of the last inserted row
      * @throws SQLException if a database error occurs
      */
-    public int insert(String query, ArrayList<String> parameters) throws SQLException {
+    public int insert(String query, List<String> parameters) throws SQLException {
         try {
             attemptQuery(query, parameters);
             return sql.getLastInsertID();
@@ -282,7 +283,7 @@ public class SQLHandler {
      * @throws SQLException if a database error occurs
      * @return the number of rows affected
      */
-    public int delete(String query, ArrayList<String> parameters) throws SQLException {
+    public int delete(String query, List<String> parameters) throws SQLException {
         try {
             attemptQuery(query, parameters);
             return sql.getAffectedRows();
@@ -314,7 +315,7 @@ public class SQLHandler {
      * @throws SQLException if a database error occurs
      * @return the number of rows affected
      */
-    public int update(String query, ArrayList<String> parameters) throws SQLException {
+    public int update(String query, List<String> parameters) throws SQLException {
         try {
             attemptQuery(query, parameters);
             return sql.getAffectedRows();

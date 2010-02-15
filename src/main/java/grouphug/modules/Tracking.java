@@ -6,12 +6,18 @@ import grouphug.exceptions.SQLUnavailableException;
 import grouphug.listeners.TriggerListener;
 import grouphug.util.SQLHandler;
 import grouphug.util.Web;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.Namespace;
+import org.jdom.xpath.XPath;
 
 import java.io.IOException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
-import java.net.URL;
 
 public class Tracking implements TriggerListener, Runnable {
 
@@ -35,7 +41,7 @@ public class Tracking implements TriggerListener, Runnable {
     public Tracking(ModuleHandler moduleHandler) {
         try {
             sqlHandler = SQLHandler.getSQLHandler();
-            ArrayList<Object[]> rows = sqlHandler.select("select * from " + DB_NAME + ";");
+            List<Object[]> rows = sqlHandler.select("select * from " + DB_NAME + ";");
             for(Object[] row : rows) {
                 items.add(new TrackingItem((Integer)row[0], (String)row[1], (String)row[2], (String)row[3]));
             }
@@ -119,6 +125,7 @@ public class Tracking implements TriggerListener, Runnable {
                 if(arrived != null) {
                     Grouphug.getInstance().sendMessage("Your package has been delivered. Removing it from my list.");
                     Grouphug.getInstance().sendMessage("Status: " + arrived.getStatus());
+                    Grouphug.getInstance().sendMessage(arrived.printSignature());
                     arrived.remove();
                     Grouphug.getInstance().sendMessage("Now tracking " + items.size() + " packages.");
                     return;
@@ -127,10 +134,11 @@ public class Tracking implements TriggerListener, Runnable {
                 if(newItem.update() == DELIVERED) {
                     Grouphug.getInstance().sendMessage("Your package has already been delivered. I will not track it further.");
                     Grouphug.getInstance().sendMessage("Status: " + newItem.getStatus());
+                    Grouphug.getInstance().sendMessage(newItem.printSignature());
                     return;
                 }
                 Grouphug.getInstance().sendMessage("Adding package '" + message + "' to tracking list.");
-                ArrayList<String> params = new ArrayList<String>();
+                List<String> params = new ArrayList<String>();
                 params.add(newItem.getTrackingNumber());
                 params.add(newItem.getStatus());
                 params.add(newItem.getOwner());
@@ -145,6 +153,9 @@ public class Tracking implements TriggerListener, Runnable {
                 e.printStackTrace();
             } catch (SQLException e) {
                 Grouphug.getInstance().sendMessage("Sorry, SQL failed on me. Please fix the problem and try again.");
+                e.printStackTrace();
+            } catch (JDOMException e) {
+                Grouphug.getInstance().sendMessage("Sorry, I was unable to build a JDOM tree. Go check what's up with posten.no.");
                 e.printStackTrace();
             }
         }
@@ -179,6 +190,7 @@ public class Tracking implements TriggerListener, Runnable {
                         case DELIVERED:
                             Grouphug.getInstance().sendMessage(ti.getOwner() + " has just picked up his/her package '" + ti.getTrackingNumber() + "':");
                             Grouphug.getInstance().sendMessage(ti.getStatus(), true);
+                            Grouphug.getInstance().sendMessage(ti.printSignature());
                             itemsToRemove.add(ti);
                             Grouphug.getInstance().sendMessage("Removing this one from my list. Currently tracking " + (items.size() - itemsToRemove.size()) + " packages.");
                             break;
@@ -201,6 +213,9 @@ public class Tracking implements TriggerListener, Runnable {
                 fails++;
                 ex.printStackTrace();
             } catch (SQLException ex) {
+                fails++;
+                ex.printStackTrace();
+            } catch(JDOMException ex) {
                 fails++;
                 ex.printStackTrace();
             } catch(Exception ex) {
@@ -229,6 +244,7 @@ public class Tracking implements TriggerListener, Runnable {
         private String trackingNumber;
         private String status;
         private String owner;
+        private String signature;
 
         public long getId() {
             return id;
@@ -248,7 +264,7 @@ public class Tracking implements TriggerListener, Runnable {
 
         public void setStatus(String status) throws SQLException {
             this.status = status;
-            ArrayList<String> params = new ArrayList<String>();
+            List<String> params = new ArrayList<String>();
             params.add(status);
             params.add(String.valueOf(id));
             sqlHandler.update("update " + DB_NAME + " set status='?' where id='?';", params);
@@ -256,6 +272,10 @@ public class Tracking implements TriggerListener, Runnable {
 
         public String getOwner() {
             return owner;
+        }
+
+        public String printSignature() {
+            return signature != null ? "Signature: " + signature : "";
         }
 
         private TrackingItem(String trackingNumber, String owner) {
@@ -275,7 +295,7 @@ public class Tracking implements TriggerListener, Runnable {
          * @throws SQLException if SQL fails
          */
         public void remove() throws SQLException {
-            ArrayList<String> params = new ArrayList<String>();
+            List<String> params = new ArrayList<String>();
             params.add(String.valueOf(getId()));
             sqlHandler.delete("delete from " + DB_NAME + " where id='?';", params);
             items.remove(this);
@@ -286,15 +306,16 @@ public class Tracking implements TriggerListener, Runnable {
          * @return CHANGED, NOT_CHANGED or DELIVERED according to its status change
          * @throws IOException if IO fails
          * @throws java.sql.SQLException if SQL fails
+         * @throws org.jdom.JDOMException if JDOM-parsing fails
          */
-        public int update() throws IOException, SQLException {
-            String posten = Web.fetchHtmlLine(new URL("http://sporing.posten.no/sporing.html?q="+trackingNumber)).replace("\n", "");
+        public int update() throws IOException, SQLException, JDOMException {
+            Document postDocument = Web.getJDOMDocument(new URL("http://sporing.posten.no/sporing.html?q="+trackingNumber));
 
-            // first find the event field
-            int startIndex = posten.indexOf("<div class=\"sporing-sendingandkolli-latestevent-text\">");
-            int endIndex = posten.indexOf("</div>", startIndex);
+            XPath xpath = XPath.newInstance("//h:div[@class='sporing-sendingandkolli-latestevent-text-container']/h:div[@class='sporing-sendingandkolli-latestevent-text']/h:strong");
+            xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
 
-            if(startIndex == -1) {
+            Element content = (Element)xpath.selectSingleNode(postDocument);
+            if(content == null) {
                 // no results
                 String newStatus = "The package ID is invalid (according to the tracking service)";
                 String oldStatus = getStatus();
@@ -305,25 +326,47 @@ public class Tracking implements TriggerListener, Runnable {
                     return NOT_CHANGED;
                 }
             }
-            if(endIndex == -1) {
-                throw new IOException("Unable to parse target site, have they changed their layout or something?");
+
+            String message = content.getText().replaceAll("\\s+", " ").replaceAll("<.*?>","").trim();
+
+            // try to find a signature url in the message (which is the case if the package has been delivered)
+            xpath = XPath.newInstance("//h:div[@class='sporing-sendingandkolli-latestevent-text-container']/h:div[@class='sporing-sendingandkolli-latestevent-text']/h:strong/h:a");
+            xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
+
+            content = (Element)xpath.selectSingleNode(postDocument);
+
+            if(content != null) {
+                // there is a signature element, first get the text content and add it to message
+                message += " " + content.getText().trim();
+
+                // now we want the href attribute in order to paste the signature url
+                signature = "http://sporing.posten.no/" + content.getAttribute("href").getValue();
+            }
+            // if there isn't a signature element, just don't assign the signature var, and it won't be outputted
+            // also, part of message won't be hidden in an element (hopefully - might be <strong>s and similar!?)
+
+
+            // now find the date
+            xpath = XPath.newInstance("//h:div[@class='sporing-sendingandkolli-latestevent-date']");
+            xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
+            
+            String date;
+            content = (Element)xpath.selectSingleNode(postDocument);
+            if(content == null) {
+                date = "";
+            } else {
+                String datePartOne = content.getText().replaceAll("\\s+", " ").replaceAll("<.*?>","").trim();
+                Element dateSpan = content.getChild("span", Namespace.getNamespace("h", "http://www.w3.org/1999/xhtml"));
+                String datePartTwo;
+                if(dateSpan == null) {
+                    datePartTwo = "";
+                } else {
+                    datePartTwo = dateSpan.getText();
+                }
+                date = datePartOne + " " + datePartTwo;
             }
 
-            // remove all tags, whitespace - and trim
-            String newStatus = posten.substring(startIndex, endIndex)
-                    .replaceAll("\\<.*?\\>","").replaceAll("\\s+", " ").trim();
-
-            // now find the date field
-            startIndex = posten.indexOf("<div class=\"sporing-sendingandkolli-latestevent-date\">", startIndex);
-            endIndex = posten.indexOf("</div>", startIndex);
-
-            if(startIndex == -1 || endIndex == -1) {
-                throw new IOException("Unable to parse target site, have they changed their layout or something?");
-            }
-
-            // remove all tags, whitespace - and trim
-            newStatus += " " + posten.substring(startIndex, endIndex)
-                    .replaceAll("\\<.*?\\>","").replaceAll("\\s+", " ").trim();
+            String newStatus = message + " " + date;
 
             String oldStatus = getStatus();
             if(newStatus.startsWith("Sendingen er utlevert")) {

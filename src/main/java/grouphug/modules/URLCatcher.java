@@ -61,7 +61,7 @@ public class URLCatcher implements MessageListener {
      * @return any urls found, in a List.
      */
     private List<URL> findAllUrls(String string) {
-        ArrayList<URL> urls = new ArrayList<URL>();
+        List<URL> urls = new ArrayList<URL>();
 
         for (String scheme : URI_SCHEMES) {
             for (String url : Web.findURIs(scheme, string)) {

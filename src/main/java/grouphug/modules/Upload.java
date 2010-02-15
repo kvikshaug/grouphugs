@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Upload implements TriggerListener {
 
@@ -59,7 +60,7 @@ public class Upload implements TriggerListener {
                 Grouphug.getInstance().sendMessage("Please use at least 2 search characters.");
                 return;
             }
-            ArrayList<Object[]> rows = sqlHandler.select("SELECT filename, nick, keyword FROM "+ UPLOAD_DB+" WHERE " +
+            List<Object[]> rows = sqlHandler.select("SELECT filename, nick, keyword FROM "+ UPLOAD_DB+" WHERE " +
                     "keyword LIKE '%"+keyword+"%' OR filename LIKE '%"+keyword+"%';");
 
             if(rows.size() == 0) {
@@ -110,7 +111,7 @@ public class Upload implements TriggerListener {
 
         try {
             Web.downloadFile(parts[0], filename, DESTINATION_DIR);
-            ArrayList<String> params = new ArrayList<String>();
+            List<String> params = new ArrayList<String>();
             params.add(parts[1]);
             params.add(sender);
             params.add(filename);

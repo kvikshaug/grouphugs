@@ -1,18 +1,18 @@
 package grouphug.modules;
 
+import grouphug.Grouphug;
+import grouphug.ModuleHandler;
 import grouphug.listeners.JoinListener;
 import grouphug.listeners.NickChangeListener;
-import grouphug.ModuleHandler;
-import grouphug.Grouphug;
-
-import java.util.regex.Pattern;
-import java.util.ArrayList;
-
 import org.jibble.pircbot.User;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public class Operator implements JoinListener, NickChangeListener {
 
-    private ArrayList<UserMask> ops = new ArrayList<UserMask>();
+    private List<UserMask> ops = new ArrayList<UserMask>();
     private Grouphug bot;
 
     public Operator(ModuleHandler handler) {
