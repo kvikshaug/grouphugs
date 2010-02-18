@@ -1,0 +1,18 @@
+# Grouphugs
+
+## What's this?
+Grouphugs is the name of an IRC-bot, created solely for entertainment
+purposes and as an experimental platform for the developers to play
+around with new libraries and frameworks. The bot's main purpose is to
+hug, entertain, insult and/or inform its users in any way imaginable.
+
+## Cool, I want to play too.
+Visit the [project web page][1] and have a look at [how it works][2]
+for the 50,000 foot view of how things fit together. Then have a look
+at the [guides][3] for some inspiration, then check out [what you can
+do][4] to help. Or do something entirely new, its up to you.
+
+[1]: http://gh.kvikshaug.no "Grouphugs"
+[2]: http://gh.kvikshaug.no/about/howitworks "How does it work?"
+[3]: http://gh.kvikshaug.no/guides "Guides"
+[4]: http://gh.kvikshaug.no/about/whatyoucando "What can you do to help?"
