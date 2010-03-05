@@ -32,6 +32,6 @@ define "gh" do
   # Packaging
   ############################################################################
   # package against maven artifacts
-  package(:jar).with :manifest => {"Main-Class" => "grouphug.Grouphug",
+  package(:jar).with :manifest => {"Main-Class" => "no.kvikshaug.gh.Grouphug",
                                    "Class-Path" => artifacts(:sqlite, :pircbot, :jdom, :tagsoup, :jaxen, :jchardet, :commonsio).each(&:invoke).map(&:name).join(" ")  }
 end
