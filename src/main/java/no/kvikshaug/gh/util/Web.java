@@ -240,15 +240,8 @@ public class Web {
 
         // do some tidying up
         if (title != null) {
-            // strip trailing whitespace
-            title = title.trim();
-
-            // strip newlines
-            title = title.replaceAll("\r\n", " ");
-            title = title.replaceAll("\n", " ");
-
-            // strip tabs
-            title = title.replaceAll("\t", " ");
+            // remove all unnecessary whitespace
+            title = title.replaceAll("\\s+", " ").trim();
         }
 
         return title;
