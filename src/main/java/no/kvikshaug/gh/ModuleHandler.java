@@ -58,6 +58,7 @@ public class ModuleHandler {
         new Operator(this);
         new Timer(this);
         new SnowReport(this);
+        new Scala(this);
 
         System.out.println();
         System.out.println(helpers.size() + " help responses registered");
