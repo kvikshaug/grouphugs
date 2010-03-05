@@ -6,3 +6,4 @@ artifacts:
     jaxen: jaxen:jaxen:jar:1.1.1
     jchardet: net.sourceforge.jchardet:jchardet:jar:1.0
     commonsio: commons-io:commons-io:jar:1.4
+    scalalib: org.scala-lang:scala-library:jar:2.7.5
