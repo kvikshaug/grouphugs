@@ -27,6 +27,7 @@ public class Web {
     /**
      * Fetches a web page for you and returns a nicely formatted arraylist with each
      * line as its own entry when the whole thing has loaded.
+     * @deprecated use getJDOMDocument instead, and use XPath to parse the html tree instead of string scraping
      * @param url the url you want to look up.
      * @return a list containing each line of the web site html
      * @throws java.io.IOException sometimes
@@ -45,6 +46,7 @@ public class Web {
     /**
      * Fetches a web page for you and returns a long string containing the full html source
      * when the whole thing has loaded, including newline characters.
+     * @deprecated use getJDOMDocument instead, and use XPath to parse the html tree instead of string scraping
      * @param url the url you want to look up.
      * @return a long string containing the full html source of the specified url
      * @throws java.io.IOException sometimes
