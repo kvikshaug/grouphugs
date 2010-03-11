@@ -22,7 +22,7 @@ import java.util.Vector;
 public class Tracking implements TriggerListener, Runnable {
 
     private static final String TRIGGER = "track";
-    private static final String TRIGGER_HELP = "tracking";
+    private static final String TRIGGER_HELP = "track";
     private static final String TRIGGER_LIST = "-ls";
     private static final String TRIGGER_DEL = "-rm";
     private static final String DB_NAME = "tracking";
