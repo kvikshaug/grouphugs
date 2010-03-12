@@ -125,7 +125,7 @@ public class Tracking implements TriggerListener, Runnable {
                 if(arrived != null) {
                     Grouphug.getInstance().sendMessage("Your package has been delivered. Removing it from my list.");
                     Grouphug.getInstance().sendMessage("Status: " + arrived.getStatus());
-                    Grouphug.getInstance().sendMessage(arrived.printSignature());
+                    //Grouphug.getInstance().sendMessage(arrived.printSignature());
                     arrived.remove();
                     Grouphug.getInstance().sendMessage("Now tracking " + items.size() + " packages.");
                     return;
@@ -134,7 +134,7 @@ public class Tracking implements TriggerListener, Runnable {
                 if(newItem.update() == DELIVERED) {
                     Grouphug.getInstance().sendMessage("Your package has already been delivered. I will not track it further.");
                     Grouphug.getInstance().sendMessage("Status: " + newItem.getStatus());
-                    Grouphug.getInstance().sendMessage(newItem.printSignature());
+                    //Grouphug.getInstance().sendMessage(newItem.printSignature());
                     return;
                 }
                 Grouphug.getInstance().sendMessage("Adding package '" + message + "' to tracking list.");
@@ -190,7 +190,7 @@ public class Tracking implements TriggerListener, Runnable {
                         case DELIVERED:
                             Grouphug.getInstance().sendMessage(ti.getOwner() + " has just picked up his/her package '" + ti.getTrackingNumber() + "':");
                             Grouphug.getInstance().sendMessage(ti.getStatus(), true);
-                            Grouphug.getInstance().sendMessage(ti.printSignature());
+                            //Grouphug.getInstance().sendMessage(ti.printSignature());
                             itemsToRemove.add(ti);
                             Grouphug.getInstance().sendMessage("Removing this one from my list. Currently tracking " + (items.size() - itemsToRemove.size()) + " packages.");
                             break;
