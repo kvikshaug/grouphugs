@@ -47,10 +47,16 @@ public class Pre implements TriggerListener, Runnable {
             XPath xpath = XPath.newInstance("//h:table[@class='rlz']/h:tbody/h:tr");
             xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
 
+            Object node = xpath.selectSingleNode(doc);
+            if(node == null) {
+                bot.sendMessage("Found no release containing '"+message+"'.");
+                return;
+            }
+
             // 1. date, 2. type (e.g. TV), 3. releasename
             String[] data = new String[3];
             int i = 0;
-            for(Object objectElement : ((Element)xpath.selectSingleNode(doc)).getChildren()) {
+            for(Object objectElement : ((Element)node).getChildren()) {
                 data[i++] = ((Element)objectElement).getText();
             }
 
