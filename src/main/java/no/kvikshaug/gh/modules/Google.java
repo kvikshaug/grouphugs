@@ -2,6 +2,7 @@ package no.kvikshaug.gh.modules;
 
 import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
+import no.kvikshaug.gh.exceptions.NoTitleException;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.Web;
 import org.jdom.JDOMException;
@@ -55,26 +56,32 @@ public class Google implements TriggerListener {
             }
 
             for(int i=1; i<=resultCount; i++) {
-                String title;
+                String title = null;
                 try {
                     title = Web.fetchTitle(urls.get(i-1));
                     if(title.length() > TITLE_MAX_LENGTH) {
                         title = title.substring(0, TITLE_MAX_LENGTH - 6); // minus the 6 ' (...)'-chars
                         title = title.concat(" (...)");
                     }
-                } catch(IllegalArgumentException ex) {
-                    title = "(image/audio/video)";
-                } catch(IOException ex) {
-                    title = "(unable to fetch title)";
-                    System.err.println(ex);
-                    ex.printStackTrace(System.err);
-                } catch(JDOMException ex) {
-                    title = "(unable to fetch title)";
-                    System.err.println(ex);
-                    ex.printStackTrace(System.err);
+                } catch(IllegalArgumentException e) {
+                    System.err.println("Unable to fetch title due to IllegalArgumentException; " +
+                            "probably image/audio/video");
+                    e.printStackTrace();
+                } catch(IOException e) {
+                    System.err.println("Unable to fetch title due to JDOMException:");
+                    e.printStackTrace();
+                } catch(JDOMException e) {
+                    System.err.println("Unable to fetch title due to JDOMException:");
+                    e.printStackTrace();
+                } catch(NoTitleException e) {
+                    System.err.println("Unable to fetch title: " + e.getMessage());
+                    e.printStackTrace();
                 }
-
-                Grouphug.getInstance().sendMessage(urls.get(i-1).toString() + " - " + title);
+                String reply = urls.get(i-1).toString();
+                if(title != null) {
+                    reply += " - " + title;
+                }
+                Grouphug.getInstance().sendMessage(reply);
                 if(urls.size() == i && resultCount > i) {
                     if(i == 1) {
                         Grouphug.getInstance().sendMessage("This was the only result.");

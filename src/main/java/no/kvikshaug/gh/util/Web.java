@@ -1,5 +1,6 @@
 package no.kvikshaug.gh.util;
 
+import no.kvikshaug.gh.exceptions.NoTitleException;
 import org.apache.commons.io.IOUtils;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import org.jdom.Document;
@@ -227,8 +228,9 @@ public class Web {
      * @return the parsed title
      * @throws java.io.IOException if I/O fails
      * @throws org.jdom.JDOMException if parsing HTML fails
+     * @throws no.kvikshaug.gh.exceptions.NoTitleException if there is no title to be found in the DOM
      */
-    public static String fetchTitle(URL url) throws JDOMException, IOException {
+    public static String fetchTitle(URL url) throws JDOMException, IOException, NoTitleException {
         String title;
         Document doc = getJDOMDocument(url);
 
@@ -236,12 +238,18 @@ public class Web {
         XPath titlePath = XPath.newInstance("/h:html/h:head/h:title");
         titlePath.addNamespace("h","http://www.w3.org/1999/xhtml");
 
-        title = ((Element)titlePath.selectSingleNode(doc)).getText();
+        Element titleElement = (Element)titlePath.selectSingleNode(doc);
+        if(titleElement == null) {
+            throw new NoTitleException("No title element in DOM");
+        }
 
-        // do some tidying up
-        if (title != null) {
-            // remove all unnecessary whitespace
-            title = title.replaceAll("\\s+", " ").trim();
+        title = titleElement.getText();
+
+        // remove all unnecessary whitespace
+        title = title.replaceAll("\\s+", " ").trim();
+
+        if(title.equals("")) {
+            throw new NoTitleException("Title tag was empty or contained only whitespace");
         }
 
         return title;
