@@ -94,9 +94,13 @@ public class Google implements TriggerListener {
                 }
             }
         } catch(IOException ex) {
-            Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)");
+            Grouphug.getInstance().sendMessage("I seem to have thrown an IOException. Woopsie!");
             System.err.println(ex);
             ex.printStackTrace();
+        } catch (JDOMException e) {
+            Grouphug.getInstance().sendMessage("I seem to have thrown a JDOMException. Woopsie!");
+            System.err.println(e);
+            e.printStackTrace();
         }
     }
 }

@@ -4,6 +4,7 @@ import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.Web;
+import org.jdom.JDOMException;
 
 import java.io.IOException;
 import java.net.URL;
@@ -37,6 +38,9 @@ public class Confession implements TriggerListener {
                         conf = getConfession(confessionURL.toString());
                     } catch(IndexOutOfBoundsException ex) {
                         Grouphug.getInstance().sendMessage("No one has confessed about their "+message+" problem yet.");
+                        return;
+                    } catch (JDOMException e) {
+                        Grouphug.getInstance().sendMessage("Woops, i seem to have thrown a JDOMException.");
                         return;
                     }
                 } else {

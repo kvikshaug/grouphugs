@@ -120,16 +120,18 @@ public class Web {
      * @param query the query to search for
      * @return a list over all URLs google provided
      * @throws IOException if I/O fails
+     * @throws org.jdom.JDOMException when errors occur in parsing
      */
-    public static List<URL> googleSearch(String query) throws IOException {
-        String googleHtml = fetchHtmlLine(new URL("http://www.google.com/search?q="+query.replace(' ', '+'))).replace("\n", "");
+    public static List<URL> googleSearch(String query) throws IOException, JDOMException {
+        Document doc = getJDOMDocument(new URL("http://www.google.com/search?q="+query.replace(' ', '+')));
 
-        String parseSearch = "<h3 class=r><a href=\"";
-        int searchIndex = 0;
+        // find all a.l elements, which are result links
+        XPath links = XPath.newInstance("//h:a[@class='l']");
+        links.addNamespace("h","http://www.w3.org/1999/xhtml");
 
         List<URL> urls = new ArrayList<URL>();
-        while((searchIndex = googleHtml.indexOf(parseSearch, searchIndex+1)) != -1) {
-            urls.add(new URL(googleHtml.substring(searchIndex + parseSearch.length(), googleHtml.indexOf('"', searchIndex + parseSearch.length()))));
+        for(Object element : links.selectNodes(doc)) {
+            urls.add(new URL(((Element)element).getAttribute("href").getValue()));
         }
         return urls;
     }

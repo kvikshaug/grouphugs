@@ -11,6 +11,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.commons.io.IOUtils;
+import org.jdom.JDOMException;
 
 public class IMDb implements TriggerListener {
 
@@ -34,6 +35,9 @@ public class IMDb implements TriggerListener {
             return;
         } catch(IOException e) {
             Grouphug.getInstance().sendMessage("But I don't want to. (IOException)");
+            return;
+        } catch (JDOMException e) {
+            Grouphug.getInstance().sendMessage("I seem to have thrown a JDOMException. Woopsie!");
             return;
         }
 
