@@ -85,8 +85,8 @@ public class Google implements TriggerListener {
                 if(urls.size() == i && resultCount > i) {
                     if(i == 1) {
                         Grouphug.getInstance().sendMessage("This was the only result.");
-                    } else if(i == 10) {
-                        Grouphug.getInstance().sendMessage("Google only provides 10 results per page.");
+                    } else if(i >= 10) {
+                        Grouphug.getInstance().sendMessage("Google only provided "+i+" results for this page.");
                     } else {
                         Grouphug.getInstance().sendMessage("There were only these " + i + " results.");
                     }
