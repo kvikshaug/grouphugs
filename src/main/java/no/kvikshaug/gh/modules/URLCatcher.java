@@ -29,7 +29,6 @@ public class URLCatcher implements MessageListener {
         System.out.println("URLCatcher module loaded.");
     }
 
-    @Override
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
         for(URL url : findAllUrls(message)) {
             String title = null;
