@@ -75,8 +75,7 @@ public class Operator implements JoinListener, NickChangeListener {
                             bot.op(Grouphug.CHANNEL, nick);
                             return;
                         } else {
-                            // i don't have op, so complain
-                            bot.sendMessage("Why haven't anyone oped me, so I could have oped " + nick + " just now?");
+                            // i don't have op, but don't complain, just ignore it
                             return;
                         }
                     }
