@@ -60,6 +60,7 @@ public class ModuleHandler {
         new SnowReport(this);
         new Fml(this);
         new Pre(this);
+        new Jargon(this);
 
         System.out.println();
         System.out.println(helpers.size() + " help responses registered");
