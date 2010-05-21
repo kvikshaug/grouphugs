@@ -327,7 +327,7 @@ public class Tracking implements TriggerListener, Runnable {
                 }
             }
 
-            String message = content.getText().replaceAll("\\s+", " ").replaceAll("<.*?>","").trim();
+            String message = content.getText().replaceAll("\\s+", " ").replaceAll("<br/?>", " ").replaceAll("<.*?>","").trim();
 
             // try to find a signature url in the message (which is the case if the package has been delivered)
             xpath = XPath.newInstance("//h:div[@class='sporing-sendingandkolli-latestevent-text-container']/h:div[@class='sporing-sendingandkolli-latestevent-text']/h:strong/h:a");
