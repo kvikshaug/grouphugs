@@ -54,7 +54,7 @@ public class ModuleHandler {
         new Upload(this);
         new URLCatcher(this);
         new WordCount(this);
-        new Weather(this);
+//        new Weather(this);
         new Operator(this);
         new Timer(this);
         new SnowReport(this);
