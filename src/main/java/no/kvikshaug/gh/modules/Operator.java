@@ -29,7 +29,7 @@ public class Operator implements JoinListener, NickChangeListener {
         ops.add(new UserMask("Twst", null, null));
         ops.add(new UserMask("Krashk", null, null));
         ops.add(new UserMask("Blaster", null, null));
-        ops.add(new UserMask("Blast|G4", null, null));
+        ops.add(new UserMask("dakh", null, null));
 
         System.out.println("Operator module loaded.");
     }
@@ -75,8 +75,7 @@ public class Operator implements JoinListener, NickChangeListener {
                             bot.op(Grouphug.CHANNEL, nick);
                             return;
                         } else {
-                            // i don't have op, so complain
-                            bot.sendMessage("Why haven't anyone oped me, so I could have oped " + nick + " just now?");
+                            // i don't have op, but don't complain, just ignore it
                             return;
                         }
                     }

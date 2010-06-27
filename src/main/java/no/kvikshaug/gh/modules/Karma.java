@@ -146,7 +146,7 @@ public class Karma implements TriggerListener, MessageListener {
     private KarmaItem find(String karma) throws SQLException {
         List<String> params = new ArrayList<String>();
         params.add(karma);
-        Object[] row = sqlHandler.selectSingle("SELECT id, name, value FROM "+KARMA_DB+" WHERE name='?';", params);
+        Object[] row = sqlHandler.selectSingle("SELECT id, name, value FROM "+KARMA_DB+" WHERE name LIKE('?');", params);
         if(row == null) {
             return null;
         }

@@ -2,6 +2,7 @@ package no.kvikshaug.gh.modules;
 
 import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
+import no.kvikshaug.gh.exceptions.NoTitleException;
 import no.kvikshaug.gh.listeners.MessageListener;
 import no.kvikshaug.gh.util.Web;
 import org.jdom.JDOMException;
@@ -29,18 +30,22 @@ public class URLCatcher implements MessageListener {
         System.out.println("URLCatcher module loaded.");
     }
 
-    @Override
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
         for(URL url : findAllUrls(message)) {
             String title = null;
             try {
                 title = Web.fetchTitle(url);
+            } catch(IllegalArgumentException e) {
+                System.err.println("[URLCatcher]: IllegalArgumentException; probably image/audio/video link");
+                e.printStackTrace();
             } catch (JDOMException e) {
                 System.err.println("[URLCatcher]: unable to fetch title (JDOMException)");
                 e.printStackTrace();
             } catch (IOException e) {
                 System.err.println("[URLCatcher]: unable to fetch title (IOException)");
                 e.printStackTrace();
+            } catch(NoTitleException e) {
+                System.err.println("[URLCatcher]: No title: " + e.getMessage());
             }
 
             if (title != null && title.length() > 0) {

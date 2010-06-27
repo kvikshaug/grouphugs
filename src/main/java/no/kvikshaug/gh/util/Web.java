@@ -1,5 +1,6 @@
 package no.kvikshaug.gh.util;
 
+import no.kvikshaug.gh.exceptions.NoTitleException;
 import org.apache.commons.io.IOUtils;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import org.jdom.Document;
@@ -27,6 +28,7 @@ public class Web {
     /**
      * Fetches a web page for you and returns a nicely formatted arraylist with each
      * line as its own entry when the whole thing has loaded.
+     * @deprecated use getJDOMDocument instead, and use XPath to parse the html tree instead of string scraping
      * @param url the url you want to look up.
      * @return a list containing each line of the web site html
      * @throws java.io.IOException sometimes
@@ -45,6 +47,7 @@ public class Web {
     /**
      * Fetches a web page for you and returns a long string containing the full html source
      * when the whole thing has loaded, including newline characters.
+     * @deprecated use getJDOMDocument instead, and use XPath to parse the html tree instead of string scraping
      * @param url the url you want to look up.
      * @return a long string containing the full html source of the specified url
      * @throws java.io.IOException sometimes
@@ -117,16 +120,18 @@ public class Web {
      * @param query the query to search for
      * @return a list over all URLs google provided
      * @throws IOException if I/O fails
+     * @throws org.jdom.JDOMException when errors occur in parsing
      */
-    public static List<URL> googleSearch(String query) throws IOException {
-        String googleHtml = fetchHtmlLine(new URL("http://www.google.com/search?q="+query.replace(' ', '+'))).replace("\n", "");
+    public static List<URL> googleSearch(String query) throws IOException, JDOMException {
+        Document doc = getJDOMDocument(new URL("http://www.google.com/search?q="+query.replace(' ', '+')));
 
-        String parseSearch = "<h3 class=r><a href=\"";
-        int searchIndex = 0;
+        // find all a.l elements, which are result links
+        XPath links = XPath.newInstance("//h:a[@class='l']");
+        links.addNamespace("h","http://www.w3.org/1999/xhtml");
 
         List<URL> urls = new ArrayList<URL>();
-        while((searchIndex = googleHtml.indexOf(parseSearch, searchIndex+1)) != -1) {
-            urls.add(new URL(googleHtml.substring(searchIndex + parseSearch.length(), googleHtml.indexOf('"', searchIndex + parseSearch.length()))));
+        for(Object element : links.selectNodes(doc)) {
+            urls.add(new URL(((Element)element).getAttribute("href").getValue()));
         }
         return urls;
     }
@@ -225,8 +230,9 @@ public class Web {
      * @return the parsed title
      * @throws java.io.IOException if I/O fails
      * @throws org.jdom.JDOMException if parsing HTML fails
+     * @throws no.kvikshaug.gh.exceptions.NoTitleException if there is no title to be found in the DOM
      */
-    public static String fetchTitle(URL url) throws JDOMException, IOException {
+    public static String fetchTitle(URL url) throws JDOMException, IOException, NoTitleException {
         String title;
         Document doc = getJDOMDocument(url);
 
@@ -234,19 +240,18 @@ public class Web {
         XPath titlePath = XPath.newInstance("/h:html/h:head/h:title");
         titlePath.addNamespace("h","http://www.w3.org/1999/xhtml");
 
-        title = ((Element)titlePath.selectSingleNode(doc)).getText();
+        Element titleElement = (Element)titlePath.selectSingleNode(doc);
+        if(titleElement == null) {
+            throw new NoTitleException("No title element in DOM");
+        }
 
-        // do some tidying up
-        if (title != null) {
-            // strip trailing whitespace
-            title = title.trim();
+        title = titleElement.getText();
 
-            // strip newlines
-            title = title.replaceAll("\r\n", " ");
-            title = title.replaceAll("\n", " ");
+        // remove all unnecessary whitespace
+        title = title.replaceAll("\\s+", " ").trim();
 
-            // strip tabs
-            title = title.replaceAll("\t", " ");
+        if(title.equals("")) {
+            throw new NoTitleException("Title tag was empty or contained only whitespace");
         }
 
         return title;

@@ -10,6 +10,10 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.apache.commons.io.IOUtils;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.xpath.XPath;
 
 public class GoogleFight implements TriggerListener {
 
@@ -34,35 +38,31 @@ public class GoogleFight implements TriggerListener {
         String query2 = message.substring(message.indexOf(TRIGGER_VS) + TRIGGER_VS.length());
 
         try {
-            String hits1 = search(query1);
-            String hits2 = search(query2);
+            String hits1 = searchResults(query1);
+            String hits2 = searchResults(query2);
 
-            if(hits1 == null) {
-                hits1 = "no";
-            }
-            if(hits2 == null) {
-                hits2 = "no";
-            }
-
-            Grouphug.getInstance().sendMessage(query1+": "+hits1+" results\n"+query2+": "+hits2+" results");
+            Grouphug.getInstance().sendMessage(query1+": "+hits1+"\n"+query2+": "+hits2);
         } catch(IOException e) {
             Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)");
-            System.err.println(e.getMessage()+"\n"+e.getCause());
-            e.printStackTrace(System.err);
+            e.printStackTrace();
+        } catch (JDOMException e) {
+            Grouphug.getInstance().sendMessage("Woopsie, I caught a JDOMException.");
+            e.printStackTrace();
         }
     }
 
-    public String search(String query) throws IOException {
-        BufferedReader google = Web.prepareEncodedBufferedReader(new URL("http://www.google.com/search?q="+query.replace(' ', '+')));
+    public String searchResults(String query) throws IOException, JDOMException {
+        Document document = Web.getJDOMDocument(new URL("http://www.google.com/search?q="+query.replace(' ', '+')));
+        XPath xpath = XPath.newInstance("//h:div[@id='resultStats']");
+        xpath.addNamespace("h","http://www.w3.org/1999/xhtml");
 
-        String line;
-        String search = "</b> of about <b>";
-        while((line = google.readLine()) != null) {
-            if(line.contains(search)) {
-                IOUtils.closeQuietly(google);
-                return line.substring(line.indexOf(search) + search.length(), line.indexOf("</b>", line.indexOf(search) + search.length()));
-            }
+        Element element = (Element)xpath.selectSingleNode(document);
+
+        if(element == null) {
+            return "no";
         }
-        return null;
+
+        String results = element.getText().replace("About ", "");
+        return results.substring(0, results.indexOf("results")+"results".length()).trim();
     }
 }

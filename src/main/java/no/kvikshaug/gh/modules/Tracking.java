@@ -22,7 +22,7 @@ import java.util.Vector;
 public class Tracking implements TriggerListener, Runnable {
 
     private static final String TRIGGER = "track";
-    private static final String TRIGGER_HELP = "tracking";
+    private static final String TRIGGER_HELP = "track";
     private static final String TRIGGER_LIST = "-ls";
     private static final String TRIGGER_DEL = "-rm";
     private static final String DB_NAME = "tracking";
@@ -66,7 +66,7 @@ public class Tracking implements TriggerListener, Runnable {
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
-        if(message.equals(TRIGGER_LIST)) {
+        if(message.equals(TRIGGER_LIST) || message.trim().equals("")) {
             if(items.size() == 0) {
                 Grouphug.getInstance().sendMessage("No packages are being tracked. What's wrong with you people?");
             } else {
@@ -125,7 +125,7 @@ public class Tracking implements TriggerListener, Runnable {
                 if(arrived != null) {
                     Grouphug.getInstance().sendMessage("Your package has been delivered. Removing it from my list.");
                     Grouphug.getInstance().sendMessage("Status: " + arrived.getStatus());
-                    Grouphug.getInstance().sendMessage(arrived.printSignature());
+                    //Grouphug.getInstance().sendMessage(arrived.printSignature());
                     arrived.remove();
                     Grouphug.getInstance().sendMessage("Now tracking " + items.size() + " packages.");
                     return;
@@ -134,7 +134,7 @@ public class Tracking implements TriggerListener, Runnable {
                 if(newItem.update() == DELIVERED) {
                     Grouphug.getInstance().sendMessage("Your package has already been delivered. I will not track it further.");
                     Grouphug.getInstance().sendMessage("Status: " + newItem.getStatus());
-                    Grouphug.getInstance().sendMessage(newItem.printSignature());
+                    //Grouphug.getInstance().sendMessage(newItem.printSignature());
                     return;
                 }
                 Grouphug.getInstance().sendMessage("Adding package '" + message + "' to tracking list.");
@@ -190,7 +190,7 @@ public class Tracking implements TriggerListener, Runnable {
                         case DELIVERED:
                             Grouphug.getInstance().sendMessage(ti.getOwner() + " has just picked up his/her package '" + ti.getTrackingNumber() + "':");
                             Grouphug.getInstance().sendMessage(ti.getStatus(), true);
-                            Grouphug.getInstance().sendMessage(ti.printSignature());
+                            //Grouphug.getInstance().sendMessage(ti.printSignature());
                             itemsToRemove.add(ti);
                             Grouphug.getInstance().sendMessage("Removing this one from my list. Currently tracking " + (items.size() - itemsToRemove.size()) + " packages.");
                             break;
@@ -327,7 +327,7 @@ public class Tracking implements TriggerListener, Runnable {
                 }
             }
 
-            String message = content.getText().replaceAll("\\s+", " ").replaceAll("<.*?>","").trim();
+            String message = content.getText().replaceAll("\\s+", " ").replaceAll("<br/?>", " ").replaceAll("<.*?>","").trim();
 
             // try to find a signature url in the message (which is the case if the package has been delivered)
             xpath = XPath.newInstance("//h:div[@class='sporing-sendingandkolli-latestevent-text-container']/h:div[@class='sporing-sendingandkolli-latestevent-text']/h:strong/h:a");

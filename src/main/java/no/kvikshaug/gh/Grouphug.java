@@ -48,8 +48,8 @@ public class Grouphug extends PircBot {
 
     // The number of characters upon which lines are splitted
     // Note that the 512 max limit includes the channel name, \r\n, and probably some other stuff.
-    // maxing out on 445 seems to be a reasonable amount, both ways.
-    private static final int MAX_LINE_CHARS = 445;
+    // maxing out on 440 seems to be a reasonable amount, both ways.
+    private static final int MAX_LINE_CHARS = 440;
 
     // How many lines we can send to the channel in one go without needing spam-trigger
     private static final int MAX_SPAM_LINES = 5;
@@ -66,7 +66,7 @@ public class Grouphug extends PircBot {
     // A static reference and getter to our bot
     private static Grouphug bot;
     public static Grouphug getInstance() {
-        return bot;
+      return bot;
     }
 
     @Override
