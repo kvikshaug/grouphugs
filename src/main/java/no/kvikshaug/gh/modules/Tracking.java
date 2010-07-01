@@ -35,17 +35,23 @@ public class Tracking implements TriggerListener, Runnable {
     private boolean threadWorking = false;
     private int itemsRemaining = 0;
 
+    // outputted when user tries to remove or add a package while the poller thread is polling
+    private String warnThreadWorking = "Sorry, I'm currently polling for updates. Modifying the " +
+            "package list now would make me go haywire. I have %s packages left to check, " +
+            "count to 10 for each of them and try again.";
+
     private Vector<TrackingItem> items = new Vector<TrackingItem>();
     private SQLHandler sqlHandler;
+    private Grouphug bot;
 
     public Tracking(ModuleHandler moduleHandler) {
         try {
+            bot = Grouphug.getInstance();
             sqlHandler = SQLHandler.getSQLHandler();
             List<Object[]> rows = sqlHandler.select("select * from " + DB_NAME + ";");
             for(Object[] row : rows) {
                 items.add(new TrackingItem((Integer)row[0], (String)row[1], (String)row[2], (String)row[3]));
             }
-
 
             moduleHandler.addTriggerListener(TRIGGER, this);
             moduleHandler.registerHelp(TRIGGER_HELP, "Posten.no package tracking. I will keep track of the package by " +
@@ -66,103 +72,129 @@ public class Tracking implements TriggerListener, Runnable {
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
-        if(message.equals(TRIGGER_LIST) || message.trim().equals("")) {
-            if(items.size() == 0) {
-                Grouphug.getInstance().sendMessage("No packages are being tracked. What's wrong with you people?");
-            } else {
-                for(TrackingItem ti : items) {
-                    Grouphug.getInstance().sendMessage(ti.getTrackingNumber() + ": " + ti.getStatus() +
-                            " (for " + ti.getOwner() + ")");
-                }
-            }
+        if(message.equals(TRIGGER_LIST) || message.equals("")) {
+            listPackages();
+        } else if(threadWorking) {
+            // the remaining options all modify the tracked items list. so if the thread is working,
+            // let the user know that we need to wait until it's done before we modify it.
+            bot.sendMessage(String.format(warnThreadWorking, itemsRemaining));
         } else if(message.startsWith(TRIGGER_DEL)) {
-            for(int i=0; i<items.size(); i++) {
-                if(items.get(i).getTrackingNumber().equals(message.replace(TRIGGER_DEL, "").trim())) {
-                    if(threadWorking) {
-                        Grouphug.getInstance().sendMessage("Sorry, I'm currently polling for updates. Modifying the " +
-                                "package list now would make me go haywire. I have " + itemsRemaining + " packages left to check, " +
-                                "count to 10 for each of them and try again.");
-                        return;
-                    }
-                    try {
-                        // i know it's wrong to say that it's done before you do it but we need the trackingnumber before it's really removed!
-                        Grouphug.getInstance().sendMessage("Ok, stopped tracking package '" + items.get(i).getTrackingNumber() + "'.");
-                        items.get(i).remove();
-                    } catch (SQLException e) {
-                        Grouphug.getInstance().sendMessage("I have the package but failed to remove it from the SQL db for some reason!");
-                        e.printStackTrace();
-                    }
-                    return;
-                }
-            }
-            Grouphug.getInstance().sendMessage("Sorry, I'm not tracking any package with ID '" +
-                    message.replace(TRIGGER_DEL, "").trim() + "'. Try " + Grouphug.MAIN_TRIGGER + TRIGGER + " " + TRIGGER_LIST);
+            removePackage(message.replace(TRIGGER_DEL, "").trim());
         } else {
-            // User wants to add a new item for tracking, but check if we're already tracking it
-            try {
-                TrackingItem arrived = null;
-                for(TrackingItem ti : items) {
-                    if(ti.getTrackingNumber().equals(message)) {
-                        int result = ti.update();
-                        if(result == CHANGED) {
-                            Grouphug.getInstance().sendMessage("New status for '" + message + "': " + ti.getStatus(), true);
-                            return;
-                        } else if(result == NOT_CHANGED) {
-                                Grouphug.getInstance().sendMessage("No change for '" + message + "': " + ti.getStatus(), true);
-                            return;
-                        } else if(result == DELIVERED) {
-                            arrived = ti;
-                            break;
-                        }
-                    }
-                }
-                if(threadWorking) {
-                    Grouphug.getInstance().sendMessage("Sorry, I'm currently polling for updates. Modifying the " +
-                            "package list now would make me go haywire. I have " + itemsRemaining + " packages left " +
-                            "to check, count to 10 for each of them and try again.");
-                    return;
-                }
-                if(arrived != null) {
-                    Grouphug.getInstance().sendMessage("Your package has been delivered. Removing it from my list.");
-                    Grouphug.getInstance().sendMessage("Status: " + arrived.getStatus());
-                    //Grouphug.getInstance().sendMessage(arrived.printSignature());
-                    arrived.remove();
-                    Grouphug.getInstance().sendMessage("Now tracking " + items.size() + " packages.");
-                    return;
-                }
-                TrackingItem newItem = new TrackingItem(message.trim(), sender);
-                if(newItem.update() == DELIVERED) {
-                    Grouphug.getInstance().sendMessage("Your package has already been delivered. I will not track it further.");
-                    Grouphug.getInstance().sendMessage("Status: " + newItem.getStatus());
-                    //Grouphug.getInstance().sendMessage(newItem.printSignature());
-                    return;
-                }
-                Grouphug.getInstance().sendMessage("Adding package '" + message + "' to tracking list.");
-                List<String> params = new ArrayList<String>();
-                params.add(newItem.getTrackingNumber());
-                params.add(newItem.getStatus());
-                params.add(newItem.getOwner());
-                int id = sqlHandler.insert("insert into " + DB_NAME + " (trackingnr, status, owner) VALUES ('?', '?', '?');", params);
-                newItem.setId(id);
+            // User wants to add a new item for tracking
+            addPackage(message, sender);
+        }
+    }
 
-                // if we came this far, no exception was thrown. if it was, the item won't get added to the list.
-                items.add(newItem);
-                Grouphug.getInstance().sendMessage("Status: " + newItem.getStatus());
-            } catch(IOException e) {
-                Grouphug.getInstance().sendMessage("Sorry, I caught an IOException. Try again later or something.");
-                e.printStackTrace();
-            } catch (SQLException e) {
-                Grouphug.getInstance().sendMessage("Sorry, SQL failed on me. Please fix the problem and try again.");
-                e.printStackTrace();
-            } catch (JDOMException e) {
-                Grouphug.getInstance().sendMessage("Sorry, I was unable to build a JDOM tree. Go check what's up with posten.no.");
-                e.printStackTrace();
+    /**
+     * List all packages that are currently being tracked
+     */
+    public void listPackages() {
+        if(items.size() == 0) {
+            bot.sendMessage("No packages are being tracked. What's wrong with you people?");
+        } else {
+            for(TrackingItem ti : items) {
+                bot.sendMessage(ti.getTrackingNumber() + ": " + ti.getStatus() + " (for " + ti.getOwner() + ")");
             }
         }
     }
 
     /**
-     * This is the posten.no poller
+     * Stop tracking a package which is currently being tracked
+     * @param id the id of the package to stop tracking
+     */
+    public void removePackage(String id) {
+        for(int i=0; i<items.size(); i++) {
+            if(items.get(i).getTrackingNumber().equals(id)) {
+                try {
+                    items.get(i).remove();
+                    bot.sendMessage("Ok, stopped tracking package '" + id + "'.");
+                } catch (SQLException e) {
+                    bot.sendMessage("I have the package but failed to remove it from the SQL db " +
+                            "for some reason! Please check for inconsistencies between memory and SQL.");
+                    e.printStackTrace();
+                }
+                return;
+            }
+        }
+        bot.sendMessage("Sorry, I'm not tracking any package with ID '" + id + "'. Try !track -ls");
+    }
+
+    /**
+     * Start tracking a new package, or update the status of a package which is already being tracked
+     * @param id the id of the package to add or update
+     * @param sender the nick of the one tracking the package
+     */
+    public void addPackage(String id, String sender) {
+        try {
+            // first check if the package is already tracked
+            for(TrackingItem ti : items) {
+                if(ti.getTrackingNumber().equals(id)) {
+                    checkForUpdate(ti);
+                    return;
+                }
+            }
+
+            // nope, let's add the new package
+            TrackingItem newItem = new TrackingItem(id, sender);
+
+            // if it's delivered, we're not going to track it further
+            if(newItem.update() == DELIVERED) {
+                bot.sendMessage("Your package has already been delivered. I will not track it further.");
+                bot.sendMessage("Status: " + newItem.getStatus());
+                //Grouphug.getInstance().sendMessage(newItem.printSignature());
+                return;
+            }
+            bot.sendMessage("Adding package '" + id + "' to tracking list.");
+            List<String> params = new ArrayList<String>();
+            params.add(newItem.getTrackingNumber());
+            params.add(newItem.getStatus());
+            params.add(newItem.getOwner());
+            int sqlId = sqlHandler.insert("insert into " + DB_NAME + " (trackingnr, status, owner) VALUES ('?', '?', '?');", params);
+            newItem.setId(sqlId);
+
+            // if we came this far, no exception was thrown. if it was, the item won't get added to the list.
+            items.add(newItem);
+            bot.sendMessage("Status: " + newItem.getStatus());
+        } catch(IOException e) {
+            bot.sendMessage("Sorry, I caught an IOException. Try again later or something.");
+            e.printStackTrace();
+        } catch (SQLException e) {
+            bot.sendMessage("Sorry, SQL failed on me. Please fix the problem and try again.");
+            e.printStackTrace();
+        } catch (JDOMException e) {
+            bot.sendMessage("Sorry, I was unable to build a JDOM tree. Go check what's up with posten.no.");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Checks an existing TrackingItem for updates. Called when the user explicitly
+     * tries to !track a package which is already tracked. Therefore, something
+     * should be outputted in all cases (even if there is no update).
+     * @param item the item to check for updates on
+     * @throws java.io.IOException if I/O fails
+     * @throws java.sql.SQLException if SQL fails
+     * @throws org.jdom.JDOMException if JDOM fails
+     */
+    public void checkForUpdate(TrackingItem item) throws JDOMException, IOException, SQLException {
+        int result = item.update();
+        if(result == CHANGED) {
+            bot.sendMessage("New status for '" + item.getId() + "': " + item.getStatus(), true);
+        } else if(result == NOT_CHANGED) {
+            bot.sendMessage("No change for '" + item.getId() + "': " + item.getStatus(), true);
+        } else if(result == DELIVERED) {
+            bot.sendMessage("Your package has been delivered. Removing it from my list.");
+            bot.sendMessage("Status: " + item.getStatus());
+            //bot.sendMessage(arrived.printSignature());
+            item.remove();
+            bot.sendMessage("Now tracking " + items.size() + " packages.");
+        }
+    }
+
+
+    /**
+     * This is the thread which handles waiting and polling of packages that are being tracked.
      */
     public void run() {
         int fails = 0;
@@ -180,19 +212,19 @@ public class Tracking implements TriggerListener, Runnable {
                 for(TrackingItem ti : items) {
                     switch(ti.update()) {
                         case CHANGED:
-                            Grouphug.getInstance().sendMessage(ti.getOwner() + ": Package '" + ti.getTrackingNumber() + "' has exciting new changes!");
-                            Grouphug.getInstance().sendMessage(ti.getStatus(), true);
+                            bot.sendMessage(ti.getOwner() + ": Package '" + ti.getTrackingNumber() + "' has exciting new changes!");
+                            bot.sendMessage(ti.getStatus(), true);
                             break;
 
                         case NOT_CHANGED:
                             break;
 
                         case DELIVERED:
-                            Grouphug.getInstance().sendMessage(ti.getOwner() + " has just picked up his/her package '" + ti.getTrackingNumber() + "':");
-                            Grouphug.getInstance().sendMessage(ti.getStatus(), true);
-                            //Grouphug.getInstance().sendMessage(ti.printSignature());
+                            bot.sendMessage(ti.getOwner() + " has just picked up his/her package '" + ti.getTrackingNumber() + "':");
+                            bot.sendMessage(ti.getStatus(), true);
+                            //bot.sendMessage(ti.printSignature());
                             itemsToRemove.add(ti);
-                            Grouphug.getInstance().sendMessage("Removing this one from my list. Currently tracking " + (items.size() - itemsToRemove.size()) + " packages.");
+                            bot.sendMessage("Removing this one from my list. Currently tracking " + (items.size() - itemsToRemove.size()) + " packages.");
                             break;
                     }
                     // let's sleep a few seconds between each item and go easy on the web server
@@ -227,7 +259,7 @@ public class Tracking implements TriggerListener, Runnable {
             }
             if(fails > 5) {
                 fails = 0;
-                Grouphug.getInstance().sendMessage("The package tracking module has now failed 5 times in a row. " +
+                bot.sendMessage("The package tracking module has now failed 5 times in a row. " +
                         "If this continues, you might want to check the logs and your package status manually.");
             }
             try {
@@ -237,6 +269,7 @@ public class Tracking implements TriggerListener, Runnable {
             }
         }
     }
+
 
     private class TrackingItem {
 
@@ -349,7 +382,7 @@ public class Tracking implements TriggerListener, Runnable {
             // now find the date
             xpath = XPath.newInstance("//h:div[@class='sporing-sendingandkolli-latestevent-date']");
             xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
-            
+
             String date;
             content = (Element)xpath.selectSingleNode(postDocument);
             if(content == null) {
