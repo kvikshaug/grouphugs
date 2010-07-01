@@ -107,7 +107,7 @@ public class Tracking implements TriggerListener, Runnable {
         for(int i=0; i<items.size(); i++) {
             if(items.get(i).getTrackingNumber().equals(id)) {
                 try {
-                    items.get(i).remove();
+                    removeItem(items.get(i));
                     bot.sendMessage("Ok, stopped tracking package '" + id + "'.");
                 } catch (SQLException e) {
                     bot.sendMessage("I have the package but failed to remove it from the SQL db " +
@@ -187,7 +187,7 @@ public class Tracking implements TriggerListener, Runnable {
             bot.sendMessage("Your package has been delivered. Removing it from my list.");
             bot.sendMessage("Status: " + item.getStatus());
             //bot.sendMessage(arrived.printSignature());
-            item.remove();
+            removeItem(item);
             bot.sendMessage("Now tracking " + items.size() + " packages.");
         }
     }
@@ -235,7 +235,7 @@ public class Tracking implements TriggerListener, Runnable {
                     }
                 }
                 for(TrackingItem toRemove : itemsToRemove) {
-                    toRemove.remove();
+                    removeItem(toRemove);
                 }
                 itemsToRemove.clear();
                 itemsRemaining--;
@@ -270,8 +270,34 @@ public class Tracking implements TriggerListener, Runnable {
         }
     }
 
+    /**
+     * Remove a tracked item from memory and database
+     * @param item the TrackingItem reference to remove
+     * @throws SQLException if SQL fails
+     */
+    private void removeItem(TrackingItem item) throws SQLException {
+        List<String> params = new ArrayList<String>();
+        params.add(String.valueOf(item.getId()));
+        sqlHandler.delete("delete from " + DB_NAME + " where id='?';", params);
+        items.remove(item);
+    }
 
-    private class TrackingItem {
+    /**
+     * Update the status of a tracked item
+     * @param item the reference to the item of which to update status
+     * @param status the items new status
+     * @throws SQLException if SQL fails
+     */
+    private void updateStatus(TrackingItem item, String status) throws SQLException {
+        item.setStatus(status);
+        List<String> params = new ArrayList<String>();
+        params.add(status);
+        params.add(String.valueOf(item.getId()));
+        sqlHandler.update("update " + DB_NAME + " set status='?' where id='?';", params);
+    }
+
+
+    private static class TrackingItem {
 
         private int id;
         private String trackingNumber;
@@ -295,12 +321,8 @@ public class Tracking implements TriggerListener, Runnable {
             return status == null ? "Status unknown" : status;
         }
 
-        public void setStatus(String status) throws SQLException {
+        public void setStatus(String status) {
             this.status = status;
-            List<String> params = new ArrayList<String>();
-            params.add(status);
-            params.add(String.valueOf(id));
-            sqlHandler.update("update " + DB_NAME + " set status='?' where id='?';", params);
         }
 
         public String getOwner() {
@@ -324,17 +346,6 @@ public class Tracking implements TriggerListener, Runnable {
         }
 
         /**
-         * Removes this item from memory and db
-         * @throws SQLException if SQL fails
-         */
-        public void remove() throws SQLException {
-            List<String> params = new ArrayList<String>();
-            params.add(String.valueOf(getId()));
-            sqlHandler.delete("delete from " + DB_NAME + " where id='?';", params);
-            items.remove(this);
-        }
-
-        /**
          * Updates the result of this tracking item. Use when polling.
          * @return CHANGED, NOT_CHANGED or DELIVERED according to its status change
          * @throws IOException if IO fails
@@ -353,7 +364,7 @@ public class Tracking implements TriggerListener, Runnable {
                 String newStatus = "The package ID is invalid (according to the tracking service)";
                 String oldStatus = getStatus();
                 if(!oldStatus.equals(newStatus)) {
-                    setStatus(newStatus);
+                    updateStatus(this, newStatus);
                     return CHANGED;
                 } else {
                     return NOT_CHANGED;
@@ -403,10 +414,10 @@ public class Tracking implements TriggerListener, Runnable {
 
             String oldStatus = getStatus();
             if(newStatus.startsWith("Sendingen er utlevert")) {
-                setStatus(newStatus);
+                updateStatus(this, newStatus);
                 return DELIVERED;
             } else if(!oldStatus.equals(newStatus)) {
-                setStatus(newStatus);
+                updateStatus(this, newStatus);
                 return CHANGED;
             } else {
                 return NOT_CHANGED;
