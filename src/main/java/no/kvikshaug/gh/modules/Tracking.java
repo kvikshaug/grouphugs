@@ -142,7 +142,6 @@ public class Tracking implements TriggerListener, Runnable {
             if(newItem.update() == DELIVERED) {
                 bot.sendMessage("Your package has already been delivered. I will not track it further.");
                 bot.sendMessage("Status: " + newItem.getStatus());
-                //Grouphug.getInstance().sendMessage(newItem.printSignature());
                 return;
             }
             bot.sendMessage("Adding package '" + id + "' to tracking list.");
@@ -186,7 +185,6 @@ public class Tracking implements TriggerListener, Runnable {
         } else if(result == DELIVERED) {
             bot.sendMessage("Your package has been delivered. Removing it from my list.");
             bot.sendMessage("Status: " + item.getStatus());
-            //bot.sendMessage(arrived.printSignature());
             removeItem(item);
             bot.sendMessage("Now tracking " + items.size() + " packages.");
         }
@@ -222,7 +220,6 @@ public class Tracking implements TriggerListener, Runnable {
                         case DELIVERED:
                             bot.sendMessage(ti.getOwner() + " has just picked up his/her package '" + ti.getTrackingNumber() + "':");
                             bot.sendMessage(ti.getStatus(), true);
-                            //bot.sendMessage(ti.printSignature());
                             itemsToRemove.add(ti);
                             bot.sendMessage("Removing this one from my list. Currently tracking " + (items.size() - itemsToRemove.size()) + " packages.");
                             break;
@@ -303,7 +300,6 @@ public class Tracking implements TriggerListener, Runnable {
         private String trackingNumber;
         private String status;
         private String owner;
-        private String signature;
 
         public long getId() {
             return id;
@@ -327,10 +323,6 @@ public class Tracking implements TriggerListener, Runnable {
 
         public String getOwner() {
             return owner;
-        }
-
-        public String printSignature() {
-            return signature != null ? "Signature: " + signature : "";
         }
 
         private TrackingItem(String trackingNumber, String owner) {
@@ -372,23 +364,6 @@ public class Tracking implements TriggerListener, Runnable {
             }
 
             String message = content.getText().replaceAll("\\s+", " ").replaceAll("<br/?>", " ").replaceAll("<.*?>","").trim();
-
-            // try to find a signature url in the message (which is the case if the package has been delivered)
-            xpath = XPath.newInstance("//h:div[@class='sporing-sendingandkolli-latestevent-text-container']/h:div[@class='sporing-sendingandkolli-latestevent-text']/h:strong/h:a");
-            xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
-
-            content = (Element)xpath.selectSingleNode(postDocument);
-
-            if(content != null) {
-                // there is a signature element, first get the text content and add it to message
-                message += " " + content.getText().trim();
-
-                // now we want the href attribute in order to paste the signature url
-                signature = "http://sporing.posten.no/" + content.getAttribute("href").getValue();
-            }
-            // if there isn't a signature element, just don't assign the signature var, and it won't be outputted
-            // also, part of message won't be hidden in an element (hopefully - might be <strong>s and similar!?)
-
 
             // now find the date
             xpath = XPath.newInstance("//h:div[@class='sporing-sendingandkolli-latestevent-date']");
