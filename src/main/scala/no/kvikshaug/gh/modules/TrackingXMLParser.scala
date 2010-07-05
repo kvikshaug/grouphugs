@@ -84,63 +84,63 @@ object TrackingXMLParser {
   }
 
   def historyFor(item: TrackingItem, packageId: String): java.util.List[TrackingItemEvent] = {
-    val events = new java.util.ArrayList[TrackingItemEvent]
-    // load the xml
     try {
-    val root = XML.load(Web.prepareEncodedBufferedReader(
-      new URL("http://sporing.posten.no/sporing.xml?q=" + item.trackingId)))
-    } catch {
-      case ex: FileNotFoundException =>
-        return null
-    }
+      val events = new java.util.ArrayList[TrackingItemEvent]
+      // load the xml
+      val root = XML.load(Web.prepareEncodedBufferedReader(
+        new URL("http://sporing.posten.no/sporing.xml?q=" + item.trackingId)))
 
-    for(somePackage <- (root \\ "PackageSet" \ "Package")) {
-      if((somePackage \ "@packageId").text.equals(packageId)) {
-        for(event <- (somePackage \ "EventSet" \ "Event")) {
-          events.add(TrackingItemEvent(
-            (event \ "Description").text,
-            (event \ "Status").text,
-            (event \ "RecipientSignature" \ "Name").text,
-            (event \ "UnitId").text,
-            (event \ "PostalCode").text,
-            (event \ "City").text,
-            (event \ "OccuredAtIsoDateTime").text,
-            (event \ "ConsignmentEvent").text
-            ))
+      for(somePackage <- (root \\ "PackageSet" \ "Package")) {
+        if((somePackage \ "@packageId").text.equals(packageId)) {
+          for(event <- (somePackage \ "EventSet" \ "Event")) {
+            events.add(TrackingItemEvent(
+              (event \ "Description").text,
+              (event \ "Status").text,
+              (event \ "RecipientSignature" \ "Name").text,
+              (event \ "UnitId").text,
+              (event \ "PostalCode").text,
+              (event \ "City").text,
+              (event \ "OccuredAtIsoDateTime").text,
+              (event \ "ConsignmentEvent").text
+              ))
+          }
         }
       }
+      events
+    } catch {
+      case ex: FileNotFoundException =>
+        null
     }
-    events
   }
 
   def infoFor(item: TrackingItem): TrackingItemInfo = {
-    val packageInfo = new java.util.ArrayList[TrackingItemPackageInfo]
-    // load the xml
     try {
-    val root = XML.load(Web.prepareEncodedBufferedReader(
-      new URL("http://sporing.posten.no/sporing.xml?q=" + item.trackingId)))
+      val packageInfo = new java.util.ArrayList[TrackingItemPackageInfo]
+      // load the xml
+      val root = XML.load(Web.prepareEncodedBufferedReader(
+        new URL("http://sporing.posten.no/sporing.xml?q=" + item.trackingId)))
+
+      for(somePackage <- (root \\ "PackageSet" \ "Package")) {
+        packageInfo.add(TrackingItemPackageInfo(
+          (somePackage \ "ProductName").text,
+          (somePackage \ "ProductCode").text,
+          (somePackage \ "Brand").text,
+          (somePackage \ "Weight").text + (somePackage \ "Weight" \ "@unitCode").text,
+          (somePackage \ "Length").text/* + (somePackage \ "Length" \ "@unitCode").text*/,
+          (somePackage \ "Width").text/* + (somePackage \ "Width" \ "@unitCode").text*/,
+          (somePackage \ "Height").text/* + (somePackage \ "Height" \ "@unitCode").text*/,
+          (somePackage \ "Volume").text + (somePackage \ "Volume" \ "@unitCode").text
+          ))
+      }
+
+      TrackingItemInfo(
+        (root \\ "Consignment" \ "@consignmentId").text,
+        (root \\ "TotalWeight").text + (root \\ "TotalWeight" \ "@unitCode").text,
+        (root \\ "TotalVolume").text + (root \\ "TotalVolume" \ "@unitCode").text,
+        packageInfo)
     } catch {
       case ex: FileNotFoundException =>
-        return null
+        null
     }
-
-    for(somePackage <- (root \\ "PackageSet" \ "Package")) {
-      packageInfo.add(TrackingItemPackageInfo(
-        (somePackage \ "ProductName").text,
-        (somePackage \ "ProductCode").text,
-        (somePackage \ "Brand").text,
-        (somePackage \ "Weight").text + (somePackage \ "Weight" \ "@unitCode").text,
-        (somePackage \ "Length").text/* + (somePackage \ "Length" \ "@unitCode").text*/,
-        (somePackage \ "Width").text/* + (somePackage \ "Width" \ "@unitCode").text*/,
-        (somePackage \ "Height").text/* + (somePackage \ "Height" \ "@unitCode").text*/,
-        (somePackage \ "Volume").text + (somePackage \ "Volume" \ "@unitCode").text
-        ))
-    }
-
-    TrackingItemInfo(
-      (root \\ "Consignment" \ "@consignmentId").text,
-      (root \\ "TotalWeight").text + (root \\ "TotalWeight" \ "@unitCode").text,
-      (root \\ "TotalVolume").text + (root \\ "TotalVolume" \ "@unitCode").text,
-      packageInfo)
   }
 }
