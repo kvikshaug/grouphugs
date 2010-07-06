@@ -1,7 +1,6 @@
 package no.kvikshaug.gh.util;
 
 import no.kvikshaug.gh.exceptions.NoTitleException;
-import org.apache.commons.io.IOUtils;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -24,40 +23,6 @@ public class Web {
 
     public static final String DEFAULT_ENCODING = "UTF-8";
     public static final int DEFAULT_URLCONNECTION_TIMEOUT = 20000; // ms
-
-    /**
-     * Fetches a web page for you and returns a nicely formatted arraylist with each
-     * line as its own entry when the whole thing has loaded.
-     * @deprecated use getJDOMDocument instead, and use XPath to parse the html tree instead of string scraping
-     * @param url the url you want to look up.
-     * @return a list containing each line of the web site html
-     * @throws java.io.IOException sometimes
-     */
-    public static List<String> fetchHtmlLines(URL url) throws IOException {
-        BufferedReader input = prepareEncodedBufferedReader(url);
-        List<String> lines = new ArrayList<String>();
-        String htmlLine;
-        while ((htmlLine = input.readLine()) != null) {
-            lines.add(htmlLine);
-        }
-        closeQuietly(input);
-        return lines;
-    }
-
-    /**
-     * Fetches a web page for you and returns a long string containing the full html source
-     * when the whole thing has loaded, including newline characters.
-     * @deprecated use getJDOMDocument instead, and use XPath to parse the html tree instead of string scraping
-     * @param url the url you want to look up.
-     * @return a long string containing the full html source of the specified url
-     * @throws java.io.IOException sometimes
-     */
-    public static String fetchHtmlLine(URL url) throws IOException {
-        InputStream in = prepareInputStream(url);
-        String line = IOUtils.toString(in, CharEncoding.guessEncoding(url));
-        closeQuietly(in);
-        return line;
-    }
 
     /**
      * Returns a JDOM document parsed via tagsoup
@@ -134,92 +99,6 @@ public class Web {
             urls.add(new URL(((Element)element).getAttribute("href").getValue()));
         }
         return urls;
-    }
-
-    /**
-     * Presents the next weather forecast for a given location using yr.no's rss.
-     * @param location the location to find the weather forecast for
-     * @return the next weather forecast from the rss.
-     * @throws IOException if I/O fails
-     */
-    public static String weatherForecast(String location) throws IOException {
-        try {
-        String rssUrl = "http://www.yr.no" + location + "varsel.rss";
-        rssUrl = rssUrl.replace("æ", "%C3%A6");
-        rssUrl = rssUrl.replace("ø", "%C3%B8");
-        rssUrl = rssUrl.replace("å", "%C3%85");
-        String searchHtml = fetchHtmlLine(new URL(rssUrl));
-
-        int searchIndex = searchHtml.indexOf("<description>");
-        searchHtml = searchHtml.substring(searchIndex+2);
-        searchIndex = searchHtml.indexOf("<description>");
-        searchHtml = searchHtml.substring(searchIndex+13);
-        searchIndex = searchHtml.indexOf("</description>");
-
-        return searchHtml.substring(0,searchIndex);
-        } catch (IndexOutOfBoundsException ex) { return ""; }
-    }
-
-    /**
-     * Searches for a valid yr.no's weather location.
-     * @param location the location to find.
-     * @return A list with the results.
-     * @throws IOException if I/O fails
-     */
-    public static List<String[]> weatherLocationSearch(String location) throws IOException {
-        String searchHtml = fetchHtmlLine(new URL("http://www.yr.no/soek.aspx?sted="+location.replace(' ', '+')));
-        List<String[]> results = new ArrayList<String[]>();
-
-        if (searchHtml.indexOf("gav 0 treff") > -1)
-            return results;
-
-        String[] name = new String[3];
-        int searchIndex = searchHtml.indexOf("<title>");
-
-        if (searchHtml.substring(searchIndex + 7, searchIndex + 8).equals("S")) {
-            // If we have multiple results.
-            while (searchIndex > -1) {
-                // Location
-                searchIndex = searchHtml.indexOf("<a href=\"/sted/", searchIndex);
-                name[0] = searchHtml.substring(searchIndex + 9, searchHtml.indexOf("\"", searchIndex + 9));
-
-                // Altitude
-                searchIndex = searchHtml.indexOf("<td>", searchIndex);
-                name[1] = searchHtml.substring(searchIndex + 4, searchHtml.indexOf("</td>", searchIndex));
-
-                // Description
-                searchIndex = searchHtml.indexOf("<td>", searchIndex + 4);
-                name[2] = searchHtml.substring(searchIndex + 4, searchHtml.indexOf("</td>", searchIndex));
-
-                results.add(name);
-                name = new String[3];
-
-                // This is a fix for non-norwegian locations.
-                searchIndex = searchHtml.indexOf("</td>", searchIndex);
-                int c = 4;
-                if (searchHtml.substring(searchIndex + 13, searchIndex + 19).equals("<td />"))
-                    c--;
-                // Let's skip ahead to the next result.
-                for (int i = 0; i < c; i++)
-                    searchIndex = searchHtml.indexOf("<a href=\"/sted/", searchIndex+1);
-            }
-        }
-        else if (searchHtml.substring(searchIndex + 7, searchIndex + 8).equals("V")) {
-            // If we only have one result.
-            searchIndex = searchHtml.indexOf("href=\"/place/");
-            name[0] = searchHtml.substring(searchIndex + 6, searchHtml.indexOf("\"", searchIndex + 6));
-
-            searchIndex = searchHtml.indexOf("over havet");
-            name[1] = searchHtml.substring(searchIndex + 28, searchHtml.indexOf(" ", searchIndex + 28));
-
-            searchIndex = searchHtml.indexOf("Kategori");
-            name[2] = searchHtml.substring(searchIndex + 25, searchHtml.indexOf("</li>", searchIndex + 28));
-
-            name[2] = name[2].trim();
-            results.add(name);
-        }
-
-        return results;
     }
 
     /**

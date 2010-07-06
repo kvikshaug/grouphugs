@@ -6,9 +6,13 @@ import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.Web;
 import org.jdom.JDOMException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 public class Confession implements TriggerListener {
     private static final String TRIGGER = "gh";
@@ -64,8 +68,15 @@ public class Confession implements TriggerListener {
      */
     private ConfessionItem getConfession(String urlString) throws IOException {
 
+        // TODO use XPath - problem is that grouphug.us has an element before its DOCTYPE, so XPath seems to fail
         String confession = "";
-        List<String> lines = Web.fetchHtmlLines(new URL(urlString));
+        BufferedReader input = Web.prepareEncodedBufferedReader(new URL(urlString));
+        List<String> lines = new ArrayList<String>();
+        String htmlLine;
+        while ((htmlLine = input.readLine()) != null) {
+            lines.add(htmlLine);
+        }
+        closeQuietly(input);
 
         // we dig from the BOTTOM and up, searching for the first confession we find
         int line = 0;
