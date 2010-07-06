@@ -1,7 +1,6 @@
 package no.kvikshaug.gh.util;
 
 import no.kvikshaug.gh.exceptions.NoTitleException;
-import org.apache.commons.io.IOUtils;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -24,40 +23,6 @@ public class Web {
 
     public static final String DEFAULT_ENCODING = "UTF-8";
     public static final int DEFAULT_URLCONNECTION_TIMEOUT = 20000; // ms
-
-    /**
-     * Fetches a web page for you and returns a nicely formatted arraylist with each
-     * line as its own entry when the whole thing has loaded.
-     * @deprecated use getJDOMDocument instead, and use XPath to parse the html tree instead of string scraping
-     * @param url the url you want to look up.
-     * @return a list containing each line of the web site html
-     * @throws java.io.IOException sometimes
-     */
-    public static List<String> fetchHtmlLines(URL url) throws IOException {
-        BufferedReader input = prepareEncodedBufferedReader(url);
-        List<String> lines = new ArrayList<String>();
-        String htmlLine;
-        while ((htmlLine = input.readLine()) != null) {
-            lines.add(htmlLine);
-        }
-        closeQuietly(input);
-        return lines;
-    }
-
-    /**
-     * Fetches a web page for you and returns a long string containing the full html source
-     * when the whole thing has loaded, including newline characters.
-     * @deprecated use getJDOMDocument instead, and use XPath to parse the html tree instead of string scraping
-     * @param url the url you want to look up.
-     * @return a long string containing the full html source of the specified url
-     * @throws java.io.IOException sometimes
-     */
-    public static String fetchHtmlLine(URL url) throws IOException {
-        InputStream in = prepareInputStream(url);
-        String line = IOUtils.toString(in, CharEncoding.guessEncoding(url));
-        closeQuietly(in);
-        return line;
-    }
 
     /**
      * Returns a JDOM document parsed via tagsoup
