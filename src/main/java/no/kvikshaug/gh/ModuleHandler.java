@@ -60,6 +60,7 @@ public class ModuleHandler {
         new Fml(this);
         new Pre(this);
         new Jargon(this);
+        new Scala(this);
 
         System.out.println();
         System.out.println(helpers.size() + " help responses registered");

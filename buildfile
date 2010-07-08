@@ -6,6 +6,8 @@ VERSION_NUMBER = "1.0.0"
 GROUP = "gh"
 COPYRIGHT = "copyleft"
 
+require 'buildr/scala'
+
 # Specify Maven 2.0 remote repositories here, like this:
 repositories.remote << "http://www.ibiblio.org/maven2/"
 
@@ -21,11 +23,11 @@ define "gh" do
   ############################################################################
   # Compilation
   ############################################################################
-  # target java 6
-  compile.options.target = '1.6'
+  # target java 5 (not 6, because scala cannot target java 6)
+  compile.options.target = '1.5'
 
   # compile against maven artifacts
-  compile.with artifacts(:sqlite, :pircbot, :jdom, :tagsoup, :jaxen, :jchardet, :commonsio, :joda)
+  compile.with artifacts(:sqlite, :pircbot, :jdom, :tagsoup, :jaxen, :jchardet, :commonsio, :joda, :scalalib)
 
 
   ############################################################################
@@ -33,5 +35,5 @@ define "gh" do
   ############################################################################
   # package against maven artifacts
   package(:jar).with :manifest => {"Main-Class" => "no.kvikshaug.gh.Grouphug",
-                                   "Class-Path" => artifacts(:sqlite, :pircbot, :jdom, :tagsoup, :jaxen, :jchardet, :commonsio, :joda).each(&:invoke).map(&:name).join(" ")  }
+                                   "Class-Path" => artifacts(:sqlite, :pircbot, :jdom, :tagsoup, :jaxen, :jchardet, :commonsio, :joda, :scalalib).each(&:invoke).map(&:name).join(" ")  }
 end
