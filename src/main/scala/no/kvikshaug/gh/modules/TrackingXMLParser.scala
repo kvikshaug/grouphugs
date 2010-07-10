@@ -24,9 +24,6 @@ object TrackingXMLParser {
     // true if there is any difference in the package list or their details
     var changes = false
 
-    // true if there is one or more packages that are not delivered
-    var notDelivered = false
-
     // iterate all packages in the trackingitem set
     for(packageXml <- (root \\ "PackageSet" \ "Package")) {
       // extract the data we want from the latest event
@@ -37,12 +34,6 @@ object TrackingXMLParser {
               ((packageXml \\ "Event")(0) \ "City").text
       val dateTime = ((packageXml \\ "Event")(0) \ "OccuredAtDisplayTime").text + " " +
                      ((packageXml \\ "Event")(0) \ "OccuredAtDisplayDate").text
-
-      // TODO not sure if this is the correct status for 'delivered', but it probably is
-      // (xsd is at http://sporing.posten.no/sporing.xsd , Status element is just a String, doesn't specify further)
-      if(status != "DELIVERED") {
-        notDelivered = true
-      }
 
       // true if this package already exists in the trackingitem's package list
       var found = false
@@ -74,9 +65,7 @@ object TrackingXMLParser {
         item.packages.add(TrackingItemPackage(dbId, packageId, status, description, dateTime))
       }
     }
-    if(!notDelivered) {
-      Tracking.DELIVERED
-    } else if(changes) {
+    if(changes) {
       Tracking.CHANGED
     } else {
       Tracking.NOT_CHANGED

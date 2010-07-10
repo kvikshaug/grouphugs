@@ -31,7 +31,12 @@ public class Tracking implements TriggerListener, Runnable {
 
     public static final int NOT_CHANGED = 0;
     public static final int CHANGED = 1;
-    public static final int DELIVERED = 2;
+
+    public static final int STATUS_NO_PACKAGES = -1;
+    public static final int STATUS_IN_TRANSIT = 0;
+    public static final int STATUS_READY_FOR_PICKUP = 1;
+    public static final int STATUS_RETURNED = 2;
+    public static final int STATUS_DELIVERED = 3;
 
     private boolean threadWorking = false;
     private int itemsRemaining = 0;
@@ -163,10 +168,9 @@ public class Tracking implements TriggerListener, Runnable {
             items.add(newItem);
 
             // now check its status
-            int status = TrackingXMLParser.track(newItem);
-
+            TrackingXMLParser.track(newItem);
             // if it's delivered, we're not going to track it further
-            if(status == DELIVERED) {
+            if(newItem.statusCode() == STATUS_DELIVERED) {
                 bot.sendMessage("Your package has already been delivered. I will not track it further.");
                 bot.sendMessage(newItem.totalStatus());
                 if(dbId != -1) {
@@ -176,6 +180,7 @@ public class Tracking implements TriggerListener, Runnable {
                 }
                 return;
             }
+
             bot.sendMessage("Adding package " + trackingId + " to tracking list.");
             TrackingItemInfo info = TrackingXMLParser.infoFor(newItem);
             bot.sendMessage(info.totalWeight() + ", " + info.totalVolume() + ", " + info.packageInfo().size() +
@@ -230,16 +235,23 @@ public class Tracking implements TriggerListener, Runnable {
     public void checkForUpdate(TrackingItem item) throws JDOMException, IOException, SQLException {
         int result = TrackingXMLParser.track(item);
         if(result == CHANGED) {
-            bot.sendMessage("New status for " + item.trackingId() + ":");
-            bot.sendMessage(item.totalStatus(), true);
+            if(item.statusCode() == STATUS_DELIVERED) {
+                bot.sendMessage(item.trackingId() + " has been delivered. Removing it from my list.");
+                bot.sendMessage(item.totalStatus(), true);
+                removeItem(item);
+                bot.sendMessage("Now tracking " + items.size() + " packages.");
+            } else if(item.statusCode() == STATUS_RETURNED) {
+                bot.sendMessage(item.trackingId() + " has been returned to sender. Removing it from my list.");
+                bot.sendMessage(item.totalStatus(), true);
+                removeItem(item);
+                bot.sendMessage("Now tracking " + items.size() + " packages.");
+            } else {
+                bot.sendMessage("New status for " + item.trackingId() + ":");
+                bot.sendMessage(item.totalStatus(), true);
+            }
         } else if(result == NOT_CHANGED) {
             bot.sendMessage("No change for " + item.trackingId() + ":");
             bot.sendMessage(item.totalStatus(), true);
-        } else if(result == DELIVERED) {
-            bot.sendMessage(item.trackingId() + " has been delivered. Removing it from my list.");
-            bot.sendMessage(item.totalStatus(), true);
-            removeItem(item);
-            bot.sendMessage("Now tracking " + items.size() + " packages.");
         }
     }
 
@@ -261,21 +273,32 @@ public class Tracking implements TriggerListener, Runnable {
                 itemsRemaining = items.size();
                 for(TrackingItem ti : items) {
                     try {
-                        switch(TrackingXMLParser.track(ti)) {
-                            case CHANGED:
-                                bot.sendMessage(ti.owner() + ": Package " + ti.trackingId() + " has changed:");
-                                bot.sendMessage(ti.totalStatus(), true);
-                                break;
-
-                            case NOT_CHANGED:
-                                break;
-
-                            case DELIVERED:
+                        if(TrackingXMLParser.track(ti) == CHANGED) {
+                            int statusCode = ti.statusCode();
+                            if(statusCode == STATUS_DELIVERED) {
                                 bot.sendMessage(ti.owner() + " has just picked up his/her package " + ti.trackingId() + ":");
                                 bot.sendMessage(ti.totalStatus(), true);
                                 itemsToRemove.add(ti);
-                                bot.sendMessage("Removing this one from my list. Now tracking " + (items.size() - itemsToRemove.size()) + " packages.");
-                                break;
+                                bot.sendMessage("Removing this one from my list. Now tracking " +
+                                        (items.size() - itemsToRemove.size()) + " packages.");
+                            } else if(statusCode == STATUS_READY_FOR_PICKUP) {
+                                bot.sendMessage(ti.owner() + ": Package " + ti.trackingId() + " is ready for pickup!");
+                                bot.sendMessage(ti.totalStatus(), true);
+                            } else if(statusCode == STATUS_RETURNED) {
+                                bot.sendMessage(ti.owner() + ": Package " + ti.trackingId() + " has been returned to sender.");
+                                bot.sendMessage(ti.totalStatus(), true);
+                                itemsToRemove.add(ti);
+                                bot.sendMessage("Removing this one from my list. Now tracking " +
+                                        (items.size() - itemsToRemove.size()) + " packages.");
+                            } else if(statusCode == STATUS_IN_TRANSIT) {
+                                bot.sendMessage(ti.owner() + ": Package " + ti.trackingId() + " has changed:");
+                                bot.sendMessage(ti.totalStatus(), true);
+                            } else if(statusCode == STATUS_NO_PACKAGES) {
+                                bot.sendMessage(ti.owner() + ": Package " + ti.trackingId() +
+                                        " has.. changed, but has no packages (kolli)? Wtf?");
+                                bot.sendMessage(ti.totalStatus(), true);
+                            }
+                            break;
                         }
                     } catch(FileNotFoundException ignored) {
                         // ignored; this is thrown when we query for a non-existing tracking ID
