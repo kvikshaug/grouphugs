@@ -29,11 +29,14 @@ object TrackingXMLParser {
       // extract the data we want from the latest event
       val packageId = (packageXml \ "@packageId").text
       val status = ((packageXml \\ "Event")(0) \ "Status").text
-      val description = ((packageXml \\ "Event")(0) \ "Description").text + " " +
+      var description = ((packageXml \\ "Event")(0) \ "Description").text + " " +
               ((packageXml \\ "Event")(0) \ "PostalCode").text + " " +
               ((packageXml \\ "Event")(0) \ "City").text
       val dateTime = ((packageXml \\ "Event")(0) \ "OccuredAtDisplayTime").text + " " +
                      ((packageXml \\ "Event")(0) \ "OccuredAtDisplayDate").text
+
+      // remove html tags
+      description = description.replaceAll("&lt;.*?>", "")
 
       // true if this package already exists in the trackingitem's package list
       var found = false
