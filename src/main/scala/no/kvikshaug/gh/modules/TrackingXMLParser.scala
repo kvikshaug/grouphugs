@@ -52,8 +52,10 @@ object TrackingXMLParser {
             changes = true
             p.status = status
             p.description = description
+            p.dateTime = dateTime
             sqlHandler.update("update " + Tracking.DB_PACKAGES_NAME + " set status='" + status + "'," +
-                    "description='" + description + "' where id='" + packageId + "'")
+                    "description='" + description + "', dateTime='"+ dateTime + "' " +
+                    "where id='" + packageId + "'")
           }
         }
       }
