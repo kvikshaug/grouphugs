@@ -36,7 +36,7 @@ object TrackingXMLParser {
                      ((packageXml \\ "Event")(0) \ "OccuredAtDisplayDate").text
 
       // remove html tags
-      description = description.replaceAll("&lt;.*?>", "")
+      description = description.replaceAll("<.*?>", "")
 
       // true if this package already exists in the trackingitem's package list
       var found = false
