@@ -158,7 +158,11 @@ public class Tracking implements TriggerListener, Runnable {
                 }
             }
 
-            // nope. let's add the new package
+            // nope. let's add the new package, if it's not bogus
+            if(trackingId.contains(" ")) {
+                bot.sendMessage("Add a tracking id which contains spaces? I THINK NOT. Try '!help track'.");
+                return;
+            }
             List<String> params = new ArrayList<String>();
             params.add(trackingId);
             params.add(sender);
