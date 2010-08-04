@@ -35,6 +35,7 @@ public class Tracking implements TriggerListener, Runnable {
     public static final int STATUS_NO_PACKAGES = -1;
     public static final int STATUS_IN_TRANSIT = 0;
     public static final int STATUS_READY_FOR_PICKUP = 1;
+    public static final int STATUS_NOTIFICATION_SENT = 4;
     public static final int STATUS_RETURNED = 2;
     public static final int STATUS_DELIVERED = 3;
 
@@ -161,6 +162,9 @@ public class Tracking implements TriggerListener, Runnable {
             // nope. let's add the new package, if it's not bogus
             if(trackingId.contains(" ")) {
                 bot.sendMessage("Add a tracking id which contains spaces? I THINK NOT. Try '!help track'.");
+                return;
+            } else if(trackingId.contains("-")) {
+                bot.sendMessage("When did posten start to use hyphens in their tracking id? Try '!help track'.");
                 return;
             }
             List<String> params = new ArrayList<String>();
