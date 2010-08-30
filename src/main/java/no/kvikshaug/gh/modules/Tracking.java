@@ -163,6 +163,7 @@ public class Tracking implements TriggerListener, Runnable {
             if(trackingId.contains(" ")) {
                 bot.sendMessage("Add a tracking id which contains spaces? I THINK NOT. Try '!help track'.");
                 return;
+
             } else if(trackingId.contains("-")) {
                 bot.sendMessage("When did posten start to use hyphens in their tracking id? Try '!help track'.");
                 return;
