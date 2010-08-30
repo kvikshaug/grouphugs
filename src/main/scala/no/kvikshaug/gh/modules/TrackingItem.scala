@@ -30,6 +30,37 @@ case class TrackingItem(dbId: Int, trackingId: String, owner: String, packages: 
       "(" + packages.size + " packages): " + packages.get(0).description + ", " + packages.get(0).dateTime
     }
   }
+
+  def statusCode(): Int = {
+    var delivered = true
+    var readyForPickup = true
+    var returned = true
+    if(packages.size == 0) {
+      return Tracking.STATUS_NO_PACKAGES
+    }
+    val it: java.util.Iterator[TrackingItemPackage] = packages.iterator
+    while(it.hasNext) {
+      val p = it.next
+      if(!p.status.equals("DELIVERED")) {
+        delivered = false
+      }
+      if(!p.status.equals("READY_FOR_PICKUP")) {
+        readyForPickup = false
+      }
+      if(!p.status.equals("RETURNED")) {
+        returned = false
+      }
+    }
+    if(delivered) {
+      Tracking.STATUS_DELIVERED
+    } else if(readyForPickup) {
+      Tracking.STATUS_READY_FOR_PICKUP
+    } else if(returned) {
+      Tracking.STATUS_RETURNED
+    } else {
+      Tracking.STATUS_IN_TRANSIT
+    }
+  }
 }
 
 case class TrackingItemPackage(dbId: Int, packageId: String, var status: String,

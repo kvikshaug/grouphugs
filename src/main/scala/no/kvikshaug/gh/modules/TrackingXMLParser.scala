@@ -24,25 +24,19 @@ object TrackingXMLParser {
     // true if there is any difference in the package list or their details
     var changes = false
 
-    // true if there is one or more packages that are not delivered
-    var notDelivered = false
-
     // iterate all packages in the trackingitem set
     for(packageXml <- (root \\ "PackageSet" \ "Package")) {
       // extract the data we want from the latest event
       val packageId = (packageXml \ "@packageId").text
       val status = ((packageXml \\ "Event")(0) \ "Status").text
-      val description = ((packageXml \\ "Event")(0) \ "Description").text + " " +
+      var description = ((packageXml \\ "Event")(0) \ "Description").text + " " +
               ((packageXml \\ "Event")(0) \ "PostalCode").text + " " +
               ((packageXml \\ "Event")(0) \ "City").text
       val dateTime = ((packageXml \\ "Event")(0) \ "OccuredAtDisplayTime").text + " " +
                      ((packageXml \\ "Event")(0) \ "OccuredAtDisplayDate").text
 
-      // TODO not sure if this is the correct status for 'delivered', but it probably is
-      // (xsd is at http://sporing.posten.no/sporing.xsd , Status element is just a String, doesn't specify further)
-      if(status != "DELIVERED") {
-        notDelivered = true
-      }
+      // remove html tags
+      description = description.replaceAll("<.*?>", "")
 
       // true if this package already exists in the trackingitem's package list
       var found = false
@@ -58,8 +52,10 @@ object TrackingXMLParser {
             changes = true
             p.status = status
             p.description = description
+            p.dateTime = dateTime
             sqlHandler.update("update " + Tracking.DB_PACKAGES_NAME + " set status='" + status + "'," +
-                    "description='" + description + "' where id='" + packageId + "'")
+                    "description='" + description + "', dateTime='"+ dateTime + "' " +
+                    "where id='" + p.dbId + "'")
           }
         }
       }
@@ -74,9 +70,7 @@ object TrackingXMLParser {
         item.packages.add(TrackingItemPackage(dbId, packageId, status, description, dateTime))
       }
     }
-    if(!notDelivered) {
-      Tracking.DELIVERED
-    } else if(changes) {
+    if(changes) {
       Tracking.CHANGED
     } else {
       Tracking.NOT_CHANGED
