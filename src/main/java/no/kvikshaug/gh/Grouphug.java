@@ -1,9 +1,16 @@
 package no.kvikshaug.gh;
 
+import org.jdom.Attribute;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+import org.jdom.xpath.XPath;
 import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
 import org.jibble.pircbot.PircBot;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -35,7 +42,7 @@ import java.util.List;
 public class Grouphug extends PircBot {
 
     // Channel and server
-    public static final String CHANNEL = "#grouphugs";
+    public static String CHANNEL = "#grouphugs";
     public static final String SERVER = "irc.inet.tele.dk";
 
     // The trigger characters (as Strings since startsWith takes String)
@@ -250,6 +257,33 @@ public class Grouphug extends PircBot {
             this.sendMessage(Grouphug.CHANNEL, line);
         }
     }
+    
+    
+    public void parseConfig(){
+    	try {
+    	
+	    	File xmlDocument = new File("props.xml");
+	    	SAXBuilder saxBuilder = new SAXBuilder("org.apache.xerces.parsers.SAXParser");
+			Document jdomDocument = saxBuilder.build(xmlDocument);
+			
+			Element channelNode = (Element)(XPath.selectSingleNode(jdomDocument,
+			        "/Channels//Channel"));
+			Grouphug.CHANNEL = channelNode.getAttribute("chan").getValue();
+			
+			List<Element> chanNicks = channelNode.getChild("Nicks").getChildren();
+			
+			for(Element nick: chanNicks){
+				nicks.add((String)nick.getValue());
+			}
+			
+    	} catch (JDOMException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    	
+    	
+    }
 
     /**
      * The main method, starting the bot, connecting to the server and joining its main channel.
@@ -267,10 +301,10 @@ public class Grouphug extends PircBot {
         moduleHandler = new ModuleHandler(bot);
 
         // Save the nicks we want, in prioritized order
-        nicks.add("gh");
-        nicks.add("gh`");
-        nicks.add("hugger");
-        nicks.add("klemZ");
+//        nicks.add("gh");
+//        nicks.add("gh`");
+//        nicks.add("hugger");
+//        nicks.add("klemZ");
 
         System.out.println("\nOk, attempting connection to '"+SERVER+"'...");
         try {

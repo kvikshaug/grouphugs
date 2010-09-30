@@ -8,7 +8,7 @@
 		</Nicks>
 		<Modules>
 			<Upload>
-				<UploadPath>/var/www/gh/public/extras/uploads/</UploadPath>
+				<UploadDir>/var/www/gh/public/extras/uploads/</UploadDir>
 				<PublicURL>http://gh.kvikshaug.no/extras/uploads/</PublicURL>
 			</Upload>
 			<Operator>
@@ -29,7 +29,7 @@
 		</Nicks>
 		<Modules>
 			<Upload>
-				<UploadPath>/var/www/gh/public/extras/uploads/</UploadPath>
+				<UploadDir></UploadDir>/var/www/gh/public/extras/uploads/</UploadDir>
 				<PublicURL>http://krashk.com/extras/uploads/</PublicURL>
 			</Upload>
 			<Operator>
