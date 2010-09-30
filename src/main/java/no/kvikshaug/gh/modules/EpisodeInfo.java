@@ -7,6 +7,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.jibble.pircbot.Colors;
+
 import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.listeners.TriggerListener;
@@ -56,7 +58,9 @@ public class EpisodeInfo implements TriggerListener  {
             }
             	
         	in.close();
-        	Grouphug.getInstance().sendMessage("Show: "+ showName + " Latest episode: "+ latestEp + " Next episode: " + nextEp);
+        	Grouphug.getInstance().sendMessage(Colors.BOLD + "Show: "+Colors.NORMAL+ showName + 
+        										Colors.BOLD + " Latest episode: "+ Colors.NORMAL+ latestEp + 
+        										Colors.BOLD + " Next episode: " +Colors.NORMAL+ nextEp);
 
         } catch (MalformedURLException e) {
 			e.printStackTrace();
