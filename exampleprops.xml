@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Channels>
+	<Channel chan="#grouphugs">
+		<Nicks>
+			<Nick>gh</Nick>
+			<Nick>gh´</Nick>
+			<Nick>Hugger</Nick>
+		</Nicks>
+		<Modules>
+			<Upload>
+				<UploadPath>/var/www/gh/public/extras/uploads/</UploadPath>
+				<PublicURL>http://gh.kvikshaug.no/extras/uploads/</PublicURL>
+			</Upload>
+			<Operator>
+				<Nick>murr4y</Nick>
+				<Nick>Krashk</Nick>
+				<Nick>sunn</Nick>
+				<Nick>Twst</Nick>
+				<Nick>Blaster</Nick>
+			</Operator>
+		</Modules>
+	</Channel>
+	
+	<Channel chan="#mtdt12">
+		<Nicks>
+			<Nick>Zomg</Nick>
+			<Nick>Gomslork</Nick>
+			<Nick>Gege</Nick>
+		</Nicks>
+		<Modules>
+			<Upload>
+				<UploadPath>/var/www/gh/public/extras/uploads/</UploadPath>
+				<PublicURL>http://krashk.com/extras/uploads/</PublicURL>
+			</Upload>
+			<Operator>
+				<Nick>Krashk</Nick>
+				<Nick>sandsmark</Nick>
+			</Operator>
+		</Modules>
+	</Channel>
+</Channels>
