@@ -298,8 +298,10 @@ public class Grouphug extends PircBot {
         bot.setVerbose(true);
         bot.setEncoding("UTF-8");
 
+        bot.parseConfig();
         moduleHandler = new ModuleHandler(bot);
 
+        
         // Save the nicks we want, in prioritized order
 //        nicks.add("gh");
 //        nicks.add("gh`");
