@@ -62,6 +62,7 @@ public class ModuleHandler {
         new Jargon(this);
         new Scala(this);
         new Commit(this);
+        new EpisodeInfo(this);
 
         System.out.println();
         System.out.println(helpers.size() + " help responses registered");
