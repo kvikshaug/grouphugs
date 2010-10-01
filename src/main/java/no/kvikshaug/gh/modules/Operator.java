@@ -30,7 +30,7 @@ public class Operator implements JoinListener, NickChangeListener {
 
         try {
 	    	File xmlDocument = new File("props.xml");
-	    	SAXBuilder saxBuilder = new SAXBuilder("org.apache.xerces.parsers.SAXParser");
+	    	SAXBuilder saxBuilder = new SAXBuilder("org.ccil.cowan.tagsoup.Parser");
 			Document jdomDocument = saxBuilder.build(xmlDocument);
 			
 			Element operatorNode = (Element)(XPath.selectSingleNode(jdomDocument,

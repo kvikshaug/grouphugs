@@ -36,7 +36,7 @@ public class Upload implements TriggerListener {
     	
         try {
 	    	File xmlDocument = new File("props.xml");
-	    	SAXBuilder saxBuilder = new SAXBuilder("org.apache.xerces.parsers.SAXParser");
+	    	SAXBuilder saxBuilder = new SAXBuilder("org.ccil.cowan.tagsoup.Parser");
 			Document jdomDocument = saxBuilder.build(xmlDocument);
 			
 			Element uploadNode = (Element)(XPath.selectSingleNode(jdomDocument,

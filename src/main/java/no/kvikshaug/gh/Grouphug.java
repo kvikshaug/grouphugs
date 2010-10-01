@@ -263,7 +263,7 @@ public class Grouphug extends PircBot {
     	try {
     	
 	    	File xmlDocument = new File("props.xml");
-	    	SAXBuilder saxBuilder = new SAXBuilder("org.apache.xerces.parsers.SAXParser");
+	    	SAXBuilder saxBuilder = new SAXBuilder("org.ccil.cowan.tagsoup.Parser");
 			Document jdomDocument = saxBuilder.build(xmlDocument);
 			
 			Element channelNode = (Element)(XPath.selectSingleNode(jdomDocument,
@@ -273,6 +273,7 @@ public class Grouphug extends PircBot {
 			List<Element> chanNicks = channelNode.getChild("Nicks").getChildren();
 			
 			for(Element nick: chanNicks){
+				System.out.println(nick.getValue());
 				nicks.add((String)nick.getValue());
 			}
 			
