@@ -267,7 +267,7 @@ public class Grouphug extends PircBot {
 			Document jdomDocument = saxBuilder.build(xmlDocument);
 			
 			Element channelNode = (Element)(XPath.selectSingleNode(jdomDocument,
-			        "/Channels//Channel"));
+			        "//Channels/Channel"));
 			Grouphug.CHANNEL = channelNode.getAttribute("chan").getValue();
 			
 			List<Element> chanNicks = channelNode.getChild("Nicks").getChildren();
