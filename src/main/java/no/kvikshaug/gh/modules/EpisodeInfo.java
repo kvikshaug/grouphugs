@@ -34,6 +34,7 @@ public class EpisodeInfo implements TriggerListener  {
 
     private void print(String message){
     	
+    	message = message.replace(" ", "%20");
     	String inputLine, showName = "", latestEp = "", nextEp = "";
         try{
         	URL tvrage = new URL("http://services.tvrage.com/tools/quickinfo.php?show=" + message);
@@ -58,7 +59,7 @@ public class EpisodeInfo implements TriggerListener  {
             }
             	
         	in.close();
-        	Grouphug.getInstance().sendMessage(Colors.BOLD + "Show: "+Colors.NORMAL+ showName + 
+        	Grouphug.getInstance().sendMessage(""+Colors.BOLD + "Show: "+Colors.NORMAL+ showName + 
         										Colors.BOLD + " Latest episode: "+ Colors.NORMAL+ latestEp + 
         										Colors.BOLD + " Next episode: " +Colors.NORMAL+ nextEp);
 
