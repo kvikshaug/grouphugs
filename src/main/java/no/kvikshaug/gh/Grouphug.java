@@ -277,7 +277,12 @@ public class Grouphug extends PircBot {
 				List<Element> chanNicks = child.getChildren();
 				
 				for(Element nick: chanNicks){
-					nicks.add((String)nick.getValue());
+					String nickString = (String)nick.getValue();
+					
+					if(nickString.length() > 9 ){
+						nickString = nickString.substring(0, 9);
+					}
+					nicks.add(nickString);
 				}
 				
 				
