@@ -264,22 +264,19 @@ public class Grouphug extends PircBot {
     	try {
     	
 	    	File xmlDocument = new File("props.xml");
-	    	SAXBuilder saxBuilder = new SAXBuilder("org.ccil.cowan.tagsoup.Parser");
+	    	SAXBuilder saxBuilder = new SAXBuilder();
 			Document jdomDocument = saxBuilder.build(xmlDocument);
-			
 			
 			Element channelsNode = jdomDocument.getRootElement();
 			
 			List<Element> channelNodes = channelsNode.getChildren();
 			
-			System.out.println(channelNodes);
-			
 			for (Element e : channelNodes) {
 				Grouphug.CHANNEL = e.getAttribute("chan").getValue();
-				List<Element> chanNicks = e.getChild("Nicks").getChildren();
+				Element child = e.getChild("Nicks");
+				List<Element> chanNicks = child.getChildren();
 				
 				for(Element nick: chanNicks){
-					System.out.println(nick.getValue());
 					nicks.add((String)nick.getValue());
 				}
 				

@@ -36,14 +36,20 @@ public class Upload implements TriggerListener {
     	
         try {
 	    	File xmlDocument = new File("props.xml");
-	    	SAXBuilder saxBuilder = new SAXBuilder("org.ccil.cowan.tagsoup.Parser");
+	    	SAXBuilder saxBuilder = new SAXBuilder();
 			Document jdomDocument = saxBuilder.build(xmlDocument);
+        	
+			Element channelsNode = jdomDocument.getRootElement();
 			
-			Element uploadNode = (Element)(XPath.selectSingleNode(jdomDocument,
-			        "/Channels//Channel//Modules//Upload"));
-						
-			DESTINATION_DIR = uploadNode.getChild("UploadDir").getValue();
-			PUBLIC_URL = uploadNode.getChild("PublicURL").getValue(); 
+			List<Element> channelNodes = channelsNode.getChildren();
+			
+			for (Element e : channelNodes) {
+				String DUMMY = e.getAttribute("chan").getValue();
+				Element upload = e.getChild("Modules").getChild("Upload");
+				DESTINATION_DIR = upload.getChild("UploadDir").getValue();
+				PUBLIC_URL = upload.getChild("PublicURL").getValue(); 
+			}
+			
 			
     	} catch (JDOMException e) {
 			e.printStackTrace();
@@ -72,6 +78,9 @@ public class Upload implements TriggerListener {
     }*/
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
+    	Grouphug.getInstance().sendMessage(DESTINATION_DIR);
+    	Grouphug.getInstance().sendMessage(PUBLIC_URL);
+    	
         if(trigger.equals(TRIGGER)) {
             insert(message, sender);
         } else if(trigger.equals(TRIGGER_KEYWORD)) {

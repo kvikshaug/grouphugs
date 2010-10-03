@@ -27,27 +27,32 @@ public class Operator implements JoinListener, NickChangeListener {
         handler.addJoinListener(this);
         handler.addNickChangeListener(this);
         bot = Grouphug.getInstance();
-
+        
         try {
 	    	File xmlDocument = new File("props.xml");
-	    	SAXBuilder saxBuilder = new SAXBuilder("org.ccil.cowan.tagsoup.Parser");
+	    	SAXBuilder saxBuilder = new SAXBuilder();
 			Document jdomDocument = saxBuilder.build(xmlDocument);
+        	
+			Element channelsNode = jdomDocument.getRootElement();
 			
-			Element operatorNode = (Element)(XPath.selectSingleNode(jdomDocument,
-			        "/Channels//Channel//Modules//Operator"));
-						
-			List<Element> operatorNicks = operatorNode.getChildren();
+			List<Element> channelNodes = channelsNode.getChildren();
 			
-			for(Element nick: operatorNicks){
-				ops.add(new UserMask((String)nick.getValue(), null, null));
+			for (Element e : channelNodes) {
+				String DUMMY = e.getAttribute("chan").getValue();
+				Element operator = e.getChild("Modules").getChild("Operator");
+				List<Element> operatorNicks = operator.getChildren("Nick");
+				for(Element nick: operatorNicks){
+					ops.add(new UserMask((String)nick.getValue(), null, null));
+				}
 			}
+			
 			
     	} catch (JDOMException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-        
+
         
 //        // add the users to be opped
 //        ops.add(new UserMask("murr4y", null, null));
