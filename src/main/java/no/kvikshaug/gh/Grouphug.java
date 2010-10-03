@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -266,11 +267,14 @@ public class Grouphug extends PircBot {
 	    	SAXBuilder saxBuilder = new SAXBuilder("org.ccil.cowan.tagsoup.Parser");
 			Document jdomDocument = saxBuilder.build(xmlDocument);
 			
-
-			List<Element> channelNodes = (XPath.selectNodes(jdomDocument,
-			        "//Channel"));
 			
-			for(Element e : channelNodes ){
+			Element channelsNode = jdomDocument.getRootElement();
+			
+			List<Element> channelNodes = channelsNode.getChildren();
+			
+			System.out.println(channelNodes);
+			
+			for (Element e : channelNodes) {
 				Grouphug.CHANNEL = e.getAttribute("chan").getValue();
 				List<Element> chanNicks = e.getChild("Nicks").getChildren();
 				
@@ -278,8 +282,11 @@ public class Grouphug extends PircBot {
 					System.out.println(nick.getValue());
 					nicks.add((String)nick.getValue());
 				}
+				
+				
 			}
-			
+
+		
 			
     	} catch (JDOMException e) {
 			e.printStackTrace();
