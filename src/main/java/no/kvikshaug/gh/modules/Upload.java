@@ -78,8 +78,7 @@ public class Upload implements TriggerListener {
     }*/
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
-    	Grouphug.getInstance().sendMessage(DESTINATION_DIR);
-    	Grouphug.getInstance().sendMessage(PUBLIC_URL);
+    
     	
         if(trigger.equals(TRIGGER)) {
             insert(message, sender);
