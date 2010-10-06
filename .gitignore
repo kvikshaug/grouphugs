@@ -14,3 +14,4 @@ target/**
 .project
 grouphugs.db
 log-current
+props.xml

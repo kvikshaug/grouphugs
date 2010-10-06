@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Channels>
+  <Channel chan="#chan1">
+    <Nicks>
+      <Nick>botnick1</Nick>
+      <Nick>botnick2</Nick>
+    </Nicks>
+    <Modules>
+      <Upload>
+        <UploadDir>/path/to/uploads/</UploadDir>
+        <PublicURL>http://url/to/uploads/</PublicURL>
+      </Upload>
+      <Operator>
+        <Nick>operatornick1</Nick>
+        <Nick>operatornick2</Nick>
+      </Operator>
+    </Modules>
+  </Channel>
+
+  <Channel chan="#chan2">
+    <Nicks>
+      <Nick>botnick1</Nick>
+      <Nick>botnick2</Nick>
+    </Nicks>
+    <Modules>
+      <Upload>
+        <UploadDir></UploadDir>/path/to/uploads/</UploadDir>
+        <PublicURL>http://url/to/uploads/</PublicURL>
+      </Upload>
+      <Operator>
+        <Nick>operatornick1</Nick>
+        <Nick>operatornick2</Nick>
+      </Operator>
+    </Modules>
+  </Channel>
+</Channels>
