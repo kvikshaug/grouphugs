@@ -6,5 +6,6 @@ git pull "$@" # pull changes from a git remote
 buildr clean compile package # recompile, package
 
 ./link-db.sh
+./link-conf.sh
 ./restart-bot.sh
 popd
