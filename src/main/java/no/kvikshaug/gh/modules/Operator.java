@@ -4,8 +4,16 @@ import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.listeners.JoinListener;
 import no.kvikshaug.gh.listeners.NickChangeListener;
+
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+import org.jdom.xpath.XPath;
 import org.jibble.pircbot.User;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -19,17 +27,43 @@ public class Operator implements JoinListener, NickChangeListener {
         handler.addJoinListener(this);
         handler.addNickChangeListener(this);
         bot = Grouphug.getInstance();
+        
+        try {
+	    	File xmlDocument = new File("props.xml");
+	    	SAXBuilder saxBuilder = new SAXBuilder();
+			Document jdomDocument = saxBuilder.build(xmlDocument);
+        	
+			Element channelsNode = jdomDocument.getRootElement();
+			
+			List<Element> channelNodes = channelsNode.getChildren();
+			
+			for (Element e : channelNodes) {
+				String DUMMY = e.getAttribute("chan").getValue();
+				Element operator = e.getChild("Modules").getChild("Operator");
+				List<Element> operatorNicks = operator.getChildren("Nick");
+				for(Element nick: operatorNicks){
+					ops.add(new UserMask((String)nick.getValue(), null, null));
+				}
+			}
+			
+			
+    	} catch (JDOMException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
-        // add the users to be opped
-        ops.add(new UserMask("murr4y", null, null));
-        ops.add(new UserMask("icc", null, null));
-        ops.add(new UserMask("sunn", null, null));
-        ops.add(new UserMask("Huuligan", null, null));
-        ops.add(new UserMask("Ehtirno", null, null));
-        ops.add(new UserMask("Twst", null, null));
-        ops.add(new UserMask("Krashk", null, null));
-        ops.add(new UserMask("Blaster", null, null));
-        ops.add(new UserMask("dakh", null, null));
+        
+//        // add the users to be opped
+//        ops.add(new UserMask("murr4y", null, null));
+//        ops.add(new UserMask("icc", null, null));
+//        ops.add(new UserMask("sunn", null, null));
+//        ops.add(new UserMask("Huuligan", null, null));
+//        ops.add(new UserMask("Ehtirno", null, null));
+//        ops.add(new UserMask("Twst", null, null));
+//        ops.add(new UserMask("Krashk", null, null));
+//        ops.add(new UserMask("Blaster", null, null));
+//        ops.add(new UserMask("dakh", null, null));
 
         System.out.println("Operator module loaded.");
     }

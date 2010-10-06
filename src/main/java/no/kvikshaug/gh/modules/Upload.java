@@ -15,18 +15,49 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+import org.jdom.xpath.XPath;
+
 public class Upload implements TriggerListener {
 
     private static final String TRIGGER_HELP = "upload";
     private static final String TRIGGER = "upload";
     private static final String UPLOAD_DB= "uploads";
     private static final String TRIGGER_KEYWORD = "keyword";
-    private static final String DESTINATION_DIR = "/var/www/gh/public/extras/uploads/";
-    private static final String PUBLIC_URL = "http://gh.kvikshaug.no/extras/uploads/";
+    private static String DESTINATION_DIR = "/var/www/gh/public/extras/uploads/";
+    private static String PUBLIC_URL = "http://gh.kvikshaug.no/extras/uploads/";
 
     private SQLHandler sqlHandler;
 
     public Upload(ModuleHandler moduleHandler) {
+    	
+        try {
+	    	File xmlDocument = new File("props.xml");
+	    	SAXBuilder saxBuilder = new SAXBuilder();
+			Document jdomDocument = saxBuilder.build(xmlDocument);
+        	
+			Element channelsNode = jdomDocument.getRootElement();
+			
+			List<Element> channelNodes = channelsNode.getChildren();
+			
+			for (Element e : channelNodes) {
+				String DUMMY = e.getAttribute("chan").getValue();
+				Element upload = e.getChild("Modules").getChild("Upload");
+				DESTINATION_DIR = upload.getChild("UploadDir").getValue();
+				PUBLIC_URL = upload.getChild("PublicURL").getValue(); 
+			}
+			
+			
+    	} catch (JDOMException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    	
+    	
         try {
             sqlHandler = SQLHandler.getSQLHandler();
             // moduleHandler.addMessageListener(this);
@@ -47,6 +78,8 @@ public class Upload implements TriggerListener {
     }*/
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
+    
+    	
         if(trigger.equals(TRIGGER)) {
             insert(message, sender);
         } else if(trigger.equals(TRIGGER_KEYWORD)) {

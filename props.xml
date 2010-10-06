@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Channels>
+	<Channel chan="#grouphugs">
+		<Nicks>
+			<Nick>gh</Nick>
+			<Nick>gh`</Nick>
+			<Nick>hugger</Nick>
+			<Nick>klemZ</Nick>
+		</Nicks>
+		<Modules>
+			<Upload>
+				<UploadDir>/var/www/gh/public/extras/uploads/</UploadDir>
+				<PublicURL>http://gh.kvikshaug.no/extras/uploads/</PublicURL>
+			</Upload>
+			<Operator>
+			        <Nick>murr4y</Nick>
+     				<Nick>icc</Nick>
+ 					<Nick>sunn</Nick>
+        			<Nick>Huuligan</Nick>
+      				<Nick>Ehtirno</Nick>
+      				<Nick>Twst</Nick>
+ 					<Nick>Krashk</Nick>
+       				<Nick>Blaster</Nick>
+        			<Nick>dakh</Nick>
+        			<Nick>Christer</Nick>
+        			<Nick>mreggen</Nick>
+			</Operator>
+		</Modules>
+	</Channel>
+</Channels>

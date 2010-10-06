@@ -1,12 +1,20 @@
 package no.kvikshaug.gh;
 
+import org.jdom.Attribute;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+import org.jdom.xpath.XPath;
 import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
 import org.jibble.pircbot.PircBot;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -35,7 +43,7 @@ import java.util.List;
 public class Grouphug extends PircBot {
 
     // Channel and server
-    public static final String CHANNEL = "#grouphugs";
+    public static String CHANNEL = "#grouphugs";
     public static final String SERVER = "irc.inet.tele.dk";
 
     // The trigger characters (as Strings since startsWith takes String)
@@ -250,6 +258,46 @@ public class Grouphug extends PircBot {
             this.sendMessage(Grouphug.CHANNEL, line);
         }
     }
+    
+    
+    public void parseConfig(){
+    	try {
+    	
+	    	File xmlDocument = new File("props.xml");
+	    	SAXBuilder saxBuilder = new SAXBuilder();
+			Document jdomDocument = saxBuilder.build(xmlDocument);
+			
+			Element channelsNode = jdomDocument.getRootElement();
+			
+			List<Element> channelNodes = channelsNode.getChildren();
+			
+			for (Element e : channelNodes) {
+				Grouphug.CHANNEL = e.getAttribute("chan").getValue();
+				Element child = e.getChild("Nicks");
+				List<Element> chanNicks = child.getChildren();
+				
+				for(Element nick: chanNicks){
+					String nickString = (String)nick.getValue();
+					
+					if(nickString.length() > 9 ){
+						nickString = nickString.substring(0, 9);
+					}
+					nicks.add(nickString);
+				}
+				
+				
+			}
+
+		
+			
+    	} catch (JDOMException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    	
+    	
+    }
 
     /**
      * The main method, starting the bot, connecting to the server and joining its main channel.
@@ -264,13 +312,15 @@ public class Grouphug extends PircBot {
         bot.setVerbose(true);
         bot.setEncoding("UTF-8");
 
+        bot.parseConfig();
         moduleHandler = new ModuleHandler(bot);
 
+        
         // Save the nicks we want, in prioritized order
-        nicks.add("gh");
-        nicks.add("gh`");
-        nicks.add("hugger");
-        nicks.add("klemZ");
+//        nicks.add("gh");
+//        nicks.add("gh`");
+//        nicks.add("hugger");
+//        nicks.add("klemZ");
 
         System.out.println("\nOk, attempting connection to '"+SERVER+"'...");
         try {
