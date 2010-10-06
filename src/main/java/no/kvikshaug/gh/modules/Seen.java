@@ -55,29 +55,6 @@ public class Seen implements TriggerListener, MessageListener {
                 sqlHandler.update("UPDATE "+SEEN_DB+" SET date='?', lastwords='?' WHERE id='?' ;", params);
             }
 
-            /* The following is some good-faith attempt to do SQL properly
-
-			PreparedStatement statement = sqlHandler.getConnection().prepareStatement("SELECT id, nick FROM "+ SEEN_DB+" WHERE nick=? ;");
-
-			statement.setString(1, sender);
-			sql.executePreparedSelect(statement);
-
-			if(!sql.getNext()) {
-				statement = sql.getConnection().prepareStatement("INSERT INTO "+SEEN_DB+" (nick, date, lastwords) VALUES (? , now(), ? );");
-				statement.setString(1, sender);
-				statement.setString(2, message);
-				sql.executePreparedUpdate(statement);
-			} else {
-				Object[] values = sql.getValueList();
-				statement = sql.getConnection().prepareStatement("UPDATE "+SEEN_DB+" SET date=now(), lastwords= ? WHERE id= ? ;");
-				statement.setString(1, message);
-				BigInteger id = (BigInteger)(values[0]);
-				int id2 = id.intValue();
-				statement.setInt(2, id2);
-				sql.executePreparedUpdate(statement);
-			}
-			*/
-
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             Grouphug.getInstance().sendMessage("Sorry, unable to update Seen DB, an SQL error occured.");

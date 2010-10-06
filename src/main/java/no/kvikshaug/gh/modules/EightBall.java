@@ -4,7 +4,7 @@ import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.listeners.TriggerListener;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -13,30 +13,17 @@ public class EightBall implements TriggerListener {
     private static final String TRIGGER = "8ball";
     private static final String TRIGGER_HELP = "8ball";
     private Random random = new Random(System.currentTimeMillis());
-    private List<String> answerDb = new ArrayList<String>();
+    private static final List<String> answers = Arrays.asList("As I see it, yes.",
+                "It is certain.", "It is decidedly so.", "Most likely.",
+                "Outlook good.", "Signs point to yes.", "Without a doubt.",
+                "Yes.", "Yes - definitely.", "You may rely on it.",
+                "Reply hazy, try again.", "Ask again later.",
+                "Better not tell you now.", "Cannot predict  now.",
+                "Concentrate and ask again.", "Don't count on it.",
+                "My reply is no.", "My sources say no.",
+                "Outlook not so good.", "Very doubtful.");
 
     public EightBall(ModuleHandler moduleHandler) {
-        answerDb.add("As I see it, yes.");
-        answerDb.add("It is certain.");
-        answerDb.add("It is decidedly so.");
-        answerDb.add("Most likely.");
-        answerDb.add("Outlook good.");
-        answerDb.add("Signs point to yes.");
-        answerDb.add("Without a doubt.");
-        answerDb.add("Yes.");
-        answerDb.add("Yes - definitely.");
-        answerDb.add("You may rely on it.");
-        answerDb.add("Reply hazy, try again.");
-        answerDb.add("Ask again later.");
-        answerDb.add("Better not tell you now.");
-        answerDb.add("Cannot predict  now.");
-        answerDb.add("Concentrate and ask again.");
-        answerDb.add("Don't count on it.");
-        answerDb.add("My reply is no.");
-        answerDb.add("My sources say no.");
-        answerDb.add("Outlook not so good.");
-        answerDb.add("Very doubtful.");
-
         moduleHandler.addTriggerListener(TRIGGER, this);
         moduleHandler.registerHelp(TRIGGER_HELP, "Seek advice from the magic 8-ball fortuneteller!\n" +
                     "  "+ Grouphug.MAIN_TRIGGER+TRIGGER+" <yes/no question>\n" +
@@ -45,6 +32,6 @@ public class EightBall implements TriggerListener {
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
-        Grouphug.getInstance().sendMessage(sender+": "+answerDb.get(random.nextInt(answerDb.size())));
+        Grouphug.getInstance().sendMessage(sender+": "+ answers.get(random.nextInt(answers.size())));
     }
 }
