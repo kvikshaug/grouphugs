@@ -9,14 +9,13 @@ public class Timer implements TriggerListener {
     private Grouphug bot;
 
     public Timer(ModuleHandler handler) {
-        handler.addTriggerListener("time", this);
+        handler.addTriggerListener("timer", this);
         String helpText = "Use timer to time stuff, like your pizza.\n" +
                 "!time count[s/m/h/d] [message]\n" +
                 "s/m/h/d = seconds/minutes/hours/days (optional, default is minutes)\n" +
-                "Example: !time 14m grandis\n" +
+                "Example: !timer 14m grandis\n" +
                 "Note that I will forget to notify you if I am rebooted!";
         handler.registerHelp("timer", helpText);
-        handler.registerHelp("time", helpText);
         bot = Grouphug.getInstance();
         System.out.println("Timer module loaded.");
     }
