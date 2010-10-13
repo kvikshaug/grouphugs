@@ -101,7 +101,7 @@ public class Factoid implements MessageListener, TriggerListener {
                 return;
             }
 
-            if(find(trigger, false).size() != 0) {
+            if(find(factoidTrigger, false).size() != 0) {
                 bot.sendMessage("But, "+sender+", "+factoidTrigger+".");
                 return;
             }
