@@ -125,13 +125,19 @@ public class Grouphug extends PircBot {
 
     @Override
     protected void onPrivateMessage(String sender, String login, String hostname, String message) {
-        if(message.equalsIgnoreCase("Hi, my name is " + sender + " and I'm completely retarded")) {
-            sendMessage(sender, "haha, you sure are");
-            sendMessage("guys, i just got this in pm:");
-            sendMessage("<" + sender + "> " + message);
-        } else {
-            sendMessage(sender, "Hi! I'm a bot. Say \"Hi, my name is " + sender + " and I'm completely retarded\" to me for more information.");
+        // First, check for the universal normal help-trigger
+        if(message.startsWith(MAIN_TRIGGER + HELP_TRIGGER)) {
+            // we send the message, however trimming the help trigger itself
+            moduleHandler.onHelp(message.substring(MAIN_TRIGGER.length() + HELP_TRIGGER.length()).trim());
         }
+        
+//        if(message.equalsIgnoreCase("Hi, my name is " + sender + " and I'm completely retarded")) {
+//            sendMessage(sender, "haha, you sure are");
+//            sendMessage("guys, i just got this in pm:");
+//            sendMessage("<" + sender + "> " + message);
+//        } else {
+//            sendMessage(sender, "Hi! I'm a bot. Say \"Hi, my name is " + sender + " and I'm completely retarded\" to me for more information.");
+//        }
     }
 
     @Override
