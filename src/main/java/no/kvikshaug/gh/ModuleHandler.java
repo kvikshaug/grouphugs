@@ -166,7 +166,7 @@ public class ModuleHandler {
     public void onHelp(String sender, String trigger) {
         if(trigger.equals("")) {
             // no specific help text was requested
-            bot.sendMessage("Try \"!help <module>\" for one of the following modules:");
+            bot.sendMessage(sender, "Try \"!help <module>\" for one of the following modules:");
             String helpString = "";
             Collection<String> helperText = helpers.keySet();
             for(String texts : helperText) {
