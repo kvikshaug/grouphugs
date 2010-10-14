@@ -160,9 +160,10 @@ public class ModuleHandler {
 
     /**
      * When someone has triggered help, this method will be called
+     * @param sender where the message came from, and where it should be sent back to
      * @param trigger the trigger word/module the user wants help for, empty if none
      */
-    public void onHelp(String trigger) {
+    public void onHelp(String sender, String trigger) {
         if(trigger.equals("")) {
             // no specific help text was requested
             bot.sendMessage("Try \"!help <module>\" for one of the following modules:");
@@ -171,14 +172,14 @@ public class ModuleHandler {
             for(String texts : helperText) {
                 helpString += texts + ", ";
             }
-            bot.sendMessage(helpString.substring(0, helpString.length()-2));
+            bot.sendMessage(sender, helpString.substring(0, helpString.length()-2));
         } else {
             // looking for a specific module
             String text = helpers.get(trigger);
             if(text == null) {
-                bot.sendMessage("No one has implemented a "+trigger+" module yet. Patches are welcome!");
+                bot.sendMessage(sender, "No one has implemented a "+trigger+" module yet. Patches are welcome!");
             } else {
-                bot.sendMessage(text);
+                bot.sendMessage(sender, text);
             }
         }
     }
