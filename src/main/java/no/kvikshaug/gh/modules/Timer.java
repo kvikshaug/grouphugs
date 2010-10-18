@@ -47,6 +47,7 @@ public class Timer implements TriggerListener {
     				} else {
     					bot.sendMessage(nick + ": Time ran out while I was shut down. I was supposed to notify you about: " + message);
     				}
+    				sqlHandler.delete("DELETE FROM " + TIMER_TABLE + "  WHERE `id` = '"+id+"';");
     			}else{
     				new Sleeper(id, nick, (int) (time-System.currentTimeMillis()), message);
     			}
