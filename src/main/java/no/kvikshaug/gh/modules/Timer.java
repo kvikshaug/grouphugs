@@ -35,9 +35,9 @@ public class Timer implements TriggerListener {
     		sqlHandler = new SQLHandler(true);
     		List<Object[]> rows = sqlHandler.select("SELECT `id`, `nick`, `time`, `message` FROM " + TIMER_TABLE + ";");
     		for(Object[] row : rows) {
-    			int id = Integer.parseInt((String) row[0]);
+    			int id = (Integer) row[0];
     			String nick = (String) row[1];
-    			int time = Integer.parseInt((String) row[2]);
+    			int time = (Integer) row[2];
     			String message = (String) row[3];
 
     			//The timer expired when the bot was down
