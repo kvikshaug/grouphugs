@@ -135,9 +135,9 @@ public class Timer implements TriggerListener {
         	params.add(sender);
         	params.add(""+time);
         	params.add(notifyMessage);
-        	id = sqlHandler.insert("INSERT INTO " + TIMER_TABLE + " (`nick`, `time`, `message`) VALUES ('?, ?, ?');", params);
+        	id = sqlHandler.insert("INSERT INTO " + TIMER_TABLE + " (`nick`, `time`, `message`) VALUES (?, ?, ?);", params);
         } catch(SQLException e) {
-            System.err.println("Factoid insertion: SQL Exception: "+e);
+            System.err.println("Timer insertion: SQL Exception: "+e);
         }
         
         bot.sendMessage("Ok, I will highlight you in " + count + " " + reply + ".");
