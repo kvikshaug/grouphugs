@@ -166,20 +166,20 @@ public class ModuleHandler {
     public void onHelp(String sender, String trigger) {
         if(trigger.equals("")) {
             // no specific help text was requested
-            bot.sendMessage(sender, "Try \"!help <module>\" for one of the following modules:");
+            bot.sendMessage(sender, "Try \"!help <module>\" for one of the following modules:", false);
             String helpString = "";
             Collection<String> helperText = helpers.keySet();
             for(String texts : helperText) {
                 helpString += texts + ", ";
             }
-            bot.sendMessage(sender, helpString.substring(0, helpString.length()-2));
+            bot.sendMessage(sender, helpString.substring(0, helpString.length()-2), false);
         } else {
             // looking for a specific module
             String text = helpers.get(trigger);
             if(text == null) {
-                bot.sendMessage(sender, "No one has implemented a "+trigger+" module yet. Patches are welcome!");
+                bot.sendMessage(sender, "No one has implemented a "+trigger+" module yet. Patches are welcome!", false);
             } else {
-                bot.sendMessage(sender, text);
+                bot.sendMessage(sender, text, false);
             }
         }
     }

@@ -1,23 +1,61 @@
 package no.kvikshaug.gh.modules;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.Grouphug;
+import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.listeners.TriggerListener;
+import no.kvikshaug.gh.util.SQLHandler;
 
 public class Timer implements TriggerListener {
 
+	//CREATE TABLE timer(id INTEGER PRIMARY KEY, nick TEXT, time INTEGER, message TEXT);
     private Grouphug bot;
+    
+    private static final String TIMER_TABLE = "timer";
+    private SQLHandler sqlHandler;
 
     public Timer(ModuleHandler handler) {
-        handler.addTriggerListener("timer", this);
-        String helpText = "Use timer to time stuff, like your pizza.\n" +
-                "!time count[s/m/h/d] [message]\n" +
-                "s/m/h/d = seconds/minutes/hours/days (optional, default is minutes)\n" +
-                "Example: !timer 14m grandis\n" +
-                "Note that I will forget to notify you if I am rebooted!";
-        handler.registerHelp("timer", helpText);
-        bot = Grouphug.getInstance();
-        System.out.println("Timer module loaded.");
+    	handler.addTriggerListener("timer", this);
+    	String helpText = "Use timer to time stuff, like your pizza.\n" +
+    	"!time count[s/m/h/d] [message]\n" +
+    	"s/m/h/d = seconds/minutes/hours/days (optional, default is minutes)\n" +
+    	"Example: !timer 14m grandis\n";
+    	handler.registerHelp("timer", helpText);
+    	bot = Grouphug.getInstance();
+    	System.out.println("Timer module loaded.");
+
+
+    	//Load timers from database, if there were any there when the bot shut down
+    	try {
+    		sqlHandler = new SQLHandler(true);
+    		List<Object[]> rows = sqlHandler.select("SELECT `id`, `nick`, `time`, `message` FROM " + TIMER_TABLE + ";");
+    		for(Object[] row : rows) {
+    			int id = (Integer) row[0];
+    			String nick = (String) row[1];
+    			long time = (Long) row[2];
+    			String message = (String) row[3];
+
+    			//The timer expired when the bot was down
+    			if (time <= System.currentTimeMillis() ){
+    				if("".equals(message)) {
+    					bot.sendMessage(nick + ": Time ran out while I was shut down. I am notifying you anyway!");
+    				} else {
+    					bot.sendMessage(nick + ": Time ran out while I was shut down. I was supposed to notify you about: " + message);
+    				}
+    				sqlHandler.delete("DELETE FROM " + TIMER_TABLE + "  WHERE `id` = '"+id+"';");
+    			}else{
+    				new Sleeper(id, nick, (int) (time-System.currentTimeMillis()), message);
+    			}
+    		}
+    	} catch(SQLUnavailableException ex) {
+    		System.err.println("Factoid startup: SQL is unavailable!");
+    	} catch (SQLException e) {
+    		e.printStackTrace();
+    	}
     }
 
     @Override
@@ -86,19 +124,38 @@ public class Timer implements TriggerListener {
             // not plural, strip 's'
             reply = reply.substring(0, reply.length()-1);
         }
+        
+        int sleepTime = count * factor * 1000;
+        
+        long time = System.currentTimeMillis() + sleepTime;
+        
+        int id = -1;
+        try {
+        	List<String> params = new ArrayList<String>();
+        	params.add(sender);
+        	params.add(""+time);
+        	params.add(notifyMessage);
+        	id = sqlHandler.insert("INSERT INTO " + TIMER_TABLE + " (`nick`, `time`, `message`) VALUES (?, ?, ?);", params);
+        } catch(SQLException e) {
+            System.err.println("Timer insertion: SQL Exception: "+e);
+        }
+        
         bot.sendMessage("Ok, I will highlight you in " + count + " " + reply + ".");
-        new Sleeper(sender, count * factor * 1000, notifyMessage);
+        
+        new Sleeper(id, sender, sleepTime, notifyMessage);
     }
 
     private class Sleeper implements Runnable {
+    	private int id;
         private String nick;
         private int sleepAmount; // ms
         private String notifyMessage;
 
-        private Sleeper(String nick, int sleepAmount, String notifyMessage) {
+        private Sleeper(int id, String nick, int sleepAmount, String notifyMessage) {
             this.nick = nick;
             this.sleepAmount = sleepAmount;
             this.notifyMessage = notifyMessage;
+            this.id = id;
             new Thread(this).start();
         }
 
@@ -109,6 +166,13 @@ public class Timer implements TriggerListener {
             } catch(InterruptedException e) {
                 bot.sendMessage(nick + ": Sorry, I caught an InterruptedException! I was supposed to highlight you " +
                         "after " + (sleepAmount / 1000) + " seconds, but I don't know how long I've slept.");
+                try {
+                	if (this.id != -1){
+                		sqlHandler.delete("DELETE FROM " + TIMER_TABLE + "  WHERE `id` = '"+this.id+"';");
+                	}
+                } catch(SQLException e2) {
+                    e.printStackTrace();
+                }
                 return;
             }
             if("".equals(notifyMessage)) {
@@ -116,6 +180,14 @@ public class Timer implements TriggerListener {
             } else {
                 bot.sendMessage(nick + ": " + notifyMessage);
             }
+            try {
+            	if (this.id != -1){
+            		sqlHandler.delete("DELETE FROM " + TIMER_TABLE + "  WHERE `id` = '"+this.id+"';");
+            	}
+            } catch(SQLException e) {
+                e.printStackTrace();
+            }
+            
         }
     }
 }
