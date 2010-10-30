@@ -2,6 +2,7 @@ package no.kvikshaug.gh.modules;
 
 import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
+import no.kvikshaug.gh.exceptions.NoTitleException;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.Web;
 
@@ -11,7 +12,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.commons.io.IOUtils;
+import org.jdom.Document;
+import org.jdom.Element;
 import org.jdom.JDOMException;
+import org.jdom.xpath.XPath;
 
 public class IMDb implements TriggerListener {
 
@@ -41,101 +45,58 @@ public class IMDb implements TriggerListener {
             return;
         }
 
+        
         String title = "";
         String score = "";
-        String votes = "";
-        String tagline = "";
         String plot = "";
-        String commentTitle = "";
+        Document doc;
+		try {
+			doc = Web.getJDOMDocument(imdbURL);
+        
+        // find the title of the movie element using XPath
+        XPath titlePath = XPath.newInstance("//h:h1[@class='header']");
+        titlePath.addNamespace("h","http://www.w3.org/1999/xhtml");
 
-        String line = "(uninitialized)";
-        BufferedReader imdb = null;
-        try {
-            imdb = Web.prepareEncodedBufferedReader(imdbURL);
-
-            String titleString = "<title>";
-            String scoreString = "<div class=\"meta\">";
-            String votesString = "&nbsp;&nbsp;<a href=\"ratings\" class=\"tn15more\">";
-            String taglineString = "<h5>Tagline:</h5>";
-            String plotString = "<h5>Plot:</h5>";
-            String commentString = "<h5>User Comments:</h5>";
-
-            // A bit of copy-pasta and wtf's in here, enjoy :)
-            while((line = imdb.readLine()) != null) {
-                if(line.startsWith(titleString)) {
-                    title = Web.entitiesToChars(line.substring(line.indexOf(">") + 1, line.substring(1).indexOf("<")+1));
-                }
-                if(line.trim().equals(scoreString)) {
-                    line = imdb.readLine();
-                    if(line.contains("<b>")) {
-                        // we parse to double and get back the string because we want to verify that it indeed
-                        // is a number, even though we save and show it as a string.
-                        score = String.valueOf(Double.parseDouble(line.substring(line.indexOf("<b>") + 3, line.indexOf("/")))) + "/10";
-                    } else if(line.contains("<small>")) {
-                        score = line.substring(line.indexOf("<small>") + 7, line.indexOf("</small>"));
-                    } else {
-                        score = "Unkown score";
-                    }
-                }
-                if(line.startsWith(votesString)) {
-                    votes = " (" + line.substring(votesString.length()).substring(0, line.substring(votesString.length()).indexOf(" ")) + " votes)";
-                }
-                if(line.startsWith(taglineString)) {
-                    tagline = imdb.readLine().trim();
-                    int ind = tagline.indexOf("<");
-                    if(ind != -1) {
-                        tagline = tagline.substring(0, ind).trim();
-                    }
-                    tagline = Web.entitiesToChars(" - "+tagline.replace("|", " "));
-                }
-                if(line.startsWith(plotString)) {
-                    plot = imdb.readLine().trim();
-                    int ind = plot.indexOf("<");
-                    if(ind != -1) {
-                        plot = plot.substring(0, ind).trim();
-                    }
-                    plot = Web.entitiesToChars(plot.replace("|", " "));
-                }
-                if(line.startsWith(commentString)) {
-                    commentTitle = imdb.readLine().trim();
-                    int ind = commentTitle.indexOf("<");
-                    if(ind != -1) {
-                        commentTitle = commentTitle.substring(0, ind).trim();
-                    }
-                    commentTitle = Web.entitiesToChars(commentTitle.replace("|", " "));
-                }
-            }
-            IOUtils.closeQuietly(imdb);
-        } catch(StringIndexOutOfBoundsException ex) {
-            IOUtils.closeQuietly(imdb);
-            System.err.println("Couldn't parse IMDb site!");
-            ex.printStackTrace();
-            System.err.println("I was parsing the following line:");
-            System.err.println(line);
-            Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.");
-            return;
-        } catch(NumberFormatException ex) {
-            IOUtils.closeQuietly(imdb);
-            System.err.println("Couldn't parse IMDb site!");
-            ex.printStackTrace();
-            System.err.println("I was parsing the following line:");
-            System.err.println(line);
-            Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.");
-            return;
-        } catch(MalformedURLException ex) {
-            IOUtils.closeQuietly(imdb);
-            ex.printStackTrace();
-            Grouphug.getInstance().sendMessage("Wtf just happened? I caught a MalformedURLException.");
-            return;
-        } catch(IOException ex) {
-            IOUtils.closeQuietly(imdb);
-            ex.printStackTrace();
-            Grouphug.getInstance().sendMessage("Sorry, the intartubes seem to be clogged up.");
-            return;
+        Element titleElement = (Element)titlePath.selectSingleNode(doc);
+        if(titleElement == null) {
+            throw new NoTitleException("No title element in DOM");
         }
-
+        title = titleElement.getText();
+        
+        // find the score of the movie element using XPath
+        XPath scorePath = XPath.newInstance("//h:span[@id='star-bar-user-rate']/h:b");
+        scorePath.addNamespace("h","http://www.w3.org/1999/xhtml");
+        
+        Element scoreElement = (Element)scorePath.selectSingleNode(doc);
+        if(scoreElement == null) {
+            throw new JDOMException("No score element in DOM");
+        }
+        score = scoreElement.getText();
+        
+        
+        // find the score of the movie element using XPath
+        XPath plotPath = XPath.newInstance("//h:table[@id='title-overview-widget-layout']/h:tbody/h:tr/h:td[2]/h:p[2]");
+        plotPath.addNamespace("h","http://www.w3.org/1999/xhtml");
+        
+        Element plotElement = (Element)plotPath.selectSingleNode(doc);
+        if(plotElement == null) {
+            throw new JDOMException("No plot element in DOM");
+        }
+        plot = plotElement.getText();
+        
+        
+        } catch (IOException e) {
+        	e.printStackTrace();
+        	System.out.println(e.getMessage());
+        } catch (JDOMException e) {
+        	e.printStackTrace();
+        	System.out.println(e.getMessage());
+        } catch (NoTitleException e) {
+			e.printStackTrace();
+			System.out.println(e.getMessage());
+		}
         try {
-            Grouphug.getInstance().sendMessage(title+tagline+"\n"+plot+"\n"+"Comment: "+commentTitle+"\n"+score+votes+" - "+imdbURL.toString());
+            Grouphug.getInstance().sendMessage(title+"\n"+plot+"\n"+"\n"+score+"/10\n"+imdbURL.toString());
         } catch(NullPointerException ex) {
             Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.");
         }
