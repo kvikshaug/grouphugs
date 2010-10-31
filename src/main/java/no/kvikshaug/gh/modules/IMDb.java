@@ -91,7 +91,7 @@ public class IMDb implements TriggerListener {
 			System.out.println(e.getMessage());
 		}
 		try {
-			Grouphug.getInstance().sendMessage(title+"\n"+plot+"\n"+"\n"+score+"/10\n"+imdbURL.toString());
+			Grouphug.getInstance().sendMessage(title+"\n"+plot+"\n"+score+"/10\n"+imdbURL.toString());
 		} catch(NullPointerException ex) {
 			Grouphug.getInstance().sendMessage("The IMDb site layout may have changed, I was unable to parse it.");
 		}
