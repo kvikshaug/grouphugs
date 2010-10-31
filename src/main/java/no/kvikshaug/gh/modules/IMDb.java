@@ -69,10 +69,11 @@ public class IMDb implements TriggerListener {
 
 
 			// find the score of the movie element using XPath
-			XPath plotPath = XPath.newInstance("//h:table[@id='title-overview-widget-layout']/h:tbody/h:tr/h:td[@id='overview-top']/h:p[2]");
+			XPath plotPath = XPath.newInstance("//h:table[@id='title-overview-widget-layout']/h:tr[1]/h:td[2]/h:p[2]");
 			plotPath.addNamespace("h","http://www.w3.org/1999/xhtml");
 
 			Element plotElement = (Element)plotPath.selectSingleNode(doc);
+
 			if(plotElement == null) {
 				throw new JDOMException("No plot element in DOM");
 			}
