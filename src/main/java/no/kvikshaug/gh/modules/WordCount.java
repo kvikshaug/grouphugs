@@ -30,9 +30,11 @@ public class WordCount implements TriggerListener, MessageListener {
     private static final DateFormat df = new SimpleDateFormat("d. MMMMM yyyy");
 
     private SQLHandler sqlHandler;
+    private Grouphug bot;
 
     public WordCount(ModuleHandler moduleHandler) {
         try {
+            bot = Grouphug.getInstance();
             sqlHandler = SQLHandler.getSQLHandler();
             moduleHandler.addTriggerListener(TRIGGER, this);
             moduleHandler.addTriggerListener(TRIGGER_TOP, this);
@@ -70,7 +72,7 @@ public class WordCount implements TriggerListener, MessageListener {
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             e.printStackTrace();
-            Grouphug.getInstance().sendMessage("Sorry, unable to update WordCounter DB; an SQL error occured.");
+            bot.sendMessage("Sorry, unable to update WordCounter DB; an SQL error occured.");
         }
     }
 
@@ -89,19 +91,19 @@ public class WordCount implements TriggerListener, MessageListener {
             showScore(false);
         } else if(trigger.equals(TRIGGER_REMOVE)) {
             if(!sender.equalsIgnoreCase(message)) {
-                Grouphug.getInstance().sendMessage("Sorry, as a safety precaution, this function can only be used " +
+                bot.sendMessage("Sorry, as a safety precaution, this function can only be used " +
                         "by a user with the same nick as the one that's being removed.");
             } else {
                 try {
                     List<String> params = new ArrayList<String>();
                     params.add(message);
                     if(sqlHandler.delete("delete from "+WORDS_DB+" where nick=?;", params) == 0) {
-                        Grouphug.getInstance().sendMessage("DB reports that no such nick has been recorded.");
+                        bot.sendMessage("DB reports that no such nick has been recorded.");
                     } else {
-                        Grouphug.getInstance().sendMessage(sender+", you now have no words counted.");
+                        bot.sendMessage(sender+", you now have no words counted.");
                     }
                 } catch(SQLException ex) {
-                    Grouphug.getInstance().sendMessage("Crap, SQL barfed on me. Check the logs if you wanna know why.");
+                    bot.sendMessage("Crap, SQL barfed on me. Check the logs if you wanna know why.");
                     System.err.println(ex);
                     ex.printStackTrace(System.err);
                 }
@@ -138,13 +140,13 @@ public class WordCount implements TriggerListener, MessageListener {
             } else {
                 reply += "Lazy bastards...";
             }
-            Grouphug.getInstance().sendMessage(reply);
+            bot.sendMessage(reply);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.");
+            bot.sendMessage("Sorry, an SQL error occured.");
         } catch(ParseException e) {
             System.err.println("Unable to parse the SQL datetime!");
-            Grouphug.getInstance().sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
+            bot.sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
         }
     }
 
@@ -153,24 +155,24 @@ public class WordCount implements TriggerListener, MessageListener {
             Object[] row = sqlHandler.selectSingle("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick LIKE'"+ message +"';");
 
             if(row == null) {
-                Grouphug.getInstance().sendMessage(message + " doesn't have any words counted.");
+                bot.sendMessage(message + " doesn't have any words counted.");
             } else {
                 long words = ((Integer)row[2]);
                 long lines = ((Integer)row[3]);
                 Date since = SQL.sqlDateTimeToDate((String)row[4]);
                 double wpl = (double)words / (double)lines;
 
-                Grouphug.getInstance().sendMessage(message + " has uttered "+words+ " words in "+lines+" lines ("+
+                bot.sendMessage(message + " has uttered "+words+ " words in "+lines+" lines ("+
                         (new DecimalFormat("0.0")).format(wpl)+
                         " wpl)");// since "+df.format(since));
             }
 
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, unable to fetch WordCount data; an SQL error occured.");
+            bot.sendMessage("Sorry, unable to fetch WordCount data; an SQL error occured.");
         } catch(ParseException e) {
             System.err.println("Unable to parse the SQL datetime!");
-            Grouphug.getInstance().sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
+            bot.sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
         }
     }
 }
