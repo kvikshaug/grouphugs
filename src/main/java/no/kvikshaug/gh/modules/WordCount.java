@@ -131,11 +131,18 @@ public class WordCount implements TriggerListener, MessageListener {
             for(Object[] row : rows) {
                 long words = ((Integer)row[2]);
                 long lines = ((Integer)row[3]);
+                DateTime since = new DateTime(SQL.sqlDateTimeToDate((String)row[4]));
+                System.out.println(row[1] + ": " + since);
+                int days = Days.daysBetween(since, new DateTime()).getDays();
                 double wpl = (double)words / (double)lines;
-                Date since = SQL.sqlDateTimeToDate((String)row[4]);
-                reply += (place++)+". "+row[1]+ " ("+words+" words, "+lines+" lines, "+
-                        (new DecimalFormat("0.0")).format(wpl)+
-                        " wpl)\n";// since "+df.format(since)+"\n";
+                double wpd = (double)words / days;
+                double lpd = (double)lines / days;
+                DecimalFormat sf = new DecimalFormat("0.0");
+
+                reply += (place++)+". "+row[1]+ " ("+words+" words, "+lines+" lines, "+days+" days, "+
+                        sf.format(wpl) + " wpl, " +
+                        sf.format(wpd) + " wpd, " +
+                        sf.format(lpd) + " lpd)\n";
             }
             if(top) {
                 reply += "I think they are going to need a new keyboard soon.";
