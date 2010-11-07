@@ -164,10 +164,14 @@ public class WordCount implements TriggerListener, MessageListener {
                 DateTime since = new DateTime(SQL.sqlDateTimeToDate((String)row[4]));
                 int days = Days.daysBetween(since, new DateTime()).getDays();
                 double wpl = (double)words / (double)lines;
+                double wpd = (double)words / days;
+                double lpd = (double)lines / days;
+                DecimalFormat sf = new DecimalFormat("0.0");
 
                 bot.sendMessage(message + " has uttered "+words+ " words in "+lines+" lines over " + days + " days ("+
-                        (new DecimalFormat("0.0")).format(wpl)+
-                        " wpl)");
+                        sf.format(wpl) + " wpl, " +
+                        sf.format(wpd) + " wpd, " +
+                        sf.format(lpd) + " lpd)");
             }
 
         } catch(SQLException e) {
