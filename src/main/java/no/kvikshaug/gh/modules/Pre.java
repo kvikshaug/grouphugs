@@ -86,13 +86,13 @@ public class Pre implements TriggerListener, Runnable {
             bot.sendMessageChannel(channel, data[2].trim() + ": " + releasedTime.toString()+" ago in "+data[1].trim().toUpperCase());
         } catch (IOException e) {
             e.printStackTrace();
-            bot.sendMessage("IOException :/");
+            bot.sendMessageChannel(channel, "IOException :/");
         } catch (JDOMException e) {
             e.printStackTrace();
-            bot.sendMessage("zomg JDOMException :/");
+            bot.sendMessageChannel(channel, "zomg JDOMException :/");
         } catch (ParseException e) {
             e.printStackTrace();
-            bot.sendMessage("zomg, the date format was unparseable :/");
+            bot.sendMessageChannel(channel, "zomg, the date format was unparseable :/");
         }
     }
 }

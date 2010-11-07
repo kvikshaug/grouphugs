@@ -178,7 +178,7 @@ public class Karma implements TriggerListener, MessageListener {
             if(top) {
                 reply += "May their lives be filled with sunlight and pink stuff.";
             } else {
-                reply += "May they burn forever in the pits of "+ Grouphug.CHANNEL+".";
+                reply += "May they burn forever in the pits of "+ channel+".";
             }
             Grouphug.getInstance().sendMessageChannel(channel, reply);
         } catch(SQLException e) {

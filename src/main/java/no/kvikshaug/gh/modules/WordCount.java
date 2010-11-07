@@ -74,7 +74,7 @@ public class WordCount implements TriggerListener, MessageListener {
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             e.printStackTrace();
-            Grouphug.getInstance().sendMessage("Sorry, unable to update WordCounter DB; an SQL error occured.");
+            Grouphug.getInstance().sendMessageChannel(channel, "Sorry, unable to update WordCounter DB; an SQL error occured.");
         }
     }
 
@@ -124,12 +124,12 @@ public class WordCount implements TriggerListener, MessageListener {
         try {
         	List<String> params = new ArrayList<String>();
             params.add(channel);
-            String query = ("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE channel=? ORDER BY words", params);
+            String query = ("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE channel=? ORDER BY words");
             if(top) {
                 query += "DESC ";
             }
             query += "LIMIT "+LIMIT+";";
-            List<Object[]> rows = sqlHandler.select(query);
+            List<Object[]> rows = sqlHandler.select(query, params);
             int place = 1;
             for(Object[] row : rows) {
                 long words = ((Integer)row[2]);
@@ -160,7 +160,7 @@ public class WordCount implements TriggerListener, MessageListener {
         	List<String> params = new ArrayList<String>();
         	params.add(message);
             params.add(channel);
-            Object[] row = sqlHandler.selectSingle("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick LIKE ? AND channel=?;");
+            Object[] row = sqlHandler.selectSingle("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick LIKE ? AND channel=?;", params);
 
             if(row == null) {
                 Grouphug.getInstance().sendMessageChannel(channel, message + " doesn't have any words counted.");
