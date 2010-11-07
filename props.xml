@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Channels>
-	<Channel chan="#grouphugs">
-		<Nicks>
-			<Nick>gh</Nick>
-			<Nick>gh`</Nick>
-			<Nick>hugger</Nick>
-			<Nick>klemZ</Nick>
-		</Nicks>
+	<Nicks>
+		<Nick>gh</Nick>
+		<Nick>gh`</Nick>
+		<Nick>hugger</Nick>
+		<Nick>klemZ</Nick>
+	</Nicks>
+	<Channel chan="#grouphugs" dbname="grouphugs.db">
 		<Modules>
 			<Upload>
 				<UploadDir>/var/www/gh/public/extras/uploads/</UploadDir>

@@ -32,23 +32,24 @@ public class Timer implements TriggerListener {
     	//Load timers from database, if there were any there when the bot shut down
     	try {
     		sqlHandler = new SQLHandler(true);
-    		List<Object[]> rows = sqlHandler.select("SELECT `id`, `nick`, `time`, `message` FROM " + TIMER_TABLE + ";");
+    		List<Object[]> rows = sqlHandler.select("SELECT `id`, `nick`, `time`, `message`, `channel` FROM " + TIMER_TABLE + ";");
     		for(Object[] row : rows) {
     			int id = (Integer) row[0];
     			String nick = (String) row[1];
     			long time = (Long) row[2];
     			String message = (String) row[3];
+    			String channel = (String) row[4];
 
     			//The timer expired when the bot was down
     			if (time <= System.currentTimeMillis() ){
     				if("".equals(message)) {
-    					bot.sendMessage(nick + ": Time ran out while I was shut down. I am notifying you anyway!");
+    					bot.sendMessageChannel(channel, nick + ": Time ran out while I was shut down. I am notifying you anyway!");
     				} else {
-    					bot.sendMessage(nick + ": Time ran out while I was shut down. I was supposed to notify you about: " + message);
+    					bot.sendMessageChannel(channel, nick + ": Time ran out while I was shut down. I was supposed to notify you about: " + message);
     				}
     				sqlHandler.delete("DELETE FROM " + TIMER_TABLE + "  WHERE `id` = '"+id+"';");
     			}else{
-    				new Sleeper(id, nick, (int) (time-System.currentTimeMillis()), message);
+    				new Sleeper(id, nick, (int) (time-System.currentTimeMillis()), message, channel);
     			}
     		}
     	} catch(SQLUnavailableException ex) {
@@ -73,7 +74,7 @@ public class Timer implements TriggerListener {
         } catch(NumberFormatException e) {
             if(indexAfterCount == 0) {
                 // message didn't start with a number
-                bot.sendMessage("'" + message + "' doesn't start with a valid number, does it now? Try '!help timer'.");
+                bot.sendMessageChannel(channel, "'" + message + "' doesn't start with a valid number, does it now? Try '!help timer'.");
                 return;
             }
             // indexAfterCount is now the index after the count
@@ -114,7 +115,7 @@ public class Timer implements TriggerListener {
                     break;
 
                 default:
-                    bot.sendMessage("No. Try '!help timer'.");
+                    bot.sendMessageChannel(channel, "No. Try '!help timer'.");
                     return;
 
             }
@@ -135,14 +136,15 @@ public class Timer implements TriggerListener {
         	params.add(sender);
         	params.add(""+time);
         	params.add(notifyMessage);
-        	id = sqlHandler.insert("INSERT INTO " + TIMER_TABLE + " (`nick`, `time`, `message`) VALUES (?, ?, ?);", params);
+        	params.add(channel);
+        	id = sqlHandler.insert("INSERT INTO " + TIMER_TABLE + " (`nick`, `time`, `message`, `channel`) VALUES (?, ?, ?, ?);", params);
         } catch(SQLException e) {
             System.err.println("Timer insertion: SQL Exception: "+e);
         }
         
-        bot.sendMessage("Ok, I will highlight you in " + count + " " + reply + ".");
+        bot.sendMessageChannel(channel, "Ok, I will highlight you in " + count + " " + reply + ".");
         
-        new Sleeper(id, sender, sleepTime, notifyMessage);
+        new Sleeper(id, sender, sleepTime, notifyMessage, channel);
     }
 
     private class Sleeper implements Runnable {
@@ -150,12 +152,14 @@ public class Timer implements TriggerListener {
         private String nick;
         private int sleepAmount; // ms
         private String notifyMessage;
+        private String channel;
 
-        private Sleeper(int id, String nick, int sleepAmount, String notifyMessage) {
+        private Sleeper(int id, String nick, int sleepAmount, String notifyMessage, String channel) {
             this.nick = nick;
             this.sleepAmount = sleepAmount;
             this.notifyMessage = notifyMessage;
             this.id = id;
+            this.channel = channel;
             new Thread(this).start();
         }
 
@@ -164,7 +168,7 @@ public class Timer implements TriggerListener {
             try {
                 Thread.sleep(sleepAmount);
             } catch(InterruptedException e) {
-                bot.sendMessage(nick + ": Sorry, I caught an InterruptedException! I was supposed to highlight you " +
+                bot.sendMessageChannel(channel, nick + ": Sorry, I caught an InterruptedException! I was supposed to highlight you " +
                         "after " + (sleepAmount / 1000) + " seconds, but I don't know how long I've slept.");
                 try {
                 	if (this.id != -1){
@@ -176,9 +180,9 @@ public class Timer implements TriggerListener {
                 return;
             }
             if("".equals(notifyMessage)) {
-                bot.sendMessage(nick + ": Time's up!");
+                bot.sendMessageChannel(channel, nick + ": Time's up!");
             } else {
-                bot.sendMessage(nick + ": " + notifyMessage);
+                bot.sendMessageChannel(channel, nick + ": " + notifyMessage);
             }
             try {
             	if (this.id != -1){

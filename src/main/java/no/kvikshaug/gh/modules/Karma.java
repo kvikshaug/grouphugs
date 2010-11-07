@@ -45,21 +45,21 @@ public class Karma implements TriggerListener, MessageListener {
     }
 
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
-        if(message.endsWith("++") || message.endsWith("++;")) {
-            add(sender, message.substring(0, message.length()-2), 1);
-        } else if(message.endsWith("--") || message.endsWith("--;")) {
-            add(sender, message.substring(0, message.length()-2), -1);
+        if(message.endsWith("++")) {
+            add(channel, sender, message.substring(0, message.length()-2), 1);
+        } else if(message.endsWith("--")) {
+            add(channel,sender, message.substring(0, message.length()-2), -1);
         } else if(message.equals(Grouphug.MAIN_TRIGGER + TRIGGER_TOP)) {
-            showScore(true);
+            showScore(channel, true);
         } else if(message.equals(Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM)) {
-            showScore(false);
+            showScore(channel, false);
 //        } else if(message.startsWith(Grouphug.MAIN_TRIGGER + TRIGGER_RESET) && CAN_RESET) {
 //            add(sender, message.substring(11, message.length()), 0);
         }
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
-        print(message);
+        print(channel, message);
     }
 
     private String htmlEntitiesToNorwegianChars(String str) {
@@ -82,26 +82,26 @@ public class Karma implements TriggerListener, MessageListener {
         return str;
     }
 
-    private void print(String name) {
+    private void print(String channel, String name) {
         String sqlName = norwegianCharsToHtmlEntities(name);
         KarmaItem ki;
         try {
-            ki = find(sqlName);
+            ki = find(channel, sqlName);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage(name+" has probably bad karma, because an SQL error occured.");
+            Grouphug.getInstance().sendMessageChannel(channel, name+" has probably bad karma, because an SQL error occured.");
             return;
         }
         if(ki == null) {
-            Grouphug.getInstance().sendMessage(name+" has neutral karma.");
+            Grouphug.getInstance().sendMessageChannel(channel, name+" has neutral karma.");
         } else {
-            Grouphug.getInstance().sendMessage(ki.getName()+" has "+ki.getKarma()+" karma.");
+            Grouphug.getInstance().sendMessageChannel(channel, ki.getName()+" has "+ki.getKarma()+" karma.");
         }
     }
 
-    private void add(String sender, String name, int karma) {
+    private void add(String channel, String sender, String name, int karma) {
         if(name.equals(sender)) {
-            Grouphug.getInstance().sendMessage(sender+", self karma is bad karma.");
+            Grouphug.getInstance().sendMessageChannel(channel, sender+", self karma is bad karma.");
             return;
         }
 
@@ -114,26 +114,27 @@ public class Karma implements TriggerListener, MessageListener {
             } catch(InterruptedException e) {
                 // interrupted, ok, just continue
             }
-            KarmaItem ki = find(sqlName);
+            KarmaItem ki = find(channel, sqlName);
             if(ki == null) {
                 List<String> params = new ArrayList<String>();
                 params.add(sqlName);
                 params.add(String.valueOf(karma));
-                sqlHandler.insert("INSERT INTO "+KARMA_DB+" (name, value) VALUES ('?', '?');", params);
+                params.add(channel);
+                sqlHandler.insert("INSERT INTO "+KARMA_DB+" (name, value, channel) VALUES (?, ?, ?);", params);
             } else if(karma == 0) {
                 List<String> params = new ArrayList<String>();
                 params.add(String.valueOf(karma));
                 params.add(String.valueOf(ki.getID()));
-                sqlHandler.update("UPDATE "+KARMA_DB+" SET value='?' WHERE id='?';", params);
+                sqlHandler.update("UPDATE "+KARMA_DB+" SET value='?' WHERE id=?;", params);
             } else {
                 List<String> params = new ArrayList<String>();
                 params.add(String.valueOf(ki.getKarma() + karma));
                 params.add(String.valueOf(ki.getID()));
-                sqlHandler.update("UPDATE "+KARMA_DB+" SET value='?' WHERE id='?';", params);
+                sqlHandler.update("UPDATE "+KARMA_DB+" SET value='?' WHERE id=?;", params);
             }
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, unable to change karma value; an SQL error occurred.");
+            Grouphug.getInstance().sendMessageChannel(channel, "Sorry, unable to change karma value; an SQL error occurred.");
         }
     }
 
@@ -143,17 +144,18 @@ public class Karma implements TriggerListener, MessageListener {
      * @return a KarmaItem-object of the item found in the DB, or null if no item was found
      * @throws SQLException - if an SQL error occured
      */
-    private KarmaItem find(String karma) throws SQLException {
+    private KarmaItem find(String channel, String karma) throws SQLException {
         List<String> params = new ArrayList<String>();
         params.add(karma);
-        Object[] row = sqlHandler.selectSingle("SELECT id, name, value FROM "+KARMA_DB+" WHERE name LIKE('?');", params);
+        params.add(channel);
+        Object[] row = sqlHandler.selectSingle("SELECT id, name, value, channel FROM "+KARMA_DB+" WHERE name LIKE(?) AND channel=?;", params);
         if(row == null) {
             return null;
         }
-        return new KarmaItem((Integer)row[0], htmlEntitiesToNorwegianChars((String)row[1]), (Integer)row[2]);
+        return new KarmaItem((Integer)row[0], htmlEntitiesToNorwegianChars((String)row[1]), (Integer)row[2], (String)row[3]);
     }
 
-    private void showScore(boolean top) {
+    private void showScore(String channel, boolean top) {
         String reply;
         if(top) {
             reply = "Top five karma winners:\n";
@@ -161,12 +163,14 @@ public class Karma implements TriggerListener, MessageListener {
             reply = "Bottom five karma losers:\n";
         }
         try {
-            String query = "SELECT name, value FROM "+KARMA_DB+" ORDER BY value ";
+        	List<String> params = new ArrayList<String>();
+            params.add(channel);
+            String query = "SELECT name, value, channel FROM "+KARMA_DB+" WHERE channel=? ORDER BY value ";
             if(top) {
                 query += "DESC ";
             }
             query += "LIMIT "+LIMIT+";";
-            List<Object[]> rows = sqlHandler.select(query);
+            List<Object[]> rows = sqlHandler.select(query, params);
             int place = 1;
             for(Object[] row : rows) {
                 reply += (place++)+". "+htmlEntitiesToNorwegianChars((String)row[0])+" ("+row[1]+")\n";
@@ -176,10 +180,10 @@ public class Karma implements TriggerListener, MessageListener {
             } else {
                 reply += "May they burn forever in the pits of "+ Grouphug.CHANNEL+".";
             }
-            Grouphug.getInstance().sendMessage(reply);
+            Grouphug.getInstance().sendMessageChannel(channel, reply);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, unable to gather karma records; an SQL error occured.");
+            Grouphug.getInstance().sendMessageChannel(channel, "Sorry, unable to gather karma records; an SQL error occured.");
         }
     }
 
@@ -188,6 +192,7 @@ public class Karma implements TriggerListener, MessageListener {
         private int ID;
         private String name;
         private int karma;
+        private String channel;
 
         public int getID() {
             return ID;
@@ -200,11 +205,16 @@ public class Karma implements TriggerListener, MessageListener {
         public int getKarma() {
             return karma;
         }
+        
+        public String getChannel(){
+        	return channel;
+        }
 
-        public KarmaItem(int ID, String name, int karma) {
+        public KarmaItem(int ID, String name, int karma, String channel) {
             this.ID = ID;
             this.name = name;
             this.karma = karma;
+            this.channel = channel;
         }
 
         public String toString() {

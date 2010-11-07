@@ -83,7 +83,7 @@ public class Bofh implements TriggerListener {
         }
 
         if (reply != null) {
-            Grouphug.getInstance().sendMessage(reply);
+            Grouphug.getInstance().sendMessageChannel(channel, reply);
         }
     }
 }

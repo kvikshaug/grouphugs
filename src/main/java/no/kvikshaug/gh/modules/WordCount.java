@@ -49,18 +49,22 @@ public class WordCount implements TriggerListener, MessageListener {
             System.err.println("WordCount startup error: SQL is unavailable!");
         }
     }
-    public void addWords(String sender, String message) {
+    public void addWords(String channel, String sender, String message) {
         // This method to count words should be more or less failsafe:
         int newWords = message.trim().replaceAll(" {2,}+", " ").split(" ").length;
 
         try{
-            Object[] row = sqlHandler.selectSingle("SELECT id, words, `lines` FROM "+WORDS_DB+" WHERE nick='"+sender+"';");
+        	List<String> params = new ArrayList<String>();
+            params.add(sender);
+            params.add(channel);
+            Object[] row = sqlHandler.selectSingle("SELECT id, words, `lines` FROM "+WORDS_DB+" WHERE nick=? AND channel=?;", params);
             if(row == null) {
-                List<String> params = new ArrayList<String>();
+                params = new ArrayList<String>();
                 params.add(sender);
                 params.add(newWords + "");
                 params.add(SQL.dateToSQLDateTime(new Date()));
-                sqlHandler.insert("INSERT INTO "+WORDS_DB+" (nick, words, `lines`, since) VALUES ('?', '?', '1', '?');", params);
+                params.add(channel);
+                sqlHandler.insert("INSERT INTO "+WORDS_DB+" (nick, words, `lines`, since, channel) VALUES (?, ?, '1', ?, ?);", params);
             } else {
                 long existingWords = ((Integer)row[1]);
                 long existingLines = ((Integer)row[2]);
@@ -76,32 +80,33 @@ public class WordCount implements TriggerListener, MessageListener {
 
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
         if(!message.startsWith(Grouphug.MAIN_TRIGGER + TRIGGER_REMOVE) || !message.endsWith(sender)) {
-            addWords(sender, message);
+            addWords(channel, sender, message);
         }
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         if(trigger.equals(TRIGGER)) {
-            print(message);
+            print(channel, message);
         } else if(trigger.equals(TRIGGER_TOP)) {
-            showScore(true);
+            showScore(channel, true);
         } else if(trigger.equals(TRIGGER_BOTTOM)) {
-            showScore(false);
+            showScore(channel, false);
         } else if(trigger.equals(TRIGGER_REMOVE)) {
             if(!sender.equalsIgnoreCase(message)) {
-                Grouphug.getInstance().sendMessage("Sorry, as a safety precaution, this function can only be used " +
+                Grouphug.getInstance().sendMessageChannel(channel, "Sorry, as a safety precaution, this function can only be used " +
                         "by a user with the same nick as the one that's being removed.");
             } else {
                 try {
                     List<String> params = new ArrayList<String>();
                     params.add(message);
-                    if(sqlHandler.delete("delete from "+WORDS_DB+" where nick=?;", params) == 0) {
-                        Grouphug.getInstance().sendMessage("DB reports that no such nick has been recorded.");
+                    params.add(channel);
+                    if(sqlHandler.delete("delete from "+WORDS_DB+" where nick=? AND channel=?;", params) == 0) {
+                        Grouphug.getInstance().sendMessageChannel(channel, "DB reports that no such nick has been recorded.");
                     } else {
-                        Grouphug.getInstance().sendMessage(sender+", you now have no words counted.");
+                        Grouphug.getInstance().sendMessageChannel(channel, sender+", you now have no words counted.");
                     }
                 } catch(SQLException ex) {
-                    Grouphug.getInstance().sendMessage("Crap, SQL barfed on me. Check the logs if you wanna know why.");
+                    Grouphug.getInstance().sendMessageChannel(channel, "Crap, SQL barfed on me. Check the logs if you wanna know why.");
                     System.err.println(ex);
                     ex.printStackTrace(System.err);
                 }
@@ -109,7 +114,7 @@ public class WordCount implements TriggerListener, MessageListener {
         }
     }
 
-    private void showScore(boolean top) {
+    private void showScore(String channel, boolean top) {
         String reply;
         if(top) {
             reply = "The biggest losers are:\n";
@@ -117,7 +122,9 @@ public class WordCount implements TriggerListener, MessageListener {
             reply = "The laziest idlers are:\n";
         }
         try {
-            String query = ("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" ORDER BY words ");
+        	List<String> params = new ArrayList<String>();
+            params.add(channel);
+            String query = ("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE channel=? ORDER BY words", params);
             if(top) {
                 query += "DESC ";
             }
@@ -138,39 +145,42 @@ public class WordCount implements TriggerListener, MessageListener {
             } else {
                 reply += "Lazy bastards...";
             }
-            Grouphug.getInstance().sendMessage(reply);
+            Grouphug.getInstance().sendMessageChannel(channel, reply);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, an SQL error occured.");
+            Grouphug.getInstance().sendMessageChannel(channel, "Sorry, an SQL error occured.");
         } catch(ParseException e) {
             System.err.println("Unable to parse the SQL datetime!");
-            Grouphug.getInstance().sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
+            Grouphug.getInstance().sendMessageChannel(channel, "Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
         }
     }
 
-    private void print(String message){
+    private void print(String channel, String message){
         try{
-            Object[] row = sqlHandler.selectSingle("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick LIKE'"+ message +"';");
+        	List<String> params = new ArrayList<String>();
+        	params.add(message);
+            params.add(channel);
+            Object[] row = sqlHandler.selectSingle("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick LIKE ? AND channel=?;");
 
             if(row == null) {
-                Grouphug.getInstance().sendMessage(message + " doesn't have any words counted.");
+                Grouphug.getInstance().sendMessageChannel(channel, message + " doesn't have any words counted.");
             } else {
                 long words = ((Integer)row[2]);
                 long lines = ((Integer)row[3]);
                 Date since = SQL.sqlDateTimeToDate((String)row[4]);
                 double wpl = (double)words / (double)lines;
 
-                Grouphug.getInstance().sendMessage(message + " has uttered "+words+ " words in "+lines+" lines ("+
+                Grouphug.getInstance().sendMessageChannel(channel, message + " has uttered "+words+ " words in "+lines+" lines ("+
                         (new DecimalFormat("0.0")).format(wpl)+
                         " wpl)");// since "+df.format(since));
             }
 
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, unable to fetch WordCount data; an SQL error occured.");
+            Grouphug.getInstance().sendMessageChannel(channel, "Sorry, unable to fetch WordCount data; an SQL error occured.");
         } catch(ParseException e) {
             System.err.println("Unable to parse the SQL datetime!");
-            Grouphug.getInstance().sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
+            Grouphug.getInstance().sendMessageChannel(channel, "Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
         }
     }
 }

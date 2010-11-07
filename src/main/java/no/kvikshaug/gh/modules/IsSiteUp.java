@@ -36,18 +36,18 @@ public class IsSiteUp implements TriggerListener {
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         try {
-            bot.sendMessage(parseHTML(new URL(DFEOJM_URI + '/' + message)));
+            bot.sendMessageChannel(channel, parseHTML(new URL(DFEOJM_URI + '/' + message)));
         } catch(ParseException ex) {
-            bot.sendMessage("Sorry, I was unable to parse downforeveryoneorjustme.com.");
+            bot.sendMessageChannel(channel, "Sorry, I was unable to parse downforeveryoneorjustme.com.");
             System.err.println(ex);
         } catch(MalformedURLException e) {
-            bot.sendMessage("I think your URL contained characters I couldn't transform into a DFEOJM-URL.");
+            bot.sendMessageChannel(channel, "I think your URL contained characters I couldn't transform into a DFEOJM-URL.");
             e.printStackTrace();
         } catch (IOException e) {
-            bot.sendMessage("Sorry, I caught an IOException in my throat.");
+            bot.sendMessageChannel(channel, "Sorry, I caught an IOException in my throat.");
             e.printStackTrace();
         } catch (JDOMException e) {
-            bot.sendMessage("Sorry, JDOM is being a bitch.");
+            bot.sendMessageChannel(channel, "Sorry, JDOM is being a bitch.");
             e.printStackTrace();
         }
     }

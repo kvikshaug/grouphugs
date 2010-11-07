@@ -58,11 +58,11 @@ public class Slang implements TriggerListener {
         try {
             si = parseXML(getSlangXML(message), number);
         } catch(IOException e) {
-            Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)");
+            Grouphug.getInstance().sendMessageChannel(channel, "Sorry, the intartubes seems to be clogged up (IOException)");
             System.err.println(e);
             return;
         } catch(NullPointerException ex) {
-            Grouphug.getInstance().sendMessage("No slang found for "+message+".");
+            Grouphug.getInstance().sendMessageChannel(channel, "No slang found for "+message+".");
             return;
         }
 
@@ -73,7 +73,7 @@ public class Slang implements TriggerListener {
             reply = si.getWord()+" ("+si.getNumber()+" of "+Slang.slangCount+"): "+ si.getDefinition();
         }
 
-        Grouphug.getInstance().sendMessage(Web.entitiesToChars(reply), true);
+        Grouphug.getInstance().sendMessageChannel(channel, Web.entitiesToChars(reply), true);
     }
 
     private String getSlangXML(String query) throws IOException {

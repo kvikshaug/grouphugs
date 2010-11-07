@@ -39,14 +39,16 @@ public class Seen implements TriggerListener, MessageListener {
         try {
             List<String> params = new ArrayList<String>();
             params.add(sender);
-            Object[] row = sqlHandler.selectSingle("SELECT id FROM "+ SEEN_DB +" WHERE nick='?';", params);
+            params.add(channel);
+            Object[] row = sqlHandler.selectSingle("SELECT id FROM "+ SEEN_DB +" WHERE nick=? AND channel=?;", params);
 
             if(row == null) {
                 params.clear();
                 params.add(sender);
                 params.add(SQL.dateToSQLDateTime(new Date()));
                 params.add(message);
-                sqlHandler.insert("INSERT INTO "+SEEN_DB+" (nick, date, lastwords) VALUES ('?', '?', '?');", params);
+                params.add(channel);
+                sqlHandler.insert("INSERT INTO "+SEEN_DB+" (nick, date, lastwords, channel) VALUES (?, ?, ?, ?);", params);
             } else {
                 params.clear();
                 params.add(SQL.dateToSQLDateTime(new Date()));
@@ -57,7 +59,7 @@ public class Seen implements TriggerListener, MessageListener {
 
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, unable to update Seen DB, an SQL error occured.");
+            Grouphug.getInstance().sendMessageChannel(channel, "Sorry, unable to update Seen DB, an SQL error occured.");
         }
 
     }
@@ -66,20 +68,21 @@ public class Seen implements TriggerListener, MessageListener {
         try {
             List<String> params = new ArrayList<String>();
             params.add(message);
-            Object[] row = sqlHandler.selectSingle("SELECT id, nick, date, lastwords FROM "+SEEN_DB+" WHERE nick='?';", params);
+            params.add(channel);
+            Object[] row = sqlHandler.selectSingle("SELECT id, nick, date, lastwords FROM "+SEEN_DB+" WHERE nick=? AND channel=?;", params);
 
             if(row == null) {
-                Grouphug.getInstance().sendMessage(message + " hasn't said anything yet.");
+                Grouphug.getInstance().sendMessageChannel(channel, message + " hasn't said anything yet.");
             } else {
                 Date last = SQL.sqlDateTimeToDate((String)row[2]);
                 String lastwords = (String)row[3];
 
-                Grouphug.getInstance().sendMessage(message + " uttered \""+ lastwords+ "\" on " +last);
+                Grouphug.getInstance().sendMessageChannel(channel, message + " uttered \""+ lastwords+ "\" on " +last);
             }
 
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessage("Sorry, unable to look up the requested data; an SQL error occured.");
+            Grouphug.getInstance().sendMessageChannel(channel, "Sorry, unable to look up the requested data; an SQL error occured.");
         } catch (ParseException e) {
             System.err.println(" > Unable to parse the SQL date! This was very unexpected.");
             e.printStackTrace();
