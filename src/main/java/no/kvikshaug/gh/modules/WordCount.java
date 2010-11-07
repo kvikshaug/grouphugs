@@ -8,6 +8,7 @@ import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.SQL;
 import no.kvikshaug.gh.util.SQLHandler;
 import org.joda.time.DateTime;
+import org.joda.time.Days;
 
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -161,11 +162,12 @@ public class WordCount implements TriggerListener, MessageListener {
                 long words = ((Integer)row[2]);
                 long lines = ((Integer)row[3]);
                 DateTime since = new DateTime(SQL.sqlDateTimeToDate((String)row[4]));
+                int days = Days.daysBetween(since, new DateTime()).getDays();
                 double wpl = (double)words / (double)lines;
 
-                bot.sendMessage(message + " has uttered "+words+ " words in "+lines+" lines ("+
+                bot.sendMessage(message + " has uttered "+words+ " words in "+lines+" lines over " + days + " days ("+
                         (new DecimalFormat("0.0")).format(wpl)+
-                        " wpl)");// since "+df.format(since));
+                        " wpl)");
             }
 
         } catch(SQLException e) {
