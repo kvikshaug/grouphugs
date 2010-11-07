@@ -7,6 +7,7 @@ import no.kvikshaug.gh.listeners.MessageListener;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.SQL;
 import no.kvikshaug.gh.util.SQLHandler;
+import org.joda.time.DateTime;
 
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -159,7 +160,7 @@ public class WordCount implements TriggerListener, MessageListener {
             } else {
                 long words = ((Integer)row[2]);
                 long lines = ((Integer)row[3]);
-                Date since = SQL.sqlDateTimeToDate((String)row[4]);
+                DateTime since = new DateTime(SQL.sqlDateTimeToDate((String)row[4]));
                 double wpl = (double)words / (double)lines;
 
                 bot.sendMessage(message + " has uttered "+words+ " words in "+lines+" lines ("+
