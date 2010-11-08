@@ -2,10 +2,10 @@
 <Bot>
   	<Nicks>
       	<Nick>botnick1</Nick>
-    	<Nick>botnick2</Nick>
+    		<Nick>botnick2</Nick>
 	</Nicks>
 	<Channels>
-		<Channel chan="#chan1" dbname="chan.db">
+		<Channel chan="#chan1">
 		    <Modules>
 		      <Upload>
 		        <UploadDir>/path/to/uploads/</UploadDir>
@@ -18,7 +18,7 @@
 		    </Modules>
   		</Channel>
 
-  		<Channel chan="#chan2" dbname="chan.db">
+  		<Channel chan="#chan2">
    			<Modules>
 				<Upload>
 			    	<UploadDir></UploadDir>/path/to/uploads/</UploadDir>
