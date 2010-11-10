@@ -34,7 +34,7 @@ public class Operator implements JoinListener, NickChangeListener {
 			SAXBuilder saxBuilder = new SAXBuilder();
 			Document jdomDocument = saxBuilder.build(xmlDocument);
 
-			Element channelsNode = jdomDocument.getRootElement();
+			Element channelsNode = jdomDocument.getRootElement().getChild("Channels");
 
 			List<Element> channelNodes = channelsNode.getChildren();
 
@@ -88,10 +88,11 @@ public class Operator implements JoinListener, NickChangeListener {
 		// all right, this looks a bit complicated but is really very easy:
 		// first check if the joining user is one to be oped
 
-		String[] chans = (String[]) channels.keySet().toArray(); //Get an array of all the channels
+		Object[] chans =  channels.keySet().toArray(); //Get an array of all the channels
 
 
-		for(String channel : chans){ //Iterate over all channels
+		for(Object channelTemp : chans){ //Iterate over all channels
+			String channel = (String)channelTemp;
 			for(UserMask op : channels.get(channel)) { //Get all ops for the channel
 				// if this is a user to be oped...
 				if(op.is(nick)) {

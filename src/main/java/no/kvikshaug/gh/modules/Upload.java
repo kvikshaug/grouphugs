@@ -42,7 +42,7 @@ public class Upload implements TriggerListener {
 	    	SAXBuilder saxBuilder = new SAXBuilder();
 			Document jdomDocument = saxBuilder.build(xmlDocument);
         	
-			Element channelsNode = jdomDocument.getRootElement();
+			Element channelsNode = jdomDocument.getRootElement().getChild("Channels");
 			
 			List<Element> channelNodes = channelsNode.getChildren();
 			
