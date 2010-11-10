@@ -29,15 +29,15 @@ public class Define implements TriggerListener {
         try {
             answer = Define.search(message);
         } catch(IOException e) {
-            Grouphug.getInstance().sendMessage("The intartubes seems to be clogged up (IOException).");
+            Grouphug.getInstance().sendMessageChannel(channel, "The intartubes seems to be clogged up (IOException).");
             System.err.println(e.getMessage()+"\n"+e.getCause());
             return;
         }
 
         if(answer == null)
-            Grouphug.getInstance().sendMessage("No definition found for "+message+".");
+            Grouphug.getInstance().sendMessageChannel(channel, "No definition found for "+message+".");
         else
-            Grouphug.getInstance().sendMessage(Web.entitiesToChars(answer));
+            Grouphug.getInstance().sendMessageChannel(channel, Web.entitiesToChars(answer), true);
     }
 
     public static String search(String query) throws IOException {

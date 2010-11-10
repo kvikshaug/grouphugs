@@ -54,7 +54,7 @@ public class URLCatcher implements MessageListener {
                     title = title.concat(" (...)");
                 }
 
-                Grouphug.getInstance().sendMessage("Title: " + title);
+                Grouphug.getInstance().sendMessageChannel(channel, "Title: " + title);
             }
         }
     }

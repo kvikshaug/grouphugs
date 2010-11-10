@@ -53,18 +53,22 @@ public class WordCount implements TriggerListener, MessageListener {
             System.err.println("WordCount startup error: SQL is unavailable!");
         }
     }
-    public void addWords(String sender, String message) {
+    public void addWords(String channel, String sender, String message) {
         // This method to count words should be more or less failsafe:
         int newWords = message.trim().replaceAll(" {2,}+", " ").split(" ").length;
 
         try{
-            Object[] row = sqlHandler.selectSingle("SELECT id, words, `lines` FROM "+WORDS_DB+" WHERE nick='"+sender+"';");
+        	List<String> params = new ArrayList<String>();
+            params.add(sender);
+            params.add(channel);
+            Object[] row = sqlHandler.selectSingle("SELECT id, words, `lines` FROM "+WORDS_DB+" WHERE nick=? AND channel=?;", params);
             if(row == null) {
-                List<String> params = new ArrayList<String>();
+                params = new ArrayList<String>();
                 params.add(sender);
                 params.add(newWords + "");
                 params.add(SQL.dateToSQLDateTime(new Date()));
-                sqlHandler.insert("INSERT INTO "+WORDS_DB+" (nick, words, `lines`, since) VALUES ('?', '?', '1', '?');", params);
+                params.add(channel);
+                sqlHandler.insert("INSERT INTO "+WORDS_DB+" (nick, words, `lines`, since, channel) VALUES (?, ?, '1', ?, ?);", params);
             } else {
                 long existingWords = ((Integer)row[1]);
                 long existingLines = ((Integer)row[2]);
@@ -74,38 +78,39 @@ public class WordCount implements TriggerListener, MessageListener {
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             e.printStackTrace();
-            bot.sendMessage("Sorry, unable to update WordCounter DB; an SQL error occured.");
+            bot.sendMessageChannel(channel, "Sorry, unable to update WordCounter DB; an SQL error occured.");
         }
     }
 
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
         if(!message.startsWith(Grouphug.MAIN_TRIGGER + TRIGGER_REMOVE) || !message.endsWith(sender)) {
-            addWords(sender, message);
+            addWords(channel, sender, message);
         }
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         if(trigger.equals(TRIGGER)) {
-            print(message);
+            print(channel, message);
         } else if(trigger.equals(TRIGGER_TOP)) {
-            showScore(true);
+            showScore(channel, true);
         } else if(trigger.equals(TRIGGER_BOTTOM)) {
-            showScore(false);
+            showScore(channel, false);
         } else if(trigger.equals(TRIGGER_REMOVE)) {
             if(!sender.equalsIgnoreCase(message)) {
-                bot.sendMessage("Sorry, as a safety precaution, this function can only be used " +
+                bot.sendMessageChannel(channel, "Sorry, as a safety precaution, this function can only be used " +
                         "by a user with the same nick as the one that's being removed.");
             } else {
                 try {
                     List<String> params = new ArrayList<String>();
                     params.add(message);
-                    if(sqlHandler.delete("delete from "+WORDS_DB+" where nick=?;", params) == 0) {
-                        bot.sendMessage("DB reports that no such nick has been recorded.");
+                    params.add(channel);
+                    if(sqlHandler.delete("delete from "+WORDS_DB+" where nick=? AND channel=?;", params) == 0) {
+                        bot.sendMessageChannel(channel, "DB reports that no such nick has been recorded.");
                     } else {
-                        bot.sendMessage(sender+", you now have no words counted.");
+                        bot.sendMessageChannel(channel, sender+", you now have no words counted.");
                     }
                 } catch(SQLException ex) {
-                    bot.sendMessage("Crap, SQL barfed on me. Check the logs if you wanna know why.");
+                    bot.sendMessageChannel(channel, "Crap, SQL barfed on me. Check the logs if you wanna know why.");
                     System.err.println(ex);
                     ex.printStackTrace(System.err);
                 }
@@ -113,7 +118,7 @@ public class WordCount implements TriggerListener, MessageListener {
         }
     }
 
-    private void showScore(boolean top) {
+    private void showScore(String channel, boolean top) {
         String reply;
         if(top) {
             reply = "The biggest losers are:\n";
@@ -121,12 +126,14 @@ public class WordCount implements TriggerListener, MessageListener {
             reply = "The laziest idlers are:\n";
         }
         try {
-            String query = ("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" ORDER BY words ");
+        	List<String> params = new ArrayList<String>();
+            params.add(channel);
+            String query = ("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE channel=? ORDER BY words");
             if(top) {
-                query += "DESC ";
+                query += " DESC";
             }
-            query += "LIMIT "+LIMIT+";";
-            List<Object[]> rows = sqlHandler.select(query);
+            query += " LIMIT "+LIMIT+";";
+            List<Object[]> rows = sqlHandler.select(query, params);
             int place = 1;
             for(Object[] row : rows) {
                 long words = ((Integer)row[2]);
@@ -149,22 +156,25 @@ public class WordCount implements TriggerListener, MessageListener {
             } else {
                 reply += "Lazy bastards...";
             }
-            bot.sendMessage(reply);
+            bot.sendMessageChannel(channel, reply);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.sendMessage("Sorry, an SQL error occured.");
+            bot.sendMessageChannel(channel, "Sorry, an SQL error occured.");
         } catch(ParseException e) {
             System.err.println("Unable to parse the SQL datetime!");
-            bot.sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
+            bot.sendMessageChannel(channel, "Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
         }
     }
 
-    private void print(String message){
+    private void print(String channel, String message){
         try{
-            Object[] row = sqlHandler.selectSingle("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick LIKE'"+ message +"';");
+        	List<String> params = new ArrayList<String>();
+        	params.add(message);
+            params.add(channel);
+            Object[] row = sqlHandler.selectSingle("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick LIKE ? AND channel=?;", params);
 
             if(row == null) {
-                bot.sendMessage(message + " doesn't have any words counted.");
+                bot.sendMessageChannel(channel, message + " doesn't have any words counted.");
             } else {
                 long words = ((Integer)row[2]);
                 long lines = ((Integer)row[3]);
@@ -175,7 +185,7 @@ public class WordCount implements TriggerListener, MessageListener {
                 double lpd = (double)lines / days;
                 DecimalFormat sf = new DecimalFormat("0.0");
 
-                bot.sendMessage(message + " has uttered "+words+ " words in "+lines+" lines over " + days + " days ("+
+                bot.sendMessageChannel(channel, message + " has uttered "+words+ " words in "+lines+" lines over " + days + " days ("+
                         sf.format(wpl) + " wpl, " +
                         sf.format(wpd) + " wpd, " +
                         sf.format(lpd) + " lpd)");
@@ -183,10 +193,10 @@ public class WordCount implements TriggerListener, MessageListener {
 
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.sendMessage("Sorry, unable to fetch WordCount data; an SQL error occured.");
+            bot.sendMessageChannel(channel, "Sorry, unable to fetch WordCount data; an SQL error occured.");
         } catch(ParseException e) {
             System.err.println("Unable to parse the SQL datetime!");
-            bot.sendMessage("Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
+            bot.sendMessageChannel(channel, "Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
         }
     }
 }

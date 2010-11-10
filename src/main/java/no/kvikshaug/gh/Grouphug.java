@@ -1,11 +1,9 @@
 package no.kvikshaug.gh;
 
-import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-import org.jdom.xpath.XPath;
 import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
 import org.jibble.pircbot.PircBot;
@@ -43,7 +41,8 @@ import java.util.List;
 public class Grouphug extends PircBot {
 
     // Channel and server
-    public static String CHANNEL = "#grouphugs";
+    public List<String> CHANNELS = new ArrayList<String>();
+    
     public static final String SERVER = "irc.inet.tele.dk";
 
     // The trigger characters (as Strings since startsWith takes String)
@@ -82,7 +81,7 @@ public class Grouphug extends PircBot {
         // Old reboot/reload functions - this is strictly not necessary, but maybe these
         // should be reimplemented properly sometime?
         if(message.equals("!reboot") || message.equals("!reload")) {
-            bot.sendMessage("Sorry, this functionality has been disabled. Patches are welcome though :)");
+            bot.sendMessageChannel(channel, "Sorry, this functionality has been disabled. Patches are welcome though :)");
             return;
         }
 
@@ -99,7 +98,7 @@ public class Grouphug extends PircBot {
 
             // But not for everyone
             if(spamOK && (sender.contains("icc") || login.contains("icc"))) {
-                sendMessage(CHANNEL, "icc, you are not allowed to use the spam trigger.");
+                sendMessageChannel(channel, "icc, you are not allowed to use the spam trigger.");
                 return;
             }
 
@@ -136,7 +135,7 @@ public class Grouphug extends PircBot {
     protected void onKick(String channel, String kickerNick, String kickerLogin, String kickerHostname, String recipientNick, String reason) {
         if (recipientNick.equalsIgnoreCase(getNick())) {
             joinChannel(channel);
-            sendMessage(CHANNEL, "sry :(");
+            sendMessageChannel(channel, "sry :(");
         }
     }
 
@@ -176,11 +175,13 @@ public class Grouphug extends PircBot {
             System.err.flush();
             System.exit(-1);
         }
-        this.joinChannel(Grouphug.CHANNEL);
+        for (String channel : this.CHANNELS) {
+        	this.joinChannel(channel);
+		}
     }
-
+    
     /**
-     * Sends a message to the main channel.
+     * Sends a message to the specified channel.
      *
      * The message will NOT be protected against spam.
      *
@@ -188,73 +189,11 @@ public class Grouphug extends PircBot {
      * each line is sent to the pircbot sendMessage function, which adds the lines to the outgoing message queue
      * and sends them at the earliest possible opportunity.
      *
+     * @param channel - The channel where the message should be sent
      * @param message - The message to send
      */
-    public void sendMessage(String message) {
-        sendMessage(message, false);
-    }
-
-    /**
-     * Sends a message to the main channel.
-     *
-     * If verifySpam is true, the message will not be sent if it is longer than Grouphug.MAX_SPAM_LINES,
-     * but instead replaced with a message telling the user to use the spam trigger (@) instead.
-     *
-     * verifySpam should not be used if the output is random, because then using the spam trigger obviously
-     * won't resend the message that was too long.
-     *
-     * The messages are splitted by maximum line number characters and by the newline character (\n), then
-     * each line is sent to the pircbot sendMessage function, which adds the lines to the outgoing message queue
-     * and sends them at the earliest possible opportunity.
-     *
-     * @param message - The message to send
-     * @param verifySpam - true if verifying that spamming is ok before sending large messages
-     */
-    public void sendMessage(String message, boolean verifySpam) {
-
-        // First create a list of the lines we will send separately.
-        List<String> lines = new ArrayList<String>();
-
-        // This will be used for searching.
-        int index;
-
-        // Remove all carriage returns.
-        for(index = message.indexOf('\r'); index != -1; index = message.indexOf('\r'))
-            message = message.substring(0, index) + message.substring(index + 1);
-
-        // Split all \n into different lines
-        for(index = message.indexOf('\n'); index != -1; index = message.indexOf('\n')) {
-            lines.add(message.substring(0, index).trim());
-            message = message.substring(index + 1);
-        }
-        lines.add(message.trim());
-
-        // If the message is longer than max line chars, separate them
-        for(int i = 0; i<lines.size(); i++) {
-            while(lines.get(i).length() > Grouphug.MAX_LINE_CHARS) {
-                String line = lines.get(i);
-                lines.remove(i);
-                lines.add(i, line.substring(0, Grouphug.MAX_LINE_CHARS).trim());
-                lines.add(i+1, line.substring(Grouphug.MAX_LINE_CHARS).trim());
-            }
-        }
-
-        // Remove all empty lines
-        for(int i = 0; i<lines.size(); i++) {
-            if(lines.get(i).equals(""))
-                lines.remove(i);
-        }
-
-        // Now check if we are spamming the channel, and stop if the spam-trigger isn't used
-        if(verifySpam && !spamOK && lines.size() > MAX_SPAM_LINES) {
-            sendMessage(Grouphug.CHANNEL, "This would spam the channel with "+lines.size()+" lines, replace "+MAIN_TRIGGER+" with "+SPAM_TRIGGER+" if you really want that.");
-            return;
-        }
-
-        // Finally send all the lines to the channel
-        for(String line : lines) {
-            this.sendMessage(Grouphug.CHANNEL, line);
-        }
+    public void sendMessageChannel(String channel,String message) {
+    	sendMessageChannel(channel, message, false);
     }
     
     /**
@@ -274,7 +213,7 @@ public class Grouphug extends PircBot {
      * @param message - The message to send
      * @param verifySpam - true if verifying that spamming is ok before sending large messages
      */
-    public void sendMessage(String receiver, String message, boolean verifySpam) {
+    public void sendMessageChannel(String receiver, String message, boolean verifySpam) {
 
         // First create a list of the lines we will send separately.
         List<String> lines = new ArrayList<String>();
@@ -331,23 +270,23 @@ public class Grouphug extends PircBot {
 	    	SAXBuilder saxBuilder = new SAXBuilder();
 			Document jdomDocument = saxBuilder.build(xmlDocument);
 			
-			Element channelsNode = jdomDocument.getRootElement();
+			Element botNode = jdomDocument.getRootElement();
 			
-			List<Element> channelNodes = channelsNode.getChildren();
+			List<Element> nicks = botNode.getChild("Nicks").getChildren();
+			
+			for(Element nick: nicks){
+				String nickString = (String)nick.getValue();
+				
+				if(nickString.length() > 9 ){
+					nickString = nickString.substring(0, 9);
+				}
+				this.nicks.add(nickString);
+			}
+			
+			List<Element> channelNodes = botNode.getChild("Channels").getChildren();
 			
 			for (Element e : channelNodes) {
-				Grouphug.CHANNEL = e.getAttribute("chan").getValue();
-				Element child = e.getChild("Nicks");
-				List<Element> chanNicks = child.getChildren();
-				
-				for(Element nick: chanNicks){
-					String nickString = (String)nick.getValue();
-					
-					if(nickString.length() > 9 ){
-						nickString = nickString.substring(0, 9);
-					}
-					nicks.add(nickString);
-				}
+				this.CHANNELS.add(e.getAttribute("chan").getValue());
 			}
     	} catch (JDOMException e) {
 			e.printStackTrace();
@@ -390,8 +329,10 @@ public class Grouphug extends PircBot {
             System.exit(-1);
         }
 
-        // Join the channel
-        bot.joinChannel(CHANNEL);
+        // Join the channels
+        for (String channel : bot.CHANNELS) {
+        	bot.joinChannel(channel);
+		}
     }
 
     /**

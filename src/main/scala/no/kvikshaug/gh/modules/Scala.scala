@@ -9,7 +9,7 @@ class Scala(val handler: ModuleHandler) extends TriggerListener {
   System.out.println("Scala module registered.")
 
   def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String) = {
-    bot.sendMessage("Hi from Scala!")
+    bot.sendMessageChannel(channel, "Hi from Scala!")
   }
 }
 

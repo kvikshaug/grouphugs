@@ -1,7 +1,7 @@
 package no.kvikshaug.gh.modules
 
 // TODO: handle dates and time with Joda, and use this wrapper: http://github.com/jorgeortiz85/scala-time
-case class TrackingItem(dbId: Int, trackingId: String, owner: String, packages: java.util.List[TrackingItemPackage]) {
+case class TrackingItem(dbId: Int, trackingId: String, owner: String, packages: java.util.List[TrackingItemPackage], channel: String) {
   def totalStatus(): String = {
     if(packages.size == 1) {
       "Status: " + packages.get(0).description + ", " + packages.get(0).dateTime

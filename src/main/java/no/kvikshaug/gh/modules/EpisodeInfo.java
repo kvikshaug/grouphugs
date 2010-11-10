@@ -28,11 +28,12 @@ public class EpisodeInfo implements TriggerListener  {
     
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         if(trigger.equals(TRIGGER)) {
-            print(message);
+            String reply = find(message);
+            Grouphug.getInstance().sendMessageChannel(channel, reply, true);
         }
     }
 
-    private void print(String message){
+    private String find(String message){
     	
     	message = message.replace(" ", "%20");
     	String inputLine, showName = "", latestEp = "", nextEp = "";
@@ -59,16 +60,19 @@ public class EpisodeInfo implements TriggerListener  {
             }
             	
         	in.close();
-        	Grouphug.getInstance().sendMessage(""+Colors.BOLD + "Show: "+Colors.NORMAL+ showName + 
-        										Colors.BOLD + " Latest episode: "+ Colors.NORMAL+ latestEp + 
-        										Colors.BOLD + " Next episode: " +Colors.NORMAL+ nextEp);
+        	String reply =  ""+Colors.BOLD + "Show: "+Colors.NORMAL+ showName + 
+        		Colors.BOLD + " Latest episode: "+ Colors.NORMAL+ latestEp + 
+        		Colors.BOLD + " Next episode: " +Colors.NORMAL+ nextEp;
 
+        	return reply;
+        	
         } catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+	
+		return "Something went wrong";
     }
 
 }

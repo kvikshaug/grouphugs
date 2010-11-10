@@ -33,13 +33,13 @@ public class Fml implements TriggerListener {
             xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
             Element element = (Element)xpath.selectSingleNode(doc);
             for(Object childElement : element.getChildren()) {
-                bot.sendMessage(((Element)childElement).getText());
+                bot.sendMessageChannel(channel, ((Element)childElement).getText());
             }
         } catch (IOException e) {
-            bot.sendMessage("Omg IOException.");
+            bot.sendMessageChannel(channel, "Omg IOException.");
             e.printStackTrace();
         } catch (JDOMException e) {
-            bot.sendMessage("Omg omg JDOMException");
+            bot.sendMessageChannel(channel, "Omg omg JDOMException");
             e.printStackTrace();
         }
     }

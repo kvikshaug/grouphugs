@@ -52,21 +52,21 @@ public class SnowReport implements TriggerListener {
                 }
             }
             if(!found) {
-                bot.sendMessage("Sorry, I couldn't find any location named '"+ message +"' on skiinfo.");
+                bot.sendMessageChannel(channel, "Sorry, I couldn't find any location named '"+ message +"' on skiinfo.");
                 return;
             }
         } catch (IOException e) {
             e.printStackTrace();
-            bot.sendAction(Grouphug.CHANNEL, "barfs up an IOException.");
+            bot.sendAction(channel, "barfs up an IOException.");
         } catch (JDOMException e) {
             e.printStackTrace();
-            bot.sendMessage("Sorry, JDOM threw an exception. Probably not my fault.");
+            bot.sendMessageChannel(channel, "Sorry, JDOM threw an exception. Probably not my fault.");
         } catch (UnableToParseException e) {
             e.printStackTrace();
-            bot.sendMessage("Sorry, I couldn't parse vital information for the report.");
+            bot.sendMessageChannel(channel, "Sorry, I couldn't parse vital information for the report.");
         }
 
-        bot.sendMessage(finalReply.toString());
+        bot.sendMessageChannel(channel, finalReply.toString());
     }
 
     private String parseSnowReport(Document document)

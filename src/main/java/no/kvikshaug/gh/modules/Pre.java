@@ -20,6 +20,7 @@ public class Pre implements TriggerListener, Runnable {
 
     private Grouphug bot;
     private String message;
+    private String channel;
 
     public Pre(ModuleHandler handler) {
         bot = Grouphug.getInstance();
@@ -31,8 +32,9 @@ public class Pre implements TriggerListener, Runnable {
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         if(message.equals("")) {
-            bot.sendMessage("Searh for what?");
+            bot.sendMessageChannel(channel, "Search for what?");
         } else {
+        	this.channel = channel; //Ugly :<
             // perform all searches in a different thread because doopes.com is
             // usually unstable and may take a loooong time to reply
             this.message = message;
@@ -49,7 +51,7 @@ public class Pre implements TriggerListener, Runnable {
 
             Object node = xpath.selectSingleNode(doc);
             if(node == null) {
-                bot.sendMessage("Found no release containing '"+message+"'.");
+                bot.sendMessageChannel(channel, "Found no release containing '"+message+"'.");
                 return;
             }
 
@@ -81,16 +83,16 @@ public class Pre implements TriggerListener, Runnable {
             releasedTime.append(rp.getMinutes()).append("m ");
             releasedTime.append(rp.getSeconds()).append("s");
 
-            bot.sendMessage(data[2].trim() + ": " + releasedTime.toString()+" ago in "+data[1].trim().toUpperCase());
+            bot.sendMessageChannel(channel, data[2].trim() + ": " + releasedTime.toString()+" ago in "+data[1].trim().toUpperCase());
         } catch (IOException e) {
             e.printStackTrace();
-            bot.sendMessage("IOException :/");
+            bot.sendMessageChannel(channel, "IOException :/");
         } catch (JDOMException e) {
             e.printStackTrace();
-            bot.sendMessage("zomg JDOMException :/");
+            bot.sendMessageChannel(channel, "zomg JDOMException :/");
         } catch (ParseException e) {
             e.printStackTrace();
-            bot.sendMessage("zomg, the date format was unparseable :/");
+            bot.sendMessageChannel(channel, "zomg, the date format was unparseable :/");
         }
     }
 }

@@ -30,7 +30,7 @@ public class GoogleFight implements TriggerListener {
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         if(!message.contains(TRIGGER_VS)) {
-            Grouphug.getInstance().sendMessage(sender+", try "+Grouphug.MAIN_TRIGGER+Grouphug.HELP_TRIGGER+" "+TRIGGER_HELP);
+            Grouphug.getInstance().sendMessageChannel(channel, sender+", try "+Grouphug.MAIN_TRIGGER+Grouphug.HELP_TRIGGER+" "+TRIGGER_HELP);
             return;
         }
 
@@ -41,12 +41,12 @@ public class GoogleFight implements TriggerListener {
             String hits1 = searchResults(query1);
             String hits2 = searchResults(query2);
 
-            Grouphug.getInstance().sendMessage(query1+": "+hits1+"\n"+query2+": "+hits2);
+            Grouphug.getInstance().sendMessageChannel(channel, query1+": "+hits1+"\n"+query2+": "+hits2);
         } catch(IOException e) {
-            Grouphug.getInstance().sendMessage("Sorry, the intartubes seems to be clogged up (IOException)");
+            Grouphug.getInstance().sendMessageChannel(channel, "Sorry, the intartubes seems to be clogged up (IOException)");
             e.printStackTrace();
         } catch (JDOMException e) {
-            Grouphug.getInstance().sendMessage("Woopsie, I caught a JDOMException.");
+            Grouphug.getInstance().sendMessageChannel(channel, "Woopsie, I caught a JDOMException.");
             e.printStackTrace();
         }
     }
