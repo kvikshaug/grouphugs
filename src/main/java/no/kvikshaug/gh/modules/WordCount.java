@@ -126,9 +126,9 @@ public class WordCount implements TriggerListener, MessageListener {
             params.add(channel);
             String query = ("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE channel=? ORDER BY words");
             if(top) {
-                query += "DESC ";
+                query += " DESC";
             }
-            query += "LIMIT "+LIMIT+";";
+            query += " LIMIT "+LIMIT+";";
             List<Object[]> rows = sqlHandler.select(query, params);
             int place = 1;
             for(Object[] row : rows) {
