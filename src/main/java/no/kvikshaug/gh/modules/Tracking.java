@@ -251,8 +251,8 @@ public class Tracking implements TriggerListener, Runnable {
         int result = TrackingXMLParser.track(item);
         if(result == CHANGED) {
             if(item.statusCode() == STATUS_DELIVERED && item.channel().equals(channel)) {
-                bot.sendMessageChannel(channel(), item.trackingId() + " has been delivered. Removing it from my list.");
-                bot.sendMessageChannel(channel(), item.totalStatus(), true);
+                bot.sendMessageChannel(channel, item.trackingId() + " has been delivered. Removing it from my list.");
+                bot.sendMessageChannel(channel, item.totalStatus(), true);
                 removeItem(item);
                 bot.sendMessageChannel(channel, "Now tracking " + items.size() + " packages.");
             } else if(item.statusCode() == STATUS_RETURNED) {
