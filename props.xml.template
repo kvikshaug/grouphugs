@@ -21,7 +21,7 @@
     <Channel chan="#chan2">
       <Modules>
         <Upload>
-          <UploadDir></UploadDir>/path/to/uploads/</UploadDir>
+          <UploadDir>/path/to/uploads/</UploadDir>
           <PublicURL>http://url/to/uploads/</PublicURL>
         </Upload>
         <Operator>
