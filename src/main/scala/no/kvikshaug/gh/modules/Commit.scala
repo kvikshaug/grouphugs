@@ -3,8 +3,9 @@ package no.kvikshaug.gh.modules
 import scala.xml._
 import java.net.URL
 
-import listeners.TriggerListener
-import util.Web
+import no.kvikshaug.gh.listeners.TriggerListener
+import no.kvikshaug.gh.util.Web
+import no.kvikshaug.gh.{Grouphug, ModuleHandler}
 
 class Commit(val handler: ModuleHandler) extends TriggerListener {
 

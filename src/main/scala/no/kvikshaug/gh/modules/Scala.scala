@@ -1,6 +1,7 @@
 package no.kvikshaug.gh.modules
 
-import listeners.TriggerListener
+import no.kvikshaug.gh.listeners.TriggerListener
+import no.kvikshaug.gh.{Grouphug, ModuleHandler}
 
 class Scala(val handler: ModuleHandler) extends TriggerListener {
 
