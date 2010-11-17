@@ -22,8 +22,6 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
-import com.sun.org.apache.bcel.internal.generic.NEW;
-
 public class Upload implements TriggerListener {
 
     private static final String TRIGGER_HELP = "upload";
