@@ -8,3 +8,4 @@ artifacts:
     commonsio: commons-io:commons-io:jar:1.4
     joda: joda-time:joda-time:jar:1.6
     scalalib: org.scala-lang:scala-library:jar:2.8.0
+    scalajcollection: org.scalaj:scalaj-collection_2.8.0:jar:1.0

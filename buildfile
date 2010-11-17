@@ -28,7 +28,7 @@ define "gh" do
   compile.options.target = '1.5'
 
   # compile against maven artifacts
-  compile.with artifacts(:sqlite, :pircbot, :jdom, :tagsoup, :jaxen, :jchardet, :commonsio, :joda, :scalalib)
+  compile.with artifacts(:sqlite, :pircbot, :jdom, :tagsoup, :jaxen, :jchardet, :commonsio, :joda, :scalalib, :scalajcollection)
 
 
   ############################################################################
@@ -36,5 +36,5 @@ define "gh" do
   ############################################################################
   # package against maven artifacts
   package(:jar).with :manifest => {"Main-Class" => "no.kvikshaug.gh.Grouphug",
-                                   "Class-Path" => artifacts(:sqlite, :pircbot, :jdom, :tagsoup, :jaxen, :jchardet, :commonsio, :joda, :scalalib).each(&:invoke).map(&:name).join(" ")  }
+                                   "Class-Path" => artifacts(:sqlite, :pircbot, :jdom, :tagsoup, :jaxen, :jchardet, :commonsio, :joda, :scalalib, :scalajcollection).each(&:invoke).map(&:name).join(" ")  }
 end
