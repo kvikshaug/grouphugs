@@ -44,7 +44,6 @@ class Tracking(moduleHandler: ModuleHandler) extends TriggerListener /*with Runn
       items = sqlHandler.select(
         "select trackingId, status, statusCode, owner, channel from " + dbName + ";"
       ).asScala.map { row =>
-      println(row(0).toString + row(1).toString + row(2).toString + row(3).toString + row(4).toString)
         Package(
           row(0).asInstanceOf[String],
           row(1).asInstanceOf[String],
