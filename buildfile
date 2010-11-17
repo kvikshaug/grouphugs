@@ -6,7 +6,7 @@ VERSION_NUMBER = "1.0.0"
 GROUP = "gh"
 COPYRIGHT = "copyleft"
 
-Buildr.settings.build['scala.version'] = "2.7.7"
+Buildr.settings.build['scala.version'] = "2.8.0"
 require 'buildr/scala'
 
 # Specify Maven 2.0 remote repositories here, like this:
