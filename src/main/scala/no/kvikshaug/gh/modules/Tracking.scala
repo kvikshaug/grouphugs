@@ -145,9 +145,7 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
   var failCount = 0
   def run {
     // wait until the bot has connected and is ready
-    println("sleeping...")
     Thread.sleep(30 * 1000)
-    println("done sleeping...")
     loop {
       this ! items
       if(failCount >= 5) {
@@ -165,7 +163,6 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
     loop {
       react {
         case itemList: List[Package] => itemList foreach { i =>
-          println("woop, updating!")
           try {
             val status = TrackingXMLParser.track(i)
             if(status._1) {
