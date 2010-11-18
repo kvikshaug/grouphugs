@@ -12,15 +12,18 @@ import java.sql.SQLException;
 import scalaj.collection.Imports._
 import scala.collection.immutable.List
 import scala.collection.JavaConversions
+import scala.actors.Actor
+import scala.actors.Actor._
 
-        // TODO bot.sendMessageChannel(channel, "Note: This package contains >1 items.")
-class Tracking(moduleHandler: ModuleHandler) extends TriggerListener /*with Runnable*/ {
+class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener with Runnable {
 
     var sqlHandler: SQLHandler = null
     val bot = Grouphug.getInstance
     var items: List[Package] = Nil
     val dbName = "tracking"
-    val pollTime = 30 // minutes
+    val pollingTime = 30 // minutes
+    new Thread(this).start
+    start
 
     val TRIGGER = "track";
     val TRIGGER_FORCE = "trackpoll";
@@ -29,6 +32,7 @@ class Tracking(moduleHandler: ModuleHandler) extends TriggerListener /*with Runn
     val TRIGGER_HELP = "track";
 
     moduleHandler.addTriggerListener(TRIGGER, this)
+    moduleHandler.addTriggerListener(TRIGGER_FORCE, this)
     moduleHandler.addTriggerListener(TRIGGER_LIST, this)
     moduleHandler.addTriggerListener(TRIGGER_DEL, this)
     moduleHandler.registerHelp(TRIGGER_HELP, "Posten.no package tracking. I will keep track of the package by " +
@@ -49,7 +53,6 @@ class Tracking(moduleHandler: ModuleHandler) extends TriggerListener /*with Runn
           row(4).asInstanceOf[String])
       }.toList
 
-      // new Thread(this).start();
       println("Package tracking module loaded.")
     } catch {
       case e: SQLUnavailableException => println("Package tracking module unable to load because SQL is unavailable.")
@@ -58,7 +61,7 @@ class Tracking(moduleHandler: ModuleHandler) extends TriggerListener /*with Runn
     }
 
     def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String) = trigger match {
-      case TRIGGER_FORCE => // TODO send actor message or something?
+      case TRIGGER_FORCE => bot.sendMessageChannel(channel, "Forcing updates."); this ! items
       case TRIGGER_LIST  => listPackages(channel)
       case TRIGGER_DEL   => removePackage(channel, message)
       case TRIGGER => message match {
@@ -139,98 +142,75 @@ class Tracking(moduleHandler: ModuleHandler) extends TriggerListener /*with Runn
       }
     }
 
-    /**
-     * This is the thread which handles waiting and polling of packages that are being tracked.
-     */
-    /*
-    public void run() {
-        int fails = 0;
-        // we're started before the bot has connected, so sleep a while first
-        try {
-            Thread.sleep(30 * 1000);
-        } catch(InterruptedException ex) {
-            // just continue
+  var failCount = 0
+  def run {
+    // wait until the bot has connected and is ready
+    println("sleeping...")
+    Thread.sleep(30 * 1000)
+    println("done sleeping...")
+    loop {
+      this ! items
+      if(failCount >= 5) {
+        failCount = 0
+        for(channel <- bot.CHANNELS) {
+          bot.sendMessageChannel(channel, "The package tracking module has now failed 5 times in a row. " +
+            "If this continues, you might want to check the logs and your package status manually.")
         }
-        Vector<TrackingItem> itemsToRemove = new Vector<TrackingItem>();
-        while(true) {
-            try {
-                threadWorking = true;
-                itemsRemaining = items.size();
-                for(TrackingItem ti : items) {
-                    try {
-                        if(TrackingXMLParser.track(ti) == CHANGED) {
-                            int statusCode = ti.statusCode();
-                            if(statusCode == STATUS_DELIVERED) {
-                                bot.sendMessageChannel(ti.channel(), ti.owner() + " has just picked up his/her package " + ti.trackingId() + ":");
-                                bot.sendMessageChannel(ti.channel(), ti.totalStatus(), true);
-                                String channel = ti.channel();
-                                itemsToRemove.add(ti);
-                                bot.sendMessageChannel(channel, "Removing this one from my list. Now tracking " +
-                                        (items.size() - itemsToRemove.size()) + " packages.");
-                            } else if(statusCode == STATUS_READY_FOR_PICKUP) {
-                                bot.sendMessageChannel(ti.channel(), ti.owner() + ": Package " + ti.trackingId() + " is ready for pickup!");
-                                bot.sendMessageChannel(ti.channel(), ti.totalStatus(), true);
-                            } else if(statusCode == STATUS_RETURNED) {
-                                bot.sendMessageChannel(ti.channel(), ti.owner() + ": Package " + ti.trackingId() + " has been returned to sender.");
-                                bot.sendMessageChannel(ti.channel(), ti.totalStatus(), true);
-                                String channel = ti.channel();
-                                itemsToRemove.add(ti);
-                                bot.sendMessageChannel(channel, "Removing this one from my list. Now tracking " +
-                                        (items.size() - itemsToRemove.size()) + " packages.");
-                            } else if(statusCode == STATUS_IN_TRANSIT) {
-                                bot.sendMessageChannel(ti.channel(), ti.owner() + ": Package " + ti.trackingId() + " has changed:");
-                                bot.sendMessageChannel(ti.channel(), ti.totalStatus(), true);
-                            } else if(statusCode == STATUS_NO_PACKAGES) {
-                                bot.sendMessageChannel(ti.channel(), ti.owner() + ": Package " + ti.trackingId() +
-                                        " has.. changed, but has no packages (kolli)? Wtf?");
-                                bot.sendMessageChannel(ti.channel(), ti.totalStatus(), true);
-                            }
-                            break;
-                        }
-                    } catch(FileNotFoundException ignored) {
-                        // ignored; this is thrown when we query for a non-existing tracking ID
-                    }
-                    // let's sleep a few seconds between each item and go easy on the web server
-                    try {
-                        Thread.sleep(5 * 1000);
-                    } catch(InterruptedException ex) {
-                        // continue
-                    }
-                }
-                for(TrackingItem toRemove : itemsToRemove) {
-                    removeItem(toRemove);
-                }
-                itemsToRemove.clear();
-                itemsRemaining--;
-                threadWorking = false;
-                fails = 0;
-            } catch(IOException ex) {
-                fails++;
-                ex.printStackTrace();
-            } catch (SQLException ex) {
-                fails++;
-                ex.printStackTrace();
-            } catch(Exception ex) {
-                fails++;
-                System.err.println("Tracking module thread caught an exception.");
-                System.err.println("I will pretend like nothing happened and try again soon, " +
-                        "let's hope it is recoverable.");
-                ex.printStackTrace();
-            }
-            if(fails > 5) {
-                fails = 0;
-                for (String channel: bot.CHANNELS){
-                	bot.sendMessageChannel(channel, "The package tracking module has now failed 5 times in a row. " +
-                	"If this continues, you might want to check the logs and your package status manually.");
-                	
-                }
-            }
-            try {
-                Thread.sleep(POLLING_TIME * 60 * 1000);
-            } catch(InterruptedException ex) {
-                // just continue
-            }
-        }
+      }
+      Thread.sleep(pollingTime * 60 * 1000)
     }
-    */
+  }
+
+  def act {
+    loop {
+      react {
+        case itemList: List[Package] => itemList foreach { i =>
+          println("woop, updating!")
+          try {
+            val status = TrackingXMLParser.track(i)
+            if(status._1) {
+              i.statusCode match {
+                case "DELIVERED" =>
+                  bot.sendMessageChannel(i.channel, i.owner + " has just picked up " + i.id + ":")
+                  bot.sendMessageChannel(i.channel, i.status)
+                  items = items.filterNot(_ == i)
+                  sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(i.id).asJava)
+                  bot.sendMessageChannel(i.channel, "Removing this one from my list. Now tracking " + items.size + " packages.")
+                case "RETURNED" =>
+                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has been returned to sender.")
+                  bot.sendMessageChannel(i.channel, i.status)
+                  items = items.filterNot(_ == i)
+                  sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(i.id).asJava)
+                  bot.sendMessageChannel(i.channel, "Removing this one from my list. Now tracking " + items.size + " packages.")
+                case "READY_FOR_PICKUP" =>
+                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " is ready for pickup!")
+                  bot.sendMessageChannel(i.channel, i.status)
+                  if(status._2 > 1) {
+                    bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
+                  }
+                case "IN_TRANSIT" =>
+                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has changed:")
+                  bot.sendMessageChannel(i.channel, i.status)
+                  if(status._2 > 1) {
+                    bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
+                  }
+                case "NO_PACKAGES" =>
+                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has changed without any packages (kolli)..?")
+                  bot.sendMessageChannel(i.channel, i.status)
+                case x =>
+                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has changed to '" + x + "', which I don't recognize!")
+                  bot.sendMessageChannel(i.channel, i.status)
+                  if(status._2 > 1) {
+                    bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
+                  }
+              }
+            }
+          } catch {
+            case e: FileNotFoundException => // ignore; this is a package which may not have been registered yet
+            case e => println("Tracking poller just failed: "); e.printStackTrace; failCount = failCount + 1
+          }
+        }
+      }
+    }
+  }
 }
