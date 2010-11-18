@@ -2,8 +2,9 @@ package no.kvikshaug.gh.modules
 
 import java.net.{URL, URLEncoder}
 
-import listeners.TriggerListener
-import util.Web
+import no.kvikshaug.gh.listeners.TriggerListener
+import no.kvikshaug.gh.util.Web
+import no.kvikshaug.gh.{Grouphug, ModuleHandler}
 
 class Translate(val handler: ModuleHandler) extends TriggerListener {
 
