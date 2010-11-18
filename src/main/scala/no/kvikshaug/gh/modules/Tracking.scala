@@ -43,12 +43,9 @@ class Tracking(moduleHandler: ModuleHandler) extends TriggerListener /*with Runn
       sqlHandler = SQLHandler.getSQLHandler
       items = sqlHandler.select(
         "select trackingId, status, statusCode, owner, channel from " + dbName + ";"
-      ).asScala.map { row =>
-        Package(
-          row(0).asInstanceOf[String],
-          row(1).asInstanceOf[String],
-          row(2).asInstanceOf[String],
-          row(3).asInstanceOf[String],
+      ).asScala.map { row => Package(
+          row(0).asInstanceOf[String], row(1).asInstanceOf[String],
+          row(2).asInstanceOf[String], row(3).asInstanceOf[String],
           row(4).asInstanceOf[String])
       }.toList
 
@@ -74,8 +71,8 @@ class Tracking(moduleHandler: ModuleHandler) extends TriggerListener /*with Runn
       if(items.size == 0) {
         bot.sendMessageChannel(channel, "No packages are being tracked. What's going on, are you all bankrupt?")
       }
-      items.filter(_.channel == channel).foreach { item =>
-        bot.sendMessageChannel(channel, item.id + " for " + item.owner + ": " + item.status)
+      items.filter(_.channel == channel).foreach {
+        item => bot.sendMessageChannel(channel, item.id + " for " + item.owner + ": " + item.status)
       }
     }
 
