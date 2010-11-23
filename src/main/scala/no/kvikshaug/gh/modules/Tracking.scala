@@ -133,9 +133,6 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
         bot.sendMessageChannel(channel, "Adding package " + id + " to tracking list.")
         bot.sendMessageChannel(channel, "Status: " + newItem.status)
       } catch {
-        case e: FileNotFoundException =>
-            bot.sendMessageChannel(channel, "Adding package " + id + " to tracking list.");
-            bot.sendMessageChannel(channel, "Status: Not found (but it might appear soon if it was recently added)")
         case e =>
           bot.sendMessageChannel(channel, "Oh no, I caught some horrible exception! Please check my logs. SQL/memory may or may not be synchronized.")
           e.printStackTrace
