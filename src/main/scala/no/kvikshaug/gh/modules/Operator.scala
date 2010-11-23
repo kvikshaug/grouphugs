@@ -15,5 +15,16 @@ case class UserMask(nick: String, login: String, hostname: String) {
   }
 }
 
-class Operator(handler: ModuleHandler) extends JoinListener with NickChangeListener
+class Operator(handler: ModuleHandler) extends JoinListener with NickChangeListener {
+
+  val bot = Grouphug.getInstance
+  handler.addJoinListener(this)
+  handler.addNickChangeListener(this)
+
+  val channels = (XML.loadFile("props.xml") \ "Channels" \ "Channel" toList).map { (x) =>
+    ((x \ "@chan").text -> (x \ "Modules" \ "Operator" \ "Nick").toList.map(_.text))
+  }.toMap
+
+  println("Operator module loaded.")
+}
 
