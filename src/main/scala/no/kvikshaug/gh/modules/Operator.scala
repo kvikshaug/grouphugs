@@ -36,5 +36,18 @@ class Operator(handler: ModuleHandler) extends JoinListener with NickChangeListe
     opIfInList(sender, login, hostname)
   }
 
+  def onNickChange(oldNick: String, login: String, hostname: String, newNick: String) {
+    // first check if it's me who's changing nick (can happen)
+    // hmm, could getNick() return the old nick if it for some reason isn't updated? just in case:
+    if(oldNick.equals(bot.getNick())) {
+        return
+    }
+    if(newNick.equals(bot.getNick())) {
+        return
+    }
+
+    opIfInList(newNick, login, hostname)
+  }
+
 }
 
