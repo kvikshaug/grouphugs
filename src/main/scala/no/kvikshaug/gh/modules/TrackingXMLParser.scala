@@ -17,7 +17,8 @@ object TrackingXMLParser {
 
   @throws(classOf[IOException])
   @throws(classOf[SQLException])
-  def track(item: Package) = {
+  // returns a tuple of ("Has the package changed?", "The number of packages in this item")
+  def track(item: Package): Tuple2[Boolean, Int] = {
     // load the xml
     val root = XML.load(Web.prepareEncodedBufferedReader(
       new URL("http://sporing.posten.no/sporing.xml?q=" + item.id)))
