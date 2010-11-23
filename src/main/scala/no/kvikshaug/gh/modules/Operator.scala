@@ -26,5 +26,15 @@ class Operator(handler: ModuleHandler) extends JoinListener with NickChangeListe
   }.toMap
 
   println("Operator module loaded.")
+
+  def onJoin(channel: String, sender: String, login: String, hostname: String) {
+    // first check if it's me who's joining
+    if(sender.equals(bot.getNick())) {
+        return
+    }
+
+    opIfInList(sender, login, hostname)
+  }
+
 }
 
