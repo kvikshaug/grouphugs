@@ -30,13 +30,6 @@ object TrackingXMLParser {
                  (e \ "OccuredAtDisplayTime").text.replaceAll("<.*?>", "") + " " +
                  (e \ "OccuredAtDisplayDate").text.replaceAll("<.*?>", "")
     val statusCode = (e \ "Status").text.replaceAll("<.*?>", "")
-/*      case "NO_PACKAGES"       => NoPackages
-      case "IN_TRANSIT"        => InTransit
-      case "READY_FOR_PICKUP"  => ReadyForPickup
-      case "NOTIFICATION_SENT" => NotificationSent
-      case "RETURNED"          => Returned
-      case "DELIVERED"         => Delivered
-      case x                   => Unknown(x) */
     val packageCount = (root \\ "PackageSet" \ "Package").size
 
     var changed = false
