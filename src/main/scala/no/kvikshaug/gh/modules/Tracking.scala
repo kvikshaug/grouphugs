@@ -192,7 +192,7 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
                     bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
                   }
                 case "NO_PACKAGES" =>
-                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has changed without any packages (kolli)..?")
+                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has suddenly lost its contents! You might want to check it manually.")
                   bot.sendMessageChannel(i.channel, i.status)
                 case x =>
                   bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has changed to '" + x + "', which I don't recognize!")
