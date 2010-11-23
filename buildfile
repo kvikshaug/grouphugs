@@ -26,6 +26,8 @@ define "gh" do
   ############################################################################
   # target java 5 (not 6, because scala cannot target java 6)
   compile.options.target = '1.5'
+  compile.options.deprecation = 'true'
+  compile.options.other = '-unchecked'
 
   # compile against maven artifacts
   compile.with artifacts(:sqlite, :pircbot, :jdom, :tagsoup, :jaxen, :jchardet, :commonsio, :joda, :scalalib, :scalajcollection)
