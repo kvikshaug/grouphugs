@@ -69,6 +69,8 @@ public class Grouphug extends PircBot {
     // Handles modules
     private static ModuleHandler moduleHandler;
 
+    public static final String configFile = "props.xml";
+
     // A static reference and getter to our bot
     private static Grouphug bot;
     public static Grouphug getInstance() {
@@ -236,7 +238,7 @@ public class Grouphug extends PircBot {
     public void parseConfig(){
         try {
 
-            File xmlDocument = new File("props.xml");
+            File xmlDocument = new File(configFile);
             SAXBuilder saxBuilder = new SAXBuilder();
             Document jdomDocument = saxBuilder.build(xmlDocument);
 
