@@ -5,14 +5,6 @@ import scala.xml._
 import no.kvikshaug.gh.{Grouphug, ModuleHandler}
 import no.kvikshaug.gh.listeners.{JoinListener, NickChangeListener}
 
-case class UserMask(nick: String, login: String, hostname: String) {
-  override def equals(other: Any) = other match {
-    case that: UserMask => nick == that.nick
-    case thatNick: String => nick == thatNick
-    case _ => false
-  }
-}
-
 class Operator(handler: ModuleHandler) extends JoinListener with NickChangeListener {
 
   val bot = Grouphug.getInstance
