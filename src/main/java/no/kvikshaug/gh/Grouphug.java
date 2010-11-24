@@ -151,35 +151,6 @@ public class Grouphug extends PircBot {
     }
 
     /**
-     * This method carries out the actions to be performed when the PircBot gets disconnected. This may happen if the
-     * PircBot quits from the server, or if the connection is unexpectedly lost.
-     * Disconnection from the IRC server is detected immediately if either we or the server close the connection
-     * normally. If the connection to the server is lost, but neither we nor the server have explicitly closed the
-     * connection, then it may take a few minutes to detect (this is commonly referred to as a "ping timeout").
-     */
-    @Override
-    protected void onDisconnect() {
-        try {
-            Grouphug.connect(this, true);
-        } catch(IrcException e) {
-            // No idea how to handle this. So print the message and exit
-            System.err.println(e.getMessage());
-            System.out.flush();
-            System.err.flush();
-            System.exit(-1);
-        } catch(IOException e) {
-            // No idea how to handle this. So print the message and exit
-            System.err.println(e.getMessage());
-            System.out.flush();
-            System.err.flush();
-            System.exit(-1);
-        }
-        for (String channel : this.CHANNELS) {
-            this.joinChannel(channel);
-        }
-    }
-
-    /**
      * Sends a message to the specified channel.
      *
      * The message will NOT be protected against spam.
@@ -377,4 +348,34 @@ public class Grouphug extends PircBot {
         // start a thread for polling back our first nick if unavailable
         NickPoller.load(bot);
     }
+
+    /**
+     * This method carries out the actions to be performed when the PircBot gets disconnected. This may happen if the
+     * PircBot quits from the server, or if the connection is unexpectedly lost.
+     * Disconnection from the IRC server is detected immediately if either we or the server close the connection
+     * normally. If the connection to the server is lost, but neither we nor the server have explicitly closed the
+     * connection, then it may take a few minutes to detect (this is commonly referred to as a "ping timeout").
+     */
+    @Override
+    protected void onDisconnect() {
+        try {
+            Grouphug.connect(this, true);
+        } catch(IrcException e) {
+            // No idea how to handle this. So print the message and exit
+            System.err.println(e.getMessage());
+            System.out.flush();
+            System.err.flush();
+            System.exit(-1);
+        } catch(IOException e) {
+            // No idea how to handle this. So print the message and exit
+            System.err.println(e.getMessage());
+            System.out.flush();
+            System.err.flush();
+            System.exit(-1);
+        }
+        for (String channel : this.CHANNELS) {
+            this.joinChannel(channel);
+        }
+    }
+
 }
