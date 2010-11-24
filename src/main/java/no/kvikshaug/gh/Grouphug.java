@@ -286,21 +286,7 @@ public class Grouphug extends PircBot {
         bot.parseConfig();
         moduleHandler = new ModuleHandler(bot);
 
-        try {
-            connect(bot);
-        } catch(IrcException e) {
-            // No idea how to handle this. So print debug information and exit
-            e.printStackTrace();
-            System.out.flush();
-            System.err.flush();
-            System.exit(-1);
-        } catch(IOException e) {
-            // No idea how to handle this. So print debug information and exit
-            e.printStackTrace();
-            System.out.flush();
-            System.err.flush();
-            System.exit(-1);
-        }
+        connect(bot);
 
         // Join the channels
         for (String channel : bot.CHANNELS) {
@@ -308,26 +294,34 @@ public class Grouphug extends PircBot {
         }
     }
 
-    private static void connect(Grouphug bot) throws IOException, IrcException {
+    private static void connect(Grouphug bot) {
         final String prefix = "[connection] ";
 
         for(String server : SERVERS) {
-            System.out.print("\n" + prefix + "Connecting to " + server + "...");
-            for(String nick : nicks) {
-                bot.setName(nick);
-                System.out.println("\n" + prefix + " -> Trying nick '" + nick + "'...");
-                try {
+            try {
+                System.out.print("\n" + prefix + "Connecting to " + server + "...");
+                for(String nick : nicks) {
+                    bot.setName(nick);
+                    System.out.println("\n" + prefix + " -> Trying nick '" + nick + "'...");
+                    try {
+                        bot.connect(server);
+                        System.out.println("\n" + prefix + "Connected as '" + nick + "'!");
+                        break;
+                    } catch(NickAlreadyInUseException ignored) {}
+                }
+                if(!bot.isConnected()) {
+                    System.out.println("\n" + prefix + " -> None of our nicks are available, letting pircbot choose...");
+                    bot.setAutoNickChange(true);
                     bot.connect(server);
-                    System.out.println("\n" + prefix + "Connected as '" + nick + "'!");
+                    System.out.println("\n" + prefix + "Connected as '" + bot.getNick() + "'!");
+                }
+                if(bot.isConnected()) {
                     break;
-                } catch(NickAlreadyInUseException ignored) {}
-            }
-            if(!bot.isConnected()) {
-                bot.setAutoNickChange(true);
-                bot.connect(server);
-            }
-            if(bot.isConnected()) {
-                break;
+                }
+            } catch(IrcException e) {
+                e.printStackTrace();
+            } catch(IOException e) {
+                e.printStackTrace();
             }
         }
         if(!bot.isConnected()) {
@@ -346,23 +340,9 @@ public class Grouphug extends PircBot {
      */
     @Override
     protected void onDisconnect() {
-        try {
-            while(!isConnected()) {
-                try { Thread.sleep(RECONNECT_TIME); } catch(InterruptedException ignored) { }
-                Grouphug.connect(this);
-            }
-        } catch(IrcException e) {
-            // No idea how to handle this. So print the message and exit
-            System.err.println(e.getMessage());
-            System.out.flush();
-            System.err.flush();
-            System.exit(-1);
-        } catch(IOException e) {
-            // No idea how to handle this. So print the message and exit
-            System.err.println(e.getMessage());
-            System.out.flush();
-            System.err.flush();
-            System.exit(-1);
+        while(!isConnected()) {
+            try { Thread.sleep(RECONNECT_TIME); } catch(InterruptedException ignored) { }
+            Grouphug.connect(this);
         }
         for (String channel : this.CHANNELS) {
             this.joinChannel(channel);
