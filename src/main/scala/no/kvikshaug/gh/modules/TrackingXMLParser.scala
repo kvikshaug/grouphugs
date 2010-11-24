@@ -29,12 +29,12 @@ object TrackingXMLParser {
         new URL("http://sporing.posten.no/sporing.xml?q=" + item.id)))
 
       val e = ((root \\ "PackageSet" \ "Package")(0) \ "EventSet" \ "Event")(0)
-      newStatus = (e \ "Description").text.replaceAll("<.*?>", "") + " " +
-                  (e \ "PostalCode").text.replaceAll("<.*?>", "")  + " " +
-                  (e \ "City").text.replaceAll("<.*?>", "") + " " +
-                  (e \ "OccuredAtDisplayTime").text.replaceAll("<.*?>", "") + " " +
-                  (e \ "OccuredAtDisplayDate").text.replaceAll("<.*?>", "")
-      newStatusCode = (e \ "Status").text.replaceAll("<.*?>", "")
+      newStatus = (e \ "Description").text.replaceAll("<.*?>", "").trim + " " +
+                  (e \ "PostalCode").text.replaceAll("<.*?>", "").trim  + " " +
+                  (e \ "City").text.replaceAll("<.*?>", "").trim + " " +
+                  (e \ "OccuredAtDisplayTime").text.replaceAll("<.*?>", "").trim + " " +
+                  (e \ "OccuredAtDisplayDate").text.replaceAll("<.*?>", "").trim
+      newStatusCode = (e \ "Status").text.replaceAll("<.*?>", "").trim
       packageCount = (root \\ "PackageSet" \ "Package").size
     } catch {
       // thrown by the API when the item ID isn't found at posten (404)
