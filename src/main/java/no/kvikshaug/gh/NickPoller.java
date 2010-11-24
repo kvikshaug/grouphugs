@@ -1,5 +1,7 @@
 package no.kvikshaug.gh;
 
+import no.kvikshaug.gh.Config;
+
 /**
  * This class runs a thread which reclaims our main nick if
  * it happens to be taken when we connect to irc.
@@ -40,7 +42,7 @@ public class NickPoller implements Runnable {
         // At startup, we should check if we already have the most wanted nick,
         // and don't need to start this algorithm at all
         // (Should this check be done before even starting the load() method ?)
-        if(bot.getNick().equals(Grouphug.nicks.get(0))) {
+        if(bot.getNick().equals(Config.nicks().get(0))) {
             System.out.println("Nickpoller: Already have main nick, stopping thread.");
             run = false;
         }
@@ -57,14 +59,14 @@ public class NickPoller implements Runnable {
 
             // Figure out which nick in the nicklist we have
             int currentNick;
-            if((currentNick = Grouphug.nicks.indexOf(bot.getNick())) == -1)
-                currentNick = Grouphug.nicks.size();
+            if((currentNick = Config.nicks().indexOf(bot.getNick())) == -1)
+                currentNick = Config.nicks().size();
 
             // Try to change the nick to one of the more wanted ones in the nicklist
-            for(int newNick = 0; newNick < currentNick && newNick < Grouphug.nicks.size(); newNick++) {
+            for(int newNick = 0; newNick < currentNick && newNick < Config.nicks().size(); newNick++) {
 
                 // First try a nickchange
-                bot.changeNick(Grouphug.nicks.get(newNick));
+                bot.changeNick(Config.nicks().get(newNick));
 
                 // Wait for confirmation from the server
                 try {
@@ -74,7 +76,7 @@ public class NickPoller implements Runnable {
                 }
 
                 // And check if the change was successful
-                if(bot.getNick().equals(Grouphug.nicks.get(newNick))) {
+                if(bot.getNick().equals(Config.nicks().get(newNick))) {
                     if(newNick == 0) {
                         // Nice, we got the nick we wanted the most! stop the thread and exit :)
                         System.out.println("Nickpoller: Got main nick! Stopping thread.");

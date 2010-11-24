@@ -49,9 +49,6 @@ public class Grouphug extends PircBot {
     public static final String SPAM_TRIGGER = "@";
     public static final String HELP_TRIGGER = "help";
 
-    // A list over all the nicknames we want
-    protected static List<String> nicks = new ArrayList<String>();
-
     // The number of characters upon which lines are splitted
     // Note that the 512 max limit includes the channel name, \r\n, and probably some other stuff.
     // maxing out on 440 seems to be a reasonable amount, both ways.
@@ -244,17 +241,6 @@ public class Grouphug extends PircBot {
 
             Element botNode = jdomDocument.getRootElement();
 
-            List<Element> nicks = botNode.getChild("Nicks").getChildren();
-
-            for(Element nick: nicks){
-                String nickString = (String)nick.getValue();
-
-                if(nickString.length() > 9 ){
-                    nickString = nickString.substring(0, 9);
-                }
-                this.nicks.add(nickString);
-            }
-
             List<Element> channelNodes = botNode.getChild("Channels").getChildren();
 
             for (Element e : channelNodes) {
@@ -307,7 +293,7 @@ public class Grouphug extends PircBot {
         for(String server : SERVERS) {
             try {
                 System.out.print("\n" + prefix + "Connecting to " + server + "...");
-                for(String nick : nicks) {
+                for(String nick : Config.nicks()) {
                     bot.setName(nick);
                     System.out.println("\n" + prefix + " -> Trying nick '" + nick + "'...");
                     try {
