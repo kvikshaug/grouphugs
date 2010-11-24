@@ -81,11 +81,11 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
 
     def removePackage(channel: String, id: String) {
       try {
-        if(items.filter(_.id == id).size == 0) {
+        if(!(items.exists(_ == id))) {
           bot.sendMessageChannel(channel, "I'm not tracking any package with ID " + id + ". Try !" + TRIGGER_LIST)
           return
         }
-        items = items.filterNot(_.id == id)
+        items = items.filterNot(_ == id)
         sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(id).asJava)
         bot.sendMessageChannel(channel, "Ok, stopped tracking package " + id + ".")
       } catch {
@@ -113,7 +113,7 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
         return
       }
 
-      if(items.filter(_.id == id).size != 0) {
+      if(items.exists(_ == id)) {
         bot.sendMessageChannel(channel, "I'm already tracking " + id + ". Use !" + TRIGGER_FORCE + " to force an update.")
         return
       }
