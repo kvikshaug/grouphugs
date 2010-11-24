@@ -265,6 +265,10 @@ public class Grouphug extends PircBot {
             for(Element server: servers) {
                 this.SERVERS.add((String)server.getValue());
             }
+        } catch (NullPointerException e) {
+            System.out.println("Error: I caught an NPE while parsing the config!" +
+                    "\nHave you checked for changes in the props template file after pulling?");
+            System.exit(-1);
         } catch (JDOMException e) {
             e.printStackTrace();
         } catch (IOException e) {
