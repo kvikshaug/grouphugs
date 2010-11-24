@@ -55,16 +55,11 @@ public class Grouphug extends PircBot {
 
     // How often to try to reconnect to the server when disconnected, in ms
     private static final int RECONNECT_TIME = 15000;
-
-    // Used to specify if it is ok to spam a large message to the channel
     private static boolean spamOK = false;
-
-    // Handles modules
     private static ModuleHandler moduleHandler;
 
     public static final String configFile = "props.xml";
 
-    // A static reference and getter to our bot
     private static Grouphug bot;
     public static Grouphug getInstance() {
       return bot;
@@ -79,15 +74,13 @@ public class Grouphug extends PircBot {
             return;
         }
 
-        // First, check for the universal normal help-trigger
+        // Help trigger
         if(message.startsWith(MAIN_TRIGGER + HELP_TRIGGER)) {
-            // we send the message, however trimming the help trigger itself
             moduleHandler.onHelp(channel, message.substring(MAIN_TRIGGER.length() + HELP_TRIGGER.length()).trim());
         }
 
-        // First check if the message starts with a normal or spam-trigger
+        // Normal/Spam-trigger
         if(message.startsWith(MAIN_TRIGGER) || message.startsWith(SPAM_TRIGGER)) {
-            // Enable spam if triggered
             spamOK = message.startsWith(SPAM_TRIGGER);
 
             // But not for everyone
@@ -95,22 +88,11 @@ public class Grouphug extends PircBot {
                 sendMessageChannel(channel, "icc, you are not allowed to use the spam trigger.");
                 return;
             }
-
-            // Now send the call to the module handler (stripping the trigger character)
             moduleHandler.onTrigger(channel, sender, login, hostname, message.substring(1));
         }
-
         moduleHandler.onMessage(channel, sender, login, hostname, message);
     }
 
-    /**
-     * This method is called whenever someone (possibly us) joins a channel
-     * which we are on.
-     * @param channel The channel which somebody joined.
-     * @param sender The nick of the user who joined the channel.
-     * @param login The login of the user who joined the channel.
-     * @param hostname The hostname of the user who joined the channel.
-     */
     @Override
     protected void onJoin(String channel, String sender, String login, String hostname) {
         moduleHandler.onJoin(channel, sender, login, hostname);
@@ -118,9 +100,8 @@ public class Grouphug extends PircBot {
 
     @Override
     protected void onPrivateMessage(String sender, String login, String hostname, String message) {
-        // First, check for the universal normal help-trigger
+        // Only accept help triggers in PM
         if(message.startsWith(MAIN_TRIGGER + HELP_TRIGGER)) {
-            // we send the message, however trimming the help trigger itself
             moduleHandler.onHelp(sender, message.substring(MAIN_TRIGGER.length() + HELP_TRIGGER.length()).trim());
         }
     }
@@ -133,13 +114,6 @@ public class Grouphug extends PircBot {
         }
     }
 
-    /**
-     * This method is called whenever someone (possibly us) changes nick on any of the channels that we are on.
-     * @param oldNick The old nick
-     * @param login The login of the user
-     * @param hostname The hostname of the user
-     * @param newNick The new nick
-     */
     @Override
     protected void onNickChange(String oldNick, String login, String hostname, String newNick) {
         moduleHandler.onNickChange(oldNick, login, hostname, newNick);
@@ -277,13 +251,6 @@ public class Grouphug extends PircBot {
         return bot.isConnected();
     }
 
-    /**
-     * This method carries out the actions to be performed when the PircBot gets disconnected. This may happen if the
-     * PircBot quits from the server, or if the connection is unexpectedly lost.
-     * Disconnection from the IRC server is detected immediately if either we or the server close the connection
-     * normally. If the connection to the server is lost, but neither we nor the server have explicitly closed the
-     * connection, then it may take a few minutes to detect (this is commonly referred to as a "ping timeout").
-     */
     @Override
     protected void onDisconnect() {
         final String prefix = "[reconnecter] ";
