@@ -2,6 +2,7 @@ package no.kvikshaug.gh.modules;
 
 import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
+import no.kvikshaug.gh.Config;
 import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.SQL;
@@ -16,49 +17,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
-import org.jdom.xpath.XPath;
-
 public class Upload implements TriggerListener {
 
     private static final String TRIGGER_HELP = "upload";
     private static final String TRIGGER = "upload";
     private static final String UPLOAD_DB= "uploads";
     private static final String TRIGGER_KEYWORD = "keyword";
-    private static HashMap<String, String> DESTINATION_DIR = new HashMap<String, String>();
-    private static HashMap<String, String> PUBLIC_URL = new HashMap<String, String>();
 
     private SQLHandler sqlHandler;
 
     public Upload(ModuleHandler moduleHandler) {
-    	
-        try {
-            File xmlDocument = new File(Grouphug.configFile);
-	    	SAXBuilder saxBuilder = new SAXBuilder();
-			Document jdomDocument = saxBuilder.build(xmlDocument);
-        	
-			Element channelsNode = jdomDocument.getRootElement().getChild("Channels");
-			
-			List<Element> channelNodes = channelsNode.getChildren();
-			
-			for (Element e : channelNodes) {
-				String channel = e.getAttribute("chan").getValue();
-				Element upload = e.getChild("Modules").getChild("Upload");
-				DESTINATION_DIR.put(channel, upload.getChild("UploadDir").getValue());
-				PUBLIC_URL.put(channel, upload.getChild("PublicURL").getValue()); 
-			}
-			
-			
-    	} catch (JDOMException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-    	
-    	
         try {
             sqlHandler = SQLHandler.getSQLHandler();
             // moduleHandler.addMessageListener(this);
@@ -107,7 +75,7 @@ public class Upload implements TriggerListener {
             } else {
                 StringBuilder allRows = new StringBuilder();
                 for(Object[] row : rows) {
-                    allRows.append(PUBLIC_URL.get(channel)).append(row[0]).append(" ('")
+                    allRows.append(Config.publicUrls().get(channel)).append(row[0]).append(" ('")
                             .append(row[2]).append("' by ").append(row[1]).append(")\n");
                 }
                 //Prints the URL(s) associated with the keyword
@@ -140,16 +108,16 @@ public class Upload implements TriggerListener {
         }
 
         // if the file exists, add a number to the front of it
-        if(new File(DESTINATION_DIR.get(channel) + filename).exists()) {
+        if(new File(Config.uploadDirs().get(channel) + filename).exists()) {
             int number = 1;
-            while(new File(DESTINATION_DIR.get(channel) + number + filename).exists()) {
+            while(new File(Config.uploadDirs().get(channel) + number + filename).exists()) {
                 number++;
             }
             filename = number + filename;
         }
 
         try {
-            Web.downloadFile(parts[0], filename, DESTINATION_DIR.get(channel));
+            Web.downloadFile(parts[0], filename, Config.uploadDirs().get(channel));
             List<String> params = new ArrayList<String>();
             params.add(parts[1]);
             params.add(sender);
@@ -171,6 +139,6 @@ public class Upload implements TriggerListener {
         }
 
         // Print the URL to the uploaded file to the channel
-        Grouphug.getInstance().sendMessageChannel(channel, "Saved to " + PUBLIC_URL.get(channel) + filename);
+        Grouphug.getInstance().sendMessageChannel(channel, "Saved to " + Config.publicUrls().get(channel) + filename);
     }
 }
