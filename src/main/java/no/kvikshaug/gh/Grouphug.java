@@ -287,7 +287,7 @@ public class Grouphug extends PircBot {
         moduleHandler = new ModuleHandler(bot);
 
         try {
-            connect(bot, false);
+            connect(bot);
         } catch(IrcException e) {
             // No idea how to handle this. So print debug information and exit
             e.printStackTrace();
@@ -308,11 +308,8 @@ public class Grouphug extends PircBot {
         }
     }
 
-    private static void connect(Grouphug bot, boolean reconnecting) throws IOException, IrcException {
+    private static void connect(Grouphug bot) throws IOException, IrcException {
         final String prefix = "[connection] ";
-        if(reconnecting) {
-            try { Thread.sleep(RECONNECT_TIME); } catch(InterruptedException ignored) { }
-        }
 
         for(String server : SERVERS) {
             System.out.print("\n" + prefix + "Connecting to " + server + "...");
@@ -350,7 +347,10 @@ public class Grouphug extends PircBot {
     @Override
     protected void onDisconnect() {
         try {
-            Grouphug.connect(this, true);
+            while(!isConnected()) {
+                try { Thread.sleep(RECONNECT_TIME); } catch(InterruptedException ignored) { }
+                Grouphug.connect(this);
+            }
         } catch(IrcException e) {
             // No idea how to handle this. So print the message and exit
             System.err.println(e.getMessage());
