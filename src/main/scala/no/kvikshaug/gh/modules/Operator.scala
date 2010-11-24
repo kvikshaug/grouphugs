@@ -11,6 +11,7 @@ import org.jibble.pircbot.User
 case class UserMask(nick: String, login: String, hostname: String) {
   override def equals(other: Any) = other match {
     case that: UserMask => nick == that.nick
+    case thatNick: String => nick == thatNick
     case _ => false
   }
 }
