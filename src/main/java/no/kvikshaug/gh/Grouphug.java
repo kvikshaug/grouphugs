@@ -42,7 +42,7 @@ public class Grouphug extends PircBot {
 
     // Channel and server
     public List<String> CHANNELS = new ArrayList<String>();
-    
+
     public static final String SERVER = "irc.inet.tele.dk";
 
     // The trigger characters (as Strings since startsWith takes String)
@@ -176,10 +176,10 @@ public class Grouphug extends PircBot {
             System.exit(-1);
         }
         for (String channel : this.CHANNELS) {
-        	this.joinChannel(channel);
-		}
+            this.joinChannel(channel);
+        }
     }
-    
+
     /**
      * Sends a message to the specified channel.
      *
@@ -193,9 +193,9 @@ public class Grouphug extends PircBot {
      * @param message - The message to send
      */
     public void sendMessageChannel(String channel,String message) {
-    	sendMessageChannel(channel, message, false);
+        sendMessageChannel(channel, message, false);
     }
-    
+
     /**
      * Sends a message to the specified channel.
      *
@@ -259,40 +259,40 @@ public class Grouphug extends PircBot {
             this.sendMessage(receiver, line);
         }
     }
-    
-    
-    
-    
+
+
+
+
     public void parseConfig(){
-    	try {
-    	
-	    	File xmlDocument = new File("props.xml");
-	    	SAXBuilder saxBuilder = new SAXBuilder();
-			Document jdomDocument = saxBuilder.build(xmlDocument);
-			
-			Element botNode = jdomDocument.getRootElement();
-			
-			List<Element> nicks = botNode.getChild("Nicks").getChildren();
-			
-			for(Element nick: nicks){
-				String nickString = (String)nick.getValue();
-				
-				if(nickString.length() > 9 ){
-					nickString = nickString.substring(0, 9);
-				}
-				this.nicks.add(nickString);
-			}
-			
-			List<Element> channelNodes = botNode.getChild("Channels").getChildren();
-			
-			for (Element e : channelNodes) {
-				this.CHANNELS.add(e.getAttribute("chan").getValue());
-			}
-    	} catch (JDOMException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        try {
+
+            File xmlDocument = new File("props.xml");
+            SAXBuilder saxBuilder = new SAXBuilder();
+            Document jdomDocument = saxBuilder.build(xmlDocument);
+
+            Element botNode = jdomDocument.getRootElement();
+
+            List<Element> nicks = botNode.getChild("Nicks").getChildren();
+
+            for(Element nick: nicks){
+                String nickString = (String)nick.getValue();
+
+                if(nickString.length() > 9 ){
+                    nickString = nickString.substring(0, 9);
+                }
+                this.nicks.add(nickString);
+            }
+
+            List<Element> channelNodes = botNode.getChild("Channels").getChildren();
+
+            for (Element e : channelNodes) {
+                this.CHANNELS.add(e.getAttribute("chan").getValue());
+            }
+        } catch (JDOMException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -331,8 +331,8 @@ public class Grouphug extends PircBot {
 
         // Join the channels
         for (String channel : bot.CHANNELS) {
-        	bot.joinChannel(channel);
-		}
+            bot.joinChannel(channel);
+        }
     }
 
     /**
