@@ -286,8 +286,6 @@ public class Grouphug extends PircBot {
         bot.parseConfig();
         moduleHandler = new ModuleHandler(bot);
 
-
-        System.out.println("\nOk, attempting connection to '"+SERVERS.get(0)+"'...");
         try {
             connect(bot, false);
         } catch(IrcException e) {
@@ -310,36 +308,33 @@ public class Grouphug extends PircBot {
         }
     }
 
-    /**
-     * This static method tries to connect the specified bot to the irc server.
-     * The method contains some spaghetti code which serves the purpose of getting
-     * the most wanted nick from the nicklist
-     *
-     * @param bot The bot object that will try to connect
-     * @param reconnecting true if we have lost a connection and are reconnecting to that
-     * @throws IOException when this occurs in the pircbot connect(String) method
-     * @throws IrcException when this occurs in the pircbot connect(String) method
-     */
     private static void connect(Grouphug bot, boolean reconnecting) throws IOException, IrcException {
-        int nextNick = 0;
-        bot.setName(nicks.get(nextNick++));
+        final String prefix = "[connection] ";
         if(reconnecting) {
             try { Thread.sleep(RECONNECT_TIME); } catch(InterruptedException ignored) { }
         }
-        while(!bot.isConnected()) {
-            try {
-                bot.connect(Grouphug.SERVERS.get(0));
-            } catch(NickAlreadyInUseException e) {
-                // Nick was taken
-                if(nextNick > nicks.size()-1) {
-                    // If we've tried all the nicks, enable autonickchange
-                    System.err.println("None of the specified nick(s) could be chosen, choosing automatically.");
-                    bot.setAutoNickChange(true);
-                } else {
-                    // If not, try the next one
-                    bot.setName(nicks.get(nextNick++));
-                }
+
+        for(String server : SERVERS) {
+            System.out.print("\n" + prefix + "Connecting to " + server + "...");
+            for(String nick : nicks) {
+                bot.setName(nick);
+                System.out.println("\n" + prefix + " -> Trying nick '" + nick + "'...");
+                try {
+                    bot.connect(server);
+                    System.out.println("\n" + prefix + "Connected as '" + nick + "'!");
+                    break;
+                } catch(NickAlreadyInUseException ignored) {}
             }
+            if(!bot.isConnected()) {
+                bot.setAutoNickChange(true);
+                bot.connect(server);
+            }
+            if(bot.isConnected()) {
+                break;
+            }
+        }
+        if(!bot.isConnected()) {
+            System.err.println("\n" + prefix + "Noes! Couldn't connect to any of the specified servers!");
         }
         // start a thread for polling back our first nick if unavailable
         NickPoller.load(bot);
