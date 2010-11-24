@@ -18,18 +18,20 @@ class Operator(handler: ModuleHandler) extends JoinListener with NickChangeListe
   println("Operator module loaded.")
 
   def onJoin(channel: String, sender: String, login: String, hostname: String) {
-    if(channels.get(channel).get.exists(_ == sender)) {
+    if(!(hasOp(sender, channel)) && channels.get(channel).get.exists(_ == sender)) {
       bot.op(channel, sender)
     }
   }
 
   def onNickChange(oldNick: String, login: String, hostname: String, newNick: String) {
     channels foreach { (m) =>
-      if(m._2.exists(_ == newNick)) {
+      if(!(hasOp(newNick, m._1)) && m._2.exists(_ == newNick)) {
         bot.op(m._1, newNick)
       }
     }
   }
 
+  def hasOp(nick: String, channel: String) =
+    bot.getUsers(channel).exists((x) => x.getNick == nick && x.isOp)
 }
 
