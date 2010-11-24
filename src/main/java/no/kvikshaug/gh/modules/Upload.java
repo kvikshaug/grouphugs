@@ -47,8 +47,8 @@ public class Upload implements TriggerListener {
     }*/
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
-    
-    	
+
+
         if(trigger.equals(TRIGGER)) {
             insert(channel, message, sender);
         } else if(trigger.equals(TRIGGER_KEYWORD)) {
@@ -66,7 +66,7 @@ public class Upload implements TriggerListener {
             params.add(channel);
             params.add(keyword);
             params.add(keyword);
-            
+
             List<Object[]> rows = sqlHandler.select("SELECT filename, nick, keyword FROM "+ UPLOAD_DB+" WHERE channel=? AND" +
                     "(keyword LIKE '%?%' OR filename LIKE '%?%');", params);
 
