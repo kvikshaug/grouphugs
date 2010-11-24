@@ -11,7 +11,7 @@ class Operator(handler: ModuleHandler) extends JoinListener with NickChangeListe
   handler.addJoinListener(this)
   handler.addNickChangeListener(this)
 
-  val channels = (XML.loadFile("props.xml") \ "Channels" \ "Channel" toList).map { (x) =>
+  val channels = (XML.loadFile(Grouphug.configFile) \ "Channels" \ "Channel" toList).map { (x) =>
     ((x \ "@chan").text -> (x \ "Modules" \ "Operator" \ "Nick").toList.map(_.text))
   }.toMap
 

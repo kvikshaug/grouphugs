@@ -42,8 +42,7 @@ public class Grouphug extends PircBot {
 
     // Channel and server
     public List<String> CHANNELS = new ArrayList<String>();
-    
-    public static final String SERVER = "irc.inet.tele.dk";
+    public static List<String> SERVERS = new ArrayList<String>();
 
     // The trigger characters (as Strings since startsWith takes String)
     public static final String MAIN_TRIGGER = "!";
@@ -69,6 +68,8 @@ public class Grouphug extends PircBot {
 
     // Handles modules
     private static ModuleHandler moduleHandler;
+
+    public static final String configFile = "props.xml";
 
     // A static reference and getter to our bot
     private static Grouphug bot;
@@ -152,35 +153,6 @@ public class Grouphug extends PircBot {
     }
 
     /**
-     * This method carries out the actions to be performed when the PircBot gets disconnected. This may happen if the
-     * PircBot quits from the server, or if the connection is unexpectedly lost.
-     * Disconnection from the IRC server is detected immediately if either we or the server close the connection
-     * normally. If the connection to the server is lost, but neither we nor the server have explicitly closed the
-     * connection, then it may take a few minutes to detect (this is commonly referred to as a "ping timeout").
-     */
-    @Override
-    protected void onDisconnect() {
-        try {
-            Grouphug.connect(this, true);
-        } catch(IrcException e) {
-            // No idea how to handle this. So print the message and exit
-            System.err.println(e.getMessage());
-            System.out.flush();
-            System.err.flush();
-            System.exit(-1);
-        } catch(IOException e) {
-            // No idea how to handle this. So print the message and exit
-            System.err.println(e.getMessage());
-            System.out.flush();
-            System.err.flush();
-            System.exit(-1);
-        }
-        for (String channel : this.CHANNELS) {
-        	this.joinChannel(channel);
-		}
-    }
-    
-    /**
      * Sends a message to the specified channel.
      *
      * The message will NOT be protected against spam.
@@ -193,9 +165,9 @@ public class Grouphug extends PircBot {
      * @param message - The message to send
      */
     public void sendMessageChannel(String channel,String message) {
-    	sendMessageChannel(channel, message, false);
+        sendMessageChannel(channel, message, false);
     }
-    
+
     /**
      * Sends a message to the specified channel.
      *
@@ -259,40 +231,49 @@ public class Grouphug extends PircBot {
             this.sendMessage(receiver, line);
         }
     }
-    
-    
-    
-    
+
+
+
+
     public void parseConfig(){
-    	try {
-    	
-	    	File xmlDocument = new File("props.xml");
-	    	SAXBuilder saxBuilder = new SAXBuilder();
-			Document jdomDocument = saxBuilder.build(xmlDocument);
-			
-			Element botNode = jdomDocument.getRootElement();
-			
-			List<Element> nicks = botNode.getChild("Nicks").getChildren();
-			
-			for(Element nick: nicks){
-				String nickString = (String)nick.getValue();
-				
-				if(nickString.length() > 9 ){
-					nickString = nickString.substring(0, 9);
-				}
-				this.nicks.add(nickString);
-			}
-			
-			List<Element> channelNodes = botNode.getChild("Channels").getChildren();
-			
-			for (Element e : channelNodes) {
-				this.CHANNELS.add(e.getAttribute("chan").getValue());
-			}
-    	} catch (JDOMException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        try {
+
+            File xmlDocument = new File(configFile);
+            SAXBuilder saxBuilder = new SAXBuilder();
+            Document jdomDocument = saxBuilder.build(xmlDocument);
+
+            Element botNode = jdomDocument.getRootElement();
+
+            List<Element> nicks = botNode.getChild("Nicks").getChildren();
+
+            for(Element nick: nicks){
+                String nickString = (String)nick.getValue();
+
+                if(nickString.length() > 9 ){
+                    nickString = nickString.substring(0, 9);
+                }
+                this.nicks.add(nickString);
+            }
+
+            List<Element> channelNodes = botNode.getChild("Channels").getChildren();
+
+            for (Element e : channelNodes) {
+                this.CHANNELS.add(e.getAttribute("chan").getValue());
+            }
+
+            List<Element> servers = botNode.getChild("Servers").getChildren();
+            for(Element server: servers) {
+                this.SERVERS.add((String)server.getValue());
+            }
+        } catch (NullPointerException e) {
+            System.out.println("Error: I caught an NPE while parsing the config!" +
+                    "\nHave you checked for changes in the props template file after pulling?");
+            System.exit(-1);
+        } catch (JDOMException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -311,66 +292,68 @@ public class Grouphug extends PircBot {
         bot.parseConfig();
         moduleHandler = new ModuleHandler(bot);
 
-
-        System.out.println("\nOk, attempting connection to '"+SERVER+"'...");
-        try {
-            connect(bot, false);
-        } catch(IrcException e) {
-            // No idea how to handle this. So print debug information and exit
-            e.printStackTrace();
-            System.out.flush();
-            System.err.flush();
-            System.exit(-1);
-        } catch(IOException e) {
-            // No idea how to handle this. So print debug information and exit
-            e.printStackTrace();
-            System.out.flush();
-            System.err.flush();
-            System.exit(-1);
-        }
+        connect(bot);
 
         // Join the channels
         for (String channel : bot.CHANNELS) {
-        	bot.joinChannel(channel);
-		}
+            bot.joinChannel(channel);
+        }
+        NickPoller.load(bot);
+    }
+
+    private static boolean connect(Grouphug bot) {
+        final String prefix = "[connection] ";
+
+        for(String server : SERVERS) {
+            try {
+                System.out.print("\n" + prefix + "Connecting to " + server + "...");
+                for(String nick : nicks) {
+                    bot.setName(nick);
+                    System.out.println("\n" + prefix + " -> Trying nick '" + nick + "'...");
+                    try {
+                        bot.connect(server);
+                        System.out.println("\n" + prefix + "Connected as '" + nick + "'!");
+                        break;
+                    } catch(NickAlreadyInUseException ignored) {}
+                }
+                if(!bot.isConnected()) {
+                    System.out.println("\n" + prefix + " -> None of our nicks are available, letting pircbot choose...");
+                    bot.setAutoNickChange(true);
+                    bot.connect(server);
+                    System.out.println("\n" + prefix + "Connected as '" + bot.getNick() + "'!");
+                }
+                if(bot.isConnected()) {
+                    return true;
+                }
+            } catch(IrcException e) {
+                e.printStackTrace();
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return bot.isConnected();
     }
 
     /**
-     * This static method tries to connect the specified bot to the irc server.
-     * The method contains some spaghetti code which serves the purpose of getting
-     * the most wanted nick from the nicklist
-     *
-     * @param bot The bot object that will try to connect
-     * @param reconnecting true if we have lost a connection and are reconnecting to that
-     * @throws IOException when this occurs in the pircbot connect(String) method
-     * @throws IrcException when this occurs in the pircbot connect(String) method
+     * This method carries out the actions to be performed when the PircBot gets disconnected. This may happen if the
+     * PircBot quits from the server, or if the connection is unexpectedly lost.
+     * Disconnection from the IRC server is detected immediately if either we or the server close the connection
+     * normally. If the connection to the server is lost, but neither we nor the server have explicitly closed the
+     * connection, then it may take a few minutes to detect (this is commonly referred to as a "ping timeout").
      */
-    private static void connect(Grouphug bot, boolean reconnecting) throws IOException, IrcException {
-        int nextNick = 0;
-        bot.setName(nicks.get(nextNick++));
-        while(!bot.isConnected()) {
-            try {
-                if(reconnecting) {
-                    Thread.sleep(RECONNECT_TIME);
-                    bot.reconnect();
-                } else {
-                    bot.connect(Grouphug.SERVER);
-                }
-            } catch(NickAlreadyInUseException e) {
-                // Nick was taken
-                if(nextNick > nicks.size()-1) {
-                    // If we've tried all the nicks, enable autonickchange
-                    System.err.println("None of the specified nick(s) could be chosen, choosing automatically.");
-                    bot.setAutoNickChange(true);
-                } else {
-                    // If not, try the next one
-                    bot.setName(nicks.get(nextNick++));
-                }
-            } catch(InterruptedException e) {
-                // do nothing, just try again once interrupted
-            }
+    @Override
+    protected void onDisconnect() {
+        final String prefix = "[reconnecter] ";
+        System.out.println("\n" + prefix + "Whoops, I was disconnected! Retrying connection...");
+        while(!Grouphug.connect(this)) {
+            System.out.println("\n" + prefix + "Noes! Couldn't connect to any of the specified servers!");
+            System.out.println(prefix + "Trying again in " + (RECONNECT_TIME / 1000) + " seconds...");
+            try { Thread.sleep(RECONNECT_TIME); } catch(InterruptedException ignored) { }
         }
-        // start a thread for polling back our first nick if unavailable
+        for (String channel : this.CHANNELS) {
+            this.joinChannel(channel);
+        }
         NickPoller.load(bot);
     }
+
 }

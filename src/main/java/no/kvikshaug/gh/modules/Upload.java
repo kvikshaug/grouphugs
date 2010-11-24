@@ -36,7 +36,7 @@ public class Upload implements TriggerListener {
     public Upload(ModuleHandler moduleHandler) {
     	
         try {
-	    	File xmlDocument = new File("props.xml");
+            File xmlDocument = new File(Grouphug.configFile);
 	    	SAXBuilder saxBuilder = new SAXBuilder();
 			Document jdomDocument = saxBuilder.build(xmlDocument);
         	
