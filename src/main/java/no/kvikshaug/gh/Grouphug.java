@@ -292,9 +292,10 @@ public class Grouphug extends PircBot {
         for (String channel : bot.CHANNELS) {
             bot.joinChannel(channel);
         }
+        NickPoller.load(bot);
     }
 
-    private static void connect(Grouphug bot) {
+    private static boolean connect(Grouphug bot) {
         final String prefix = "[connection] ";
 
         for(String server : SERVERS) {
@@ -316,7 +317,7 @@ public class Grouphug extends PircBot {
                     System.out.println("\n" + prefix + "Connected as '" + bot.getNick() + "'!");
                 }
                 if(bot.isConnected()) {
-                    break;
+                    return true;
                 }
             } catch(IrcException e) {
                 e.printStackTrace();
@@ -324,11 +325,7 @@ public class Grouphug extends PircBot {
                 e.printStackTrace();
             }
         }
-        if(!bot.isConnected()) {
-            System.err.println("\n" + prefix + "Noes! Couldn't connect to any of the specified servers!");
-        }
-        // start a thread for polling back our first nick if unavailable
-        NickPoller.load(bot);
+        return bot.isConnected();
     }
 
     /**
@@ -340,13 +337,17 @@ public class Grouphug extends PircBot {
      */
     @Override
     protected void onDisconnect() {
-        while(!isConnected()) {
+        final String prefix = "[reconnecter] ";
+        System.out.println("\n" + prefix + "Whoops, I was disconnected! Retrying connection...");
+        while(!Grouphug.connect(this)) {
+            System.out.println("\n" + prefix + "Noes! Couldn't connect to any of the specified servers!");
+            System.out.println(prefix + "Trying again in " + (RECONNECT_TIME / 1000) + " seconds...");
             try { Thread.sleep(RECONNECT_TIME); } catch(InterruptedException ignored) { }
-            Grouphug.connect(this);
         }
         for (String channel : this.CHANNELS) {
             this.joinChannel(channel);
         }
+        NickPoller.load(bot);
     }
 
 }
