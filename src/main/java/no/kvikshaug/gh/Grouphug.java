@@ -40,8 +40,7 @@ import java.util.List;
 
 public class Grouphug extends PircBot {
 
-    // Channel and server
-    public List<String> CHANNELS = new ArrayList<String>();
+    // server
     public static List<String> SERVERS = new ArrayList<String>();
 
     // The trigger characters (as Strings since startsWith takes String)
@@ -241,12 +240,6 @@ public class Grouphug extends PircBot {
 
             Element botNode = jdomDocument.getRootElement();
 
-            List<Element> channelNodes = botNode.getChild("Channels").getChildren();
-
-            for (Element e : channelNodes) {
-                this.CHANNELS.add(e.getAttribute("chan").getValue());
-            }
-
             List<Element> servers = botNode.getChild("Servers").getChildren();
             for(Element server: servers) {
                 this.SERVERS.add((String)server.getValue());
@@ -281,7 +274,7 @@ public class Grouphug extends PircBot {
         connect(bot);
 
         // Join the channels
-        for (String channel : bot.CHANNELS) {
+        for (String channel : Config.channels()) {
             bot.joinChannel(channel);
         }
         NickPoller.load(bot);
@@ -336,7 +329,7 @@ public class Grouphug extends PircBot {
             System.out.println(prefix + "Trying again in " + (RECONNECT_TIME / 1000) + " seconds...");
             try { Thread.sleep(RECONNECT_TIME); } catch(InterruptedException ignored) { }
         }
-        for (String channel : this.CHANNELS) {
+        for (String channel : Config.channels()) {
             this.joinChannel(channel);
         }
         NickPoller.load(bot);

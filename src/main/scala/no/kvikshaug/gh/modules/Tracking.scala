@@ -1,6 +1,6 @@
 package no.kvikshaug.gh.modules
 
-import no.kvikshaug.gh.{Grouphug, ModuleHandler}
+import no.kvikshaug.gh.{Grouphug, ModuleHandler, Config}
 import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.SQLHandler;
@@ -147,7 +147,7 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
       this ! items
       if(failCount >= 5) {
         failCount = 0
-        for(channel <- bot.CHANNELS) {
+        for(channel <- Config.channels) {
           bot.sendMessageChannel(channel, "The package tracking module has now failed 5 times in a row. " +
             "If this continues, you might want to check the logs and your package status manually.")
         }

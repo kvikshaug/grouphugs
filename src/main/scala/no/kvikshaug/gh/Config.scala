@@ -9,4 +9,5 @@ object Config {
   val root = XML.loadFile(configFile)
 
   val nicks = (root \ "Nicks" \ "Nick").map(_.text).asJava
+  val channels = (root \ "Channels" \ "Channel").map(_.attribute("chan").get.text).asJava
 }
