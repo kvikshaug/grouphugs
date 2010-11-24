@@ -200,7 +200,6 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
               }
             }
           } catch {
-            case e: FileNotFoundException => // ignore; this is a package which may not have been registered yet
             case e => println("Tracking poller just failed: "); e.printStackTrace; failCount = failCount + 1
           }
         }
