@@ -42,8 +42,7 @@ public class Grouphug extends PircBot {
 
     // Channel and server
     public List<String> CHANNELS = new ArrayList<String>();
-
-    public static final String SERVER = "irc.inet.tele.dk";
+    public static List<String> SERVERS = new ArrayList<String>();
 
     // The trigger characters (as Strings since startsWith takes String)
     public static final String MAIN_TRIGGER = "!";
@@ -288,6 +287,11 @@ public class Grouphug extends PircBot {
             for (Element e : channelNodes) {
                 this.CHANNELS.add(e.getAttribute("chan").getValue());
             }
+
+            List<Element> servers = botNode.getChild("Servers").getChildren();
+            for(Element server: servers) {
+                this.SERVERS.add((String)server.getValue());
+            }
         } catch (JDOMException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -312,7 +316,7 @@ public class Grouphug extends PircBot {
         moduleHandler = new ModuleHandler(bot);
 
 
-        System.out.println("\nOk, attempting connection to '"+SERVER+"'...");
+        System.out.println("\nOk, attempting connection to '"+SERVERS.get(0)+"'...");
         try {
             connect(bot, false);
         } catch(IrcException e) {
@@ -354,7 +358,7 @@ public class Grouphug extends PircBot {
                     Thread.sleep(RECONNECT_TIME);
                     bot.reconnect();
                 } else {
-                    bot.connect(Grouphug.SERVER);
+                    bot.connect(Grouphug.SERVERS.get(0));
                 }
             } catch(NickAlreadyInUseException e) {
                 // Nick was taken

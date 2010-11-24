@@ -4,6 +4,11 @@
     <Nick>botnick1</Nick>
     <Nick>botnick2</Nick>
   </Nicks>
+  <Servers>
+    <Server>server1</Server>
+    <Server>server2</Server>
+    <!-- Add more servers to the *same* network here in case the first one(s) are down -->
+  </Servers>
   <Channels>
     <Channel chan="#chan1">
       <Modules>
