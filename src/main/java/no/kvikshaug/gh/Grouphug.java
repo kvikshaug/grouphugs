@@ -323,14 +323,12 @@ public class Grouphug extends PircBot {
     private static void connect(Grouphug bot, boolean reconnecting) throws IOException, IrcException {
         int nextNick = 0;
         bot.setName(nicks.get(nextNick++));
+        if(reconnecting) {
+            try { Thread.sleep(RECONNECT_TIME); } catch(InterruptedException ignored) { }
+        }
         while(!bot.isConnected()) {
             try {
-                if(reconnecting) {
-                    Thread.sleep(RECONNECT_TIME);
-                    bot.reconnect();
-                } else {
-                    bot.connect(Grouphug.SERVERS.get(0));
-                }
+                bot.connect(Grouphug.SERVERS.get(0));
             } catch(NickAlreadyInUseException e) {
                 // Nick was taken
                 if(nextNick > nicks.size()-1) {
@@ -341,8 +339,6 @@ public class Grouphug extends PircBot {
                     // If not, try the next one
                     bot.setName(nicks.get(nextNick++));
                 }
-            } catch(InterruptedException e) {
-                // do nothing, just try again once interrupted
             }
         }
         // start a thread for polling back our first nick if unavailable
