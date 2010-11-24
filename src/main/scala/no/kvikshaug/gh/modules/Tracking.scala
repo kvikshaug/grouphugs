@@ -143,7 +143,7 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
   def run {
     // wait until the bot has connected and is ready
     Thread.sleep(30 * 1000)
-    loop {
+    while(true) {
       this ! items
       if(failCount >= 5) {
         failCount = 0
