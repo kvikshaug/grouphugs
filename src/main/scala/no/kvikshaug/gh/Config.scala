@@ -20,4 +20,10 @@ object Config {
   val publicUrls = (root \ "Channels" \ "Channel").map { (x) =>
     ((x \ "@chan").text -> (x \ "Modules" \ "Upload" \ "PublicURL").text)
   }.toMap.asJava
+
+  // Operator module
+  val operatorList = (XML.loadFile(Grouphug.configFile) \ "Channels" \ "Channel" toList).map { (x) =>
+    ((x \ "@chan").text -> (x \ "Modules" \ "Operator" \ "Nick").toList.map(_.text))
+  }.toMap
+
 }
