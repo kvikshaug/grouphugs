@@ -103,6 +103,10 @@ public class Grouphug extends PircBot {
         // Only accept help triggers in PM
         if(message.startsWith(MAIN_TRIGGER + HELP_TRIGGER)) {
             moduleHandler.onHelp(sender, message.substring(MAIN_TRIGGER.length() + HELP_TRIGGER.length()).trim());
+        } else if(message.equals("!reparse")) {
+            sendMessageChannel(sender, "Reparsing '" + Config.configFile() + "'...");
+            Config.reparse();
+            System.out.println(Config.nicks());
         }
     }
 
