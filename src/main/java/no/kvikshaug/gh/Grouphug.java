@@ -40,9 +40,6 @@ import java.util.List;
 
 public class Grouphug extends PircBot {
 
-    // server
-    public static List<String> SERVERS = new ArrayList<String>();
-
     // The trigger characters (as Strings since startsWith takes String)
     public static final String MAIN_TRIGGER = "!";
     public static final String SPAM_TRIGGER = "@";
@@ -228,33 +225,6 @@ public class Grouphug extends PircBot {
         }
     }
 
-
-
-
-    public void parseConfig(){
-        try {
-
-            File xmlDocument = new File(configFile);
-            SAXBuilder saxBuilder = new SAXBuilder();
-            Document jdomDocument = saxBuilder.build(xmlDocument);
-
-            Element botNode = jdomDocument.getRootElement();
-
-            List<Element> servers = botNode.getChild("Servers").getChildren();
-            for(Element server: servers) {
-                this.SERVERS.add((String)server.getValue());
-            }
-        } catch (NullPointerException e) {
-            System.out.println("Error: I caught an NPE while parsing the config!" +
-                    "\nHave you checked for changes in the props template file after pulling?");
-            System.exit(-1);
-        } catch (JDOMException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * The main method, starting the bot, connecting to the server and joining its main channel.
      *
@@ -262,18 +232,12 @@ public class Grouphug extends PircBot {
      * @throws UnsupportedEncodingException very rarely since the encoding is almost never changed
      */
     public static void main(String[] args) throws UnsupportedEncodingException {
-
-        // Load up the bot, enable debugging output, and specify encoding
+        // Fire her up
         Grouphug.bot = new Grouphug();
         bot.setVerbose(true);
         bot.setEncoding("UTF-8");
-
-        bot.parseConfig();
         moduleHandler = new ModuleHandler(bot);
-
         connect(bot);
-
-        // Join the channels
         for (String channel : Config.channels()) {
             bot.joinChannel(channel);
         }
@@ -283,7 +247,7 @@ public class Grouphug extends PircBot {
     private static boolean connect(Grouphug bot) {
         final String prefix = "[connection] ";
 
-        for(String server : SERVERS) {
+        for(String server : Config.servers()) {
             try {
                 System.out.print("\n" + prefix + "Connecting to " + server + "...");
                 for(String nick : Config.nicks()) {

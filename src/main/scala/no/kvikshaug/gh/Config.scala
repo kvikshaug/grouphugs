@@ -10,4 +10,5 @@ object Config {
 
   val nicks = (root \ "Nicks" \ "Nick").map(_.text).asJava
   val channels = (root \ "Channels" \ "Channel").map(_.attribute("chan").get.text).asJava
+  val servers = (root \ "Servers" \ "Server").map(_.text).asJava
 }
