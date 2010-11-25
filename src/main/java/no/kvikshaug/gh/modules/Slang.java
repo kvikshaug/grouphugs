@@ -34,6 +34,13 @@ public class Slang implements TriggerListener {
         boolean includeExample = message.contains(TRIGGER_EXAMPLE);
         message = message.replaceAll(TRIGGER_EXAMPLE, "").trim();
 
+        // If the query ends with a number, there's a good chance it was intended as a count
+        // because the syntax has been changed. So pick it up for later
+        Matcher nm = Pattern.compile("(.*?) ?([0-9]+)?").matcher(message);
+        nm.matches();
+        String invMessage = nm.group(1);
+        String invNumber = nm.group(2);
+
         Matcher m = Pattern.compile("(-n ([0-9]+) )?(.*)").matcher(message);
         m.matches();
         int number = 1;
@@ -50,7 +57,11 @@ public class Slang implements TriggerListener {
             System.err.println(e);
             return;
         } catch(NullPointerException ex) {
-            Grouphug.getInstance().sendMessageChannel(channel, "No slang found for "+message+".");
+            if(invNumber == null) {
+                Grouphug.getInstance().sendMessageChannel(channel, "No slang found for "+message+".");
+            } else {
+                Grouphug.getInstance().sendMessageChannel(channel, "No slang found for "+message+". Did you mean \"!slang -n " + invNumber + " " + invMessage + "\"?");
+            }
             return;
         }
 
