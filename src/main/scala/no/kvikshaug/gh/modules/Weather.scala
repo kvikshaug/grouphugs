@@ -46,10 +46,10 @@ class Weather(val handler: ModuleHandler) extends TriggerListener {
     // current conditions
     if(input._2) {
       bot.sendMessageChannel(channel, "Currently: " +
-                  (root \ "current_conditions" \ "temp_c" \ "@data").text + "°C, " +
-                  (root \ "current_conditions" \ "condition" \ "@data").text + ". " +
-                  (root \ "current_conditions" \ "humidity" \ "@data").text + ". " +
-                  (root \ "current_conditions" \ "wind_condition" \ "@data").text)
+        (root \ "current_conditions" \ "temp_c" \ "@data").text + "°C, " +
+        (root \ "current_conditions" \ "condition" \ "@data").text + ". " +
+        (root \ "current_conditions" \ "humidity" \ "@data").text + ". " +
+        (root \ "current_conditions" \ "wind_condition" \ "@data").text)
     }
 
     // forecast
