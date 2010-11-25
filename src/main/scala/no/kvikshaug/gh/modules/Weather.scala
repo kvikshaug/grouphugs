@@ -16,6 +16,7 @@ class Weather(val handler: ModuleHandler) extends TriggerListener {
 !weather <place>      - Current weather for <place>
 !weather 2 <place>    - Weather in two days at <place>
 !weather 1-2 <place>  - Weather next two days at <place>
+!weather -f <place>   - Full forecasts for <place>
 !weather -a <place>   - All available weather data for <place>
 0 = forecast today; longest ahead is 3 days""")
   println("Weather module registered.")
@@ -63,17 +64,20 @@ class Weather(val handler: ModuleHandler) extends TriggerListener {
 
   def parseLine(str: String) = {
     val mAll = Pattern.compile("-a (.+)").matcher(str)
+    val mFor = Pattern.compile("-f (.+)").matcher(str)
     val mSeq = Pattern.compile("([0-9])-([0-9]) (.+)").matcher(str)
     val mOne = Pattern.compile("([0-9]) (.+)").matcher(str)
-    //val mFor = Pattern.compile(".+").matcher(str)
+    //val mCur = Pattern.compile(".+").matcher(str)
 
     if(mAll matches) {
       (List(0, 1, 2, 3), true, mAll.group(1))
+    } else if(mFor matches) {
+      (List(0, 1, 2, 3), false, mFor.group(1))
     } else if(mSeq matches) {
       ((mSeq.group(1).toInt to mSeq.group(2).toInt toList), false, mSeq.group(3))
     } else if(mOne matches) {
       (List(mOne.group(1).toInt), false, mOne.group(2))
-    } else /* if(mFor matches) */ {
+    } else /* if(mCur matches) */ {
       (List(), true, str)
     }
   }
