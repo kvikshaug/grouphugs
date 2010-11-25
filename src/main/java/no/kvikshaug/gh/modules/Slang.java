@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.regex.*;
 
 public class Slang implements TriggerListener {
 
@@ -33,20 +34,13 @@ public class Slang implements TriggerListener {
         boolean includeExample = message.contains(TRIGGER_EXAMPLE);
         message = message.replaceAll(TRIGGER_EXAMPLE, "").trim();
 
-        // Check if the line ends with a number - in which case a specified slangitem is to be extracted
-        int number = -1;
-        try {
-            number = Integer.parseInt(message.substring(message.length() - 1, message.length()));
-            message = message.substring(0, message.length()-1);
-            number = Integer.parseInt(message.substring(message.length() - 2, message.length()));
-            message = message.substring(0, message.length()-1);
-        } catch(NumberFormatException ex) {
-            // do nothing - if the number hasn't been set, we know it didn't work
+        Matcher m = Pattern.compile("(-n ([0-9]+) )?(.*)").matcher(message);
+        m.matches();
+        int number = 1;
+        if(m.group(2) != null) {
+            number = Integer.parseInt(m.group(2));
         }
-
-        if(number <= 0) {
-            number = 1;
-        }
+        message = m.group(3);
 
         SlangItem si;
         try {
