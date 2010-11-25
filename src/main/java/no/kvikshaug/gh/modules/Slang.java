@@ -24,9 +24,9 @@ public class Slang implements TriggerListener {
     public Slang(ModuleHandler moduleHandler) {
         moduleHandler.addTriggerListener(TRIGGER_MAIN, this);
         moduleHandler.registerHelp(TRIGGER_HELP, "Slang: Define an expression in slang terms.\n" +
-                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + "<expr>\n" +
-                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + "<expr> <number>\n" +
-                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + Slang.TRIGGER_EXAMPLE + "<expr>");
+                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + " <expr>\n" +
+                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + " -n <number> <expr>\n" +
+                   "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + " " + Slang.TRIGGER_EXAMPLE + " <expr>");
         System.out.println("Slang module loaded.");
     }
 
