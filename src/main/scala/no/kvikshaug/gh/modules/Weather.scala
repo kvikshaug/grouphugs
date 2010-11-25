@@ -1,7 +1,7 @@
 package no.kvikshaug.gh.modules
 
 import scala.xml._
-import java.net.URL
+import java.net.{URL, URLEncoder}
 import java.util.regex._
 
 import no.kvikshaug.gh.listeners.TriggerListener
@@ -20,13 +20,40 @@ class Weather(val handler: ModuleHandler) extends TriggerListener {
 0 = forecast today; longest ahead is 3 days""")
   println("Weather module registered.")
 
-  def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String) = {
+  def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String) {
     val input = parseLine(message)
-    val root = XML.load(Web.prepareEncodedBufferedReader(
-      new URL("http://www.google.com/ig/api?weather=" + place)))
 
-    bot.sendMessageChannel(channel, (root \\ "p").text)
+    val root = XML.load(Web.prepareEncodedBufferedReader(
+      new URL("http://www.google.com/ig/api?weather=" + URLEncoder.encode(input._3, "UTF-8")))) \ "weather"
+
+    val maxDays = (root \ "forecast_conditions" size) - 1
+    if(input._1.exists(_ > maxDays)) {
+      bot.sendMessageChannel(channel, "Google only provides forecast data for " + maxDays + " days ahead.")
+      return
+    }
+
+    bot.sendMessageChannel(channel, (root \ "forecast_information" \ "city" \ "@data").text + ", " +
+             (root \ "forecast_information" \ "current_date_time" \ "@data").text)
+
+    // current conditions
+    if(input._2) {
+      bot.sendMessageChannel(channel, (root \ "current_conditions" \ "temp_c" \ "@data").text + "°C, " +
+                  (root \ "current_conditions" \ "condition" \ "@data").text + ". " +
+                  (root \ "current_conditions" \ "humidity" \ "@data").text + ". " +
+                  (root \ "current_conditions" \ "wind_condition" \ "@data").text)
+    }
+
+    // forecast
+    for(day <- input._1) {
+      bot.sendMessageChannel(channel, forecastFor(day, root))
+    }
   }
+
+  def forecastFor(day: Int, root: NodeSeq) =
+    ((root \ "forecast_conditions")(day) \ "day_of_week" \ "@data").text + ": " +
+    math.round(ftoc(((root \ "forecast_conditions")(day) \ "low" \ "@data").text.toDouble)) + "-" +
+    math.round(ftoc(((root \ "forecast_conditions")(day) \ "high" \ "@data").text.toDouble)) + "°C, " +
+    ((root \ "forecast_conditions")(day) \ "condition" \ "@data").text
 
   def parseLine(str: String) = {
     val mAll = Pattern.compile("-a (.+)").matcher(str)
@@ -34,7 +61,7 @@ class Weather(val handler: ModuleHandler) extends TriggerListener {
     val mOne = Pattern.compile("([0-9]) (.+)").matcher(str)
     //val mFor = Pattern.compile(".+").matcher(str)
 
-    if(mAll matches): {
+    if(mAll matches) {
       (List(0, 1, 2, 3), true, mAll.group(1))
     } else if(mSeq matches) {
       ((mSeq.group(1).toInt to mSeq.group(2).toInt toList), false, mSeq.group(3))
@@ -44,5 +71,7 @@ class Weather(val handler: ModuleHandler) extends TriggerListener {
       (List(), true, str)
     }
   }
+
+  def ftoc(f: Double) = (f - 32) * (5.0/9)
 }
 
