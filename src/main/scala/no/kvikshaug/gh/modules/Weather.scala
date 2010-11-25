@@ -29,7 +29,20 @@ class Weather(val handler: ModuleHandler) extends TriggerListener {
   }
 
   def parseLine(str: String) = {
-    if str matches "-a (.+)"
+    val mAll = Pattern.compile("-a (.+)").matcher(str)
+    val mSeq = Pattern.compile("([0-9])-([0-9]) (.+)").matcher(str)
+    val mOne = Pattern.compile("([0-9]) (.+)").matcher(str)
+    //val mFor = Pattern.compile(".+").matcher(str)
+
+    if(mAll matches): {
+      (List(0, 1, 2, 3), true, mAll.group(1))
+    } else if(mSeq matches) {
+      ((mSeq.group(1).toInt to mSeq.group(2).toInt toList), false, mSeq.group(3))
+    } else if(mOne matches) {
+      (List(mOne.group(1).toInt), false, mOne.group(2))
+    } else /* if(mFor matches) */ {
+      (List(), true, str)
+    }
   }
 }
 
