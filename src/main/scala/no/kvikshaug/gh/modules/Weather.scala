@@ -26,6 +26,12 @@ class Weather(val handler: ModuleHandler) extends TriggerListener {
     val root = XML.load(Web.prepareEncodedBufferedReader(
       new URL("http://www.google.com/ig/api?weather=" + URLEncoder.encode(input._3, "UTF-8")))) \ "weather"
 
+    // check that the place was found
+    if((root \ "problem_cause").size != 0) {
+      bot.sendMessageChannel(channel, "I don't think google tracks the weather in " + input._3 + ".")
+      return
+    }
+
     val maxDays = (root \ "forecast_conditions" size) - 1
     if(input._1.exists(_ > maxDays)) {
       bot.sendMessageChannel(channel, "Google only provides forecast data for " + maxDays + " days ahead.")
