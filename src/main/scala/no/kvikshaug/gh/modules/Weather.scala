@@ -60,7 +60,7 @@ class Weather(val handler: ModuleHandler) extends TriggerListener {
 
   def forecastFor(day: Int, root: NodeSeq) =
     ((root \ "forecast_conditions")(day) \ "day_of_week" \ "@data").text + ": " +
-    math.round(ftoc(((root \ "forecast_conditions")(day) \ "low" \ "@data").text.toDouble)) + "-" +
+    math.round(ftoc(((root \ "forecast_conditions")(day) \ "low" \ "@data").text.toDouble)) + " to " +
     math.round(ftoc(((root \ "forecast_conditions")(day) \ "high" \ "@data").text.toDouble)) + "°C, " +
     ((root \ "forecast_conditions")(day) \ "condition" \ "@data").text
 
