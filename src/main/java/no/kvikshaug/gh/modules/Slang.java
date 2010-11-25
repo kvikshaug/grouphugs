@@ -30,14 +30,8 @@ public class Slang implements TriggerListener {
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
-        boolean includeExample;
-        if(message.contains(TRIGGER_EXAMPLE)) {
-            includeExample = true;
-            message = message.replace("-ex", "").trim();
-        } else {
-            includeExample = false;
-            message = message.trim();
-        }
+        boolean includeExample = message.contains(TRIGGER_EXAMPLE);
+        message = message.replaceAll(TRIGGER_EXAMPLE, "").trim();
 
         // Check if the line ends with a number - in which case a specified slangitem is to be extracted
         int number = -1;
