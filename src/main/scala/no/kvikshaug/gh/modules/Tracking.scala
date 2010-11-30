@@ -194,6 +194,12 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
                   if(status._2 > 1) {
                     bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
                   }
+                case "CUSTOMS" =>
+                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " due for inspection!")
+                  bot.sendMessageChannel(i.channel, i.status)
+                  if(status._2 > 1) {
+                    bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
+                  }
                 case "NO_PACKAGES" =>
                   bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has suddenly lost its contents! You might want to check it manually.")
                   bot.sendMessageChannel(i.channel, i.status)
