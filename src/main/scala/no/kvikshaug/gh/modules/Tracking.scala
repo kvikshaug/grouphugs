@@ -176,6 +176,12 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
                   items = items.filterNot(_ == i)
                   sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(i.id).asJava)
                   bot.sendMessageChannel(i.channel, "Removing this one from my list. Now tracking " + items.size + " packages.")
+                case "NOTIFICATION_SENT" =>
+                  bot.sendMessageChannel(i.channel, i.owner + ": Notification for package " + i.id + " has been sent!")
+                  bot.sendMessageChannel(i.channel, i.status)
+                  if(status._2 > 1) {
+                    bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
+                  }
                 case "READY_FOR_PICKUP" =>
                   bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " is ready for pickup!")
                   bot.sendMessageChannel(i.channel, i.status)
