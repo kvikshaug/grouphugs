@@ -65,6 +65,7 @@ public class ModuleHandler {
         new EpisodeInfo(this);
         new Translate(this);
         new Weather(this);
+        new Tell(this);
 
         System.out.println();
         System.out.println(helpers.size() + " help responses registered");
