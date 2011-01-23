@@ -25,15 +25,6 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener {
     private static final String TRIGGER_HELP = "tell";
     private static final String TRIGGER = "tell";
     private static final String TELL_DB = "tell";
-    public static final PeriodFormatter FORMATTER = new PeriodFormatterBuilder()
-                        .appendSeconds().appendSuffix(" seconds ago")
-                        .appendMinutes().appendSuffix(" minutes ago")
-                        .appendHours().appendSuffix(" hours ago")
-                        .appendDays().appendSuffix(" days ago")
-                        .appendMonths().appendSuffix(" months ago")
-                        .appendYears().appendSuffix(" years ago")
-                        .printZeroNever()
-                        .toFormatter();
 
     private SQLHandler sqlHandler;
     private Grouphug bot;
@@ -44,8 +35,9 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener {
             sqlHandler = SQLHandler.getSQLHandler();
             moduleHandler.addTriggerListener(TRIGGER, this);
             moduleHandler.addJoinListener(this);
+            moduleHandler.addNickChangeListener(this);
             moduleHandler.registerHelp(TRIGGER_HELP, "Tell: Tell something to someone who's not here when they eventually join\n" +
-                    "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<nick>\n");
+                    "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<nick> <message>\n");
             System.out.println("Tell module loaded.");
         } catch (SQLUnavailableException ex) {
             System.err.println("Tell module startup error: SQL is unavailable!");
@@ -56,9 +48,11 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener {
         tell(channel, sender);
     }
 
-    private void tell(String channel, String sender) {
+    private void tell(String channel, String toNick) {
+        System.out.println("channel: " + channel);
+        System.out.println("toNick: " + toNick);
         List<String> params = new ArrayList<String>();
-        params.add(sender);
+        params.add(toNick);
         params.add(channel);
         List<Object[]> rows = null;
         try {
@@ -70,28 +64,14 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener {
         }
 
         for (Object[] row : rows) {
-            if (!channel.equals(row[4])) {
-                continue; // don't tell to wrong channel
-            }
             String fromNick = (String) row[1];
-            Date savedAt = null;
             String msg = (String) row[3];
-            try {
-                savedAt = SQL.sqlDateTimeToDate((String) row[2]);
-            } catch (ParseException e) {
-                System.err.println(" > Date Parse Exception: " + e.getMessage() + "\n" + e.getCause());
-            }
-
             StringBuilder message = new StringBuilder();
-            if (savedAt != null) {
-                Period period = new Period(new DateTime(savedAt), new DateTime());
-                message.append(FORMATTER.print(period)).append(", ");
-            }
             message.append(fromNick).append(" told me to tell you this: ").append(msg);
             bot.sendMessageChannel(channel, message.toString());
 
             params.clear();
-            params.add((String)row[0]);
+            params.add(row[0].toString());
             try {
                 sqlHandler.delete("DELETE FROM " + TELL_DB + " WHERE id=?;", params);
             } catch (SQLException e) {
@@ -137,8 +117,14 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener {
     }
 
     public void onNickChange(String oldNick, String login, String hostname, String newNick) {
-        for (String c : bot.getChannels()) {
-            tell(c, newNick);
+        for (String chan : bot.getChannels()) {
+            System.out.println(chan);
+            for (User user : bot.getUsers(chan)) {
+                System.out.println(user);
+                if (user.equals(newNick)) {
+                    tell(chan, newNick);
+                }
+            }
         }
     }
 }
