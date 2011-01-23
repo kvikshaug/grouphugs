@@ -4,6 +4,7 @@ import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.listeners.JoinListener;
+import no.kvikshaug.gh.listeners.NickChangeListener;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.SQL;
 import no.kvikshaug.gh.util.SQLHandler;
@@ -20,7 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 
-public class Tell implements JoinListener, TriggerListener {
+public class Tell implements JoinListener, TriggerListener, NickChangeListener {
     private static final String TRIGGER_HELP = "tell";
     private static final String TRIGGER = "tell";
     private static final String TELL_DB = "tell";
@@ -35,8 +36,10 @@ public class Tell implements JoinListener, TriggerListener {
                         .toFormatter();
 
     private SQLHandler sqlHandler;
+    private Grouphug bot;
 
     public Tell(ModuleHandler moduleHandler) {
+        bot = Grouphug.getInstance();
         try {
             sqlHandler = SQLHandler.getSQLHandler();
             moduleHandler.addTriggerListener(TRIGGER, this);
@@ -50,19 +53,26 @@ public class Tell implements JoinListener, TriggerListener {
     }
 
     public void onJoin(String channel, String sender, String login, String hostname) {
+        tell(channel, sender);
+    }
+
+    private void tell(String channel, String sender) {
         List<String> params = new ArrayList<String>();
         params.add(sender);
         params.add(channel);
         List<Object[]> rows = null;
         try {
-            rows = sqlHandler.select("SELECT id, from_nick, date, msg FROM " + TELL_DB + " WHERE to_nick=? AND channel=?;", params);
+            rows = sqlHandler.select("SELECT id, from_nick, date, msg, channel FROM " + TELL_DB + " WHERE to_nick=? AND channel=?;", params);
         } catch (SQLException e) {
             System.err.println(" > SQL Exception: " + e.getMessage() + "\n" + e.getCause());
-            Grouphug.getInstance().sendMessageChannel(channel, "Sorry, couldn't query Tell DB, an SQL error occured.");
+            bot.sendMessageChannel(channel, "Sorry, couldn't query Tell DB, an SQL error occured.");
             return;
         }
 
         for (Object[] row : rows) {
+            if (!channel.equals(row[4])) {
+                continue; // don't tell to wrong channel
+            }
             String fromNick = (String) row[1];
             Date savedAt = null;
             String msg = (String) row[3];
@@ -78,7 +88,7 @@ public class Tell implements JoinListener, TriggerListener {
                 message.append(FORMATTER.print(period)).append(", ");
             }
             message.append(fromNick).append(" told me to tell you this: ").append(msg);
-            Grouphug.getInstance().sendMessageChannel(channel, message.toString());
+            bot.sendMessageChannel(channel, message.toString());
 
             params.clear();
             params.add((String)row[0]);
@@ -98,13 +108,13 @@ public class Tell implements JoinListener, TriggerListener {
             toNick = message.substring(0, message.indexOf(' '));
             msg = message.substring(message.indexOf(' '));
         } catch (IndexOutOfBoundsException ioobe) {
-            Grouphug.getInstance().sendMessageChannel(channel, "Bogus message format: try !" + TRIGGER + " <nick> <message>.");
+            bot.sendMessageChannel(channel, "Bogus message format: try !" + TRIGGER + " <nick> <message>.");
             return;
         }
 
-        for (User user : Grouphug.getInstance().getUsers(channel)) {
+        for (User user : bot.getUsers(channel)) {
             if (user.equals(toNick)) {
-                Grouphug.getInstance().sendMessageChannel(channel, toNick + " is here right now, you dumbass!");
+                bot.sendMessageChannel(channel, toNick + " is here right now, you dumbass!");
                 return;
             }
         }
@@ -120,9 +130,15 @@ public class Tell implements JoinListener, TriggerListener {
             sqlHandler.insert("INSERT INTO " + TELL_DB + " (from_nick, to_nick, date, msg, channel) VALUES (?, ?, ?, ?, ?);", params);
         } catch (SQLException e) {
             System.err.println(" > SQL Exception: " + e.getMessage() + "\n" + e.getCause());
-            Grouphug.getInstance().sendMessageChannel(channel, "Sorry, unable to update Tell DB, an SQL error occured.");
+            bot.sendMessageChannel(channel, "Sorry, unable to update Tell DB, an SQL error occured.");
         }
 
-        Grouphug.getInstance().sendMessageChannel(channel, "I'll tell " + toNick + " this: " + msg);
+        bot.sendMessageChannel(channel, "I'll tell " + toNick + " this: " + msg);
+    }
+
+    public void onNickChange(String oldNick, String login, String hostname, String newNick) {
+        for (String c : bot.getChannels()) {
+            tell(c, newNick);
+        }
     }
 }
