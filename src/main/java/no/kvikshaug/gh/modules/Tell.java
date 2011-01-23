@@ -118,9 +118,7 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener {
 
     public void onNickChange(String oldNick, String login, String hostname, String newNick) {
         for (String chan : bot.getChannels()) {
-            System.out.println(chan);
             for (User user : bot.getUsers(chan)) {
-                System.out.println(user);
                 if (user.equals(newNick)) {
                     tell(chan, newNick);
                 }
