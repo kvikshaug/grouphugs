@@ -25,12 +25,12 @@ public class Tell implements JoinListener, TriggerListener {
     private static final String TRIGGER = "tell";
     private static final String TELL_DB = "tell";
     public static final PeriodFormatter FORMATTER = new PeriodFormatterBuilder()
-                        .appendSeconds().appendSuffix(" seconds ago\n")
-                        .appendMinutes().appendSuffix(" minutes ago\n")
-                        .appendHours().appendSuffix(" hours ago\n")
-                        .appendDays().appendSuffix(" days ago\n")
-                        .appendMonths().appendSuffix(" months ago\n")
-                        .appendYears().appendSuffix(" years ago\n")
+                        .appendSeconds().appendSuffix(" seconds ago")
+                        .appendMinutes().appendSuffix(" minutes ago")
+                        .appendHours().appendSuffix(" hours ago")
+                        .appendDays().appendSuffix(" days ago")
+                        .appendMonths().appendSuffix(" months ago")
+                        .appendYears().appendSuffix(" years ago")
                         .printZeroNever()
                         .toFormatter();
 
