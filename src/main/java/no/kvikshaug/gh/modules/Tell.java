@@ -65,6 +65,15 @@ public class Tell implements JoinListener, TriggerListener {
             }
             message.append(fromNick).append(" told me to tell you this: ").append(msg);
             Grouphug.getInstance().sendMessageChannel(channel, message.toString());
+
+            params.clear();
+            params.add((String)row[0]);
+            try {
+                sqlHandler.delete("DELETE FROM " + TELL_DB + " WHERE id=?;", params);
+            } catch (SQLException e) {
+                System.err.println(" > SQL Exception: " + e.getMessage() + "\n" + e.getCause());
+                Grouphug.getInstance().sendMessageChannel(channel, "Sorry, couldn't delete Tell, an SQL error occured.");
+            }
         }
     }
 
