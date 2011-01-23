@@ -100,5 +100,6 @@ public class Tell implements JoinListener, TriggerListener {
             Grouphug.getInstance().sendMessageChannel(channel, "Sorry, unable to update Tell DB, an SQL error occured.");
         }
 
+        Grouphug.getInstance().sendMessageChannel(channel, "I'll tell " + toNick + " this: " + msg);
     }
 }
