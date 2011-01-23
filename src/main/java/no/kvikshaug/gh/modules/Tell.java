@@ -8,6 +8,10 @@ import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.SQL;
 import no.kvikshaug.gh.util.SQLHandler;
 import org.jibble.pircbot.User;
+import org.joda.time.DateTime;
+import org.joda.time.Period;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -20,6 +24,15 @@ public class Tell implements JoinListener, TriggerListener {
     private static final String TRIGGER_HELP = "tell";
     private static final String TRIGGER = "tell";
     private static final String TELL_DB = "tell";
+    public static final PeriodFormatter FORMATTER = new PeriodFormatterBuilder()
+                        .appendSeconds().appendSuffix(" seconds ago\n")
+                        .appendMinutes().appendSuffix(" minutes ago\n")
+                        .appendHours().appendSuffix(" hours ago\n")
+                        .appendDays().appendSuffix(" days ago\n")
+                        .appendMonths().appendSuffix(" months ago\n")
+                        .appendYears().appendSuffix(" years ago\n")
+                        .printZeroNever()
+                        .toFormatter();
 
     private SQLHandler sqlHandler;
 
@@ -61,7 +74,8 @@ public class Tell implements JoinListener, TriggerListener {
 
             StringBuilder message = new StringBuilder();
             if (savedAt != null) {
-                message.append("At ").append(savedAt).append(" ");
+                Period period = new Period(new DateTime(savedAt), new DateTime());
+                message.append(FORMATTER.print(period)).append(", ");
             }
             message.append(fromNick).append(" told me to tell you this: ").append(msg);
             Grouphug.getInstance().sendMessageChannel(channel, message.toString());
