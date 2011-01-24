@@ -4,24 +4,20 @@ import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.listeners.JoinListener;
+import no.kvikshaug.gh.listeners.MessageListener;
 import no.kvikshaug.gh.listeners.NickChangeListener;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.SQL;
 import no.kvikshaug.gh.util.SQLHandler;
 import org.jibble.pircbot.User;
-import org.joda.time.DateTime;
-import org.joda.time.Period;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
 
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 
-public class Tell implements JoinListener, TriggerListener, NickChangeListener {
+public class Tell implements JoinListener, TriggerListener, NickChangeListener, MessageListener {
     private static final String TRIGGER_HELP = "tell";
     private static final String TRIGGER = "tell";
     private static final String TELL_DB = "tell";
@@ -36,6 +32,7 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener {
             moduleHandler.addTriggerListener(TRIGGER, this);
             moduleHandler.addJoinListener(this);
             moduleHandler.addNickChangeListener(this);
+            moduleHandler.addMessageListener(this);
             moduleHandler.registerHelp(TRIGGER_HELP, "Tell: Tell something to someone who's not here when they eventually join\n" +
                     "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<nick> <message>\n");
             System.out.println("Tell module loaded.");
@@ -49,8 +46,6 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener {
     }
 
     private void tell(String channel, String toNick) {
-        System.out.println("channel: " + channel);
-        System.out.println("toNick: " + toNick);
         List<String> params = new ArrayList<String>();
         params.add(toNick);
         params.add(channel);
@@ -98,9 +93,12 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener {
                 return;
             }
         }
+        saveTell(channel, sender, toNick, msg);
+    }
 
+    private void saveTell(String channel, String fromNick, String toNick, String msg) {
         List<String> params = new ArrayList<String>();
-        params.add(sender);
+        params.add(fromNick);
         params.add(toNick);
         params.add(SQL.dateToSQLDateTime(new Date()));
         params.add(msg);
@@ -122,6 +120,40 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener {
                 if (user.equals(newNick)) {
                     tell(chan, newNick);
                 }
+            }
+        }
+    }
+
+    public void onMessage(String channel, String sender, String login, String hostname, String message) {
+        if (message.matches("^(\\w+):.+") && !message.matches("(\\w+)://.+")) {
+            String toNick = message.substring(0, message.indexOf(':'));
+            String msg = message.substring(message.indexOf(':') + 1, message.length());
+
+            List<Object[]> rows = null;
+            try {
+                rows = sqlHandler.select("SELECT nick FROM seen;");
+            } catch (SQLException e) {
+                System.err.println(" > SQL Exception: " + e.getMessage() + "\n" + e.getCause());
+            }
+
+            boolean save = false;
+            if (rows != null) {
+                for (Object[] row : rows) {
+                    if (row[0].equals(toNick)) {
+                        save = true;
+                        break;
+                    }
+                }
+            }
+
+            for (User user : bot.getUsers(channel)) {
+                if (user.equals(toNick)) {
+                    return;
+                }
+            }
+
+            if (save) {
+                saveTell(channel, sender, toNick, msg);
             }
         }
     }
