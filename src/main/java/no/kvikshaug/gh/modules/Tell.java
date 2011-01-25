@@ -62,7 +62,7 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener, 
             String fromNick = (String) row[1];
             String msg = (String) row[3];
             StringBuilder message = new StringBuilder();
-            message.append(fromNick).append(" told me to tell you this: ").append(msg);
+            message.append(toNick).append(": ").append(fromNick).append(" told me to tell you this: ").append(msg);
             bot.sendMessageChannel(channel, message.toString());
 
             params.clear();
