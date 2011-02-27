@@ -39,8 +39,15 @@ object TrackingXMLParser {
     } catch {
       // thrown by the API when the item ID isn't found at posten (404)
       case e: FileNotFoundException =>
-        newStatus = "Not found (but it might appear soon if it was recently added)"
-        newStatusCode = "NO_PACKAGES"
+        if(item.statusCode == "") {
+          // if this is a new package, it has no status code
+          newStatus = "Not found (but it might appear soon if it was recently added)"
+          newStatusCode = "NO_PACKAGES"
+        } else {
+          // this package already has a status.
+          // posten sometimes gives a temporary incorrect 404 value, so just ignore it
+          (false, 0)
+        }
     }
 
     var changed = false
