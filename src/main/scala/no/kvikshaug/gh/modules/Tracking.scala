@@ -176,8 +176,26 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
                   items = items.filterNot(_ == i)
                   sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(i.id).asJava)
                   bot.sendMessageChannel(i.channel, "Removing this one from my list. Now tracking " + items.size + " packages.")
+                case "PRE_NOTIFIED" =>
+                  bot.sendMessageChannel(i.channel, i.owner + ": Posten now knows about your package.")
+                  bot.sendMessageChannel(i.channel, i.status)
+                  if(status._2 > 1) {
+                    bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
+                  }
+                case "INTERNATIONAL" =>
+                  bot.sendMessageChannel(i.channel, i.owner + ": Your package is still far away.")
+                  bot.sendMessageChannel(i.channel, i.status)
+                  if(status._2 > 1) {
+                    bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
+                  }
                 case "NOTIFICATION_SENT" =>
                   bot.sendMessageChannel(i.channel, i.owner + ": Notification for package " + i.id + " has been sent!")
+                  bot.sendMessageChannel(i.channel, i.status)
+                  if(status._2 > 1) {
+                    bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
+                  }
+                case "TRANSPORT_TO_RECIPIENT" =>
+                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " is on its way to you!")
                   bot.sendMessageChannel(i.channel, i.status)
                   if(status._2 > 1) {
                     bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
