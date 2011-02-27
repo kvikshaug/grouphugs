@@ -179,54 +179,33 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
                 case "PRE_NOTIFIED" =>
                   bot.sendMessageChannel(i.channel, i.owner + ": Posten now knows about your package.")
                   bot.sendMessageChannel(i.channel, i.status)
-                  if(status._2 > 1) {
-                    bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
-                  }
                 case "INTERNATIONAL" =>
                   bot.sendMessageChannel(i.channel, i.owner + ": Your package is still far away.")
                   bot.sendMessageChannel(i.channel, i.status)
-                  if(status._2 > 1) {
-                    bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
-                  }
                 case "NOTIFICATION_SENT" =>
                   bot.sendMessageChannel(i.channel, i.owner + ": Notification for package " + i.id + " has been sent!")
                   bot.sendMessageChannel(i.channel, i.status)
-                  if(status._2 > 1) {
-                    bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
-                  }
                 case "TRANSPORT_TO_RECIPIENT" =>
                   bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " is on its way to you!")
                   bot.sendMessageChannel(i.channel, i.status)
-                  if(status._2 > 1) {
-                    bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
-                  }
                 case "READY_FOR_PICKUP" =>
                   bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " is ready for pickup!")
                   bot.sendMessageChannel(i.channel, i.status)
-                  if(status._2 > 1) {
-                    bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
-                  }
                 case "IN_TRANSIT" =>
                   bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has changed:")
                   bot.sendMessageChannel(i.channel, i.status)
-                  if(status._2 > 1) {
-                    bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
-                  }
                 case "CUSTOMS" =>
                   bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " due for inspection!")
                   bot.sendMessageChannel(i.channel, i.status)
-                  if(status._2 > 1) {
-                    bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
-                  }
                 case "NO_PACKAGES" =>
                   bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has suddenly lost its contents! You might want to check it manually.")
                   bot.sendMessageChannel(i.channel, i.status)
                 case x =>
                   bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has changed to '" + x + "', which I don't recognize!")
                   bot.sendMessageChannel(i.channel, i.status)
-                  if(status._2 > 1) {
-                    bot.sendMessageChannel(i.channel, "Note: This package has >1 items, you might wanna track the other ones manually.")
-                  }
+              }
+              if(status._2 > 1) {
+                bot.sendMessageChannel(i.channel, "Note: This package has >1 items.")
               }
             }
           } catch {
