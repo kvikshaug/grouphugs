@@ -186,7 +186,7 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
                   bot.sendMessageChannel(i.channel, i.owner + ": Notification for package " + i.id + " has been sent!")
                   bot.sendMessageChannel(i.channel, i.status)
                 case "TRANSPORT_TO_RECIPIENT" =>
-                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " is on its way to you!")
+                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " is on its way to you right now!")
                   bot.sendMessageChannel(i.channel, i.status)
                 case "READY_FOR_PICKUP" =>
                   bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " is ready for pickup!")
@@ -195,7 +195,7 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
                   bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has changed:")
                   bot.sendMessageChannel(i.channel, i.status)
                 case "CUSTOMS" =>
-                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " due for inspection!")
+                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " is due for inspection!")
                   bot.sendMessageChannel(i.channel, i.status)
                 case "NO_PACKAGES" =>
                   bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has suddenly lost its contents! You might want to check it manually.")
