@@ -68,7 +68,7 @@ public class Quote implements TriggerListener, MessageListener {
 
 	private void sayRandomQuote(String channel){
 		try {
-			Object[] row = sqlHandler.selectSingle("SELECT id, sender, date, quote FROM "+QUOTE_DB+" WHERE channel="+channel+" ORDER BY RANDOM() LIMIT 1");
+			Object[] row = sqlHandler.selectSingle("SELECT id, sender, date, quote FROM "+QUOTE_DB+" WHERE channel='"+channel+"' ORDER BY RANDOM() LIMIT 1");
 			if (row != null) {
 				bot.sendMessageChannel(channel, (String)row[3]);
 			} 
