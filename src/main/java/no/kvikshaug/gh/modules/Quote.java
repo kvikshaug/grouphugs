@@ -57,6 +57,9 @@ public class Quote implements TriggerListener, MessageListener {
 	@Override
 	public void onMessage(String channel, String sender, String login,
 			String hostname, String message) {
+		if (message.equals("!startquote") || message.equals("!stopquote")){
+			return;
+		}
 		if (quotes.containsKey(sender)){ //Currently recording a quote
 			quotes.put(sender, quotes.get(sender)+ message + "\n");
 		}
