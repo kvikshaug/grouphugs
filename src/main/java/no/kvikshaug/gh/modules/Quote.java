@@ -31,6 +31,7 @@ public class Quote implements TriggerListener, MessageListener {
 		}
 		handler.addTriggerListener("startquote", this);
 		handler.addTriggerListener("stopquote", this);
+		handler.addTriggerListener("randomquote", this);
 		handler.addMessageListener(this);
 		handler.registerHelp("quote", "Saves lines you say between !startquote and !stopquote as quotes.\n" +
 		"Restarts recording if sending a startquote before sending a stopquote");
