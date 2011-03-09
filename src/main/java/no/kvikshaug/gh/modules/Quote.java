@@ -45,7 +45,7 @@ public class Quote implements TriggerListener, MessageListener {
 		} else if (trigger.equals("stopquote")){
 			bot.sendMessageChannel(channel, "Stopped recording of quote: ");
 			String quote = quotes.get(sender);
-			quote = quote.substring(0, quote.length()-2); //remove last \n
+			quote = quote.substring(0, quote.length()-1); //remove last \n
 			saveQuote(channel, sender, quote);
 			bot.sendMessageChannel(channel, quote);
 			quotes.remove(sender);
