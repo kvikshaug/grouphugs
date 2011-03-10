@@ -29,7 +29,8 @@ public class GoogleCalc implements TriggerListener {
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         try {
-            Document doc = Web.getJDOMDocument(new URL("http://www.google.no/search?q=" + message.replace(" ", "+")));
+        	message = message.replace("+", "%2B");
+        	Document doc = Web.getJDOMDocument(new URL("http://www.google.no/search?q=" + message.replace(" ", "+")));
             XPath calcPath = XPath.newInstance("//h:h2[@class='r']/h:b");
             calcPath.addNamespace("h","http://www.w3.org/1999/xhtml");
             Element calcElement = (Element)calcPath.selectSingleNode(doc);
