@@ -11,7 +11,8 @@ import org.jdom.xpath.XPath;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
+
+import static java.net.URLEncoder.encode;
 
 public class GoogleCalc implements TriggerListener {
 
@@ -29,8 +30,7 @@ public class GoogleCalc implements TriggerListener {
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         try {
-        	message = message.replace("+", "%2B");
-        	Document doc = Web.getJDOMDocument(new URL("http://www.google.no/search?q=" + message.replace(" ", "+")));
+            Document doc = Web.getJDOMDocument(new URL("http://www.google.no/search?q=" + encode(message, "UTF-8")));
             XPath calcPath = XPath.newInstance("//h:h2[@class='r']/h:b");
             calcPath.addNamespace("h","http://www.w3.org/1999/xhtml");
             Element calcElement = (Element)calcPath.selectSingleNode(doc);
