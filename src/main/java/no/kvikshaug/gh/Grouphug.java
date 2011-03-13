@@ -214,6 +214,8 @@ public class Grouphug extends PircBot {
             bot.joinChannel(channel);
         }
         NickPoller.load(bot);
+        GithubPostReceiveServer ghps = new GithubPostReceiveServer(bot);
+        ghps.start();
     }
 
     private static boolean connect(Grouphug bot) {
