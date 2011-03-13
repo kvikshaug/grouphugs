@@ -54,7 +54,7 @@ public class SQLHandler {
     private boolean connectionOK = false;
     private boolean verbose;
 
-    private final String connectionUrl = "jdbc:sqlite:grouphugs.db";
+    private static final String connectionUrl = "jdbc:sqlite:grouphugs.db";
 
     /**
      * Constructs a new SQLHandler object
