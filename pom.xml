@@ -158,6 +158,7 @@
               <exclude>dom4j:dom4j</exclude>
               <exclude>com.ibm.icu:icu4j</exclude>
               <exclude>xml-apis:xml-apis</exclude>
+              <exclude>xom:xom</exclude>
             </excludes>
           </artifactSet>
           <filters>
