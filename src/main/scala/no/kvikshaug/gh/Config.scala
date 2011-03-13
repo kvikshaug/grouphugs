@@ -15,8 +15,8 @@ object Config {
   def channels = (root \ "Channels" \ "Channel").map(_.attribute("chan").get.text).asJava
   def servers = (root \ "Servers" \ "Server").map(_.text).asJava
 
-  def bitlyUser = val e = (root \\ "BitLyUser").text
-  def bitlyApikey = val e = (root \\ "BitLyApiKey").text
+  def bitlyUser = (root \\ "BitLyUser").text
+  def bitlyApikey = (root \\ "BitLyApiKey").text
   
   // Upload module
   def uploadDirs = (root \ "Channels" \ "Channel").map { (x) =>
