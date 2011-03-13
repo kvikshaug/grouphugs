@@ -69,6 +69,7 @@ public class ModuleHandler {
         new Quote(this);
         new Mlia(this);
         new Bash(this);
+        new Vote(this);
 
         System.out.println();
         System.out.println(helpers.size() + " help responses registered");
