@@ -1,5 +1,7 @@
 package no.kvikshaug.gh;
 
+import static java.net.URLDecoder.decode;
+
 import com.google.gson.Gson;
 import com.sun.net.httpserver.*;
 import no.kvikshaug.gh.exceptions.GithubHookDisabledException;
@@ -75,7 +77,7 @@ public class GithubPostReceiveServer {
                 InputStream payloadStream = exchange.getRequestBody();
                 StringWriter writer = new StringWriter();
                 IOUtils.copy(payloadStream, writer, "UTF-8");
-                String body = writer.toString();
+                String body = decode(writer.toString());
                 if (body.startsWith("payload=")) {
                     System.out.println("GithubPostReceive: stripped 'payload='");
                     body = body.substring(8);
