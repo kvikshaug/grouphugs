@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Bot>
+  <GithubHookUrl>http://domain.tld</GithubHookUrl>
+  <GithubHookPort>50505</GithubHookPort>
   <Nicks>
     <Nick>botnick1</Nick>
     <Nick>botnick2</Nick>
