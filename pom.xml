@@ -104,11 +104,6 @@
   </properties>
 
   <build>
-    <!-- include scala source dirs 
-    <sourceDirectory>src/main/scala</sourceDirectory>
-    <testSourceDirectory>src/test/scala</testSourceDirectory>
-    -->
-
     <plugins>
       <!-- scala -->
       <plugin>
@@ -165,9 +160,6 @@
               <mainClass>
                 no.kvikshaug.gh.Grouphug
               </mainClass>
-              <!--addClasspath>true</addClasspath>
-              <classpathPrefix>~/.m2/repository</classpathPrefix>
-              <classpathLayoutType>repository</classpathLayoutType-->
             </manifest>
           </archive>
         </configuration>
