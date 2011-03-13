@@ -15,6 +15,8 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.net.URLEncoder.encode;
+
 /**
  * Web contains useful methods often performed by modules, like fetching the contents of a website,
  * performing a search on Google and anything else that might be handy to have here.
@@ -186,6 +188,32 @@ public class Web {
                 bytesWritten+" bytes).");
         is.close();
         os.close();
+    }
+    
+    
+    public static String getBitlyURL(String URL){
+    	String bitlyUser = Config.bitlyUser();
+    	String apiKey = Config.bitlyApikey();
+    	
+    	if ("".equals(bitlyUser) || "".equals(apiKey)) {
+    		return URL;
+    	}
+    	
+    	String urlString = "http://api.bitly.com/v3/shorten?" +
+    			"login=" + bitlyUser + "&apiKey=" + apiKey +
+    			"&longUrl=" + encode(URL, "UTF-8")  +
+    			"&format=txt";
+    	URL bitly = new URL(urlString);
+    	BufferedReader in = new BufferedReader(new InputStreamReader(bitly.openStream()));
+
+    	String inputLine;
+
+    	String newURL = "";
+    	while ((inputLine = in.readLine()) != null)
+    	    newURL+=inputLine;
+    	in.close();
+    	
+    	return newURL;
     }
 
 

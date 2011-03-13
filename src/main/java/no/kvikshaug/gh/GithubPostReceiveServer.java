@@ -5,6 +5,7 @@ import static java.net.URLDecoder.decode;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.*;
 import no.kvikshaug.gh.exceptions.GithubHookDisabledException;
+import no.kvikshaug.gh.util.Web;
 import org.apache.commons.io.IOUtils;
 
 import org.jibble.pircbot.Colors;
@@ -109,7 +110,7 @@ public class GithubPostReceiveServer {
                     message.append((payload.getCommits().size() > 3) ? " more commit" : " more commits");
                     message.append(')');
                 }
-                message.append(" — ").append(headUrl);
+                message.append(" — ").append(getBitlyURL(headUrl));
 
                 bot.sendMessageChannel(channel, message.toString());
 

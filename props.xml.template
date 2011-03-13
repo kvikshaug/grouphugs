@@ -2,6 +2,8 @@
 <Bot>
   <GithubHookUrl>domain.tld</GithubHookUrl>
   <GithubHookPort>50505</GithubHookPort>
+  <BitLyUser></BitLyUser>
+  <BitLyApiKey></BitLyApiKey>
   <Nicks>
     <Nick>botnick1</Nick>
     <Nick>botnick2</Nick>
