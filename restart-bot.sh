@@ -3,6 +3,12 @@ set -e
 if [ -e "/tmp/gh.pid" ]
 then
     kill "$(cat /tmp/gh.pid)" # kill bot
+    rm /tmp/gh.pid
+fi
+
+if [[ "$1" == "stop" ]]
+then
+    exit
 fi
 
 ./link-conf.sh
