@@ -208,6 +208,11 @@ public class Grouphug extends PircBot {
         Grouphug.bot = new Grouphug();
         bot.setVerbose(true);
         bot.setEncoding("UTF-8");
+        Runtime.getRuntime().addShutdownHook(new Thread(){
+                public void run() {
+                    bot.quitServer("Caught signal; quitting.");
+                }
+            });
         moduleHandler = new ModuleHandler(bot);
         connect(bot);
         for (String channel : Config.channels()) {
