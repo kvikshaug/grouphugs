@@ -1,5 +1,6 @@
 package no.kvikshaug.gh
 
+import no.kvikshaug.gh.exceptions.GithubHookDisabledException
 import scalaj.collection.Imports._
 import scala.collection.JavaConversions
 import scala.xml._
@@ -27,4 +28,23 @@ object Config {
     ((x \ "@chan").text -> (x \ "Modules" \ "Operator" \ "Nick").toList.map(_.text))
   }.toMap
 
+  // GithubPostReceiveServer
+  @throws(classOf[GithubHookDisabledException])
+  def githubHookUrl = {
+    val e = (root \\ "GithubHookUrl").text
+    if(e isEmpty) {
+      throw new GithubHookDisabledException("No URL option specified in " + configFile)
+    } else {
+      e
+    }
+  }
+    @throws(classOf[GithubHookDisabledException])
+    def githubHookPort = {
+      val e = (root \\ "GithubHookPort").text
+      if(e isEmpty) {
+        throw new GithubHookDisabledException("No port option specified in " + configFile)
+      } else {
+        e.toInt
+      }
+    }
 }

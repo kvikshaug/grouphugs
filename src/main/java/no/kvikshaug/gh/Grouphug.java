@@ -1,18 +1,12 @@
 package no.kvikshaug.gh;
 
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
 import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
 import org.jibble.pircbot.PircBot;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -220,6 +214,8 @@ public class Grouphug extends PircBot {
             bot.joinChannel(channel);
         }
         NickPoller.load(bot);
+        GithubPostReceiveServer ghps = new GithubPostReceiveServer(bot);
+        ghps.start();
     }
 
     private static boolean connect(Grouphug bot) {
