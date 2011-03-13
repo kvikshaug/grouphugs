@@ -59,7 +59,6 @@ public class Timer implements TriggerListener {
     	}
     }
 
-    @Override
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         int indexAfterCount = 0;
         try {
@@ -163,7 +162,6 @@ public class Timer implements TriggerListener {
             new Thread(this).start();
         }
 
-        @Override
         public void run() {
             try {
                 Thread.sleep(sleepAmount);
