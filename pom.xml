@@ -41,7 +41,7 @@
       <version>1.4.2</version>
     </dependency>
     
-    <!-- pircbot -->
+    <!-- jdom -->
     <dependency>
       <groupId>org.jdom</groupId>
       <artifactId>jdom</artifactId>
@@ -147,6 +147,29 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <artifactSet>
+            <!-- This is an attempt at making the uber jar a bit slimmer. If you get NoClassDefinitionFoundExceptions, try removing some of these... -->
+            <excludes>
+              <exclude>junit:junit</exclude>
+              <exclude>xerces:*</exclude>
+              <exclude>org.jdom:saxpath</exclude>
+              <exclude>xalan:xalan</exclude>
+              <exclude>dom4j:dom4j</exclude>
+              <exclude>com.ibm.icu:icu4j</exclude>
+              <exclude>xml-apis:xml-apis</exclude>
+            </excludes>
+          </artifactSet>
+          <filters>
+            <filter>
+              <!-- don't need source files in the jar -->
+              <artifact>*:*</artifact>
+              <excludes>
+                <exclude>**/*.java</exclude>
+              </excludes>
+            </filter>
+          </filters>
+        </configuration>
       </plugin>
 
       <!-- set Main-Class in manifest -->
