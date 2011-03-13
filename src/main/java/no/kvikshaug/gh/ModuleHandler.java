@@ -67,6 +67,7 @@ public class ModuleHandler {
         new Weather(this);
         new Tell(this);
         new Quote(this);
+        new Mlia(this);
 
         System.out.println();
         System.out.println(helpers.size() + " help responses registered");
