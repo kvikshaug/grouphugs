@@ -47,7 +47,7 @@ public class Factoid implements MessageListener, TriggerListener {
     public Factoid(ModuleHandler moduleHandler) {
         // Load up all existing factoids from sql
         try {
-            sqlHandler = new SQLHandler(true);
+            sqlHandler = SQLHandler.getSQLHandler();
             List<Object[]> rows = sqlHandler.select("SELECT `type`, `trigger`, `reply`, `author`, `channel`  FROM " + FACTOID_TABLE + ";");
             for(Object[] row : rows) {
                 boolean message = row[0].equals("message");

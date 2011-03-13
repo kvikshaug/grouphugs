@@ -31,7 +31,7 @@ public class Timer implements TriggerListener {
 
     	//Load timers from database, if there were any there when the bot shut down
     	try {
-    		sqlHandler = new SQLHandler(true);
+    		sqlHandler = SQLHandler.getSQLHandler();
     		List<Object[]> rows = sqlHandler.select("SELECT `id`, `nick`, `time`, `message`, `channel` FROM " + TIMER_TABLE + ";");
     		for(Object[] row : rows) {
     			int id = (Integer) row[0];

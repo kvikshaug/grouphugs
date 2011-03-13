@@ -62,7 +62,7 @@ public class SQLHandler {
      * to System.err.
      * @throws SQLUnavailableException if SQL is unavailable
      */
-    public SQLHandler(boolean verbose) throws SQLUnavailableException {
+    private SQLHandler(boolean verbose) throws SQLUnavailableException {
         try {
             File db = new File("grouphugs.db");
             if(!db.exists()) {
