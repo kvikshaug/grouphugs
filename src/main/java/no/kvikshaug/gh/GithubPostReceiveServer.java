@@ -2,19 +2,23 @@ package no.kvikshaug.gh;
 
 import static java.net.URLDecoder.decode;
 
-import com.google.gson.Gson;
+import com.google.gson.*;
 import com.sun.net.httpserver.*;
 import no.kvikshaug.gh.exceptions.GithubHookDisabledException;
-import no.kvikshaug.gh.util.Web;
 import org.apache.commons.io.IOUtils;
 
 import org.jibble.pircbot.Colors;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
+import org.joda.time.DateTime;
+
+import java.io.*;
+import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.URL;
+import java.text.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -27,7 +31,7 @@ public class GithubPostReceiveServer {
         this.bot = bot;
     }
 
-    private String colorize(String color, String s) {
+    private static String colorize(String color, String s) {
         return color + s + Colors.NORMAL;
     }
 
@@ -75,12 +79,12 @@ public class GithubPostReceiveServer {
         public void handle(HttpExchange exchange) throws IOException {
             String requestMethod = exchange.getRequestMethod();
             if (requestMethod.equalsIgnoreCase("POST")) {
-                InputStream payloadStream = exchange.getRequestBody();
+                BufferedInputStream payloadStream = new BufferedInputStream(exchange.getRequestBody());
                 StringWriter writer = new StringWriter();
                 IOUtils.copy(payloadStream, writer, "UTF-8");
-                String body = decode(writer.toString());
+                String body = decode(writer.toString(), "UTF-8");
                 if (body.startsWith("payload=")) {
-                    System.out.println("GithubPostReceive: stripped 'payload='");
+                    // There's no free lunch with HttpExchange; hack to get the payload POST argument :3
                     body = body.substring(8);
                 }
 
@@ -90,29 +94,15 @@ public class GithubPostReceiveServer {
                 URI requestURI = exchange.getRequestURI();
                 String channel = '#' + requestURI.getPath().substring(1);
 
-                Commit head = payload.getHead();
-                String headHashShort = head.getId().substring(0, 6);
-                String author = head.getAuthor().getName();
-                String repo = payload.getRepository().getOwner().getName() + '/' + payload.getRepository().getName();
-                String headMessage = head.getMessage();
-                String branch = payload.getRef().substring(payload.getRef().lastIndexOf('/') + 1);
-                String headUrl = head.getUrl().substring(0, head.getUrl().length() - 34);
-                if (headUrl.startsWith("http:")) {
-                    headUrl = headUrl.replaceFirst("http:", "https:");
+                if (payload.created) {
+                    bot.sendMessageChannel(channel, createdBranchMessage(payload));
+                } else if (payload.deleted) {
+                    bot.sendMessageChannel(channel, deletedBranchMessage(payload));
                 }
 
-                StringBuilder message = new StringBuilder();
-                message.append(' ').append(repo).append(' ').append(branch)
-                        .append(": ").append(author)
-                        .append(" ").append(colorize(Colors.BOLD, headHashShort)).append(" \"").append(headMessage).append('"');
-                if (payload.getCommits().size() > 1) {
-                    message.append(" (+ ").append(payload.commits.size());
-                    message.append((payload.getCommits().size() > 3) ? " more commit" : " more commits");
-                    message.append(')');
+                if (payload.commits.size() > 0) {
+                    bot.sendMessageChannel(channel, pushMessage(payload));
                 }
-                message.append(" — ").append(headUrl);
-
-                bot.sendMessageChannel(channel, message.toString());
 
                 Headers responseHeaders = exchange.getResponseHeaders();
                 responseHeaders.set("Content-Type", "text/plain");
@@ -122,11 +112,17 @@ public class GithubPostReceiveServer {
     }
 
     private static class Payload {
-        private String before;
-        private Repository repository;
-        private List<Commit> commits;
         private String after;
+        private String before;
+        private String base;
+        private List<Commit> commits;
+        private URL compare;
+        private boolean created;
+        private boolean deleted;
+        private boolean forced;
+        private User pusher;
         private String ref;
+        private Repository repository;
 
         public Commit getHead() {
             for (Commit commit : commits) {
@@ -137,126 +133,127 @@ public class GithubPostReceiveServer {
             return null;
         }
 
-        public String getBefore() {
-            return before;
+        public String getAffectedRefName() {
+            return ref.substring(ref.lastIndexOf('/') + 1);
         }
 
-        public Repository getRepository() {
-            return repository;
-        }
-
-        public List<Commit> getCommits() {
-            return commits;
-        }
-
-        public String getAfter() {
-            return after;
-        }
-
-        public String getRef() {
-            return ref;
+        public String prefix() {
+            return repository.getRepoName() + ' ' + getAffectedRefName();
         }
     }
 
     private static class Repository {
-        private String name;
-        private String url;
-        private String pledgie;
+        private DateTime created_at;
         private String description;
-        private int watchers;
+        private boolean fork;
         private int forks;
-        private int _private;
+        private boolean has_downloads;
+        private boolean has_issues;
+        private boolean has_wiki;
+        private URL homepage;
+        private String language;
+        private String name;
+        private int open_issues;
         private User owner;
+        private int watchers;
+        private boolean _private;
+        private DateTime pushed_at;
+        private int size;
+        private URL url;
 
-
-
-        public String getUrl() {
-            return url;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public int getWatchers() {
-            return watchers;
-        }
-
-        public int getForks() {
-            return forks;
-        }
-
-        public int getPrivate() {
-            return _private;
-        }
-
-        public User getOwner() {
-            return owner;
-        }
-
-        public String getPledgie() {
-            return pledgie;
+        public String getRepoName() {
+            return owner.name + '/' + name;
         }
     }
 
     private static class User {
         private String email;
         private String name;
-
-        public String getEmail() {
-            return email;
-        }
-
-        public String getName() {
-            return name;
-        }
     }
 
     private static class Commit {
-        private String id;
-        private String url;
-        private User author;
-        private String message;
-        private String timestamp;
         private List<String> added;
-        private List<String> removed;
+        private User author;
+        private boolean distinct;
+        private String id;
+        private String message;
         private List<String> modified;
+        private List<String> removed;
+        private DateTime timestamp;
+        private URL url;
+    }
 
-        public String getId() {
-            return id;
+    private class DateTimeDeserializer implements JsonDeserializer<DateTime> {
+        public DateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            return new DateTime(json.getAsJsonPrimitive().getAsString());
+        }
+    }
+
+    // originally from: http://sites.google.com/site/gson/gson-type-adapters-for-common-classes-1
+    private static class DateTimeTypeConverter
+            implements JsonSerializer<DateTime>, JsonDeserializer<DateTime> {
+        public JsonElement serialize(DateTime src, Type srcType, JsonSerializationContext context) {
+            return new JsonPrimitive(src.toString());
         }
 
-        public String getUrl() {
-            return url;
+        public DateTime deserialize(JsonElement json, Type type, JsonDeserializationContext context)
+                throws JsonParseException {
+            try {
+                try {
+                    return new DateTime(json.getAsString());
+                } catch (IllegalArgumentException e) {
+                    // May be it came in formatted as a java.util.Date, so try that
+                    Date date = context.deserialize(json, Date.class);
+                    return new DateTime(date);
+                }
+            } catch (JsonParseException jpe) {
+                // Github seems to use a format that doesn't work with java.util.Date
+                SimpleDateFormat githubFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+                try {
+                    return new DateTime(githubFormat.parse(json.getAsString()));
+                } catch (ParseException eFirst) {
+                    // Github seems to use ANOTHER format that doesn't work with java.util.Date (what the hell?)
+                    SimpleDateFormat secondGithubFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss Z");
+                    try {
+                        return new DateTime(secondGithubFormat.parse(json.getAsString()));
+                    } catch (ParseException eSecond) {
+                        System.err.println("GithubPostReceive: Unable to parse date!");
+                        eSecond.printStackTrace(System.err);
+                    }
+                }
+                return null;
+            }
         }
+    }
 
-        public User getAuthor() {
-            return author;
-        }
+    private static String createdBranchMessage(Payload payload) {
+        StringBuilder message = new StringBuilder();
+        message.append(payload.prefix()).append(": new branch created by ").append(payload.pusher.name);
+        return message.toString();
+    }
 
-        public String getMessage() {
-            return message;
-        }
+    private static String deletedBranchMessage(Payload payload) {
+        StringBuilder message = new StringBuilder();
+        message.append(payload.prefix()).append(": branch deleted by ").append(payload.pusher.name);
+        return message.toString();
+    }
 
-        public String getTimestamp() {
-            return timestamp;
-        }
+    private static String pushMessage(Payload payload) {
+        Commit head = payload.getHead();
+        String headHashShort = head.id.substring(0, 6);
+        int commitCount = payload.commits.size();
 
-        public List<String> getAdded() {
-            return added;
+        StringBuilder message = new StringBuilder();
+        message.append(payload.prefix()).append(": ").append(payload.pusher.name).append(" pushed ").append(head.author.name)
+               .append(" ").append(colorize(Colors.BOLD, headHashShort)).append(" \"").append(head.message).append('"');
+        if (commitCount > 1) {
+            message.append(" (+ ").append(commitCount);
+            message.append((commitCount > 3) ? " more commit" : " more commits");
+            message.append(')');
         }
+        message.append(" — ").append(payload.compare);
 
-        public List<String> getRemoved() {
-            return removed;
-        }
-
-        public List<String> getModified() {
-            return modified;
-        }
+        return message.toString();
     }
 }
 
