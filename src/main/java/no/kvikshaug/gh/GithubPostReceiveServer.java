@@ -79,7 +79,7 @@ public class GithubPostReceiveServer {
         public void handle(HttpExchange exchange) throws IOException {
             String requestMethod = exchange.getRequestMethod();
             if (requestMethod.equalsIgnoreCase("POST")) {
-                BufferedInputStream payloadStream = new BufferedInputStream(exchange.getRequestBody());
+                InputStream payloadStream = exchange.getRequestBody();
                 StringWriter writer = new StringWriter();
                 IOUtils.copy(payloadStream, writer, "UTF-8");
                 String body = decode(writer.toString(), "UTF-8");
@@ -88,7 +88,9 @@ public class GithubPostReceiveServer {
                     body = body.substring(8);
                 }
 
-                Gson gson = new Gson();
+                GsonBuilder gsonBuilder = new GsonBuilder();
+                gsonBuilder.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter());
+                Gson gson = gsonBuilder.create();
                 Payload payload = gson.fromJson(body, Payload.class);
 
                 URI requestURI = exchange.getRequestURI();
