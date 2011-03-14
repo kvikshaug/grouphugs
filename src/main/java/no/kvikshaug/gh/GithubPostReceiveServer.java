@@ -109,6 +109,7 @@ public class GithubPostReceiveServer {
                 Headers responseHeaders = exchange.getResponseHeaders();
                 responseHeaders.set("Content-Type", "text/plain");
                 exchange.sendResponseHeaders(200, 0);
+                exchange.close();
             }
         }
     }
