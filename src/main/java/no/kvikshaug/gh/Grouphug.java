@@ -56,6 +56,8 @@ public class Grouphug extends PircBot {
     public static final String configFile = "props.xml";
 
     private static Grouphug bot;
+    private GithubPostReceiveServer gprs;
+
     public static Grouphug getInstance() {
       return bot;
     }
@@ -212,6 +214,9 @@ public class Grouphug extends PircBot {
         Runtime.getRuntime().addShutdownHook(new Thread(){
                 public void run() {
                     DISCONNECTING = true;
+                    if (bot.gprs != null) {
+                        bot.gprs.stop();
+                    }
                     bot.quitServer("Caught signal; quitting.");
                 }
             });
@@ -221,8 +226,8 @@ public class Grouphug extends PircBot {
             bot.joinChannel(channel);
         }
         NickPoller.load(bot);
-        GithubPostReceiveServer ghps = new GithubPostReceiveServer(bot);
-        ghps.start();
+        bot.gprs = new GithubPostReceiveServer(bot);
+        bot.gprs.start();
     }
 
     private static boolean connect(Grouphug bot) {
