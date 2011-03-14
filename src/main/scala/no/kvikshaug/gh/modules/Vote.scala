@@ -2,8 +2,14 @@ package no.kvikshaug.gh.modules
 
 import no.kvikshaug.gh.listeners.TriggerListener
 import no.kvikshaug.gh.{Grouphug, ModuleHandler}
+import no.kvikshaug.gh.exceptions.SQLUnavailableException;
+import no.kvikshaug.gh.util.SQLHandler;
 
 import java.util.regex._
+import java.sql.SQLException
+
+import scalaj.collection.Imports._
+import scala.collection.immutable.List
 
 case class VoteItem(id: String, creator: String, text: String, multi: Boolean, options: List[VoteOption]) {
   def resultCount = options.foldLeft(0)((c, o) => c + o.voters.size)
@@ -39,8 +45,42 @@ class Vote(val handler: ModuleHandler) extends TriggerListener {
 Add -m to !startvote to allow multiple choices from one candidate""")
   println("Vote module loaded.")
 
-  // TODO: db everywhere
+  var sqlHandler: SQLHandler = null
+  val dbVotes = "votes"
+  val dbVoteOptions = "vote_options"
+  val dbVoteOptionVoters = "vote_option_voters"
   var items = List[VoteItem]()
+
+  // load all votes from db. this is so ugly i can't even look at it.
+  try {
+    sqlHandler = SQLHandler.getSQLHandler
+    // votes
+    items = sqlHandler.select(
+      "select id, creator, text, multi from " + dbVotes + ";"
+    ).asScala.map { voteRow =>
+      // vote options
+      val optionList = sqlHandler.select(
+        "select id, text from " + dbVoteOptions + " where voteId='" + voteRow(0).toString + "';"
+      ).asScala.map { voteOptionRow =>
+        // vote option voters
+        val voterList = sqlHandler.select(
+          "select nick from " + dbVoteOptionVoters + " where optionId='" + voteOptionRow(0).toString + "';"
+        ).asScala.map { voteOptionVoterRow =>
+          voteOptionVoterRow(0).asInstanceOf[String]
+        }.toList;
+        VoteOption(voteOptionRow(1).asInstanceOf[String], voterList)
+      }.toList;
+    VoteItem(voteRow(0).toString, voteRow(1).asInstanceOf[String],
+             voteRow(2).asInstanceOf[String], voteRow(3).asInstanceOf[String].toBoolean,
+             optionList)
+    }.toList
+  } catch {
+    case e: SQLUnavailableException => println("Vote module warning: Existing votes couldn't be loaded because SQL is unavailable.")
+    case e: SQLException => println("Vote module warning: Existing votes couldn't be loaded because of an SQLException.")
+      e.printStackTrace();
+  }
+  println("Vote module loaded.")
+
   val random = new java.util.Random
   val idDigits = 4
   def randomId = {
@@ -91,8 +131,13 @@ Add -m to !startvote to allow multiple choices from one candidate""")
       }
       bot.sendMessageChannel(channel, "Created vote " + items(0).id + multiText + ".")
       bot.sendMessageChannel(channel, "Type '!vote <choice> " + items(0).id + "' to vote")
+      sqlHandler.insert("insert into votes (id, creator, text, multi) values ('" + items(0).id + "', '" + nick + "', '" + question + "', '" + multi.toString + "')")
+      options foreach { o =>
+        sqlHandler.insert("insert into " + dbVoteOptions + " (voteId, text) values ('" + items(0).id + "', '" + o.text + "');")
+      }
       // db
     } catch {
+      case e: SQLException => bot.sendMessageChannel(channel, "Failed to insert the vote into SQL."); e.printStackTrace
       case e => bot.sendMessageChannel(channel, "Sorry, what? Maybe you should check !help vote."); e.printStackTrace
     }
   }
@@ -103,6 +148,11 @@ Add -m to !startvote to allow multiple choices from one candidate""")
       return
     }
     items = items.filterNot(_ == id)
+    sqlHandler.select("select id from " + dbVoteOptions + " where voteId='" + id + "';").asScala.foreach { row =>
+      sqlHandler.delete("delete from " + dbVoteOptionVoters + " where optionId='" + row(0).toString + "';")
+    }
+    sqlHandler.delete("delete from " + dbVoteOptions + " where voteId='" + id + "';")
+    sqlHandler.delete("delete from " + dbVotes + " where id='" + id + "';")
     bot.sendMessageChannel(channel, "Removed vote \"" + id + "\".")
   }
 
@@ -154,10 +204,15 @@ Add -m to !startvote to allow multiple choices from one candidate""")
       bot.sendMessageChannel(channel, "You've already voted for that option.")
       return
     }
-    // TODO db!
-    option.get.voters = nick :: option.get.voters
-    bot.sendMessageChannel(channel, nick + " voted for '" + option.get.text + "' in vote " + item.get.id + ": " + item.get.text)
-    outputSortedList(channel, item.get)
+    try {
+      option.get.voters = nick :: option.get.voters
+      val optionId = (sqlHandler.selectSingle("select id from " + dbVoteOptions + " where text='" + option.get.text + "' and voteId='" + m.group(2) + "';"))(0).toString
+      sqlHandler.insert("insert into " + dbVoteOptionVoters + " (optionId, nick) values ('" + optionId + "', '" + nick + "');")
+      bot.sendMessageChannel(channel, nick + " voted for '" + option.get.text + "' in vote " + item.get.id + ": " + item.get.text)
+      outputSortedList(channel, item.get)
+    } catch {
+      case e: SQLException => bot.sendMessageChannel(channel, "Sorry, I failed to update votecount in SQL!"); e.printStackTrace
+    }
   }
 
   def hasVoted(nick: String, vote: VoteItem): Boolean = vote.options.exists {
