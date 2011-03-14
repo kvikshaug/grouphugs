@@ -135,8 +135,8 @@ public class GithubPostReceiveServer {
         int commitCount = payload.commits.size();
 
         StringBuilder message = new StringBuilder();
-        message.append(payload.prefix()).append(": ").append(payload.pusher.name).append(" pushed ").append(head.author.name)
-               .append(" ").append(colorize(Colors.BOLD, headHashShort)).append(" \"").append(head.getShortMessage()).append('"');
+        message.append(payload.prefix()).append(": ").append(payload.pusher.name).append(" pushed ")
+               .append(colorize(Colors.BOLD, headHashShort)).append(" \"").append(head.getShortMessage()).append('"');
         if (commitCount > 1) {
             message.append(" (+ ").append(commitCount);
             message.append((commitCount > 3) ? " more commits" : " more commit");
