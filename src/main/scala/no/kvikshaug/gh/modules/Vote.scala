@@ -43,7 +43,6 @@ class Vote(val handler: ModuleHandler) extends TriggerListener {
 !votes                 -> Lists all available votes
 !endvote <vote>        -> Deletes a vote and corresponding results
 Add -m to !startvote to allow multiple choices from one candidate""")
-  println("Vote module loaded.")
 
   var sqlHandler: SQLHandler = null
   val dbVotes = "votes"
