@@ -73,7 +73,9 @@ public class GithubPostReceiveServer {
     }
 
     public void stop() {
-        this.server.stop(0);
+        if(this.server != null) {
+            this.server.stop(0);
+        }
     }
 
     private class GithubPayloadHandler implements HttpHandler {
