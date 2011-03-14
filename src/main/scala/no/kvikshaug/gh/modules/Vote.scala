@@ -36,7 +36,7 @@ class Vote(val handler: ModuleHandler) extends TriggerListener {
 !showvote <vote>       -> Shows options and results for a vote
 !votes                 -> Lists all available votes
 !endvote <vote>        -> Deletes a vote and corresponding results
-Add -m to !startvote to allow multiple answers from one candidate""")
+Add -m to !startvote to allow multiple choices from one candidate""")
   println("Vote module loaded.")
 
   // TODO: db everywhere
@@ -87,7 +87,7 @@ Add -m to !startvote to allow multiple answers from one candidate""")
       items = VoteItem(randomId.toString, nick, question, multi, options) :: items
       var multiText = ""
       if(multi) {
-        multiText = " with multiple answers allowed"
+        multiText = " with multiple choices allowed"
       }
       bot.sendMessageChannel(channel, "Created vote " + items(0).id + multiText + ".")
       bot.sendMessageChannel(channel, "Type '!vote <choice> " + items(0).id + "' to vote")
@@ -114,7 +114,7 @@ Add -m to !startvote to allow multiple answers from one candidate""")
     }
     var multi = ""
     if(item.get.multi) {
-      multi = ", multiple answers allowed"
+      multi = ", multiple choices allowed"
     }
     bot.sendMessageChannel(channel, "Vote " + id + " by " + item.get.creator + multi + ": " + item.get.text)
     outputSortedList(channel, item.get)
