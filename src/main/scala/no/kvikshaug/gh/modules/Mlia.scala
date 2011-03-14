@@ -3,6 +3,7 @@ package no.kvikshaug.gh.modules
 import scala.xml._
 
 import java.net.URL
+import org.ccil.cowan.tagsoup.jaxp.SAXParserImpl
 
 import no.kvikshaug.gh.listeners.TriggerListener
 import no.kvikshaug.gh.util.Web
@@ -26,9 +27,7 @@ class Mlia(val handler: ModuleHandler) extends TriggerListener {
   def randomPage = random.nextInt(pageCount + 1) + 1 // read java.util.Random.nextInt(int) javadoc if you wonder about +1
 
   def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String) = {
-    // Throws a SAXParseException due to invalid XML (the dir attribute in the html element does not contain any value)
-    // at the time of this writing.
-    val root = XML.load(Web.prepareEncodedBufferedReader(
+    val root = XML.withSAXParser(SAXParserImpl.newInstance(null)).load(Web.prepareEncodedBufferedReader(
       new URL("http://mylifeisaverage.com/" + randomPage)))
 
     //bot.sendMessageChannel(channel, entry)
