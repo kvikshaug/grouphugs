@@ -219,8 +219,6 @@ public class Web {
 			System.out.println("Malformed URL in bitly-method");
 		} catch (IOException e) {
 			System.out.println("IOException in bitly-method");
-		} catch (UnsupportedEncodingException e) {
-			System.out.println("IOException in bitly-method");
 		}
 		return newURL;
 	}

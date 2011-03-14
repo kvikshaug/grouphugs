@@ -110,7 +110,7 @@ public class GithubPostReceiveServer {
                     message.append((payload.getCommits().size() > 3) ? " more commit" : " more commits");
                     message.append(')');
                 }
-                message.append(" — ").append(getBitlyURL(headUrl));
+                message.append(" — ").append(headUrl);
 
                 bot.sendMessageChannel(channel, message.toString());
 
