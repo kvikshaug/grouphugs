@@ -181,6 +181,15 @@ public class GithubPostReceiveServer {
         private List<String> removed;
         private DateTime timestamp;
         private URL url;
+
+
+        public String getShortMessage() {
+            if (message.indexOf('\n') != -1) {
+                return message.substring(0, message.indexOf('\n'));
+            } else {
+                return message;
+            }
+        }
     }
 
     private class DateTimeDeserializer implements JsonDeserializer<DateTime> {
@@ -245,7 +254,7 @@ public class GithubPostReceiveServer {
 
         StringBuilder message = new StringBuilder();
         message.append(payload.prefix()).append(": ").append(payload.pusher.name).append(" pushed ").append(head.author.name)
-               .append(" ").append(colorize(Colors.BOLD, headHashShort)).append(" \"").append(head.message).append('"');
+               .append(" ").append(colorize(Colors.BOLD, headHashShort)).append(" \"").append(head.getShortMessage()).append('"');
         if (commitCount > 1) {
             message.append(" (+ ").append(commitCount);
             message.append((commitCount > 3) ? " more commit" : " more commits");
