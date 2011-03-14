@@ -139,7 +139,7 @@ public class GithubPostReceiveServer {
                .append(colorize(Colors.BOLD, headHashShort)).append(" \"").append(head.getShortMessage()).append('"');
         if (commitCount > 1) {
             message.append(" (+ ").append(commitCount);
-            message.append((commitCount > 3) ? " more commits" : " more commit");
+            message.append((commitCount > 1) ? " more commits" : " more commit");
             message.append(')');
         }
         message.append(" — ").append(payload.compare);
