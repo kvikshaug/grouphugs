@@ -175,7 +175,11 @@ Add -m to !startvote to allow multiple answers from one candidate""")
       if(voters != "") {
         voters = " (" + voters.substring(2) + ")"
       }
-      bot.sendMessageChannel(channel, o.voters.size + " votes for " + o.text + voters)
+      var plural = ""
+      if(voters.size != 1) {
+        plural = "s"
+      }
+      bot.sendMessageChannel(channel, o.voters.size + " vote" + plural + " for " + o.text + voters)
     }
   }
 }
