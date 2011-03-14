@@ -26,11 +26,16 @@ class Mlia(val handler: ModuleHandler) extends TriggerListener {
   val random = new java.util.Random
   def randomPage = random.nextInt(pageCount + 1) + 1 // read java.util.Random.nextInt(int) javadoc if you wonder about +1
 
-  def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String) = {
+  def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String): Unit = {
     val root = XML.withSAXParser(SAXParserImpl.newInstance(null)).load(Web.prepareEncodedBufferedReader(
       new URL("http://mylifeisaverage.com/" + randomPage)))
 
-    //bot.sendMessageChannel(channel, entry)
+    for(div <- root \\ "div") {
+      if((div \ "@class").text == "sc") {
+        bot.sendMessageChannel(channel, div.text.trim)
+        return
+      }
+    }
   }
 }
 
