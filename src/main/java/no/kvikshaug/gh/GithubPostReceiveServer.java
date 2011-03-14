@@ -1,26 +1,27 @@
 package no.kvikshaug.gh;
 
-import static java.net.URLDecoder.decode;
-
 import com.google.gson.*;
 import com.sun.net.httpserver.*;
 import no.kvikshaug.gh.exceptions.GithubHookDisabledException;
 import org.apache.commons.io.IOUtils;
-
 import org.jibble.pircbot.Colors;
 import org.joda.time.DateTime;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
-import java.text.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
+
+import static java.net.URLDecoder.decode;
 
 public class GithubPostReceiveServer {
 
@@ -112,6 +113,36 @@ public class GithubPostReceiveServer {
                 exchange.close();
             }
         }
+    }
+
+    private static String createdBranchMessage(Payload payload) {
+        StringBuilder message = new StringBuilder();
+        message.append(payload.prefix()).append(": new branch created by ").append(payload.pusher.name);
+        return message.toString();
+    }
+
+    private static String deletedBranchMessage(Payload payload) {
+        StringBuilder message = new StringBuilder();
+        message.append(payload.prefix()).append(": branch deleted by ").append(payload.pusher.name);
+        return message.toString();
+    }
+
+    private static String pushMessage(Payload payload) {
+        Commit head = payload.getHead();
+        String headHashShort = head.id.substring(0, 6);
+        int commitCount = payload.commits.size();
+
+        StringBuilder message = new StringBuilder();
+        message.append(payload.prefix()).append(": ").append(payload.pusher.name).append(" pushed ").append(head.author.name)
+               .append(" ").append(colorize(Colors.BOLD, headHashShort)).append(" \"").append(head.getShortMessage()).append('"');
+        if (commitCount > 1) {
+            message.append(" (+ ").append(commitCount);
+            message.append((commitCount > 3) ? " more commits" : " more commit");
+            message.append(')');
+        }
+        message.append(" — ").append(payload.compare);
+
+        return message.toString();
     }
 
     private static class Payload {
@@ -236,36 +267,6 @@ public class GithubPostReceiveServer {
                 return null;
             }
         }
-    }
-
-    private static String createdBranchMessage(Payload payload) {
-        StringBuilder message = new StringBuilder();
-        message.append(payload.prefix()).append(": new branch created by ").append(payload.pusher.name);
-        return message.toString();
-    }
-
-    private static String deletedBranchMessage(Payload payload) {
-        StringBuilder message = new StringBuilder();
-        message.append(payload.prefix()).append(": branch deleted by ").append(payload.pusher.name);
-        return message.toString();
-    }
-
-    private static String pushMessage(Payload payload) {
-        Commit head = payload.getHead();
-        String headHashShort = head.id.substring(0, 6);
-        int commitCount = payload.commits.size();
-
-        StringBuilder message = new StringBuilder();
-        message.append(payload.prefix()).append(": ").append(payload.pusher.name).append(" pushed ").append(head.author.name)
-               .append(" ").append(colorize(Colors.BOLD, headHashShort)).append(" \"").append(head.getShortMessage()).append('"');
-        if (commitCount > 1) {
-            message.append(" (+ ").append(commitCount);
-            message.append((commitCount > 3) ? " more commits" : " more commit");
-            message.append(')');
-        }
-        message.append(" — ").append(payload.compare);
-
-        return message.toString();
     }
 }
 
