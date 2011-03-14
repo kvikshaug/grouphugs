@@ -51,6 +51,7 @@ public class Grouphug extends PircBot {
     private static final int RECONNECT_TIME = 15000;
     private static boolean spamOK = false;
     private static ModuleHandler moduleHandler;
+    private static boolean DISCONNECTING = false; // set to true when intentionally disconnecting
 
     public static final String configFile = "props.xml";
 
@@ -210,6 +211,7 @@ public class Grouphug extends PircBot {
         bot.setEncoding("UTF-8");
         Runtime.getRuntime().addShutdownHook(new Thread(){
                 public void run() {
+                    DISCONNECTING = true;
                     bot.quitServer("Caught signal; quitting.");
                 }
             });
@@ -258,6 +260,9 @@ public class Grouphug extends PircBot {
 
     @Override
     protected void onDisconnect() {
+        if(DISCONNECTING) {
+            return;
+        }
         final String prefix = "[reconnecter] ";
         System.out.println("\n" + prefix + "Whoops, I was disconnected! Retrying connection...");
         while(!Grouphug.connect(this)) {
