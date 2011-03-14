@@ -2,6 +2,7 @@ package no.kvikshaug.gh.util;
 
 import no.kvikshaug.gh.exceptions.NoTitleException;
 import static org.apache.commons.io.IOUtils.closeQuietly;
+import no.kvikshaug.gh.Config;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
