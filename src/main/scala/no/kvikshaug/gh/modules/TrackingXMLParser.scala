@@ -46,7 +46,7 @@ object TrackingXMLParser {
         } else {
           // this package already has a status.
           // posten sometimes gives a temporary incorrect 404 value, so just ignore it
-          (false, 0)
+          return (false, 0)
         }
     }
 
