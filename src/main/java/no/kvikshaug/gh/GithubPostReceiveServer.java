@@ -3,6 +3,8 @@ package no.kvikshaug.gh;
 import com.google.gson.*;
 import com.sun.net.httpserver.*;
 import no.kvikshaug.gh.exceptions.GithubHookDisabledException;
+import no.kvikshaug.gh.util.Web;
+
 import org.apache.commons.io.IOUtils;
 import org.jibble.pircbot.Colors;
 import org.joda.time.DateTime;
@@ -141,7 +143,7 @@ public class GithubPostReceiveServer {
             message.append(" + ").append(commitCount);
             message.append(((commitCount - 1) >= 2) ? " more commits" : " more commit");
         }
-        message.append(" — ").append(payload.compare);
+        message.append(" — ").append(Web.getBitlyURL(payload.compare.toString()));
 
         return message.toString();
     }
