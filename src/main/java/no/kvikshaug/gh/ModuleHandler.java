@@ -71,6 +71,7 @@ public class ModuleHandler {
         new Bash(this);
         new Vote(this);
         new Tlf(this);
+        new Time(this);
 
         System.out.println();
         System.out.println(helpers.size() + " help responses registered");

@@ -63,7 +63,7 @@ public class Grouphug extends PircBot {
     }
 
     @Override
-    protected void onMessage(String channel, String sender, String login, String hostname, String message) {
+    public void onMessage(String channel, String sender, String login, String hostname, String message) {
         // Old reboot/reload functions - this is strictly not necessary, but maybe these
         // should be reimplemented properly sometime?
         if(message.equals("!reboot") || message.equals("!reload")) {
