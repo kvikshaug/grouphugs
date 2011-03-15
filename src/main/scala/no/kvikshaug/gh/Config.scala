@@ -6,6 +6,7 @@ import scala.collection.JavaConversions
 import scala.xml._
 
 object Config {
+  implicit def wrapNodeSeq(ns: NodeSeq) = new NodeSeqWrapper(ns)
   val configFile = "props.xml"
   var root = XML.loadFile(configFile)
   def reparse = root = XML.loadFile(configFile)
@@ -67,4 +68,17 @@ object Config {
         e.toInt
       }
     }
+
+  /* Throws a PNSE if the node doesn't exist */
+  def ifExists(ns: NodeSeq, message: String = "Missing corresponding option in " + configFile) = {
+    if(ns isEmpty) { throw new PreferenceNotSetException(message) }
+    else { ns }
+  }
+
 }
+
+class NodeSeqWrapper(val value: NodeSeq) {
+  // takes and calls a function with the NodeSeq as parameter which can return anything
+  def get[A](fun: (NodeSeq) => A): A = fun(value)
+}
+
