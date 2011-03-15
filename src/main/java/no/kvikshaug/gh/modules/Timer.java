@@ -89,18 +89,32 @@ public class Timer implements TriggerListener {
 			parseHighlight = new DateTime(hour_min_format.parse(timerTime));
 			timeToHighlight = new DateTime(now.getYear(), now.getMonthOfYear(), now.getDayOfMonth(), 
 					parseHighlight.getHourOfDay(), parseHighlight.getMinuteOfHour(), 0, 0);
+		
+			if (timeToHighlight.isBefore(now)){ //Aka a timestamp that already has been today
+				timeToHighlight = timeToHighlight.plusDays(1); //So that means we mean tomorrow
+			}
+
 		} catch (ParseException e) {
 			//Not of this type, try another one
 			try {
 				parseHighlight = new DateTime(date_format.parse(timerTime));
 				timeToHighlight = new DateTime(now.getYear(), parseHighlight.getMonthOfYear(), parseHighlight.getDayOfMonth(), 
 						0, 0, 0, 0);
+				
+				if (timeToHighlight.isBefore(now)){ //A date that has already been this year
+					timeToHighlight = timeToHighlight.plusYears(1); //So that means we mean next year
+				}
+				
 			} catch (ParseException e1) {
 				//Not this one either, try the last one
 				try {
 					parseHighlight = new DateTime(date_hour_min_format.parse(timerTime));
 					timeToHighlight = new DateTime(now.getYear(), parseHighlight.getMonthOfYear(), parseHighlight.getDayOfMonth(), 
 							parseHighlight.getHourOfDay(), parseHighlight.getMinuteOfHour(), 0, 0);
+					
+					if (timeToHighlight.isBefore(now)){ //Aka a date and time that has been this year
+						timeToHighlight = timeToHighlight.plusYears(1);						
+					}
 				} catch (ParseException e2) {
 					//Not this one either, this is just bogus
 					bot.sendMessageChannel(channel, "Stop trying to trick me, this isn't a valid timer-argument. Try !help timer");
@@ -111,7 +125,13 @@ public class Timer implements TriggerListener {
 		
 		//We now have the time, now we just have to find out how long it is until that time
 		
-		Duration duration = new Duration(new DateTime(), timeToHighlight);
+		Duration duration = null;
+		try {
+			duration = new Duration(new DateTime(), timeToHighlight);
+		} catch (IllegalArgumentException e) {
+			System.out.println("Error in timer, trying to get the duration between now, and a datetime that has already been");
+			return;
+		}
 		
 		String notifyMessage = message.substring(timerTime.length()).trim();
 		
