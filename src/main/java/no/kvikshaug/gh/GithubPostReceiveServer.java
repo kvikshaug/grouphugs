@@ -2,9 +2,8 @@ package no.kvikshaug.gh;
 
 import com.google.gson.*;
 import com.sun.net.httpserver.*;
-import no.kvikshaug.gh.exceptions.GithubHookDisabledException;
+import no.kvikshaug.gh.exceptions.PreferenceNotSetException;
 import no.kvikshaug.gh.util.Web;
-
 import org.apache.commons.io.IOUtils;
 import org.jibble.pircbot.Colors;
 import org.joda.time.DateTime;
@@ -44,7 +43,7 @@ public class GithubPostReceiveServer {
         try {
             url = Config.githubHookUrl();
             port = Config.githubHookPort();
-        } catch (GithubHookDisabledException e) {
+        } catch (PreferenceNotSetException e) {
             System.out.println("GithubPostReceive: Disabled.");
             System.out.println("GithubPostReceive: " + e.getMessage());
             return;

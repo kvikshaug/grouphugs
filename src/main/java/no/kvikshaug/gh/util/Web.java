@@ -2,6 +2,8 @@ package no.kvikshaug.gh.util;
 
 import no.kvikshaug.gh.Config;
 import no.kvikshaug.gh.exceptions.NoTitleException;
+import no.kvikshaug.gh.exceptions.PreferenceNotSetException;
+import org.apache.commons.io.IOUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -200,34 +202,34 @@ public class Web {
     }
 
 
-    public static String getBitlyURL(String URL) {
-        String newURL = "";
+    public static String getBitlyURL(String url) {
+        String bitlyUser;
+        String apiKey;
         try {
-            String bitlyUser = Config.bitlyUser();
-            String apiKey = Config.bitlyApikey();
-
-            if ("".equals(bitlyUser) || "".equals(apiKey)) {
-                return URL;
-            }
-
+            bitlyUser = Config.bitlyUser();
+            apiKey = Config.bitlyApiKey();
+        } catch (PreferenceNotSetException pnse) {
+            return url;
+        }
+        try {
             String urlString = "http://api.bitly.com/v3/shorten?" +
                     "login=" + bitlyUser + "&apiKey=" + apiKey +
-                    "&longUrl=" + encode(URL, "UTF-8") +
+                    "&longUrl=" + encode(url, "UTF-8") +
                     "&format=txt";
             URL bitly = new URL(urlString);
-            BufferedReader in = new BufferedReader(new InputStreamReader(bitly.openStream()));
 
-            String inputLine;
-
-            while ((inputLine = in.readLine()) != null)
-                newURL += inputLine;
-            in.close();
-        } catch (MalformedURLException e) {
-            System.out.println("Malformed URL in bitly-method");
-        } catch (IOException e) {
+            InputStream is = bitly.openStream();
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(is, writer);
+            is.close();
+            return writer.toString(); // short url
+        } catch (MalformedURLException murle) {
+            System.out.println("Malformed url in bitly-method");
+            return url;
+        } catch (IOException ioe) {
             System.out.println("IOException in bitly-method");
+            return url;
         }
-        return newURL;
     }
 
 

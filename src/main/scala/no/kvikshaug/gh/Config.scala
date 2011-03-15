@@ -1,6 +1,6 @@
 package no.kvikshaug.gh
 
-import no.kvikshaug.gh.exceptions.GithubHookDisabledException
+import no.kvikshaug.gh.exceptions.PreferenceNotSetException
 import scalaj.collection.Imports._
 import scala.collection.JavaConversions
 import scala.xml._
@@ -15,8 +15,25 @@ object Config {
   def channels = (root \ "Channels" \ "Channel").map(_.attribute("chan").get.text).asJava
   def servers = (root \ "Servers" \ "Server").map(_.text).asJava
 
-  def bitlyUser = (root \\ "BitLyUser").text
-  def bitlyApikey = (root \\ "BitLyApiKey").text
+  @throws(classOf[PreferenceNotSetException])
+  def bitlyUser = {
+    val e = (root \\ "BitLyUser").text
+    if(e isEmpty) {
+      throw new PreferenceNotSetException("No BitLyUser option specified in " + configFile)
+    } else {
+      e
+    }
+  }
+
+  @throws(classOf[PreferenceNotSetException])
+  def bitlyApiKey = {
+    val e = (root \\ "BitLyApiKey").text
+    if(e isEmpty) {
+      throw new PreferenceNotSetException("No BitLyApiKey option specified in " + configFile)
+    } else {
+      e
+    }
+  }
   
   // Upload module
   def uploadDirs = (root \ "Channels" \ "Channel").map { (x) =>
@@ -32,20 +49,20 @@ object Config {
   }.toMap
 
   // GithubPostReceiveServer
-  @throws(classOf[GithubHookDisabledException])
+  @throws(classOf[PreferenceNotSetException])
   def githubHookUrl = {
     val e = (root \\ "GithubHookUrl").text
     if(e isEmpty) {
-      throw new GithubHookDisabledException("No URL option specified in " + configFile)
+      throw new PreferenceNotSetException("No GithubHookUrl option specified in " + configFile)
     } else {
       e
     }
   }
-    @throws(classOf[GithubHookDisabledException])
+    @throws(classOf[PreferenceNotSetException])
     def githubHookPort = {
       val e = (root \\ "GithubHookPort").text
       if(e isEmpty) {
-        throw new GithubHookDisabledException("No port option specified in " + configFile)
+        throw new PreferenceNotSetException("No GithubHookPort option specified in " + configFile)
       } else {
         e.toInt
       }
