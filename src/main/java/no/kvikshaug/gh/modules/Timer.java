@@ -82,17 +82,25 @@ public class Timer implements TriggerListener {
     	SimpleDateFormat date_format = new SimpleDateFormat("dd/MM"); // 2/4, 23/12
     	SimpleDateFormat date_hour_min_format = new SimpleDateFormat("dd/MM-HH:mm"); //24/12-20:34
     	
+    	DateTime parseHighlight = null;
     	DateTime timeToHighlight = null;
+    	DateTime now = new DateTime();
 		try {
-			timeToHighlight = new DateTime(hour_min_format.parse(timerTime));
+			parseHighlight = new DateTime(hour_min_format.parse(timerTime));
+			timeToHighlight = new DateTime(now.getYear(), now.getMonthOfYear(), now.getDayOfMonth(), 
+					parseHighlight.getHourOfDay(), parseHighlight.getMinuteOfHour(), 0, 0);
 		} catch (ParseException e) {
 			//Not of this type, try another one
 			try {
-				timeToHighlight = new DateTime(date_format.parse(timerTime));
+				parseHighlight = new DateTime(date_format.parse(timerTime));
+				timeToHighlight = new DateTime(now.getYear(), parseHighlight.getMonthOfYear(), parseHighlight.getDayOfMonth(), 
+						0, 0, 0, 0);
 			} catch (ParseException e1) {
 				//Not this one either, try the last one
 				try {
-					timeToHighlight = new DateTime(date_hour_min_format.parse(timerTime));
+					parseHighlight = new DateTime(date_hour_min_format.parse(timerTime));
+					timeToHighlight = new DateTime(now.getYear(), parseHighlight.getMonthOfYear(), parseHighlight.getDayOfMonth(), 
+							parseHighlight.getHourOfDay(), parseHighlight.getMinuteOfHour(), 0, 0);
 				} catch (ParseException e2) {
 					//Not this one either, this is just bogus
 					bot.sendMessageChannel(channel, "Stop trying to trick me, this isn't a valid timer-argument. Try !help timer");
@@ -110,7 +118,7 @@ public class Timer implements TriggerListener {
 		
 		int id = insertTimerIntoDb(channel, sender, notifyMessage, duration.getMillis());
         
-        bot.sendMessageChannel(channel, "Ok, I will highlight at " + timerTime +".");
+        bot.sendMessageChannel(channel, "Ok, I will highlight you at " + timerTime +".");
         
         new Sleeper(id, sender, (int) duration.getMillis(), notifyMessage, channel);
     }
