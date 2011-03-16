@@ -17,9 +17,9 @@ object Config {
   def servers = ifExists (root \ "Servers") get ((ns) => (ns \ "Server").map(_.text).asJava)
 
   @throws(classOf[PreferenceNotSetException])
-  def bitlyUser = (ifExists (root \\ "BitLyUser")) text
+  def bitlyUser = (ifExists (root \ "BitLyUser")) text
   @throws(classOf[PreferenceNotSetException])
-  def bitlyApiKey = (ifExists (root \\ "BitLyApiKey")) text
+  def bitlyApiKey = (ifExists (root \ "BitLyApiKey")) text
 
   // Upload module
   def uploadDirs = ifExists (root \ "Channels") get {
