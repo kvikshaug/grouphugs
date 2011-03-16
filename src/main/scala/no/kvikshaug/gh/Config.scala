@@ -35,7 +35,7 @@ object Config {
   }
 
   // Operator module
-  def operatorList = ifExists (XML.loadFile(Grouphug.configFile) \ "Channels") get {
+  def operatorList = ifExists (root \ "Channels") get {
     (ns) => (ns \ "Channel" toList).map {
       (x) => ((x \ "@chan").text -> (x \ "Modules" \ "Operator" \ "Nick").toList.map(_.text))
     }.toMap
