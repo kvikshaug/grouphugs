@@ -11,7 +11,14 @@ object Config {
   var root = XML.loadFile(configFile)
   def reparse = root = XML.loadFile(configFile)
 
-  // General options
+  // NOTE: A throw PNSE declaration requires the corresponding java code to catch the exception.
+  // Only options that are OPTIONAL are declared to throw PNSE, because that case should
+  // be handled by the corresponding module.
+  // Options that are required aren't declared because if they aren't set, the program should
+  // exit and it will because the unchecked exception will propagate like a RuntimeException,
+  // and we won't have to handle it in the code using the option.
+
+  // Required bot options
   def nicks = ifExists (root \ "Nicks") get ((ns) => (ns \ "Nick").map(_.text).asJava)
   def channels = ifExists (root \ "Channels") get ((ns) => (ns \ "Channel").map(_.attribute("chan").get.text).asJava)
   def servers = ifExists (root \ "Servers") get ((ns) => (ns \ "Server").map(_.text).asJava)
@@ -23,11 +30,13 @@ object Config {
   def bitlyApiKey = (ifExists (root \ "BitLyApiKey")) text
 
   // Upload module
+  @throws(classOf[PreferenceNotSetException])
   def uploadDirs = ifExists (root \ "Channels") get {
     (ns) => (ns \ "Channel").map {
       (x) => ((x \ "@chan").text -> (x \ "Modules" \ "Upload" \ "UploadDir").text)
     }.toMap.asJava
   }
+  @throws(classOf[PreferenceNotSetException])
   def publicUrls = ifExists (root \ "Channels") get {
     (ns) => (ns \ "Channel").map {
       (x) => ((x \ "@chan").text -> (x \ "Modules" \ "Upload" \ "PublicURL").text)
@@ -35,6 +44,7 @@ object Config {
   }
 
   // Operator module
+  @throws(classOf[PreferenceNotSetException])
   def operatorList = ifExists (root \ "Channels") get {
     (ns) => (ns \ "Channel" toList).map {
       (x) => ((x \ "@chan").text -> (x \ "Modules" \ "Operator" \ "Nick").toList.map(_.text))
