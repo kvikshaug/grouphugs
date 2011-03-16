@@ -44,7 +44,7 @@ public class Timer implements TriggerListener {
     		for(Object[] row : rows) {
     			int id = (Integer) row[0];
     			String nick = (String) row[1];
-    			long time = Long.parseLong(Integer.toString((Integer) row[2]));
+    			long time = (Long) row[2];
     			String message = (String) row[3];
     			String channel = (String) row[4];
 
