@@ -42,10 +42,10 @@ object Config {
 
   // GithubPostReceiveServer
   @throws(classOf[PreferenceNotSetException])
-  def githubHookUrl = (ifExists (root \\ "GithubHookUrl")) text
+  def githubHookUrl = (ifExists (root \ "GithubHookUrl")) text
 
   @throws(classOf[PreferenceNotSetException])
-  def githubHookPort = (ifExists (root \\ "GithubHookPort")).text.toInt
+  def githubHookPort = (ifExists (root \ "GithubHookPort")).text.toInt
 
   /* Throws a PNSE if the node doesn't exist */
   def ifExists(ns: NodeSeq, message: String = "Missing corresponding option in " + configFile) = {
