@@ -16,6 +16,7 @@ object Config {
   def channels = ifExists (root \ "Channels") get ((ns) => (ns \ "Channel").map(_.attribute("chan").get.text).asJava)
   def servers = ifExists (root \ "Servers") get ((ns) => (ns \ "Server").map(_.text).asJava)
 
+  // Bitly authentication
   @throws(classOf[PreferenceNotSetException])
   def bitlyUser = (ifExists (root \ "BitLyUser")) text
   @throws(classOf[PreferenceNotSetException])
