@@ -124,10 +124,7 @@ Add -m to !startvote to allow multiple choices from one candidate""")
         return
       }
       items = VoteItem(randomId.toString, nick, question, multi, options) :: items
-      var multiText = ""
-      if(multi) {
-        multiText = " with multiple choices allowed"
-      }
+      val multiText = if(multi) " with multiple choices allowed" else ""
       bot.sendMessageChannel(channel, "Created vote " + items(0).id + multiText + ".")
       bot.sendMessageChannel(channel, "Type '!vote <choice> " + items(0).id + "' to vote")
       sqlHandler.insert("insert into votes (id, creator, text, multi) values ('" + items(0).id + "', '" + nick + "', '" + question + "', '" + multi.toString + "')")
@@ -161,10 +158,7 @@ Add -m to !startvote to allow multiple choices from one candidate""")
       bot.sendMessageChannel(channel, "I don't have a vote with ID \"" + id + "\", try !votes")
       return
     }
-    var multi = ""
-    if(item.get.multi) {
-      multi = ", multiple choices allowed"
-    }
+    val multi = if(item.get.multi) ", multiple choices allowed" else ""
     bot.sendMessageChannel(channel, "Vote " + id + " by " + item.get.creator + multi + ": " + item.get.text)
     outputSortedList(channel, item.get)
   }
@@ -229,10 +223,7 @@ Add -m to !startvote to allow multiple choices from one candidate""")
       if(voters != "") {
         voters = " (" + voters.substring(2) + ")"
       }
-      var plural = ""
-      if(voters.size != 1) {
-        plural = "s"
-      }
+      val plural = if(voters.size != 1) "s" else ""
       bot.sendMessageChannel(channel, o.voters.size + " vote" + plural + " for " + o.text + voters)
     }
   }
