@@ -4,6 +4,7 @@ import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.Config;
 import no.kvikshaug.gh.exceptions.SQLUnavailableException;
+import no.kvikshaug.gh.exceptions.PreferenceNotSetException;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.SQL;
 import no.kvikshaug.gh.util.SQLHandler;
@@ -49,16 +50,25 @@ public class Upload implements TriggerListener {
     }*/
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
-
-
-        if(trigger.equals(TRIGGER)) {
-            insert(channel, message, sender);
-        } else if(trigger.equals(TRIGGER_KEYWORD)) {
-            showUploads(channel, message);
+        // Verify that settings in Config are specified
+        try {
+            if("".equals(Config.uploadDirs().get(channel)) || "".equals(Config.publicUrls().get(channel))) {
+                // Also throw an exception if the value for the specified channel is empty
+                throw new PreferenceNotSetException("Missing Upload module elements in properties file");
+            }
+            if(trigger.equals(TRIGGER)) {
+                insert(channel, message, sender);
+            } else if(trigger.equals(TRIGGER_KEYWORD)) {
+                showUploads(channel, message);
+            }
+        } catch(PreferenceNotSetException e) {
+            bot.sendMessageChannel(channel, "My owner hasn't specified where to save upload " +
+                    "images for this channel, and/or the URL where they can be accessed.");
+            return;
         }
     }
 
-    private void showUploads(String channel, String keyword) {
+    private void showUploads(String channel, String keyword) throws PreferenceNotSetException {
         try {
             if(keyword.length() <= 1) {
                 bot.sendMessageChannel(channel, "Please use at least 2 search characters.");
@@ -89,7 +99,7 @@ public class Upload implements TriggerListener {
         }
     }
 
-    private void insert(String channel, String message, String sender) {
+    private void insert(String channel, String message, String sender) throws PreferenceNotSetException {
         //Split the message into URL and keyword, URL first
         String[] parts = message.split(" ");
         int lastSlashIndex = parts[0].lastIndexOf('/');
