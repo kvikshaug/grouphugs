@@ -12,62 +12,40 @@ object Config {
   def reparse = root = XML.loadFile(configFile)
 
   // General options
-  def nicks = (root \ "Nicks" \ "Nick").map(_.text).asJava
-  def channels = (root \ "Channels" \ "Channel").map(_.attribute("chan").get.text).asJava
-  def servers = (root \ "Servers" \ "Server").map(_.text).asJava
+  def nicks = ifExists (root \ "Nicks") get ((ns) => (ns \ "Nick").map(_.text).asJava)
+  def channels = ifExists (root \ "Channels") get ((ns) => (ns \ "Channel").map(_.attribute("chan").get.text).asJava)
+  def servers = ifExists (root \ "Servers") get ((ns) => (ns \ "Server").map(_.text).asJava)
 
   @throws(classOf[PreferenceNotSetException])
-  def bitlyUser = {
-    val e = (root \\ "BitLyUser").text
-    if(e isEmpty) {
-      throw new PreferenceNotSetException("No BitLyUser option specified in " + configFile)
-    } else {
-      e
-    }
-  }
-
+  def bitlyUser = (ifExists (root \\ "BitLyUser")) text
   @throws(classOf[PreferenceNotSetException])
-  def bitlyApiKey = {
-    val e = (root \\ "BitLyApiKey").text
-    if(e isEmpty) {
-      throw new PreferenceNotSetException("No BitLyApiKey option specified in " + configFile)
-    } else {
-      e
-    }
-  }
-  
+  def bitlyApiKey = (ifExists (root \\ "BitLyApiKey")) text
+
   // Upload module
-  def uploadDirs = (root \ "Channels" \ "Channel").map { (x) =>
-    ((x \ "@chan").text -> (x \ "Modules" \ "Upload" \ "UploadDir").text)
-  }.toMap.asJava
-  def publicUrls = (root \ "Channels" \ "Channel").map { (x) =>
-    ((x \ "@chan").text -> (x \ "Modules" \ "Upload" \ "PublicURL").text)
-  }.toMap.asJava
+  def uploadDirs = ifExists (root \ "Channels") get {
+    (ns) => (ns \ "Channel").map {
+      (x) => ((x \ "@chan").text -> (x \ "Modules" \ "Upload" \ "UploadDir").text)
+    }.toMap.asJava
+  }
+  def publicUrls = ifExists (root \ "Channels") get {
+    (ns) => (ns \ "Channel").map {
+      (x) => ((x \ "@chan").text -> (x \ "Modules" \ "Upload" \ "PublicURL").text)
+    }.toMap.asJava
+  }
 
   // Operator module
-  def operatorList = (XML.loadFile(Grouphug.configFile) \ "Channels" \ "Channel" toList).map { (x) =>
-    ((x \ "@chan").text -> (x \ "Modules" \ "Operator" \ "Nick").toList.map(_.text))
-  }.toMap
+  def operatorList = ifExists (XML.loadFile(Grouphug.configFile) \ "Channels") get {
+    (ns) => (ns \ "Channel" toList).map {
+      (x) => ((x \ "@chan").text -> (x \ "Modules" \ "Operator" \ "Nick").toList.map(_.text))
+    }.toMap
+  }
 
   // GithubPostReceiveServer
   @throws(classOf[PreferenceNotSetException])
-  def githubHookUrl = {
-    val e = (root \\ "GithubHookUrl").text
-    if(e isEmpty) {
-      throw new PreferenceNotSetException("No GithubHookUrl option specified in " + configFile)
-    } else {
-      e
-    }
-  }
+  def githubHookUrl = (ifExists (root \\ "GithubHookUrl")) text
+
     @throws(classOf[PreferenceNotSetException])
-    def githubHookPort = {
-      val e = (root \\ "GithubHookPort").text
-      if(e isEmpty) {
-        throw new PreferenceNotSetException("No GithubHookPort option specified in " + configFile)
-      } else {
-        e.toInt
-      }
-    }
+    def githubHookPort = (ifExists (root \\ "GithubHookPort")).text.toInt
 
   /* Throws a PNSE if the node doesn't exist */
   def ifExists(ns: NodeSeq, message: String = "Missing corresponding option in " + configFile) = {
