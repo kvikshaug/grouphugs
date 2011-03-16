@@ -44,8 +44,8 @@ object Config {
   @throws(classOf[PreferenceNotSetException])
   def githubHookUrl = (ifExists (root \\ "GithubHookUrl")) text
 
-    @throws(classOf[PreferenceNotSetException])
-    def githubHookPort = (ifExists (root \\ "GithubHookPort")).text.toInt
+  @throws(classOf[PreferenceNotSetException])
+  def githubHookPort = (ifExists (root \\ "GithubHookPort")).text.toInt
 
   /* Throws a PNSE if the node doesn't exist */
   def ifExists(ns: NodeSeq, message: String = "Missing corresponding option in " + configFile) = {
