@@ -36,6 +36,9 @@ class IsUp(val handler: ModuleHandler) extends TriggerListener {
       url = timeoutRegex.group(2)
       timeout = timeoutRegex.group(1).toInt
     }
+    if(!(url.startsWith("http://"))) {
+      url = "http://" + url
+    }
 
     try {
       // Try to connect in asynchronous actors
