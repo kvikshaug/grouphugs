@@ -51,7 +51,7 @@ public class Google implements TriggerListener {
             }
 
             if(urls.size() == 0) {
-                Grouphug.getInstance().sendMessageChannel(channel, "No results for " + query + ".");
+                Grouphug.getInstance().msg(channel, "No results for " + query + ".");
                 return;
             }
 
@@ -81,24 +81,24 @@ public class Google implements TriggerListener {
                 if(title != null) {
                     reply += " - " + title;
                 }
-                Grouphug.getInstance().sendMessageChannel(channel, reply);
+                Grouphug.getInstance().msg(channel, reply);
                 if(urls.size() == i && resultCount > i) {
                     if(i == 1) {
-                        Grouphug.getInstance().sendMessageChannel(channel, "This was the only result.");
+                        Grouphug.getInstance().msg(channel, "This was the only result.");
                     } else if(i >= 10) {
-                        Grouphug.getInstance().sendMessageChannel(channel, "Google only provided "+i+" results for this page.");
+                        Grouphug.getInstance().msg(channel, "Google only provided "+i+" results for this page.");
                     } else {
-                        Grouphug.getInstance().sendMessageChannel(channel, "There were only these " + i + " results.");
+                        Grouphug.getInstance().msg(channel, "There were only these " + i + " results.");
                     }
                     return;
                 }
             }
         } catch(IOException ex) {
-            Grouphug.getInstance().sendMessageChannel(channel, "I seem to have thrown an IOException. Woopsie!");
+            Grouphug.getInstance().msg(channel, "I seem to have thrown an IOException. Woopsie!");
             System.err.println(ex);
             ex.printStackTrace();
         } catch (JDOMException e) {
-            Grouphug.getInstance().sendMessageChannel(channel, "I seem to have thrown a JDOMException. Woopsie!");
+            Grouphug.getInstance().msg(channel, "I seem to have thrown a JDOMException. Woopsie!");
             System.err.println(e);
             e.printStackTrace();
         }

@@ -39,22 +39,22 @@ public class Insulter implements TriggerListener {
         try {
             String insult = parseInsult();
             if(insulted != null) {
-                bot.sendMessageChannel(channel, insulted + ": " + insult);
+                bot.msg(channel, insulted + ": " + insult);
             } else {
-                bot.sendMessageChannel(channel, insult);
+                bot.msg(channel, insult);
             }
         } catch(IOException e) {
             if(insulted != null) {
-                bot.sendMessageChannel(channel, "Sorry, " + insulted + "'s ghastly presence made me throw up an IOException.");
+                bot.msg(channel, "Sorry, " + insulted + "'s ghastly presence made me throw up an IOException.");
             } else {
-                bot.sendMessageChannel(channel, "Sorry, your ghastly presence made me throw up an IOException.");
+                bot.msg(channel, "Sorry, your ghastly presence made me throw up an IOException.");
             }
             e.printStackTrace();
         } catch (JDOMException e) {
             if(insulted != null) {
-                bot.sendMessageChannel(channel, "Sorry, " + insulted + "'s ghastly presence made me throw up a JDOMException.");
+                bot.msg(channel, "Sorry, " + insulted + "'s ghastly presence made me throw up a JDOMException.");
             } else {
-                bot.sendMessageChannel(channel, "Sorry, your ghastly presence made me throw up a JDOMException.");
+                bot.msg(channel, "Sorry, your ghastly presence made me throw up a JDOMException.");
             }
             e.printStackTrace();
         }

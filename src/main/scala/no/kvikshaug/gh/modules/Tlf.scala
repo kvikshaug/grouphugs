@@ -30,7 +30,7 @@ class Tlf(val handler: ModuleHandler) extends TriggerListener {
       hits = m.group(1)
     }
     if(hits isEmpty) {
-      bot.sendMessageChannel(channel, "Sorry, I got no hits.")
+      bot.msg(channel, "Sorry, I got no hits.")
       return
     }
 
@@ -68,7 +68,7 @@ class Tlf(val handler: ModuleHandler) extends TriggerListener {
     } else {
       hitText = " (first of " + hits + " hits)"
     }
-    bot.sendMessageChannel(channel, name + address + ": " + numbers + hitText + " — http://www.gulesider.no/tk/search.c?q=" + query)
+    bot.msg(channel, name + address + ": " + numbers + hitText + " — http://www.gulesider.no/tk/search.c?q=" + query)
   }
 }
 

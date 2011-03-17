@@ -78,7 +78,7 @@ public class WordCount implements TriggerListener, MessageListener {
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             e.printStackTrace();
-            bot.sendMessageChannel(channel, "Sorry, unable to update WordCounter DB; an SQL error occured.");
+            bot.msg(channel, "Sorry, unable to update WordCounter DB; an SQL error occured.");
         }
     }
 
@@ -97,7 +97,7 @@ public class WordCount implements TriggerListener, MessageListener {
             showScore(channel, false);
         } else if(trigger.equals(TRIGGER_REMOVE)) {
             if(!sender.equalsIgnoreCase(message)) {
-                bot.sendMessageChannel(channel, "Sorry, as a safety precaution, this function can only be used " +
+                bot.msg(channel, "Sorry, as a safety precaution, this function can only be used " +
                         "by a user with the same nick as the one that's being removed.");
             } else {
                 try {
@@ -105,12 +105,12 @@ public class WordCount implements TriggerListener, MessageListener {
                     params.add(message);
                     params.add(channel);
                     if(sqlHandler.delete("delete from "+WORDS_DB+" where nick=? AND channel=?;", params) == 0) {
-                        bot.sendMessageChannel(channel, "DB reports that no such nick has been recorded.");
+                        bot.msg(channel, "DB reports that no such nick has been recorded.");
                     } else {
-                        bot.sendMessageChannel(channel, sender+", you now have no words counted.");
+                        bot.msg(channel, sender+", you now have no words counted.");
                     }
                 } catch(SQLException ex) {
-                    bot.sendMessageChannel(channel, "Crap, SQL barfed on me. Check the logs if you wanna know why.");
+                    bot.msg(channel, "Crap, SQL barfed on me. Check the logs if you wanna know why.");
                     System.err.println(ex);
                     ex.printStackTrace(System.err);
                 }
@@ -156,13 +156,13 @@ public class WordCount implements TriggerListener, MessageListener {
             } else {
                 reply += "Lazy bastards...";
             }
-            bot.sendMessageChannel(channel, reply);
+            bot.msg(channel, reply);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.sendMessageChannel(channel, "Sorry, an SQL error occured.");
+            bot.msg(channel, "Sorry, an SQL error occured.");
         } catch(ParseException e) {
             System.err.println("Unable to parse the SQL datetime!");
-            bot.sendMessageChannel(channel, "Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
+            bot.msg(channel, "Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
         }
     }
 
@@ -174,7 +174,7 @@ public class WordCount implements TriggerListener, MessageListener {
             Object[] row = sqlHandler.selectSingle("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick LIKE ? AND channel=?;", params);
 
             if(row == null) {
-                bot.sendMessageChannel(channel, message + " doesn't have any words counted.");
+                bot.msg(channel, message + " doesn't have any words counted.");
             } else {
                 long words = ((Integer)row[2]);
                 long lines = ((Integer)row[3]);
@@ -185,7 +185,7 @@ public class WordCount implements TriggerListener, MessageListener {
                 double lpd = (double)lines / days;
                 DecimalFormat sf = new DecimalFormat("0.0");
 
-                bot.sendMessageChannel(channel, message + " has uttered "+words+ " words in "+lines+" lines over " + days + " days ("+
+                bot.msg(channel, message + " has uttered "+words+ " words in "+lines+" lines over " + days + " days ("+
                         sf.format(wpl) + " wpl, " +
                         sf.format(wpd) + " wpd, " +
                         sf.format(lpd) + " lpd)");
@@ -193,10 +193,10 @@ public class WordCount implements TriggerListener, MessageListener {
 
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.sendMessageChannel(channel, "Sorry, unable to fetch WordCount data; an SQL error occured.");
+            bot.msg(channel, "Sorry, unable to fetch WordCount data; an SQL error occured.");
         } catch(ParseException e) {
             System.err.println("Unable to parse the SQL datetime!");
-            bot.sendMessageChannel(channel, "Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
+            bot.msg(channel, "Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
         }
     }
 }

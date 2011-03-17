@@ -19,7 +19,7 @@ class Translate(val handler: ModuleHandler) extends TriggerListener {
 
   def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String): Unit = {
     trigger match {
-      case "tcode" => bot.sendMessageChannel(channel, codeFor(message.toLowerCase)); return
+      case "tcode" => bot.msg(channel, codeFor(message.toLowerCase)); return
       case "translate" =>
 
       val input = parseMessage(message)
@@ -29,10 +29,10 @@ class Translate(val handler: ModuleHandler) extends TriggerListener {
       val json = buffer.readLine
       val srch = "\"translatedText\":\"";
       if(!json.contains(srch)) {
-        bot.sendMessageChannel(channel, "Google didn't reply, maybe your language codes are incorrect?")
+        bot.msg(channel, "Google didn't reply, maybe your language codes are incorrect?")
       } else {
         val translation = json.substring(json.indexOf(srch) + srch.length, json.indexOf("\"", json.indexOf(srch) + srch.length))
-        bot.sendMessageChannel(channel, translation)
+        bot.msg(channel, translation)
       }
     }
   }

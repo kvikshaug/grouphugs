@@ -41,10 +41,10 @@ public class Confession implements TriggerListener {
                         URL confessionURL = Web.googleSearch(message+"+site:grouphug.us/confessions/").get(0);
                         conf = getConfession(confessionURL.toString());
                     } catch(IndexOutOfBoundsException ex) {
-                        Grouphug.getInstance().sendMessageChannel(channel, "No one has confessed about their "+message+" problem yet.");
+                        Grouphug.getInstance().msg(channel, "No one has confessed about their "+message+" problem yet.");
                         return;
                     } catch (JDOMException e) {
-                        Grouphug.getInstance().sendMessageChannel(channel, "Woops, i seem to have thrown a JDOMException.");
+                        Grouphug.getInstance().msg(channel, "Woops, i seem to have thrown a JDOMException.");
                         return;
                     }
                 } else {
@@ -52,9 +52,9 @@ public class Confession implements TriggerListener {
                 }
             }
 
-            Grouphug.getInstance().sendMessageChannel(channel, conf.toString(), true);
+            Grouphug.getInstance().msg(channel, conf.toString(), true);
         } catch(IOException ex) {
-            Grouphug.getInstance().sendMessageChannel(channel, "Sorry, the intertubes seem to be clogged up, " +
+            Grouphug.getInstance().msg(channel, "Sorry, the intertubes seem to be clogged up, " +
                     "I catched an IOException.");
             ex.printStackTrace();
         }

@@ -52,7 +52,7 @@ public class SnowReport implements TriggerListener {
                 }
             }
             if(!found) {
-                bot.sendMessageChannel(channel, "Sorry, I couldn't find any location named '"+ message +"' on skiinfo.");
+                bot.msg(channel, "Sorry, I couldn't find any location named '"+ message +"' on skiinfo.");
                 return;
             }
         } catch (IOException e) {
@@ -60,13 +60,13 @@ public class SnowReport implements TriggerListener {
             bot.sendAction(channel, "barfs up an IOException.");
         } catch (JDOMException e) {
             e.printStackTrace();
-            bot.sendMessageChannel(channel, "Sorry, JDOM threw an exception. Probably not my fault.");
+            bot.msg(channel, "Sorry, JDOM threw an exception. Probably not my fault.");
         } catch (UnableToParseException e) {
             e.printStackTrace();
-            bot.sendMessageChannel(channel, "Sorry, I couldn't parse vital information for the report.");
+            bot.msg(channel, "Sorry, I couldn't parse vital information for the report.");
         }
 
-        bot.sendMessageChannel(channel, finalReply.toString());
+        bot.msg(channel, finalReply.toString());
     }
 
     private String parseSnowReport(Document document)

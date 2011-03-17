@@ -100,13 +100,13 @@ public class GithubPostReceiveServer {
                 String channel = '#' + requestURI.getPath().substring(1);
 
                 if (payload.created) {
-                    bot.sendMessageChannel(channel, createdBranchMessage(payload));
+                    bot.msg(channel, createdBranchMessage(payload));
                 } else if (payload.deleted) {
-                    bot.sendMessageChannel(channel, deletedBranchMessage(payload));
+                    bot.msg(channel, deletedBranchMessage(payload));
                 }
 
                 if (payload.commits.size() > 0) {
-                    bot.sendMessageChannel(channel, pushMessage(payload));
+                    bot.msg(channel, pushMessage(payload));
                 }
 
                 Headers responseHeaders = exchange.getResponseHeaders();

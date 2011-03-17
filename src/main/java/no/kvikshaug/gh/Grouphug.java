@@ -65,7 +65,7 @@ public class Grouphug extends PircBot {
         // Old reboot/reload functions - this is strictly not necessary, but maybe these
         // should be reimplemented properly sometime?
         if(message.equals("!reboot") || message.equals("!reload")) {
-            bot.sendMessageChannel(channel, "Sorry, this functionality has been disabled. Patches are welcome though :)");
+            bot.msg(channel, "Sorry, this functionality has been disabled. Patches are welcome though :)");
             return;
         }
 
@@ -80,7 +80,7 @@ public class Grouphug extends PircBot {
 
             // But not for everyone
             if(spamOK && (sender.contains("icc") || login.contains("icc"))) {
-                sendMessageChannel(channel, "icc, you are not allowed to use the spam trigger.");
+                msg(channel, "icc, you are not allowed to use the spam trigger.");
                 return;
             }
             moduleHandler.onTrigger(channel, sender, login, hostname, message.substring(1));
@@ -99,7 +99,7 @@ public class Grouphug extends PircBot {
         if(message.startsWith(MAIN_TRIGGER + HELP_TRIGGER)) {
             moduleHandler.onHelp(sender, message.substring(MAIN_TRIGGER.length() + HELP_TRIGGER.length()).trim());
         } else if(message.equals("!reparse")) {
-            sendMessageChannel(sender, "Reparsing '" + Config.configFile() + "'...");
+            msg(sender, "Reparsing '" + Config.configFile() + "'...");
             Config.reparse();
             System.out.println(Config.nicks());
         }
@@ -109,7 +109,7 @@ public class Grouphug extends PircBot {
     protected void onKick(String channel, String kickerNick, String kickerLogin, String kickerHostname, String recipientNick, String reason) {
         if (recipientNick.equalsIgnoreCase(getNick())) {
             joinChannel(channel);
-            sendMessageChannel(channel, "sry :(");
+            msg(channel, "sry :(");
         }
     }
 
@@ -130,8 +130,8 @@ public class Grouphug extends PircBot {
      * @param channel - The channel where the message should be sent
      * @param message - The message to send
      */
-    public void sendMessageChannel(String channel,String message) {
-        sendMessageChannel(channel, message, false);
+    public void msg(String channel,String message) {
+        msg(channel, message, false);
     }
 
     /**
@@ -151,7 +151,7 @@ public class Grouphug extends PircBot {
      * @param message - The message to send
      * @param verifySpam - true if verifying that spamming is ok before sending large messages
      */
-    public void sendMessageChannel(String receiver, String message, boolean verifySpam) {
+    public void msg(String receiver, String message, boolean verifySpam) {
 
         // First create a list of the lines we will send separately.
         List<String> lines = new ArrayList<String>();

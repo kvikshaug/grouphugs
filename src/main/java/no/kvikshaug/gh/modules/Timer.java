@@ -51,9 +51,9 @@ public class Timer implements TriggerListener {
     			//The timer expired when the bot was down
     			if (time <= System.currentTimeMillis() ){
     				if("".equals(message)) {
-    					bot.sendMessageChannel(channel, nick + ": Time ran out while I was shut down. I am notifying you anyway!");
+    					bot.msg(channel, nick + ": Time ran out while I was shut down. I am notifying you anyway!");
     				} else {
-    					bot.sendMessageChannel(channel, nick + ": Time ran out while I was shut down. I was supposed to notify you about: " + message);
+    					bot.msg(channel, nick + ": Time ran out while I was shut down. I was supposed to notify you about: " + message);
     				}
     				sqlHandler.delete("DELETE FROM " + TIMER_TABLE + "  WHERE `id` = '"+id+"';");
     			}else{
@@ -117,7 +117,7 @@ public class Timer implements TriggerListener {
 					}
 				} catch (ParseException e2) {
 					//Not this one either, this is just bogus
-					bot.sendMessageChannel(channel, "Stop trying to trick me, this isn't a valid timer-argument. Try !help timer");
+					bot.msg(channel, "Stop trying to trick me, this isn't a valid timer-argument. Try !help timer");
 					return;
 				}
 			}
@@ -138,7 +138,7 @@ public class Timer implements TriggerListener {
 		
 		int id = insertTimerIntoDb(channel, sender, notifyMessage, duration.getMillis());
         
-        bot.sendMessageChannel(channel, "Ok, I will highlight you at " + timerTime +".");
+        bot.msg(channel, "Ok, I will highlight you at " + timerTime +".");
         
         new Sleeper(id, sender, (int) duration.getMillis(), notifyMessage, channel);
     }
@@ -164,7 +164,7 @@ public class Timer implements TriggerListener {
         } catch(NumberFormatException e) {
             if(indexAfterCount == 0) {
                 // message didn't start with a number
-                bot.sendMessageChannel(channel, "'" + message + "' doesn't start with a valid number, does it now? Try '!help timer'.");
+                bot.msg(channel, "'" + message + "' doesn't start with a valid number, does it now? Try '!help timer'.");
                 return;
             }
             // indexAfterCount is now the index after the count
@@ -205,7 +205,7 @@ public class Timer implements TriggerListener {
                     break;
 
                 default:
-                    bot.sendMessageChannel(channel, "No. Try '!help timer'.");
+                    bot.msg(channel, "No. Try '!help timer'.");
                     return;
 
             }
@@ -222,7 +222,7 @@ public class Timer implements TriggerListener {
         
         int id = insertTimerIntoDb(channel, sender, notifyMessage, time);
         
-        bot.sendMessageChannel(channel, "Ok, I will highlight you in " + count + " " + reply + ".");
+        bot.msg(channel, "Ok, I will highlight you in " + count + " " + reply + ".");
         
         new Sleeper(id, sender, sleepTime, notifyMessage, channel);
 	}
@@ -262,7 +262,7 @@ public class Timer implements TriggerListener {
             try {
                 Thread.sleep(sleepAmount);
             } catch(InterruptedException e) {
-                bot.sendMessageChannel(channel, nick + ": Sorry, I caught an InterruptedException! I was supposed to highlight you " +
+                bot.msg(channel, nick + ": Sorry, I caught an InterruptedException! I was supposed to highlight you " +
                         "after " + (sleepAmount / 1000) + " seconds, but I don't know how long I've slept.");
                 try {
                 	if (this.id != -1){
@@ -274,9 +274,9 @@ public class Timer implements TriggerListener {
                 return;
             }
             if("".equals(notifyMessage)) {
-                bot.sendMessageChannel(channel, nick + ": Time's up!");
+                bot.msg(channel, nick + ": Time's up!");
             } else {
-                bot.sendMessageChannel(channel, nick + ": " + notifyMessage);
+                bot.msg(channel, nick + ": " + notifyMessage);
             }
             try {
             	if (this.id != -1){

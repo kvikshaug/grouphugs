@@ -22,7 +22,7 @@ class Bash(val handler: ModuleHandler) extends TriggerListener {
 
     for(p <- root \\ "p") {
       if((p \ "@class").text == "qt") {
-        bot.sendMessageChannel(channel, p.text.trim)
+        bot.msg(channel, p.text.trim)
         return
       }
     }

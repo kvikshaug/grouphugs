@@ -62,7 +62,7 @@ public class Upload implements TriggerListener {
                 showUploads(channel, message);
             }
         } catch(PreferenceNotSetException e) {
-            bot.sendMessageChannel(channel, "My owner hasn't specified where to save upload " +
+            bot.msg(channel, "My owner hasn't specified where to save upload " +
                     "images for this channel, and/or the URL where they can be accessed.");
             return;
         }
@@ -71,7 +71,7 @@ public class Upload implements TriggerListener {
     private void showUploads(String channel, String keyword) throws PreferenceNotSetException {
         try {
             if(keyword.length() <= 1) {
-                bot.sendMessageChannel(channel, "Please use at least 2 search characters.");
+                bot.msg(channel, "Please use at least 2 search characters.");
                 return;
             }
             List<String> params = new ArrayList<String>();
@@ -83,7 +83,7 @@ public class Upload implements TriggerListener {
                     "(keyword LIKE '%?%' OR filename LIKE '%?%');", params);
 
             if(rows.size() == 0) {
-                bot.sendMessageChannel(channel, "No results for '" + keyword + "'.");
+                bot.msg(channel, "No results for '" + keyword + "'.");
             } else {
                 StringBuilder allRows = new StringBuilder();
                 for(Object[] row : rows) {
@@ -91,11 +91,11 @@ public class Upload implements TriggerListener {
                             .append(row[2]).append("' by ").append(row[1]).append(")\n");
                 }
                 //Prints the URL(s) associated with the keyword
-                bot.sendMessageChannel(channel, allRows.toString(), true);
+                bot.msg(channel, allRows.toString(), true);
             }
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.sendMessageChannel(channel, "Sorry, an SQL error occured.");
+            bot.msg(channel, "Sorry, an SQL error occured.");
         }
     }
 
@@ -104,11 +104,11 @@ public class Upload implements TriggerListener {
         String[] parts = message.split(" ");
         int lastSlashIndex = parts[0].lastIndexOf('/');
         if(lastSlashIndex == -1) {
-            bot.sendMessageChannel(channel, "That's not a valid URL now, is it?");
+            bot.msg(channel, "That's not a valid URL now, is it?");
             return;
         }
         if(parts.length <= 1) {
-            bot.sendMessageChannel(channel, "Please provide both a valid URL and keyword.");
+            bot.msg(channel, "Please provide both a valid URL and keyword.");
             return;
         }
         int nextQuestionmarkIndex = parts[0].indexOf('?', lastSlashIndex);
@@ -139,18 +139,18 @@ public class Upload implements TriggerListener {
             sqlHandler.insert("INSERT INTO "+UPLOAD_DB+" (keyword, nick, filename, date, channel) VALUES (?,?,?,?,?);", params);
         } catch (IOException e) {
             System.err.println("Failed to copy the file to the local filesystem.");
-            bot.sendMessageChannel(channel, "Why am I expected to be able to upload anything?");
+            bot.msg(channel, "Why am I expected to be able to upload anything?");
             e.printStackTrace();
             return;
         } catch(SQLException e) {
             System.err.println("SQL Exception: "+e.getMessage()+"\n"+e.getCause());
             e.printStackTrace();
-            bot.sendMessageChannel(channel, "An SQL error occured, but the file was probably saved successfully " +
+            bot.msg(channel, "An SQL error occured, but the file was probably saved successfully " +
                     "before that happened. Go check the logs and clean up my database, you fool.");
             return;
         }
 
         // Print the URL to the uploaded file to the channel
-        bot.sendMessageChannel(channel, "Saved to " + Config.publicUrls().get(channel) + filename);
+        bot.msg(channel, "Saved to " + Config.publicUrls().get(channel) + filename);
     }
 }

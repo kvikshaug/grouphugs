@@ -35,13 +35,13 @@ public class IMDb implements TriggerListener {
 		try {
 			imdbURL = Web.googleSearch(message+"+site:www.imdb.com").get(0);
 		} catch(IndexOutOfBoundsException ex) {
-			Grouphug.getInstance().sendMessageChannel(channel, "Sorry, I didn't find "+message+" on IMDb.");
+			Grouphug.getInstance().msg(channel, "Sorry, I didn't find "+message+" on IMDb.");
 			return;
 		} catch(IOException e) {
-			Grouphug.getInstance().sendMessageChannel(channel, "But I don't want to. (IOException)");
+			Grouphug.getInstance().msg(channel, "But I don't want to. (IOException)");
 			return;
 		} catch (JDOMException e) {
-			Grouphug.getInstance().sendMessageChannel(channel, "I seem to have thrown a JDOMException. Woopsie!");
+			Grouphug.getInstance().msg(channel, "I seem to have thrown a JDOMException. Woopsie!");
 			return;
 		}
 
@@ -91,9 +91,9 @@ public class IMDb implements TriggerListener {
 			System.out.println(e.getMessage());
 		}
 		try {
-			Grouphug.getInstance().sendMessageChannel(channel, title+"\n"+plot+"\n"+score+"/10\n"+imdbURL.toString());
+			Grouphug.getInstance().msg(channel, title+"\n"+plot+"\n"+score+"/10\n"+imdbURL.toString());
 		} catch(NullPointerException ex) {
-			Grouphug.getInstance().sendMessageChannel(channel, "The IMDb site layout may have changed, I was unable to parse it.");
+			Grouphug.getInstance().msg(channel, "The IMDb site layout may have changed, I was unable to parse it.");
 		}
 	}
 }

@@ -120,27 +120,27 @@ Add -m to !startvote to allow multiple choices from one candidate""")
       }
       options = (options.map{x => x.text = x.text.trim; x}).filterNot(_.text isEmpty)
       if((options isEmpty) || (question isEmpty)) {
-        bot.sendMessageChannel(channel, "Please provide both a question and options.")
+        bot.msg(channel, "Please provide both a question and options.")
         return
       }
       items = VoteItem(randomId.toString, nick, question, multi, options) :: items
       val multiText = if(multi) " with multiple choices allowed" else ""
-      bot.sendMessageChannel(channel, "Created vote " + items(0).id + multiText + ".")
-      bot.sendMessageChannel(channel, "Type '!vote <choice> " + items(0).id + "' to vote")
+      bot.msg(channel, "Created vote " + items(0).id + multiText + ".")
+      bot.msg(channel, "Type '!vote <choice> " + items(0).id + "' to vote")
       sqlHandler.insert("insert into votes (id, creator, text, multi) values ('" + items(0).id + "', '" + nick + "', '" + question + "', '" + multi.toString + "')")
       options foreach { o =>
         sqlHandler.insert("insert into " + dbVoteOptions + " (voteId, text) values ('" + items(0).id + "', '" + o.text + "');")
       }
       // db
     } catch {
-      case e: SQLException => bot.sendMessageChannel(channel, "Failed to insert the vote into SQL."); e.printStackTrace
-      case e => bot.sendMessageChannel(channel, "Sorry, what? Maybe you should check !help vote."); e.printStackTrace
+      case e: SQLException => bot.msg(channel, "Failed to insert the vote into SQL."); e.printStackTrace
+      case e => bot.msg(channel, "Sorry, what? Maybe you should check !help vote."); e.printStackTrace
     }
   }
 
   def endVote(channel: String, id: String): Unit = {
     if(!(items.contains(id))) {
-      bot.sendMessageChannel(channel, "I don't have a vote with ID \"" + id + "\", try !votes")
+      bot.msg(channel, "I don't have a vote with ID \"" + id + "\", try !votes")
       return
     }
     items = items.filterNot(_ == id)
@@ -149,26 +149,26 @@ Add -m to !startvote to allow multiple choices from one candidate""")
     }
     sqlHandler.delete("delete from " + dbVoteOptions + " where voteId='" + id + "';")
     sqlHandler.delete("delete from " + dbVotes + " where id='" + id + "';")
-    bot.sendMessageChannel(channel, "Removed vote \"" + id + "\".")
+    bot.msg(channel, "Removed vote \"" + id + "\".")
   }
 
   def showVote(channel: String, id: String): Unit = {
     var item = items.find(_ == id)
     if(item isEmpty) {
-      bot.sendMessageChannel(channel, "I don't have a vote with ID \"" + id + "\", try !votes")
+      bot.msg(channel, "I don't have a vote with ID \"" + id + "\", try !votes")
       return
     }
     val multi = if(item.get.multi) ", multiple choices allowed" else ""
-    bot.sendMessageChannel(channel, "Vote " + id + " by " + item.get.creator + multi + ": " + item.get.text)
+    bot.msg(channel, "Vote " + id + " by " + item.get.creator + multi + ": " + item.get.text)
     outputSortedList(channel, item.get)
   }
 
   def listVotes(channel: String) = {
     if(items.size == 0) {
-      bot.sendMessageChannel(channel, "No votes are currently being tracked.")
+      bot.msg(channel, "No votes are currently being tracked.")
     } else {
       items foreach { item =>
-        bot.sendMessageChannel(channel, "Vote " + item.id + " by " + item.creator + " asking \"" + item.text + "\" with " + item.resultCount + " votes")
+        bot.msg(channel, "Vote " + item.id + " by " + item.creator + " asking \"" + item.text + "\" with " + item.resultCount + " votes")
       }
     }
   }
@@ -176,35 +176,35 @@ Add -m to !startvote to allow multiple choices from one candidate""")
   def vote(channel: String, nick: String, message: String): Unit = {
     val m = Pattern.compile("(.+) ([0-9]{" + idDigits + "})").matcher(message)
     if(!(m matches) || m.groupCount < 2) {
-      bot.sendMessageChannel(channel, "Sorry, what? Maybe you should try !help vote")
+      bot.msg(channel, "Sorry, what? Maybe you should try !help vote")
       return
     }
     val item = items.find(_ == m.group(2))
     if(item isEmpty) {
-      bot.sendMessageChannel(channel, "I don't have a vote with ID \"" + m.group(2) + "\", try !votes")
+      bot.msg(channel, "I don't have a vote with ID \"" + m.group(2) + "\", try !votes")
       return
     }
     if(!(item.get.multi) && hasVoted(nick, item.get)) {
-      bot.sendMessageChannel(channel, "You've already voted in that vote.")
+      bot.msg(channel, "You've already voted in that vote.")
       return
     }
     val option = item.get.options.find(_ == m.group(1))
     if(option isEmpty) {
-      bot.sendMessageChannel(channel, "That vote doesn't have an option called \"" + m.group(1) + "\", try !showvote " + item.get.id)
+      bot.msg(channel, "That vote doesn't have an option called \"" + m.group(1) + "\", try !showvote " + item.get.id)
       return
     }
     if(option.get.voters.contains(nick)) {
-      bot.sendMessageChannel(channel, "You've already voted for that option.")
+      bot.msg(channel, "You've already voted for that option.")
       return
     }
     try {
       option.get.voters = nick :: option.get.voters
       val optionId = (sqlHandler.selectSingle("select id from " + dbVoteOptions + " where text='" + option.get.text + "' and voteId='" + m.group(2) + "';"))(0).toString
       sqlHandler.insert("insert into " + dbVoteOptionVoters + " (optionId, nick) values ('" + optionId + "', '" + nick + "');")
-      bot.sendMessageChannel(channel, nick + " voted for '" + option.get.text + "' in vote " + item.get.id + ": " + item.get.text)
+      bot.msg(channel, nick + " voted for '" + option.get.text + "' in vote " + item.get.id + ": " + item.get.text)
       outputSortedList(channel, item.get)
     } catch {
-      case e: SQLException => bot.sendMessageChannel(channel, "Sorry, I failed to update votecount in SQL!"); e.printStackTrace
+      case e: SQLException => bot.msg(channel, "Sorry, I failed to update votecount in SQL!"); e.printStackTrace
     }
   }
 
@@ -224,7 +224,7 @@ Add -m to !startvote to allow multiple choices from one candidate""")
         voters = " (" + voters.substring(2) + ")"
       }
       val plural = if(voters.size != 1) "s" else ""
-      bot.sendMessageChannel(channel, o.voters.size + " vote" + plural + " for " + o.text + voters)
+      bot.msg(channel, o.voters.size + " vote" + plural + " for " + o.text + voters)
     }
   }
 }

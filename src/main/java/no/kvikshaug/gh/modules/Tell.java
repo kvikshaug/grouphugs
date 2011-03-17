@@ -54,7 +54,7 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener, 
             rows = sqlHandler.select("SELECT id, from_nick, date, msg, channel FROM " + TELL_DB + " WHERE to_nick=? AND channel=?;", params);
         } catch (SQLException e) {
             System.err.println(" > SQL Exception: " + e.getMessage() + "\n" + e.getCause());
-            bot.sendMessageChannel(channel, "Sorry, couldn't query Tell DB, an SQL error occured.");
+            bot.msg(channel, "Sorry, couldn't query Tell DB, an SQL error occured.");
             return;
         }
 
@@ -63,7 +63,7 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener, 
             String msg = (String) row[3];
             StringBuilder message = new StringBuilder();
             message.append(toNick).append(": ").append(fromNick).append(" told me to tell you this: ").append(msg);
-            bot.sendMessageChannel(channel, message.toString());
+            bot.msg(channel, message.toString());
 
             params.clear();
             params.add(row[0].toString());
@@ -71,7 +71,7 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener, 
                 sqlHandler.delete("DELETE FROM " + TELL_DB + " WHERE id=?;", params);
             } catch (SQLException e) {
                 System.err.println(" > SQL Exception: " + e.getMessage() + "\n" + e.getCause());
-                Grouphug.getInstance().sendMessageChannel(channel, "Sorry, couldn't delete Tell, an SQL error occured.");
+                Grouphug.getInstance().msg(channel, "Sorry, couldn't delete Tell, an SQL error occured.");
             }
         }
     }
@@ -83,13 +83,13 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener, 
             toNick = message.substring(0, message.indexOf(' '));
             msg = message.substring(message.indexOf(' '));
         } catch (IndexOutOfBoundsException ioobe) {
-            bot.sendMessageChannel(channel, "Bogus message format: try !" + TRIGGER + " <nick> <message>.");
+            bot.msg(channel, "Bogus message format: try !" + TRIGGER + " <nick> <message>.");
             return;
         }
 
         for (User user : bot.getUsers(channel)) {
             if (user.equals(toNick)) {
-                bot.sendMessageChannel(channel, toNick + " is here right now, you dumbass!");
+                bot.msg(channel, toNick + " is here right now, you dumbass!");
                 return;
             }
         }
@@ -108,10 +108,10 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener, 
             sqlHandler.insert("INSERT INTO " + TELL_DB + " (from_nick, to_nick, date, msg, channel) VALUES (?, ?, ?, ?, ?);", params);
         } catch (SQLException e) {
             System.err.println(" > SQL Exception: " + e.getMessage() + "\n" + e.getCause());
-            bot.sendMessageChannel(channel, "Sorry, unable to update Tell DB, an SQL error occured.");
+            bot.msg(channel, "Sorry, unable to update Tell DB, an SQL error occured.");
         }
 
-        bot.sendMessageChannel(channel, "I'll tell " + toNick + " this: " + msg);
+        bot.msg(channel, "I'll tell " + toNick + " this: " + msg);
     }
 
     public void onNickChange(String oldNick, String login, String hostname, String newNick) {

@@ -44,7 +44,7 @@ class IsUp(val handler: ModuleHandler) extends TriggerListener {
       pinger ! con
     } catch {
       case e: MalformedURLException =>
-        bot.sendMessageChannel(channel, "Is '" + url + "' supposed to look like a url?")
+        bot.msg(channel, "Is '" + url + "' supposed to look like a url?")
     }
   }
 
@@ -58,16 +58,16 @@ class IsUp(val handler: ModuleHandler) extends TriggerListener {
             con.setRequestMethod("HEAD")
             con.setConnectTimeout(c.timeout)
             con.connect
-            bot.sendMessageChannel(c.channel, "It's just you. I can reach " + c.url.getHost + " just fine.")
+            bot.msg(c.channel, "It's just you. I can reach " + c.url.getHost + " just fine.")
           } catch {
             case e: UnknownHostException =>
-              bot.sendMessageChannel(c.channel, c.url.getHost + " appears to be down! Unknown host; I couldn't find an IP for the name.")
+              bot.msg(c.channel, c.url.getHost + " appears to be down! Unknown host; I couldn't find an IP for the name.")
             case e: NoRouteToHostException =>
-              bot.sendMessageChannel(c.channel, c.url.getHost + " appears to be down! There is no available route to the host.")
+              bot.msg(c.channel, c.url.getHost + " appears to be down! There is no available route to the host.")
             case e: ConnectException =>
-              bot.sendMessageChannel(c.channel, c.url.getHost + " appears to be down! I couldn't connect: " + e.getMessage + ".")
+              bot.msg(c.channel, c.url.getHost + " appears to be down! I couldn't connect: " + e.getMessage + ".")
             case e: IOException =>
-              bot.sendMessageChannel(c.channel, c.url.getHost + " appears to be down: " + e.getMessage + ".")
+              bot.msg(c.channel, c.url.getHost + " appears to be down: " + e.getMessage + ".")
           }
       }
     }
@@ -80,9 +80,9 @@ class IsUp(val handler: ModuleHandler) extends TriggerListener {
           val name = c.url.getHost
           try {
             if(InetAddress.getByName(name).isReachable(c.timeout)) {
-              bot.sendMessageChannel(c.channel, name + " responds to ping!")
+              bot.msg(c.channel, name + " responds to ping!")
             } else {
-              bot.sendMessageChannel(c.channel, name + " doesn't respond to ping.")
+              bot.msg(c.channel, name + " doesn't respond to ping.")
             }
           } catch {
             // Ignore unkown host and no route to host; they will be displayed by the httpconnecter
@@ -90,9 +90,9 @@ class IsUp(val handler: ModuleHandler) extends TriggerListener {
             case e: UnknownHostException =>
             case e: NoRouteToHostException =>
             case e: ConnectException =>
-              bot.sendMessageChannel(c.channel, c.url.getHost + " doesn't respond to ping: " + e.getMessage + ".")
+              bot.msg(c.channel, c.url.getHost + " doesn't respond to ping: " + e.getMessage + ".")
             case e: IOException =>
-              bot.sendMessageChannel(c.channel, c.url.getHost + " doesn't respond to ping: " + e.getMessage + ".")
+              bot.msg(c.channel, c.url.getHost + " doesn't respond to ping: " + e.getMessage + ".")
           }
       }
     }
