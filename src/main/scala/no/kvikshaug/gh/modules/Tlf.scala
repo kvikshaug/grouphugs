@@ -18,7 +18,7 @@ class Tlf(val handler: ModuleHandler) extends TriggerListener {
   println("Tlf module loaded.")
 
   def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String): Unit = {
-    val query = java.net.URLEncoder.encode(message)
+    val query = java.net.URLEncoder.encode(message, "UTF-8")
     val root = XML.withSAXParser(SAXParserImpl.newInstance(null)).load(Web.prepareEncodedBufferedReader(
       new URL("http://www.gulesider.no/tk/search.c?q=" + query + "&x=0&y=0")))
 
