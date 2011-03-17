@@ -156,7 +156,7 @@ public class GithubPostReceiveServer {
             message.append(" + ").append(commitCount);
             message.append(((commitCount - 1) >= 2) ? " more commits" : " more commit");
         }
-        message.append(" — ").append(Web.getBitlyURL(payload.compare.toString()));
+        message.append(" — ").append(Web.getBitlyURL(payload.compare));
 
         return message.toString();
     }
@@ -166,7 +166,7 @@ public class GithubPostReceiveServer {
         private String before;
         private String base;
         private List<Commit> commits;
-        private URL compare;
+        private String compare;
         private boolean created;
         private boolean deleted;
         private boolean forced;
@@ -200,7 +200,7 @@ public class GithubPostReceiveServer {
         private boolean has_downloads;
         private boolean has_issues;
         private boolean has_wiki;
-        private URL homepage;
+        private String homepage;
         private String language;
         private String name;
         private int open_issues;
@@ -209,7 +209,7 @@ public class GithubPostReceiveServer {
         private boolean _private;
         private DateTime pushed_at;
         private int size;
-        private URL url;
+        private String url;
 
         public String getRepoName() {
             return owner.name + '/' + name;
@@ -230,7 +230,7 @@ public class GithubPostReceiveServer {
         private List<String> modified;
         private List<String> removed;
         private DateTime timestamp;
-        private URL url;
+        private String url;
 
 
         public String getShortMessage() {
