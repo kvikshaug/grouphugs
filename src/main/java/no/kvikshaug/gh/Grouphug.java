@@ -53,8 +53,6 @@ public class Grouphug extends PircBot {
     private static ModuleHandler moduleHandler;
     private static boolean DISCONNECTING = false; // set to true when intentionally disconnecting
 
-    public static final String configFile = "props.xml";
-
     private static Grouphug bot;
     private GithubPostReceiveServer gprs;
 
