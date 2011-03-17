@@ -10,6 +10,7 @@ import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
@@ -92,10 +93,7 @@ public class GithubPostReceiveServer {
                     body = body.substring(8);
                 }
 
-                GsonBuilder gsonBuilder = new GsonBuilder();
-                gsonBuilder.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter());
-                Gson gson = gsonBuilder.create();
-                Payload payload = gson.fromJson(body, Payload.class);
+                Payload payload = jsonToPayload(body);
 
                 URI requestURI = exchange.getRequestURI();
                 String channel = '#' + requestURI.getPath().substring(1);
@@ -116,6 +114,15 @@ public class GithubPostReceiveServer {
                 exchange.close();
             }
         }
+
+
+    }
+
+    private static Payload jsonToPayload(String body) {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter());
+        Gson gson = gsonBuilder.create();
+        return gson.fromJson(body, Payload.class);
     }
 
     private static String createdBranchMessage(Payload payload) {
@@ -269,6 +276,21 @@ public class GithubPostReceiveServer {
                 return null;
             }
         }
+    }
+
+    // For debugging payloads
+    public static void main(String[] args) {
+        InputStreamReader stdin = new InputStreamReader(System.in);
+        StringWriter writer = new StringWriter();
+        try {
+            IOUtils.copy(stdin, writer);
+        } catch (IOException e) {
+            e.printStackTrace(System.err);
+        }
+        String json = writer.toString();
+        System.out.println("JSON: " + json);
+        Payload payload = jsonToPayload(json);
+        System.out.println(payload);
     }
 }
 
