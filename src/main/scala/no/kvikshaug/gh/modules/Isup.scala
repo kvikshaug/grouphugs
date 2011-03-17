@@ -14,21 +14,56 @@ import scala.actors.Actor
 import scala.actors.Actor._
 
 case class ConnectionAttempt(url: URL, timeout: Int, channel: String)
+case class PollSite(url: URL, nick: String, channel: String)
 
 class IsUp(val handler: ModuleHandler) extends TriggerListener {
 
   val bot = Grouphug.getInstance
   handler.addTriggerListener("isup", this)
+  handler.addTriggerListener("isupls", this)
+  handler.addTriggerListener("isuprm", this)
+  handler.addTriggerListener("whenup", this)
   handler.registerHelp("isup", "isup - Checks if a web site is down, or if it's just your connection that sucks somehow.\n" +
     "Usage:\n" +
     "!isup http://foo.tld       - Checks if http://foo.tld responds to HTTP requests.\n" +
     "!isup -p http://foo.tld    - Checks if http://foo.tld responds to ping.\n" +
-    "!isup -t 20 http://foo.tld - Specify a 20 second timeout value. Default is " + defaultTimeout + ".")
+    "!isup -t 20 http://foo.tld - Specify a 20 second timeout value. Default is " + defaultTimeout + ".\n" +
+    "!whenup http://foo.tld     - Watch http://foo.tld and notify me when it comes back up.\n" +
+    "!isuprm http://foo.tld     - Stop watching http://foo.tld.\n" +
+    "!isupls                    - Show all URLs I'm watching\n" +
+    "Note: I'll forget all the URLs I'm watching between restarts.")
   println("IsUp module loaded.")
 
+  val sleepTime = 1 // minutes
   val defaultTimeout = 10 // seconds
 
-  def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String): Unit = {
+  var sites = List[PollSite]()
+
+  def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String): Unit = trigger match {
+      case "isup" => isup(message, channel)
+      case "isupls" =>
+        sites foreach (s => bot.msg(channel, "Watching " + s.url + " for " + s.nick))
+        if(sites isEmpty) {
+          bot.msg(channel, "I'm not watching any URLs.")
+        }
+      case "isuprm" =>
+        if(sites.exists(_ == message)) {
+          sites = sites.filterNot(_ == message)
+          bot.msg(channel, "Removed '" + message + "' from watchlist.")
+        } else {
+          bot.msg(channel, "I'm not watching '" + message + "'.")
+        }
+      case "whenup" =>
+        try {
+          sites = PollSite(new URL(message), sender, channel) :: sites
+          bot.msg(channel, "Started watching '" + message + "', I'll notify you when it's back up.")
+        } catch {
+          case e: MalformedURLException =>
+            bot.msg(channel, "Is '" + message + "' supposed to look like a url?")
+        }
+  }
+
+  def isup(message: String, channel: String) = {
     // Parse input
     var ping = false
     var url = if(message contains "-p ") {
@@ -58,6 +93,25 @@ class IsUp(val handler: ModuleHandler) extends TriggerListener {
     } catch {
       case e: MalformedURLException =>
         bot.msg(channel, "Is '" + url + "' supposed to look like a url?")
+    }
+  }
+
+  val periodalConnecter = actor {
+    loop {
+      Thread.sleep(sleepTime * 60 * 1000)
+      sites foreach { s =>
+        try {
+          val con = s.url.openConnection.asInstanceOf[HttpURLConnection]
+          con.setInstanceFollowRedirects(false)
+          con.setRequestMethod("HEAD")
+          con.setConnectTimeout(defaultTimeout * 1000)
+          con.connect
+          bot.msg(s.channel, s.nick + ": Looks like " + s.url.getHost + " is back up! Removing it from my list.")
+          sites = sites.filterNot(_ == s)
+        } catch {
+          case e => // ignore and retry later
+        }
+      }
     }
   }
 
