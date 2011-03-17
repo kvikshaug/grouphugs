@@ -21,17 +21,24 @@ class IsUp(val handler: ModuleHandler) extends TriggerListener {
   handler.addTriggerListener("isup", this)
   handler.registerHelp("isup", "isup - Checks if a web site is down, or if it's just your connection that sucks somehow.\n" +
     "Usage:\n" +
-    "!isup http://foo.tld       - Checks if http://foo.tld is up or not.\n" +
-    "!isup -t 20 http://foo.tld - Same, with a 20 second timeout value. Default is " + defaultTimeout + ".")
+    "!isup http://foo.tld       - Checks if http://foo.tld responds to HTTP requests.\n" +
+    "!isup -p http://foo.tld    - Checks if http://foo.tld responds to ping.\n" +
+    "!isup -t 20 http://foo.tld - Specify a 20 second timeout value. Default is " + defaultTimeout + ".")
   println("IsUp module loaded.")
 
   val defaultTimeout = 10 // seconds
 
   def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String): Unit = {
     // Parse input
-    var url = message
+    var ping = false
+    var url = if(message contains "-p ") {
+      ping = true
+      message.replaceAll("-p ", "").trim
+    } else {
+      message
+    }
     var timeout = defaultTimeout
-    val timeoutRegex = Pattern.compile("-t ([0-9]+) (.+)").matcher(message)
+    val timeoutRegex = Pattern.compile("-t ([0-9]+) (.+)").matcher(url)
     if(timeoutRegex matches) {
       url = timeoutRegex.group(2)
       timeout = timeoutRegex.group(1).toInt
@@ -43,8 +50,11 @@ class IsUp(val handler: ModuleHandler) extends TriggerListener {
     try {
       // Try to connect in asynchronous actors
       val con = ConnectionAttempt(new URL(url), timeout * 1000, channel)
-      connecter ! con
-      pinger ! con
+      if(ping) {
+        pinger ! con
+      } else {
+        connecter ! con
+      }
     } catch {
       case e: MalformedURLException =>
         bot.msg(channel, "Is '" + url + "' supposed to look like a url?")
@@ -91,7 +101,9 @@ class IsUp(val handler: ModuleHandler) extends TriggerListener {
             // Ignore unkown host and no route to host; they will be displayed by the httpconnecter
             // and it's implicit that it can't respond to ping if they are thrown
             case e: UnknownHostException =>
+              bot.msg(c.channel, "Can't ping " + c.url.getHost + "! Unknown host; I couldn't find an IP for the name.")
             case e: NoRouteToHostException =>
+              bot.msg(c.channel, "Can't ping " + c.url.getHost + "! There is no available route to the host.")
             case e: ConnectException =>
               bot.msg(c.channel, c.url.getHost + " doesn't respond to ping: " + e.getMessage + ".")
             case e: IOException =>
