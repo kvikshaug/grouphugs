@@ -153,8 +153,9 @@ public class GithubPostReceiveServer {
         message.append(payload.prefix()).append(": ").append(payload.pusher.name).append(" pushed ")
                .append(colorize(Colors.BOLD, headHashShort)).append(" by ").append(head.author.name).append(": \"").append(head.getShortMessage()).append('"');
         if (commitCount > 1) {
-            message.append(" + ").append(commitCount);
-            message.append(((commitCount - 1) >= 2) ? " more commits" : " more commit");
+            int additionalCommits = commitCount - 1;
+            message.append(" + ").append(additionalCommits);
+            message.append((additionalCommits >= 2) ? " more commits" : " more commit");
         }
         message.append(" — ").append(Web.getBitlyURL(payload.compare));
 
