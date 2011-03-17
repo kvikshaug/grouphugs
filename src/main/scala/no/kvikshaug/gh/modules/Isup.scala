@@ -36,8 +36,13 @@ class IsUp(val handler: ModuleHandler) extends TriggerListener {
 
   val sleepTime = 1 // minutes
   val defaultTimeout = 10 // seconds
-
   var sites = List[PollSite]()
+
+  // Add 'urlify' method to string, which prepends "http://" if not already there
+  implicit def urlifyString(s: String) = new Urlifier(s)
+  class Urlifier(val value: String) {
+    def urlify = if(value.startsWith("http://")) value else "http://" + value
+  }
 
   def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String): Unit = trigger match {
       case "isup" => isup(message, channel)
@@ -47,19 +52,23 @@ class IsUp(val handler: ModuleHandler) extends TriggerListener {
           bot.msg(channel, "I'm not watching any URLs.")
         }
       case "isuprm" =>
-        if(sites.exists(_ == message)) {
-          sites = sites.filterNot(_ == message)
-          bot.msg(channel, "Removed '" + message + "' from watchlist.")
+        if(sites.exists(_.url.toString == message.urlify)) {
+          sites = sites.filterNot(_.url.toString == message.urlify)
+          bot.msg(channel, "Removed '" + message.urlify + "' from watchlist.")
         } else {
           bot.msg(channel, "I'm not watching '" + message + "'.")
         }
       case "whenup" =>
         try {
-          sites = PollSite(new URL(message), sender, channel) :: sites
+          if(sites.exists(_.url.toString == message.urlify)) {
+            bot.msg(channel, "I'm already watching '" + message + "'.")
+            return
+          }
+          sites = PollSite(new URL(message.urlify), sender, channel) :: sites
           bot.msg(channel, "Started watching '" + message + "', I'll notify you when it's back up.")
         } catch {
           case e: MalformedURLException =>
-            bot.msg(channel, "Is '" + message + "' supposed to look like a url?")
+            bot.msg(channel, "Is '" + message.urlify + "' supposed to look like a url?")
         }
   }
 
@@ -78,9 +87,7 @@ class IsUp(val handler: ModuleHandler) extends TriggerListener {
       url = timeoutRegex.group(2)
       timeout = timeoutRegex.group(1).toInt
     }
-    if(!(url.startsWith("http://"))) {
-      url = "http://" + url
-    }
+    url = url.urlify
 
     try {
       // Try to connect in asynchronous actors
