@@ -94,6 +94,7 @@ public class GithubPostReceiveServer {
                 }
 
                 Payload payload = jsonToPayload(body);
+                if (payload == null) { return; }
 
                 URI requestURI = exchange.getRequestURI();
                 String channel = '#' + requestURI.getPath().substring(1);
@@ -122,7 +123,13 @@ public class GithubPostReceiveServer {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(DateTime.class, new DateTimeTypeConverter());
         Gson gson = gsonBuilder.create();
-        return gson.fromJson(body, Payload.class);
+        Payload payload = null;
+        try {
+            payload = gson.fromJson(body, Payload.class);
+        } catch (JsonParseException jpe) {
+            jpe.printStackTrace(System.err);
+        }
+        return payload;
     }
 
     private static String createdBranchMessage(Payload payload) {
