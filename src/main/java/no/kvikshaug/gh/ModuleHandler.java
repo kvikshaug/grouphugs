@@ -46,7 +46,7 @@ public class ModuleHandler {
         new GoogleFight(this);
         new IMDb(this);
         new Insulter(this);
-        new IsSiteUp(this);
+        new IsUp(this);
         new Karma(this);
         new Seen(this);
         new Slang(this);
