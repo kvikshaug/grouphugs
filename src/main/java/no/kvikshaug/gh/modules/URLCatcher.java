@@ -17,10 +17,13 @@ import java.util.List;
 /**
  * URLCatcher implemented with tagsoup and jchardet
  */
-public class URLCatcher implements MessageListener {
+public class URLCatcher implements MessageListener, Runnable {
     private static final String[] URI_SCHEMES = new String[]{"http://", "https://"};
     private static final String HELP_TRIGGER = "urlcatcher";
     private static final int TITLE_MAX_LENGTH = 100;
+
+    private String channel;
+    private String message;
 
     public URLCatcher(ModuleHandler moduleHandler) {
         moduleHandler.addMessageListener(this);
@@ -31,6 +34,16 @@ public class URLCatcher implements MessageListener {
     }
 
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
+        this.channel = channel;
+        this.message = message;
+        new Thread(this).start();
+    }
+
+    public void run() {
+        // get the public vars into this local thread immediately,
+        // so they haven't changed by the time we're gonna use them.
+        String channel = this.channel;
+        String message = this.message;
         for(URL url : findAllUrls(message)) {
             String title = null;
             try {
