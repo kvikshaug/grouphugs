@@ -22,6 +22,7 @@ import java.util.List;
 public class ModuleHandler {
 
     private Grouphug bot;
+    private ThreadGroup eventThreads;
 
     private HashMap<String, String> helpers = new HashMap<String, String>();
     private List<TriggerListener> triggerListeners = new ArrayList<TriggerListener>();
@@ -31,6 +32,7 @@ public class ModuleHandler {
 
     public ModuleHandler(Grouphug bot) {
         this.bot = bot;
+        this.eventThreads = new ThreadGroup("ModuleHandler event threads");
 
         // add all the modules here
         System.out.println("Initializing modules...");
@@ -146,13 +148,13 @@ public class ModuleHandler {
     public void onTrigger(final String channel, final String sender, final String login, final String hostname, final String message) {
         for(final TriggerListener listener : triggerListeners) {
             if(listener.trigger(message)) {
-                Thread listenerThread = new Thread(){
+                Thread listenerThread = new Thread(eventThreads, new Runnable() {
                     public void run() {
                         // we trim the trigger and any following whitespace from the message
                         listener.getListener().onTrigger(channel, sender, login, hostname,
                                 message.substring(listener.getTrigger().length()).trim(), listener.getTrigger());
                     }
-                };
+                });
                 listenerThread.start();
             }
         }
@@ -168,11 +170,11 @@ public class ModuleHandler {
      */
     public void onMessage(final String channel, final String sender, final String login, final String hostname, final String message) {
         for(final MessageListener listener : messageListeners) {
-            Thread listenerThread = new Thread(){
+            Thread listenerThread = new Thread(eventThreads, new Runnable(){
                     public void run() {
                         listener.onMessage(channel, sender, login, hostname, message);
                     }
-                };
+                });
             listenerThread.start();
 
         }
@@ -213,11 +215,11 @@ public class ModuleHandler {
      */
     public void onJoin(final String channel, final String sender, final String login, final String hostname) {
         for(final JoinListener listener : joinListeners) {
-            Thread listenerThread = new Thread(){
+            Thread listenerThread = new Thread(eventThreads, new Runnable() {
                     public void run() {
                         listener.onJoin(channel, sender, login, hostname);
                     }
-                };
+                });
             listenerThread.start();
         }
     }
@@ -231,11 +233,11 @@ public class ModuleHandler {
      */
     public void onNickChange(final String oldNick, final String login, final String hostname, final String newNick) {
         for(final NickChangeListener listener : nickChangeListeners) {
-            Thread listenerThread = new Thread(){
+            Thread listenerThread = new Thread(eventThreads, new Runnable() {
                     public void run() {
                         listener.onNickChange(oldNick, login, hostname, newNick);
                     }
-                };
+                });
             listenerThread.start();
         }
     }
