@@ -143,12 +143,17 @@ public class ModuleHandler {
      * any leading or trailing whitespace. So a '!trigger hi all'-message will be sent to the module as
      * 'hi all'.
      */
-    public void onTrigger(String channel, String sender, String login, String hostname, String message) {
-        for(TriggerListener listener : triggerListeners) {
+    public void onTrigger(final String channel, final String sender, final String login, final String hostname, final String message) {
+        for(final TriggerListener listener : triggerListeners) {
             if(listener.trigger(message)) {
-                // we trim the trigger and any following whitespace from the message
-                listener.getListener().onTrigger(channel, sender, login, hostname,
-                        message.substring(listener.getTrigger().length()).trim(), listener.getTrigger());
+                Thread listenerThread = new Thread(){
+                    public void run() {
+                        // we trim the trigger and any following whitespace from the message
+                        listener.getListener().onTrigger(channel, sender, login, hostname,
+                                message.substring(listener.getTrigger().length()).trim(), listener.getTrigger());
+                    }
+                };
+                listenerThread.start();
             }
         }
     }
@@ -161,9 +166,15 @@ public class ModuleHandler {
      * @param hostname users hostname
      * @param message the users complete message
      */
-    public void onMessage(String channel, String sender, String login, String hostname, String message) {
-        for(MessageListener listener : messageListeners) {
-            listener.onMessage(channel, sender, login, hostname, message);
+    public void onMessage(final String channel, final String sender, final String login, final String hostname, final String message) {
+        for(final MessageListener listener : messageListeners) {
+            Thread listenerThread = new Thread(){
+                    public void run() {
+                        listener.onMessage(channel, sender, login, hostname, message);
+                    }
+                };
+            listenerThread.start();
+
         }
     }
 
@@ -200,9 +211,14 @@ public class ModuleHandler {
      * @param login The login of the user who joined the channel.
      * @param hostname The hostname of the user who joined the channel.
      */
-    public void onJoin(String channel, String sender, String login, String hostname) {
-        for(JoinListener listener : joinListeners) {
-            listener.onJoin(channel, sender, login, hostname);
+    public void onJoin(final String channel, final String sender, final String login, final String hostname) {
+        for(final JoinListener listener : joinListeners) {
+            Thread listenerThread = new Thread(){
+                    public void run() {
+                        listener.onJoin(channel, sender, login, hostname);
+                    }
+                };
+            listenerThread.start();
         }
     }
 
@@ -213,9 +229,14 @@ public class ModuleHandler {
      * @param hostname The hostname of the user
      * @param newNick The new nick
      */
-    public void onNickChange(String oldNick, String login, String hostname, String newNick) {
-        for(NickChangeListener listener : nickChangeListeners) {
-            listener.onNickChange(oldNick, login, hostname, newNick);
+    public void onNickChange(final String oldNick, final String login, final String hostname, final String newNick) {
+        for(final NickChangeListener listener : nickChangeListeners) {
+            Thread listenerThread = new Thread(){
+                    public void run() {
+                        listener.onNickChange(oldNick, login, hostname, newNick);
+                    }
+                };
+            listenerThread.start();
         }
     }
 
