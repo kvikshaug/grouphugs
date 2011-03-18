@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.*;
 
 /**
  * Grouphug
@@ -156,18 +157,16 @@ public class Grouphug extends PircBot {
         // Remove all carriage returns.
         message = message.replaceAll("\r", "");
 
+        // Insert newlines where lines are longer than max line chars
+        Pattern p = Pattern.compile("(?s).*?([^\n]{" + (MAX_LINE_CHARS + 1) + "}?).*");
+        Matcher m = p.matcher(message);
+        while(m.matches()) {
+            message = message.substring(0, m.end(1) - 1) + '\n' + message.substring(m.end(1) - 1);
+            m = p.matcher(message);
+        }
+
         // Split all \n into different lines
         List<String> lines = java.util.Arrays.asList(message.split("\n"));
-
-        // If the message is longer than max line chars, separate them
-        for(int i = 0; i<lines.size(); i++) {
-            while(lines.get(i).length() > Grouphug.MAX_LINE_CHARS) {
-                String line = lines.get(i);
-                lines.remove(i);
-                lines.add(i, line.substring(0, Grouphug.MAX_LINE_CHARS).trim());
-                lines.add(i+1, line.substring(Grouphug.MAX_LINE_CHARS).trim());
-            }
-        }
 
         // Remove all empty lines
         for(int i = 0; i<lines.size(); i++) {
