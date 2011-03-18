@@ -162,8 +162,11 @@ public class Grouphug extends PircBot {
             m = p.matcher(message);
         }
 
-        // Remove all carriage returns, empty lines (consecutive newlines), and leading/trailing newlines
-        message = message.replaceAll("\r", "").replaceAll("\n+", "\n").replaceAll("^\n", "").replaceAll("\n$", "");
+        message = message
+            .replaceAll("\r", "")    // Remove carriage returns
+            .replaceAll("\n+", "\n") // Remove empty lines (consecutive newlines)
+            .replaceAll("^\n", "")   // Remove leading newlines
+            .replaceAll("\n$", "");  // Remove trailing newlines
 
         // Split all \n into different lines
         List<String> lines = java.util.Arrays.asList(message.split("\n"));
