@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.*;
 
 /**
  * Grouphug
@@ -153,38 +154,24 @@ public class Grouphug extends PircBot {
      */
     public void msg(String receiver, String message, boolean verifySpam) {
 
-        // First create a list of the lines we will send separately.
-        List<String> lines = new ArrayList<String>();
+        // Insert newlines where lines are longer than max line chars
+        Pattern p = Pattern.compile("(?s).*?([^\n]{" + (MAX_LINE_CHARS + 1) + "}?).*");
+        Matcher m = p.matcher(message);
+        while(m.matches()) {
+            message = message.substring(0, m.end(1) - 1) + '\n' + message.substring(m.end(1) - 1);
+            m = p.matcher(message);
+        }
 
-        // This will be used for searching.
-        int index;
-
-        // Remove all carriage returns.
-        for(index = message.indexOf('\r'); index != -1; index = message.indexOf('\r'))
-            message = message.substring(0, index) + message.substring(index + 1);
+        // Note: don't call trim() on message, as leading spaces may be intentional!
+        message = message
+            .replaceAll("\r", "")      // Remove carriage returns
+            .replaceAll("\n+", "\n")   // Remove empty lines (consecutive newlines)
+            .replaceAll("^\n", "")     // Remove leading newlines
+            .replaceAll("\n$", "")     // Remove trailing newlines
+            .replaceAll("\t", "    "); // Replace tab characters with spaces
 
         // Split all \n into different lines
-        for(index = message.indexOf('\n'); index != -1; index = message.indexOf('\n')) {
-            lines.add(message.substring(0, index).trim());
-            message = message.substring(index + 1);
-        }
-        lines.add(message.trim());
-
-        // If the message is longer than max line chars, separate them
-        for(int i = 0; i<lines.size(); i++) {
-            while(lines.get(i).length() > Grouphug.MAX_LINE_CHARS) {
-                String line = lines.get(i);
-                lines.remove(i);
-                lines.add(i, line.substring(0, Grouphug.MAX_LINE_CHARS).trim());
-                lines.add(i+1, line.substring(Grouphug.MAX_LINE_CHARS).trim());
-            }
-        }
-
-        // Remove all empty lines
-        for(int i = 0; i<lines.size(); i++) {
-            if(lines.get(i).equals(""))
-                lines.remove(i);
-        }
+        List<String> lines = java.util.Arrays.asList(message.split("\n"));
 
         // Now check if we are spamming the channel, and stop if the spam-trigger isn't used
         if(verifySpam && !spamOK && lines.size() > MAX_SPAM_LINES) {

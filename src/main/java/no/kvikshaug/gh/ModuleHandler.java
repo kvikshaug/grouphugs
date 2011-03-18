@@ -72,6 +72,7 @@ public class ModuleHandler {
         new Vote(this);
         new Tlf(this);
         new Time(this);
+        new Repl(this);
 
         System.out.println();
         System.out.println(helpers.size() + " help responses registered");
