@@ -162,6 +162,7 @@ public class Grouphug extends PircBot {
             m = p.matcher(message);
         }
 
+        // Note: don't call trim() on message, as leading spaces may be intentional!
         message = message
             .replaceAll("\r", "")      // Remove carriage returns
             .replaceAll("\n+", "\n")   // Remove empty lines (consecutive newlines)
