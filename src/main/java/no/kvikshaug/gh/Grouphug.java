@@ -154,9 +154,6 @@ public class Grouphug extends PircBot {
      */
     public void msg(String receiver, String message, boolean verifySpam) {
 
-        // Remove all carriage returns.
-        message = message.replaceAll("\r", "");
-
         // Insert newlines where lines are longer than max line chars
         Pattern p = Pattern.compile("(?s).*?([^\n]{" + (MAX_LINE_CHARS + 1) + "}?).*");
         Matcher m = p.matcher(message);
@@ -165,14 +162,11 @@ public class Grouphug extends PircBot {
             m = p.matcher(message);
         }
 
+        // Remove all carriage returns, empty lines (consecutive newlines), and leading/trailing newlines
+        message = message.replaceAll("\r", "").replaceAll("\n+", "\n").replaceAll("^\n", "").replaceAll("\n$", "");
+
         // Split all \n into different lines
         List<String> lines = java.util.Arrays.asList(message.split("\n"));
-
-        // Remove all empty lines
-        for(int i = 0; i<lines.size(); i++) {
-            if(lines.get(i).equals(""))
-                lines.remove(i);
-        }
 
         // Now check if we are spamming the channel, and stop if the spam-trigger isn't used
         if(verifySpam && !spamOK && lines.size() > MAX_SPAM_LINES) {
