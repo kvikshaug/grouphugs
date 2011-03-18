@@ -153,21 +153,11 @@ public class Grouphug extends PircBot {
      */
     public void msg(String receiver, String message, boolean verifySpam) {
 
-        // First create a list of the lines we will send separately.
-        List<String> lines = new ArrayList<String>();
-
-        // This will be used for searching.
-        int index;
-
         // Remove all carriage returns.
         message = message.replaceAll("\r", "");
 
         // Split all \n into different lines
-        for(index = message.indexOf('\n'); index != -1; index = message.indexOf('\n')) {
-            lines.add(message.substring(0, index).trim());
-            message = message.substring(index + 1);
-        }
-        lines.add(message.trim());
+        List<String> lines = java.util.Arrays.asList(message.split("\n"));
 
         // If the message is longer than max line chars, separate them
         for(int i = 0; i<lines.size(); i++) {
