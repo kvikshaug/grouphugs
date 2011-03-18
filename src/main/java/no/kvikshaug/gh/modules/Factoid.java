@@ -97,12 +97,12 @@ public class Factoid implements MessageListener, TriggerListener {
                 reply = message.substring(message.indexOf(SEPARATOR_ACTION) + SEPARATOR_ACTION.length());
             } else {
                 // If it's neither a message nor an action
-                bot.sendMessageChannel(channel, "What? Don't give me that nonsense, "+sender+".");
+                bot.msg(channel, "What? Don't give me that nonsense, "+sender+".");
                 return;
             }
 
             if(find(channel, factoidTrigger, false).size() != 0) {
-                bot.sendMessageChannel(channel, "But, "+sender+", "+factoidTrigger+".");
+                bot.msg(channel, "But, "+sender+", "+factoidTrigger+".");
                 return;
             }
 
@@ -115,14 +115,14 @@ public class Factoid implements MessageListener, TriggerListener {
 
             // Then add it to memory
             factoids.add(new FactoidItem(type.equals("message"), factoidTrigger, reply, sender, channel));
-            bot.sendMessageChannel(channel, "OK, "+sender+".");
+            bot.msg(channel, "OK, "+sender+".");
         } else if(trigger.equals(TRIGGER_DEL)) {
             // Trying to remove a factoid
             List<FactoidItem> factoids = find(channel, message, false);
             if(factoids.size() == 0) {
-                bot.sendMessageChannel(channel, sender+", I can't remember "+ message +" in the first place.");
+                bot.msg(channel, sender+", I can't remember "+ message +" in the first place.");
             } else if(factoids.size() != 1) {
-                bot.sendMessageChannel(channel, "I actually have " + factoids.size() + " such factoids, how did that happen? " +
+                bot.msg(channel, "I actually have " + factoids.size() + " such factoids, how did that happen? " +
                         "Please remove them manually and fix this bug.");
                 System.err.println("More than one factoid exists with '"+message+"' as trigger:");
                 for(FactoidItem factoid : factoids) {
@@ -133,40 +133,40 @@ public class Factoid implements MessageListener, TriggerListener {
                 try {
                     if(sqlHandler.delete("DELETE FROM " + FACTOID_TABLE + "  WHERE `trigger` = '"+message+"' AND `channel` = '"+channel+"';") == 0) {
                         System.err.println("Factoid deletion warning: Item was found in local arraylist, but not in SQL DB!");
-                        bot.sendMessageChannel(channel, "OMG inconsistency; I have the factoid in memory but not in the SQL db.");
+                        bot.msg(channel, "OMG inconsistency; I have the factoid in memory but not in the SQL db.");
                         return;
                     }
                 } catch(SQLException e) {
-                    bot.sendMessageChannel(channel, "You should know that I caught an SQL exception.");
+                    bot.msg(channel, "You should know that I caught an SQL exception.");
                     System.err.println("Factoid deletion: SQL Exception!");
                     e.printStackTrace();
                 }
 
                 // Then remove it from memory
                 this.factoids.remove(factoids.get(0));
-                bot.sendMessageChannel(channel, "I no longer know of this "+ message +" that you speak of.");
+                bot.msg(channel, "I no longer know of this "+ message +" that you speak of.");
             }
         } else if(trigger.equals(TRIGGER_MAIN)) {
             // Trying to view data about a factoid
             List<FactoidItem> factoids = find(channel, message, false);
             if(factoids.size() == 0) {
-                bot.sendMessageChannel(channel, sender+", I do not know of this "+message+" that you speak of.");
+                bot.msg(channel, sender+", I do not know of this "+message+" that you speak of.");
             } else {
                 for(FactoidItem factoid : factoids) {
-                    bot.sendMessageChannel(channel, factoid.toString());
+                    bot.msg(channel, factoid.toString());
                 }
             }
         } else if(trigger.equals(TRIGGER_RANDOM)) {
-        	bot.sendMessageChannel(channel, "Random is disabled until further notice");
+            bot.msg(channel, "Random is disabled until further notice");
         	
             //factoids.get(random.nextInt(factoids.size())).send(sender);
         } else if(trigger.equals(TRIGGER_FOR)) {
             List<FactoidItem> factoids = find(channel, message, true);
             if(factoids.size() == 0) {
-                bot.sendMessageChannel(channel, "Sorry, that expression doesn't ring any bell.");
+                bot.msg(channel, "Sorry, that expression doesn't ring any bell.");
             } else {
                 for(FactoidItem factoid : factoids) {
-                    bot.sendMessageChannel(channel, factoid.toString());
+                    bot.msg(channel, factoid.toString());
                 }
             }
         }
@@ -259,7 +259,7 @@ public class Factoid implements MessageListener, TriggerListener {
          */
         private void send(String sender) {
             if(isMessage()) {
-                bot.sendMessageChannel(getChannel(), getReply().replace("$sender", sender), true);
+                bot.msg(getChannel(), getReply().replace("$sender", sender), true);
             } else {
                 // TODO - action evades spam, and all the local sendMessage routines
                 bot.sendAction(getChannel(), getReply().replace("$sender", sender));

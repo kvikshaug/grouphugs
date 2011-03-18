@@ -29,7 +29,7 @@ public class EpisodeInfo implements TriggerListener  {
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         if(trigger.equals(TRIGGER)) {
             String reply = find(message);
-            Grouphug.getInstance().sendMessageChannel(channel, reply, true);
+            Grouphug.getInstance().msg(channel, reply, true);
         }
     }
 

@@ -18,7 +18,7 @@ class Tlf(val handler: ModuleHandler) extends TriggerListener {
   println("Tlf module loaded.")
 
   def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String): Unit = {
-    val query = java.net.URLEncoder.encode(message)
+    val query = java.net.URLEncoder.encode(message, "UTF-8")
     val root = XML.withSAXParser(SAXParserImpl.newInstance(null)).load(Web.prepareEncodedBufferedReader(
       new URL("http://www.gulesider.no/tk/search.c?q=" + query + "&x=0&y=0")))
 
@@ -30,7 +30,7 @@ class Tlf(val handler: ModuleHandler) extends TriggerListener {
       hits = m.group(1)
     }
     if(hits isEmpty) {
-      bot.sendMessageChannel(channel, "Sorry, I got no hits.")
+      bot.msg(channel, "Sorry, I got no hits.")
       return
     }
 
@@ -68,7 +68,7 @@ class Tlf(val handler: ModuleHandler) extends TriggerListener {
     } else {
       hitText = " (first of " + hits + " hits)"
     }
-    bot.sendMessageChannel(channel, name + address + ": " + numbers + hitText + " — http://www.gulesider.no/tk/search.c?q=" + query)
+    bot.msg(channel, name + address + ": " + numbers + hitText + " — http://www.gulesider.no/tk/search.c?q=" + query)
   }
 }
 

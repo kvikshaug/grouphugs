@@ -89,19 +89,19 @@ public class Karma implements TriggerListener, MessageListener {
             ki = find(channel, sqlName);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessageChannel(channel, name+" has probably bad karma, because an SQL error occured.");
+            Grouphug.getInstance().msg(channel, name+" has probably bad karma, because an SQL error occured.");
             return;
         }
         if(ki == null) {
-            Grouphug.getInstance().sendMessageChannel(channel, name+" has neutral karma.");
+            Grouphug.getInstance().msg(channel, name+" has neutral karma.");
         } else {
-            Grouphug.getInstance().sendMessageChannel(channel, ki.getName()+" has "+ki.getKarma()+" karma.");
+            Grouphug.getInstance().msg(channel, ki.getName()+" has "+ki.getKarma()+" karma.");
         }
     }
 
     private void add(String channel, String sender, String name, int karma) {
         if(name.equals(sender)) {
-            Grouphug.getInstance().sendMessageChannel(channel, sender+", self karma is bad karma.");
+            Grouphug.getInstance().msg(channel, sender+", self karma is bad karma.");
             return;
         }
 
@@ -134,7 +134,7 @@ public class Karma implements TriggerListener, MessageListener {
             }
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessageChannel(channel, "Sorry, unable to change karma value; an SQL error occurred.");
+            Grouphug.getInstance().msg(channel, "Sorry, unable to change karma value; an SQL error occurred.");
         }
     }
 
@@ -180,10 +180,10 @@ public class Karma implements TriggerListener, MessageListener {
             } else {
                 reply += "May they burn forever in the pits of "+ channel+".";
             }
-            Grouphug.getInstance().sendMessageChannel(channel, reply);
+            Grouphug.getInstance().msg(channel, reply);
         } catch(SQLException e) {
             System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().sendMessageChannel(channel, "Sorry, unable to gather karma records; an SQL error occured.");
+            Grouphug.getInstance().msg(channel, "Sorry, unable to gather karma records; an SQL error occured.");
         }
     }
 

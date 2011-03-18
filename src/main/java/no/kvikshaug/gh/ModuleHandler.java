@@ -46,7 +46,7 @@ public class ModuleHandler {
         new GoogleFight(this);
         new IMDb(this);
         new Insulter(this);
-        new IsSiteUp(this);
+        new IsUp(this);
         new Karma(this);
         new Seen(this);
         new Slang(this);
@@ -175,20 +175,20 @@ public class ModuleHandler {
     public void onHelp(String sender, String trigger) {
         if(trigger.equals("")) {
             // no specific help text was requested
-            bot.sendMessageChannel(sender, "Try \"!help <module>\" for one of the following modules:", false);
+            bot.msg(sender, "Try \"!help <module>\" for one of the following modules:", false);
             String helpString = "";
             Collection<String> helperText = helpers.keySet();
             for(String texts : helperText) {
                 helpString += texts + ", ";
             }
-            bot.sendMessageChannel(sender, helpString.substring(0, helpString.length()-2), false);
+            bot.msg(sender, helpString.substring(0, helpString.length()-2), false);
         } else {
             // looking for a specific module
             String text = helpers.get(trigger);
             if(text == null) {
-                bot.sendMessageChannel(sender, "No one has implemented a "+trigger+" module yet. Patches are welcome!", false);
+                bot.msg(sender, "No one has implemented a "+trigger+" module yet. Patches are welcome!", false);
             } else {
-                bot.sendMessageChannel(sender, text, false);
+                bot.msg(sender, text, false);
             }
         }
     }

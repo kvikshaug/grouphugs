@@ -35,15 +35,15 @@ public class GoogleCalc implements TriggerListener {
             calcPath.addNamespace("h","http://www.w3.org/1999/xhtml");
             Element calcElement = (Element)calcPath.selectSingleNode(doc);
             if(calcElement == null) {
-                bot.sendMessageChannel(channel, "The google calculator had nothing to say about that.");
+                bot.msg(channel, "The google calculator had nothing to say about that.");
             } else {
-                bot.sendMessageChannel(channel, calcElement.getValue(), true);
+                bot.msg(channel, calcElement.getValue(), true);
             }
         } catch(IOException e) {
-            bot.sendMessageChannel(channel, "Google showed me the finger and mumbled something about 'go throw an IOException' :(");
+            bot.msg(channel, "Google showed me the finger and mumbled something about 'go throw an IOException' :(");
             e.printStackTrace();
         } catch (JDOMException e) {
-            bot.sendMessageChannel(channel, "JDOM threw up in my face, what the hell.");
+            bot.msg(channel, "JDOM threw up in my face, what the hell.");
             e.printStackTrace();
         }
     }

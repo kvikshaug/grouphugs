@@ -61,7 +61,7 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
     }
 
     def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String) = trigger match {
-      case TRIGGER_FORCE => bot.sendMessageChannel(channel, "Forcing updates."); this ! items
+      case TRIGGER_FORCE => bot.msg(channel, "Forcing updates."); this ! items
       case TRIGGER_LIST  => listPackages(channel)
       case TRIGGER_DEL   => removePackage(channel, message)
       case TRIGGER => message match {
@@ -72,25 +72,25 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
 
     def listPackages(channel: String) {
       if(items.size == 0) {
-        bot.sendMessageChannel(channel, "No packages are being tracked. What's going on, are you all bankrupt?")
+        bot.msg(channel, "No packages are being tracked. What's going on, are you all bankrupt?")
       }
       items.filter(_.channel == channel).foreach {
-        item => bot.sendMessageChannel(channel, item.id + " for " + item.owner + ": " + item.status)
+        item => bot.msg(channel, item.id + " for " + item.owner + ": " + item.status)
       }
     }
 
     def removePackage(channel: String, id: String) {
       try {
         if(!(items.exists(_ == id))) {
-          bot.sendMessageChannel(channel, "I'm not tracking any package with ID " + id + ". Try !" + TRIGGER_LIST)
+          bot.msg(channel, "I'm not tracking any package with ID " + id + ". Try !" + TRIGGER_LIST)
           return
         }
         items = items.filterNot(_ == id)
         sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(id).asJava)
-        bot.sendMessageChannel(channel, "Ok, stopped tracking package " + id + ".")
+        bot.msg(channel, "Ok, stopped tracking package " + id + ".")
       } catch {
         case e: SQLException =>
-          bot.sendMessageChannel(channel, "Removed it from memory but not from SQL. Check my logs for more info.")
+          bot.msg(channel, "Removed it from memory but not from SQL. Check my logs for more info.")
           e.printStackTrace
       }
     }
@@ -99,22 +99,22 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
     def addPackage(channel: String, id: String, sender: String) {
       // the following two checks are for temporary backwards compatibility
       if(id.startsWith("-rm")) {
-        bot.sendMessageChannel(channel, sender + ": Please use !" + TRIGGER_DEL + " in the future, this trigger is deprecated.")
+        bot.msg(channel, sender + ": Please use !" + TRIGGER_DEL + " in the future, this trigger is deprecated.")
         removePackage(channel, id.replaceAll("-rm", "").trim)
         return
       } else if(id.startsWith("-ls")) {
-        bot.sendMessageChannel(channel, sender + ": Please use !" + TRIGGER_LIST + " in the future, this trigger is deprecated.")
+        bot.msg(channel, sender + ": Please use !" + TRIGGER_LIST + " in the future, this trigger is deprecated.")
         listPackages(channel)
         return
       }
 
       if(!(id matches "[a-zA-Z0-9]+")) {
-        bot.sendMessageChannel(channel, "The ID " + id + " doesn't match [a-zA-Z0-9]+.")
+        bot.msg(channel, "The ID " + id + " doesn't match [a-zA-Z0-9]+.")
         return
       }
 
       if(items.exists(_ == id)) {
-        bot.sendMessageChannel(channel, "I'm already tracking " + id + ". Use !" + TRIGGER_FORCE + " to force an update.")
+        bot.msg(channel, "I'm already tracking " + id + ". Use !" + TRIGGER_FORCE + " to force an update.")
         return
       }
 
@@ -123,18 +123,18 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
         val newItem = Package(id, "", "", sender, channel)
         TrackingXMLParser.track(newItem)
         if(newItem.statusCode == "DELIVERED") {
-            bot.sendMessageChannel(channel, "Your package has already been delivered. I will not track it further.")
-            bot.sendMessageChannel(channel, newItem.status)
+            bot.msg(channel, "Your package has already been delivered. I will not track it further.")
+            bot.msg(channel, newItem.status)
             return
         }
         sqlHandler.insert("insert into " + dbName + " (trackingId, status, statusCode, owner, channel) VALUES (?, ?, ?, ?, ?);", List(id, newItem.status, newItem.statusCode, sender, channel).asJava)
         items = newItem :: items
 
-        bot.sendMessageChannel(channel, "Adding package " + id + " to tracking list.")
-        bot.sendMessageChannel(channel, "Status: " + newItem.status)
+        bot.msg(channel, "Adding package " + id + " to tracking list.")
+        bot.msg(channel, "Status: " + newItem.status)
       } catch {
         case e =>
-          bot.sendMessageChannel(channel, "Oh no, I caught some horrible exception! Please check my logs. SQL/memory may or may not be synchronized.")
+          bot.msg(channel, "Oh no, I caught some horrible exception! Please check my logs. SQL/memory may or may not be synchronized.")
           e.printStackTrace
       }
     }
@@ -148,7 +148,7 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
       if(failCount >= 5) {
         failCount = 0
         for(channel <- Config.channels) {
-          bot.sendMessageChannel(channel, "The package tracking module has now failed 5 times in a row. " +
+          bot.msg(channel, "The package tracking module has now failed 5 times in a row. " +
             "If this continues, you might want to check the logs and your package status manually.")
         }
       }
@@ -165,47 +165,47 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
             if(status._1) {
               i.statusCode match {
                 case "DELIVERED" =>
-                  bot.sendMessageChannel(i.channel, i.owner + " has just picked up " + i.id + ":")
-                  bot.sendMessageChannel(i.channel, i.status)
+                  bot.msg(i.channel, i.owner + " has just picked up " + i.id + ":")
+                  bot.msg(i.channel, i.status)
                   items = items.filterNot(_ == i)
                   sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(i.id).asJava)
-                  bot.sendMessageChannel(i.channel, "Removing this one from my list. Now tracking " + items.size + " packages.")
+                  bot.msg(i.channel, "Removing this one from my list. Now tracking " + items.size + " packages.")
                 case "RETURNED" =>
-                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has been returned to sender.")
-                  bot.sendMessageChannel(i.channel, i.status)
+                  bot.msg(i.channel, i.owner + ": Package " + i.id + " has been returned to sender.")
+                  bot.msg(i.channel, i.status)
                   items = items.filterNot(_ == i)
                   sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(i.id).asJava)
-                  bot.sendMessageChannel(i.channel, "Removing this one from my list. Now tracking " + items.size + " packages.")
+                  bot.msg(i.channel, "Removing this one from my list. Now tracking " + items.size + " packages.")
                 case "PRE_NOTIFIED" =>
-                  bot.sendMessageChannel(i.channel, i.owner + ": Posten now knows about your package.")
-                  bot.sendMessageChannel(i.channel, i.status)
+                  bot.msg(i.channel, i.owner + ": Posten now knows about your package.")
+                  bot.msg(i.channel, i.status)
                 case "INTERNATIONAL" =>
-                  bot.sendMessageChannel(i.channel, i.owner + ": Your package is still far away.")
-                  bot.sendMessageChannel(i.channel, i.status)
+                  bot.msg(i.channel, i.owner + ": Your package is still far away.")
+                  bot.msg(i.channel, i.status)
                 case "NOTIFICATION_SENT" =>
-                  bot.sendMessageChannel(i.channel, i.owner + ": Notification for package " + i.id + " has been sent!")
-                  bot.sendMessageChannel(i.channel, i.status)
+                  bot.msg(i.channel, i.owner + ": Notification for package " + i.id + " has been sent!")
+                  bot.msg(i.channel, i.status)
                 case "TRANSPORT_TO_RECIPIENT" =>
-                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " is on its way to you right now!")
-                  bot.sendMessageChannel(i.channel, i.status)
+                  bot.msg(i.channel, i.owner + ": Package " + i.id + " is on its way to you right now!")
+                  bot.msg(i.channel, i.status)
                 case "READY_FOR_PICKUP" =>
-                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " is ready for pickup!")
-                  bot.sendMessageChannel(i.channel, i.status)
+                  bot.msg(i.channel, i.owner + ": Package " + i.id + " is ready for pickup!")
+                  bot.msg(i.channel, i.status)
                 case "IN_TRANSIT" =>
-                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has changed:")
-                  bot.sendMessageChannel(i.channel, i.status)
+                  bot.msg(i.channel, i.owner + ": Package " + i.id + " has changed:")
+                  bot.msg(i.channel, i.status)
                 case "CUSTOMS" =>
-                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " is due for inspection!")
-                  bot.sendMessageChannel(i.channel, i.status)
+                  bot.msg(i.channel, i.owner + ": Package " + i.id + " is due for inspection!")
+                  bot.msg(i.channel, i.status)
                 case "NO_PACKAGES" =>
-                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has suddenly lost its contents! You might want to check it manually.")
-                  bot.sendMessageChannel(i.channel, i.status)
+                  bot.msg(i.channel, i.owner + ": Package " + i.id + " has suddenly lost its contents! You might want to check it manually.")
+                  bot.msg(i.channel, i.status)
                 case x =>
-                  bot.sendMessageChannel(i.channel, i.owner + ": Package " + i.id + " has changed to '" + x + "', which I don't recognize!")
-                  bot.sendMessageChannel(i.channel, i.status)
+                  bot.msg(i.channel, i.owner + ": Package " + i.id + " has changed to '" + x + "', which I don't recognize!")
+                  bot.msg(i.channel, i.status)
               }
               if(status._2 > 1) {
-                bot.sendMessageChannel(i.channel, "Note: This package has >1 items.")
+                bot.msg(i.channel, "Note: This package has >1 items.")
               }
             }
           } catch {

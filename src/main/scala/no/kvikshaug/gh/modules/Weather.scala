@@ -29,23 +29,23 @@ class Weather(val handler: ModuleHandler) extends TriggerListener {
 
     // check that the place was found
     if((root \ "problem_cause").size != 0) {
-      bot.sendMessageChannel(channel, "I don't think google tracks the weather in " + input._3 + ".")
+      bot.msg(channel, "I don't think google tracks the weather in " + input._3 + ".")
       return
     }
 
     val maxDays = (root \ "forecast_conditions" size) - 1
     if(input._1.exists(_ > maxDays)) {
-      bot.sendMessageChannel(channel, "Google only provides forecast data for " + maxDays + " days ahead.")
+      bot.msg(channel, "Google only provides forecast data for " + maxDays + " days ahead.")
       return
     }
 
-    bot.sendMessageChannel(channel,
+    bot.msg(channel,
       (root \ "forecast_information" \ "city" \ "@data").text + ", " +
       (root \ "forecast_information" \ "current_date_time" \ "@data").text)
 
     // current conditions
     if(input._2) {
-      bot.sendMessageChannel(channel, "Currently: " +
+      bot.msg(channel, "Currently: " +
         (root \ "current_conditions" \ "temp_c" \ "@data").text + "°C, " +
         (root \ "current_conditions" \ "condition" \ "@data").text + ". " +
         (root \ "current_conditions" \ "humidity" \ "@data").text + ". " +
@@ -54,7 +54,7 @@ class Weather(val handler: ModuleHandler) extends TriggerListener {
 
     // forecast
     for(day <- input._1) {
-      bot.sendMessageChannel(channel, forecastFor(day, root))
+      bot.msg(channel, forecastFor(day, root))
     }
   }
 

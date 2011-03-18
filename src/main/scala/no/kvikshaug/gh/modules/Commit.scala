@@ -18,7 +18,7 @@ class Commit(val handler: ModuleHandler) extends TriggerListener {
     val root = XML.load(Web.prepareEncodedBufferedReader(
       new URL("http://whatthecommit.com/")))
 
-    bot.sendMessageChannel(channel, (root \\ "p").text)
+    bot.msg(channel, (root \\ "p").text)
   }
 }
 

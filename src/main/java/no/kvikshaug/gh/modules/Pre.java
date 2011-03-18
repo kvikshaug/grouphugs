@@ -32,7 +32,7 @@ public class Pre implements TriggerListener, Runnable {
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         if(message.equals("")) {
-            bot.sendMessageChannel(channel, "Search for what?");
+            bot.msg(channel, "Search for what?");
         } else {
         	this.channel = channel; //Ugly :<
             // perform all searches in a different thread because doopes.com is
@@ -51,7 +51,7 @@ public class Pre implements TriggerListener, Runnable {
 
             Object node = xpath.selectSingleNode(doc);
             if(node == null) {
-                bot.sendMessageChannel(channel, "Found no release containing '"+message+"'.");
+                bot.msg(channel, "Found no release containing '"+message+"'.");
                 return;
             }
 
@@ -83,16 +83,16 @@ public class Pre implements TriggerListener, Runnable {
             releasedTime.append(rp.getMinutes()).append("m ");
             releasedTime.append(rp.getSeconds()).append("s");
 
-            bot.sendMessageChannel(channel, data[2].trim() + ": " + releasedTime.toString()+" ago in "+data[1].trim().toUpperCase());
+            bot.msg(channel, data[2].trim() + ": " + releasedTime.toString()+" ago in "+data[1].trim().toUpperCase());
         } catch (IOException e) {
             e.printStackTrace();
-            bot.sendMessageChannel(channel, "IOException :/");
+            bot.msg(channel, "IOException :/");
         } catch (JDOMException e) {
             e.printStackTrace();
-            bot.sendMessageChannel(channel, "zomg JDOMException :/");
+            bot.msg(channel, "zomg JDOMException :/");
         } catch (ParseException e) {
             e.printStackTrace();
-            bot.sendMessageChannel(channel, "zomg, the date format was unparseable :/");
+            bot.msg(channel, "zomg, the date format was unparseable :/");
         }
     }
 }

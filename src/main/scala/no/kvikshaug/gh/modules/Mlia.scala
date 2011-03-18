@@ -32,7 +32,7 @@ class Mlia(val handler: ModuleHandler) extends TriggerListener {
 
     for(div <- root \\ "div") {
       if((div \ "@class").text == "sc") {
-        bot.sendMessageChannel(channel, div.text.trim)
+        bot.msg(channel, div.text.trim)
         return
       }
     }

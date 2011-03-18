@@ -32,6 +32,6 @@ public class EightBall implements TriggerListener {
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
-        Grouphug.getInstance().sendMessageChannel(channel, sender+": "+ answers.get(random.nextInt(answers.size())));
+        Grouphug.getInstance().msg(channel, sender+": "+ answers.get(random.nextInt(answers.size())));
     }
 }

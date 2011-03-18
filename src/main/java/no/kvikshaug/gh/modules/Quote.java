@@ -41,14 +41,14 @@ public class Quote implements TriggerListener, MessageListener {
 
 	public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
 		if (trigger.equals("startquote")){
-			bot.sendMessageChannel(channel, "Starting recording of quote");
+			bot.msg(channel, "Starting recording of quote");
 			quotes.put(sender, "");
 		} else if (trigger.equals("stopquote")){
-			bot.sendMessageChannel(channel, "Stopped recording of quote: ");
+			bot.msg(channel, "Stopped recording of quote: ");
 			String quote = quotes.get(sender);
 			quote = quote.substring(0, quote.length()-1); //remove last \n
 			saveQuote(channel, sender, quote);
-			bot.sendMessageChannel(channel, quote);
+			bot.msg(channel, quote);
 			quotes.remove(sender);
 		} else if (trigger.equals("randomquote")){
 			sayRandomQuote(channel);
@@ -70,7 +70,7 @@ public class Quote implements TriggerListener, MessageListener {
 		try {
 			Object[] row = sqlHandler.selectSingle("SELECT id, sender, date, quote FROM "+QUOTE_DB+" WHERE channel='"+channel+"' ORDER BY RANDOM() LIMIT 1");
 			if (row != null) {
-				bot.sendMessageChannel(channel, (String)row[3]);
+				bot.msg(channel, (String)row[3]);
 			}
 		} catch (SQLUnavailableException e) {
 			System.err.println("Quote failed: SQL is unavailable!");
@@ -89,7 +89,7 @@ public class Quote implements TriggerListener, MessageListener {
 			sqlHandler.insert("INSERT INTO " + QUOTE_DB + " (channel, sender, date, quote) VALUES (?, ?, ?, ?);", params);
 		} catch (SQLException e) {
 			System.err.println(" > SQL Exception: " + e.getMessage() + "\n" + e.getCause());
-			bot.sendMessageChannel(channel, "Sorry, unable to update Quote DB, an SQL error occured.");
+			bot.msg(channel, "Sorry, unable to update Quote DB, an SQL error occured.");
 		}
 	}
 }

@@ -15,7 +15,7 @@ class Time(val handler: ModuleHandler) extends TriggerListener {
     val now = System.currentTimeMillis
     bot.onMessage(channel, sender, login, hostname, message)
     val later = System.currentTimeMillis
-    bot.sendMessageChannel(channel, "Time used: " + (later - now) + "ms")
+    bot.msg(channel, "Time used: " + (later - now) + "ms")
   }
 }
 

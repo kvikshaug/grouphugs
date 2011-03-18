@@ -26,7 +26,7 @@ public class Jargon implements TriggerListener {
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         if(message.equals("")) {
-            bot.sendMessageChannel(channel, "Try !help jargon. It's not that hard.");
+            bot.msg(channel, "Try !help jargon. It's not that hard.");
         }
 
         String folder = message.substring(0, 1).toUpperCase();
@@ -64,18 +64,18 @@ public class Jargon implements TriggerListener {
                 definition += "\n" + e.getValue().replace("\n", " ").replaceAll("\\s+", " ").trim();
             }
             definition = definition.trim();
-            bot.sendMessageChannel(channel, definitionTerm + ": " + definition, true);
+            bot.msg(channel, definitionTerm + ": " + definition, true);
 
         } catch (NullPointerException e) {
-            bot.sendMessageChannel(channel, "Looks like someone made a woopise with xpath and the DOM; there was an NPE somewhere.");
+            bot.msg(channel, "Looks like someone made a woopise with xpath and the DOM; there was an NPE somewhere.");
             e.printStackTrace();
         } catch (FileNotFoundException e) {
-            bot.sendMessageChannel(channel, "Couldn't find that in the jargon files. Try !slang.");
+            bot.msg(channel, "Couldn't find that in the jargon files. Try !slang.");
         } catch (IOException e) {
-            bot.sendMessageChannel(channel, "Whoa whoa, an IOException caught me by surprise.");
+            bot.msg(channel, "Whoa whoa, an IOException caught me by surprise.");
             e.printStackTrace();
         } catch (JDOMException e) {
-            bot.sendMessageChannel(channel, "Lookie here, a JDOMExcpetion.");
+            bot.msg(channel, "Lookie here, a JDOMExcpetion.");
             e.printStackTrace();
         }
     }
