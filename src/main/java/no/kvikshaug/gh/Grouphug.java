@@ -160,8 +160,7 @@ public class Grouphug extends PircBot {
         int index;
 
         // Remove all carriage returns.
-        for(index = message.indexOf('\r'); index != -1; index = message.indexOf('\r'))
-            message = message.substring(0, index) + message.substring(index + 1);
+        message = message.replaceAll("\r", "");
 
         // Split all \n into different lines
         for(index = message.indexOf('\n'); index != -1; index = message.indexOf('\n')) {
