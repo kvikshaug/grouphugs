@@ -163,10 +163,11 @@ public class Grouphug extends PircBot {
         }
 
         message = message
-            .replaceAll("\r", "")    // Remove carriage returns
-            .replaceAll("\n+", "\n") // Remove empty lines (consecutive newlines)
-            .replaceAll("^\n", "")   // Remove leading newlines
-            .replaceAll("\n$", "");  // Remove trailing newlines
+            .replaceAll("\r", "")      // Remove carriage returns
+            .replaceAll("\n+", "\n")   // Remove empty lines (consecutive newlines)
+            .replaceAll("^\n", "")     // Remove leading newlines
+            .replaceAll("\n$", "")     // Remove trailing newlines
+            .replaceAll("\t", "    "); // Replace tab characters with spaces
 
         // Split all \n into different lines
         List<String> lines = java.util.Arrays.asList(message.split("\n"));
