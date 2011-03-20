@@ -60,7 +60,6 @@ public class ModuleHandler {
         new Fml(this);
         new Pre(this);
         new Jargon(this);
-        new Scala(this);
         new Commit(this);
         new EpisodeInfo(this);
         new Translate(this);
