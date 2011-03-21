@@ -136,7 +136,7 @@ public class Timer implements TriggerListener {
 		String notifyMessage = message.substring(timerTime.length()).trim();
 		
 		
-		int id = insertTimerIntoDb(channel, sender, notifyMessage, duration.getMillis());
+		int id = insertTimerIntoDb(channel, sender, notifyMessage, timeToHighlight.getMillis());
         
         bot.msg(channel, "Ok, I will highlight you at " + timerTime +".");
         
