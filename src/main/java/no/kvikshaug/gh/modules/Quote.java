@@ -44,11 +44,10 @@ public class Quote implements TriggerListener, MessageListener {
 			bot.msg(channel, "Starting recording of quote");
 			quotes.put(sender, "");
 		} else if (trigger.equals("stopquote")){
-			bot.msg(channel, "Stopped recording of quote: ");
+			bot.msg(channel, "Stopped recording of quote");
 			String quote = quotes.get(sender);
 			quote = quote.substring(0, quote.length()-1); //remove last \n
 			saveQuote(channel, sender, quote);
-			bot.msg(channel, quote);
 			quotes.remove(sender);
 		} else if (trigger.equals("randomquote")){
 			sayRandomQuote(channel);
