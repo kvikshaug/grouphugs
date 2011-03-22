@@ -79,8 +79,8 @@ public class Timer implements TriggerListener {
     	//Change this checking to regex checking which type it is perhaps, this is ugly :3
     	
     	SimpleDateFormat hour_min_format = new SimpleDateFormat("HH:mm"); // 21:45
-    	SimpleDateFormat date_format = new SimpleDateFormat("dd/MM"); // 2/4, 23/12
     	SimpleDateFormat date_hour_min_format = new SimpleDateFormat("dd/MM-HH:mm"); //24/12-20:34
+    	SimpleDateFormat date_format = new SimpleDateFormat("dd/MM"); // 2/4, 23/12
     	
     	DateTime parseHighlight = null;
     	DateTime timeToHighlight = null;
@@ -97,23 +97,23 @@ public class Timer implements TriggerListener {
 		} catch (ParseException e) {
 			//Not of this type, try another one
 			try {
-				parseHighlight = new DateTime(date_format.parse(timerTime));
+				parseHighlight = new DateTime(date_hour_min_format.parse(timerTime));
 				timeToHighlight = new DateTime(now.getYear(), parseHighlight.getMonthOfYear(), parseHighlight.getDayOfMonth(), 
-						0, 0, 0, 0);
+						parseHighlight.getHourOfDay(), parseHighlight.getMinuteOfHour(), 0, 0);
 				
-				if (timeToHighlight.isBefore(now)){ //A date that has already been this year
-					timeToHighlight = timeToHighlight.plusYears(1); //So that means we mean next year
+				if (timeToHighlight.isBefore(now)){ //Aka a date and time that has been this year
+					timeToHighlight = timeToHighlight.plusYears(1);						
 				}
 				
 			} catch (ParseException e1) {
 				//Not this one either, try the last one
 				try {
-					parseHighlight = new DateTime(date_hour_min_format.parse(timerTime));
+					parseHighlight = new DateTime(date_format.parse(timerTime));
 					timeToHighlight = new DateTime(now.getYear(), parseHighlight.getMonthOfYear(), parseHighlight.getDayOfMonth(), 
-							parseHighlight.getHourOfDay(), parseHighlight.getMinuteOfHour(), 0, 0);
+							0, 0, 0, 0);
 					
-					if (timeToHighlight.isBefore(now)){ //Aka a date and time that has been this year
-						timeToHighlight = timeToHighlight.plusYears(1);						
+					if (timeToHighlight.isBefore(now)){ //A date that has already been this year
+						timeToHighlight = timeToHighlight.plusYears(1); //So that means we mean next year
 					}
 				} catch (ParseException e2) {
 					//Not this one either, this is just bogus
