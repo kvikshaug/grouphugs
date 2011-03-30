@@ -44,7 +44,6 @@ class Repl(val handler: ModuleHandler) extends TriggerListener {
             }
             Thread.sleep(sleepTime * 1000)
           }
-          println(line)
           val pattern = Pattern.compile("""(?s).*<pre class="code">.*</pre>.*<pre.*>(.*)</pre>.*""").matcher(line)
           if(pattern matches) {
             def nIndex(h: String, n: String, s: Int, c: Int): Int = {
@@ -60,7 +59,6 @@ class Repl(val handler: ModuleHandler) extends TriggerListener {
             if(thirdLineBreak != -1) {
               line = line.substring(0, thirdLineBreak)
             }
-            println("printing:\n" + line)
             bot.msg(message._2, line)
           } else {
             bot.msg(message._2, "Whoops, looks like the expected output at simplyscala.com has changed. My regex didn't match.")
