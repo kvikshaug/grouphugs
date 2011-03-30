@@ -30,6 +30,7 @@ public class Timer implements TriggerListener {
     	"!timer hh:mm [message]\n" +
     	"!timer dd/mm [message] \n" +
     	"!timer dd/mm-hh:mm [message] \n" +
+    	"!timer day-hh:mm [message] \n" +
     	"s/m/h/d = seconds/minutes/hours/days (optional, default is minutes)\n" +
     	"Example: !timer 14m grandis\n";
     	handler.registerHelp("timer", helpText);
@@ -81,6 +82,7 @@ public class Timer implements TriggerListener {
     	SimpleDateFormat hour_min_format = new SimpleDateFormat("HH:mm"); // 21:45
     	SimpleDateFormat date_hour_min_format = new SimpleDateFormat("dd/MM-HH:mm"); //24/12-20:34
     	SimpleDateFormat date_format = new SimpleDateFormat("dd/MM"); // 2/4, 23/12
+    	SimpleDateFormat day_format = new SimpleDateFormat("E-HH:mm"); // Monday-23:14
     	
     	DateTime parseHighlight = null;
     	DateTime timeToHighlight = null;
@@ -105,7 +107,7 @@ public class Timer implements TriggerListener {
 					timeToHighlight = timeToHighlight.plusYears(1);						
 				}
 				
-			} catch (ParseException e1) {
+			} catch (ParseException e2) {
 				//Not this one either, try the last one
 				try {
 					parseHighlight = new DateTime(date_format.parse(timerTime));
@@ -115,10 +117,22 @@ public class Timer implements TriggerListener {
 					if (timeToHighlight.isBefore(now)){ //A date that has already been this year
 						timeToHighlight = timeToHighlight.plusYears(1); //So that means we mean next year
 					}
-				} catch (ParseException e2) {
-					//Not this one either, this is just bogus
-					bot.msg(channel, "Stop trying to trick me, this isn't a valid timer-argument. Try !help timer");
-					return;
+				} catch (ParseException e3) {
+					try{
+						parseHighlight = new DateTime(day_format.parse(timerTime));
+						
+						timeToHighlight = now.withDayOfWeek(parseHighlight.getDayOfWeek())
+						.withHourOfDay(parseHighlight.getHourOfDay())
+						.withMinuteOfHour(parseHighlight.getMinuteOfHour());
+						
+						if (timeToHighlight.isBefore(now)) { //That day has already been  this week
+							timeToHighlight = timeToHighlight.plusWeeks(1);
+						}
+					}catch (ParseException e4){
+						//Not this one either, this is just bogus
+						bot.msg(channel, "Stop trying to trick me, this isn't a valid timer-argument. Try !help timer");
+						return;
+					}
 				}
 			}
 		}
