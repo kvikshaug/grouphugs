@@ -10,6 +10,7 @@ import no.kvikshaug.gh.listeners.TriggerListener
 import no.kvikshaug.gh.util.Web
 import no.kvikshaug.gh.{Grouphug, ModuleHandler}
 
+case class Message(val code: String, val channel: String)
 class Repl(val handler: ModuleHandler) extends TriggerListener {
 
   val bot = Grouphug.getInstance
@@ -19,7 +20,7 @@ class Repl(val handler: ModuleHandler) extends TriggerListener {
 
   def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String): Unit = {
     // run this asynchronous
-    listener ! (message, channel)
+    listener ! Message(message, channel)
   }
 
   val maxTries = 5
@@ -28,16 +29,16 @@ class Repl(val handler: ModuleHandler) extends TriggerListener {
   val listener = actor {
     loop {
       receive {
-        case message: Tuple2[String, String] =>
+        case message: Message =>
           var line = ""
           var counter = -1
           while(line == "") {
             counter = counter + 1
             if(counter == maxTries) {
-              bot.msg(message._2, "I tried polling simplyscala.com " + maxTries + " times now but they still say " +
+              bot.msg(message.channel, "I tried polling simplyscala.com " + maxTries + " times now but they still say " +
                 "that our interpreter is being created. Maybe there's some bug somewhere? I'm giving up.")
             }
-            line = run(message._1)
+            line = run(message.code)
             if(line matches "(?s).*New interpreter instance being created for you.*") {
               line = ""
               println("REPL: Interpreter is being created, trying again in " + sleepTime + " seconds.")
@@ -59,9 +60,9 @@ class Repl(val handler: ModuleHandler) extends TriggerListener {
             if(thirdLineBreak != -1) {
               line = line.substring(0, thirdLineBreak)
             }
-            bot.msg(message._2, line)
+            bot.msg(message.channel, line)
           } else {
-            bot.msg(message._2, "Whoops, looks like the expected output at simplyscala.com has changed. My regex didn't match.")
+            bot.msg(message.channel, "Whoops, looks like the expected output at simplyscala.com has changed. My regex didn't match.")
           }
       }
     }
