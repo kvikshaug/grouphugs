@@ -10,7 +10,7 @@ import no.kvikshaug.gh.listeners.TriggerListener
 import no.kvikshaug.gh.util.Web
 import no.kvikshaug.gh.{Grouphug, ModuleHandler}
 
-case class Message(val code: String, val channel: String)
+case class Message(val code: String, val lineCount: Int, val channel: String)
 class Repl(val handler: ModuleHandler) extends TriggerListener {
 
   val bot = Grouphug.getInstance
