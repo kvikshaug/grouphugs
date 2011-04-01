@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The SQLHandler is a wrapper for the SQL class. Together, these two provide
@@ -30,6 +32,8 @@ import java.util.List;
 public class SQLHandler {
 
     private static SQLUnavailableException sqlUnavailableException = null;
+
+    private final Lock dbLock = new ReentrantLock();
 
     public static SQLHandler getSQLHandler() throws SQLUnavailableException {
         if(sqlUnavailableException != null) {
@@ -138,26 +142,31 @@ public class SQLHandler {
      * @throws SQLException if a database error occurs
      */
     private void attemptQuery(String query, List<String> parameters, boolean firstAttempt) throws SQLException {
-        if(!firstAttempt || !connectionOK) {
-            try {
-                reconnect();
-                connectionOK = true;
-            } catch(SQLException ex) {
-                connectionOK = false;
-                throw ex;
-            }
-        }
+        dbLock.lock();
         try {
-            sql.query(query, parameters);
-        } catch(SQLException ex) {
-            if(firstAttempt) {
-                if(verbose) {
-                    System.err.println("sql> SQL query failed (timeout?), attempting reconnection...");
+            if (!firstAttempt || !connectionOK) {
+                try {
+                    reconnect();
+                    connectionOK = true;
+                } catch (SQLException ex) {
+                    connectionOK = false;
+                    throw ex;
                 }
-                attemptQuery(query, parameters, false);
-            } else {
-                throw ex;
             }
+            try {
+                sql.query(query, parameters);
+            } catch (SQLException ex) {
+                if (firstAttempt) {
+                    if (verbose) {
+                        System.err.println("sql> SQL query failed (timeout?), attempting reconnection...");
+                    }
+                    attemptQuery(query, parameters, false);
+                } else {
+                    throw ex;
+                }
+            }
+        } finally {
+            dbLock.unlock();
         }
     }
 
@@ -186,10 +195,13 @@ public class SQLHandler {
      * @throws SQLException if a database error occurs - debug information will already have been printed out.
      */
     public Object[] selectSingle(String query, List<String> parameters) throws SQLException {
+        dbLock.lock();
         try {
             return select(query, parameters).get(0);
         } catch(IndexOutOfBoundsException ex) {
             return null;
+        } finally {
+            dbLock.unlock();
         }
     }
 
@@ -216,6 +228,7 @@ public class SQLHandler {
      * @throws SQLException if a database error occurs
      */
     public List<Object[]> select(String query, List<String> parameters) throws SQLException {
+        dbLock.lock();
         try {
             List<Object[]> rows = new ArrayList<Object[]>();
             attemptQuery(query, parameters);
@@ -226,6 +239,8 @@ public class SQLHandler {
         } catch(SQLException ex) {
             printExceptionOutput(ex);
             throw ex;
+        } finally {
+            dbLock.unlock();
         }
     }
 
@@ -252,12 +267,15 @@ public class SQLHandler {
      * @throws SQLException if a database error occurs
      */
     public int insert(String query, List<String> parameters) throws SQLException {
+        dbLock.lock();
         try {
             attemptQuery(query, parameters);
             return sql.getLastInsertID();
         } catch(SQLException ex) {
             printExceptionOutput(ex);
             throw ex;
+        } finally {
+            dbLock.unlock();
         }
     }
 
@@ -284,12 +302,15 @@ public class SQLHandler {
      * @return the number of rows affected
      */
     public int delete(String query, List<String> parameters) throws SQLException {
+        dbLock.lock();
         try {
             attemptQuery(query, parameters);
             return sql.getAffectedRows();
         } catch(SQLException ex) {
             printExceptionOutput(ex);
             throw ex;
+        } finally {
+            dbLock.unlock();
         }
     }
 
@@ -316,12 +337,15 @@ public class SQLHandler {
      * @return the number of rows affected
      */
     public int update(String query, List<String> parameters) throws SQLException {
+        dbLock.lock();
         try {
             attemptQuery(query, parameters);
             return sql.getAffectedRows();
         } catch(SQLException ex) {
             printExceptionOutput(ex);
             throw ex;
+        } finally {
+            dbLock.unlock();
         }
     }
 
