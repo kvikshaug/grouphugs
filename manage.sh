@@ -4,7 +4,7 @@ PIDFILE=gh.pid
 
 function startbot() {
     java -jar target/grouphug-1.0-SNAPSHOT.jar > gh.log 2>&1 &
-    echo "$!" > gh.pid # save pid
+    echo "$!" > $PIDFILE # save pid
 }
 
 function stopbot() {
