@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -e
 PIDFILE=gh.pid
+LOGFILE=gh.log
 
 function startbot() {
-    java -jar target/grouphug-1.0-SNAPSHOT.jar > gh.log 2>&1 &
+    java -jar target/grouphug-1.0-SNAPSHOT.jar > $LOGFILE 2>&1 &
     echo "$!" > $PIDFILE # save pid
 }
 
