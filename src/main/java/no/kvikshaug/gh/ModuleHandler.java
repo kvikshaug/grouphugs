@@ -3,6 +3,7 @@ package no.kvikshaug.gh;
 import no.kvikshaug.gh.listeners.JoinListener;
 import no.kvikshaug.gh.listeners.MessageListener;
 import no.kvikshaug.gh.listeners.NickChangeListener;
+import no.kvikshaug.gh.util.StatsD;
 import no.kvikshaug.gh.modules.*;
 
 import java.util.ArrayList;
@@ -148,6 +149,7 @@ public class ModuleHandler {
     public void onTrigger(final String channel, final String sender, final String login, final String hostname, final String message) {
         for(final TriggerListener listener : triggerListeners) {
             if(listener.trigger(message)) {
+                StatsD.increment("gh.bot.events."+channel+".triggers");
                 Thread listenerThread = new Thread(eventThreads, new Runnable() {
                     public void run() {
                         // we trim the trigger and any following whitespace from the message
@@ -169,6 +171,7 @@ public class ModuleHandler {
      * @param message the users complete message
      */
     public void onMessage(final String channel, final String sender, final String login, final String hostname, final String message) {
+        StatsD.increment("gh.bot.events."+channel+".messages");
         for(final MessageListener listener : messageListeners) {
             Thread listenerThread = new Thread(eventThreads, new Runnable(){
                     public void run() {
@@ -186,6 +189,7 @@ public class ModuleHandler {
      * @param trigger the trigger word/module the user wants help for, empty if none
      */
     public void onHelp(String sender, String trigger) {
+        StatsD.increment("gh.bot.events.helps");
         if(trigger.equals("")) {
             // no specific help text was requested
             bot.msg(sender, "Try \"!help <module>\" for one of the following modules:", false);
@@ -214,6 +218,7 @@ public class ModuleHandler {
      * @param hostname The hostname of the user who joined the channel.
      */
     public void onJoin(final String channel, final String sender, final String login, final String hostname) {
+        StatsD.increment("gh.bot.events."+channel+".joins");
         for(final JoinListener listener : joinListeners) {
             Thread listenerThread = new Thread(eventThreads, new Runnable() {
                     public void run() {
@@ -232,6 +237,7 @@ public class ModuleHandler {
      * @param newNick The new nick
      */
     public void onNickChange(final String oldNick, final String login, final String hostname, final String newNick) {
+        StatsD.increment("gh.bot.events.nickchanges");
         for(final NickChangeListener listener : nickChangeListeners) {
             Thread listenerThread = new Thread(eventThreads, new Runnable() {
                     public void run() {
