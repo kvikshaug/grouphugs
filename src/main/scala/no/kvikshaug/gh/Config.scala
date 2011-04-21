@@ -29,6 +29,12 @@ object Config {
   @throws(classOf[PreferenceNotSetException])
   def bitlyApiKey = (ifExists (root \ "BitLyApiKey")) text
 
+  // StatsD settings
+  @throws(classOf[PreferenceNotSetException])
+  def statsDHost = (ifExists (root \ "StatsD" \ "Host")) text
+  @throws(classOf[PreferenceNotSetException])
+  def statsDPort = (ifExists (root \ "StatsD" \ "Port")).text.toInt
+
   // Upload module
   @throws(classOf[PreferenceNotSetException])
   def uploadDirs = ifExists (root \ "Channels") get {

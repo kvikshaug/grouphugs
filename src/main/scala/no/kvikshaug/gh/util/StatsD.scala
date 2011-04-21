@@ -2,9 +2,17 @@ package no.kvikshaug.gh.util
 
 import java.net._
 
+import no.kvikshaug.gh.Config
+
 object StatsD {
-  val host = InetAddress.getByName("kvikshaug.no")
-  val port = 8125
+  var host: Option[InetAddress] = None
+  var port: Option[Int] = None
+  try {
+    host = Some(InetAddress.getByName(Config.statsDHost))
+    port = Some(Config.statsDPort)
+  } catch {
+    case e => println("StatsD reporter disabled: " + e.getMessage)
+  }
 
   val random = new java.util.Random
 
@@ -22,6 +30,11 @@ object StatsD {
     send(stat + ":" + delta + "|c", sampleRate)
 
   def send(data: String, sampleRate: Double = 1): Unit = {
+    // this method may be called from everywhere we want to measure a metric in the code,
+    // so we'll have to check if the config parameters weren't set each time we're called
+    if(host.isEmpty || port.isEmpty) {
+      return
+    }
     if(sampleRate < 1 && sampleRate < random.nextDouble) {
       return
     }
@@ -31,7 +44,7 @@ object StatsD {
     } else {
       (data + "|@" + sampleRate).getBytes
     }
-    val packet = new DatagramPacket(payload, payload.length, host, port)
+    val packet = new DatagramPacket(payload, payload.length, host.get, port.get)
     socket.send(packet)
   }
 }

@@ -4,6 +4,10 @@
   <GithubHookPort>50505</GithubHookPort>
   <BitLyUser></BitLyUser>
   <BitLyApiKey></BitLyApiKey>
+  <StatsD>
+    <Host></Host>
+    <Port></Port>
+  </StatsD>
   <Nicks>
     <Nick>botnick1</Nick>
     <Nick>botnick2</Nick>
