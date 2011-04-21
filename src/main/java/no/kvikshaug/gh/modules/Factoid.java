@@ -6,6 +6,7 @@ import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.listeners.MessageListener;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.SQLHandler;
+import no.kvikshaug.gh.util.StatsD;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -185,6 +186,7 @@ public class Factoid implements MessageListener, TriggerListener {
         for(FactoidItem factoid : factoids) {
             factoid.send(sender);
         }
+        StatsD.updateStats("gh.bot.modules.factoid.triggers", factoids.size());
     }
 
     /**
