@@ -17,7 +17,7 @@ public class PingAll implements TriggerListener {
     public PingAll(ModuleHandler moduleHandler) {
         moduleHandler.addTriggerListener(TRIGGER, this);
         moduleHandler.registerHelp(TRIGGER_HELP, "Pingall: Highlights everyone in the channel.\n" +
-                    Grouphug.MAIN_TRIGGER+TRIGGER+
+                    Grouphug.MAIN_TRIGGER+TRIGGER+ "\n" +
                     Grouphug.MAIN_TRIGGER+TRIGGER+" <message>");
         System.out.println("Pingall module loaded.");
     }
@@ -25,9 +25,17 @@ public class PingAll implements TriggerListener {
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         User[] users = Grouphug.getInstance().getUsers(channel);
         
+        if (users.length <= 1) {
+        	Grouphug.getInstance().msg(channel, "There is noone here except you");
+        	return;
+        }
+        
         String output = "";
         
         for (int i = 0; i < users.length; i++) {
+        	if (users[i].getNick().equals(sender)){
+        		continue;
+        	}
 			output += users[i].getNick()+", ";
 		}
         //Nick1, Nick2, Nick3, Nick4, 
