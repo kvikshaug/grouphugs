@@ -33,7 +33,8 @@ public class PingAll implements TriggerListener {
         String output = "";
         
         for (int i = 0; i < users.length; i++) {
-        	if (users[i].getNick().equals(sender)){
+        	if (users[i].getNick().equals(sender) || users[i].getNick().equals(Grouphug.getInstance().getNick())){ 
+        		//remove sender and bot nick from highlight
         		continue;
         	}
 			output += users[i].getNick()+", ";
