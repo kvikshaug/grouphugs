@@ -14,6 +14,10 @@ object StatsD {
     case e => println("StatsD reporter disabled: " + e.getMessage)
   }
 
+  // wrapper methods for java
+  def count(stat: String, value: Double): Unit = count(stat, value, 0)
+  def time(stat: String, value: Double): Unit = count(stat, value, 0)
+
   def count(stat: String, value: Double, interval: Double = 0) = send(format("%s|%s|%s|count", stat, value, interval))
   def retain(stat: String, value: Double) = send(format("%s|%s|0|retain", stat, value))
   def time(stat: String, value: Double, interval: Double = 0) = send(format("%s|%s|%s|time", stat, value, interval))
