@@ -3,12 +3,15 @@ package no.kvikshaug.gh;
 import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
 import org.jibble.pircbot.PircBot;
+import org.jibble.pircbot.User;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.*;
+
+import no.kvikshaug.gh.util.StatsD;
 
 /**
  * Grouphug
@@ -92,6 +95,24 @@ public class Grouphug extends PircBot {
     @Override
     protected void onJoin(String channel, String sender, String login, String hostname) {
         moduleHandler.onJoin(channel, sender, login, hostname);
+        StatsD.retain("gh.bot."+channel+".users", getUsers(channel).length);
+    }
+
+    @Override
+    protected void onQuit(String sourceNick, String sourceLogin, String sourceHostname, String reason) {
+        for(String channel : getChannels()) {
+            StatsD.retain("gh.bot."+channel+".users", getUsers(channel).length);
+        }
+    }
+
+    @Override
+    protected void onPart(String channel, String sender, String login, String hostname) {
+        StatsD.retain("gh.bot."+channel+".users", getUsers(channel).length);
+    }
+
+    @Override
+    protected void onUserList(String channel, User[] users) {
+        StatsD.retain("gh.bot."+channel+".users", users.length);
     }
 
     @Override
@@ -112,6 +133,7 @@ public class Grouphug extends PircBot {
             joinChannel(channel);
             msg(channel, "sry :(");
         }
+        StatsD.retain("gh.bot."+channel+".users", getUsers(channel).length);
     }
 
     @Override
