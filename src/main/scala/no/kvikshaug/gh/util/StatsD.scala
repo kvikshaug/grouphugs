@@ -14,9 +14,9 @@ object StatsD {
     case e => println("StatsD reporter disabled: " + e.getMessage)
   }
 
-  def count(stat: String, value: Double) = send(format("%s|%s|count", stat, value))
-  def retain(stat: String, value: Double) = send(format("%s|%s|retain", stat, value))
-  def time(stat: String, value: Double) = send(format("%s|%s|time", stat, value))
+  def count(stat: String, value: Double, interval: Double = 0) = send(format("%s|%s|%s|count", stat, value, interval))
+  def retain(stat: String, value: Double) = send(format("%s|%s|0|retain", stat, value))
+  def time(stat: String, value: Double, interval: Double = 0) = send(format("%s|%s|%s|time", stat, value, interval))
 
   def send(data: String): Unit = {
     // this method may be called from everywhere we want to measure a metric in the code,
