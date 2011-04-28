@@ -16,8 +16,8 @@ object StatsD {
 
   val random = new java.util.Random
 
-  def timing(stat: String, time: String): Unit = timing(stat, time, 1)
-  def timing(stat: String, time: String, sampleRate: Double = 1) = send(stat + ":" + time + "|ms", sampleRate)
+  def timing(stat: String, time: Double): Unit = timing(stat, time, 1)
+  def timing(stat: String, time: Double, sampleRate: Double = 1) = send(stat + ":" + time + "|ms", sampleRate)
 
   def increment(stat: String): Unit = increment(stat, 1)
   def increment(stat: String, sampleRate: Double = 1) = updateStats(stat, 1, sampleRate)
@@ -25,8 +25,8 @@ object StatsD {
   def decrement(stat: String): Unit = decrement(stat, 1)
   def decrement(stat: String, sampleRate: Double = 1) = updateStats(stat, -1, sampleRate)
 
-  def updateStats(stat: String, delta: Int): Unit = updateStats(stat, delta, 1)
-  def updateStats(stat: String, delta: Int, sampleRate: Double = 1) =
+  def updateStats(stat: String, delta: Double): Unit = updateStats(stat, delta, 1)
+  def updateStats(stat: String, delta: Double, sampleRate: Double = 1) =
     send(stat + ":" + delta + "|c", sampleRate)
 
   def send(data: String, sampleRate: Double = 1): Unit = {
