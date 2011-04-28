@@ -186,7 +186,7 @@ public class Factoid implements MessageListener, TriggerListener {
         for(FactoidItem factoid : factoids) {
             factoid.send(sender);
         }
-        StatsD.updateStats("gh.bot.modules.factoid.triggers", factoids.size());
+        StatsD.count("gh.bot.modules.factoid.triggers", factoids.size());
     }
 
     /**
