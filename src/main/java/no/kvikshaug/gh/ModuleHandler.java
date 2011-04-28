@@ -172,7 +172,7 @@ public class ModuleHandler {
      * @param message the users complete message
      */
     public void onMessage(final String channel, final String sender, final String login, final String hostname, final String message) {
-        StatsD.count("gh.bot."+channel+".messages", 1);
+        StatsD.count("gh.bot."+channel+".messages", 1, 60);
         for(final MessageListener listener : messageListeners) {
             Thread listenerThread = new Thread(eventThreads, new Runnable(){
                     public void run() {
