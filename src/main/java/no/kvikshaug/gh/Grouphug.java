@@ -10,8 +10,11 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
-import no.kvikshaug.gh.util.StatsD;
+import no.kvikshaug.gh.exceptions.PreferenceNotSetException;
+import no.kvikshaug.scatsd.client.ScatsD;
 
 /**
  * Grouphug
@@ -95,24 +98,24 @@ public class Grouphug extends PircBot {
     @Override
     protected void onJoin(String channel, String sender, String login, String hostname) {
         moduleHandler.onJoin(channel, sender, login, hostname);
-        StatsD.retain("gh.bot."+channel+".users", getUsers(channel).length);
+        ScatsD.retain("gh.bot."+channel+".users", getUsers(channel).length);
     }
 
     @Override
     protected void onQuit(String sourceNick, String sourceLogin, String sourceHostname, String reason) {
         for(String channel : getChannels()) {
-            StatsD.retain("gh.bot."+channel+".users", getUsers(channel).length);
+            ScatsD.retain("gh.bot."+channel+".users", getUsers(channel).length);
         }
     }
 
     @Override
     protected void onPart(String channel, String sender, String login, String hostname) {
-        StatsD.retain("gh.bot."+channel+".users", getUsers(channel).length);
+        ScatsD.retain("gh.bot."+channel+".users", getUsers(channel).length);
     }
 
     @Override
     protected void onUserList(String channel, User[] users) {
-        StatsD.retain("gh.bot."+channel+".users", users.length);
+        ScatsD.retain("gh.bot."+channel+".users", users.length);
     }
 
     @Override
@@ -133,7 +136,7 @@ public class Grouphug extends PircBot {
             joinChannel(channel);
             msg(channel, "sry :(");
         }
-        StatsD.retain("gh.bot."+channel+".users", getUsers(channel).length);
+        ScatsD.retain("gh.bot."+channel+".users", getUsers(channel).length);
     }
 
     @Override
@@ -235,6 +238,13 @@ public class Grouphug extends PircBot {
         NickPoller.load(bot);
         bot.gprs = new GithubPostReceiveServer(bot);
         bot.gprs.start();
+        try {
+            ScatsD.setHost(InetAddress.getByName(Config.scatsDHost()), Config.scatsDPort());
+        } catch(UnknownHostException e) {
+          System.out.println("ScatsD reporter disabled: " + e.getMessage());
+        } catch(PreferenceNotSetException e) {
+          System.out.println("ScatsD reporter disabled: " + e.getMessage());
+        }
     }
 
     private static boolean connect(Grouphug bot) {

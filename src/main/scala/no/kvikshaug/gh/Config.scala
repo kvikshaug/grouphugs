@@ -29,11 +29,11 @@ object Config {
   @throws(classOf[PreferenceNotSetException])
   def bitlyApiKey = (ifExists (root \ "BitLyApiKey")) text
 
-  // StatsD settings
+  // ScatsD settings
   @throws(classOf[PreferenceNotSetException])
-  def statsDHost = (ifExists (root \ "StatsD" \ "Host")) text
+  def scatsDHost = (ifExists (root \ "ScatsD" \ "Host")) text
   @throws(classOf[PreferenceNotSetException])
-  def statsDPort = (ifExists (root \ "StatsD" \ "Port")).text.toInt
+  def scatsDPort = (ifExists (root \ "ScatsD" \ "Port")).text.toInt
 
   // Upload module
   @throws(classOf[PreferenceNotSetException])
@@ -66,7 +66,7 @@ object Config {
 
   /* Throws a PNSE if the node doesn't exist */
   def ifExists(ns: NodeSeq, message: String = "Missing corresponding option in " + configFile) = {
-    if(ns isEmpty) { throw new PreferenceNotSetException(message) }
+    if(ns.isEmpty || ns.text.isEmpty) { throw new PreferenceNotSetException(message) }
     else { ns }
   }
 

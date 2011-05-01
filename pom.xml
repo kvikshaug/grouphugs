@@ -9,6 +9,12 @@
   <packaging>jar</packaging>
 
   <repositories>
+    <repository>
+      <id>kvikshaug</id>
+      <name>Kvikshaug maven repo</name>
+      <url>http://mvn.kvikshaug.no/</url>
+    </repository>
+
     <!-- add scala-tools repo for scala stuff -->
     <repository>
       <id>scala-tools</id>
@@ -87,6 +93,12 @@
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>1.4</version>
+    </dependency>
+
+    <dependency>
+      <groupId>kvikshaug</groupId>
+      <artifactId>scatsd-client_2.8.1</artifactId>
+      <version>1.0</version>
     </dependency>
   </dependencies>
 

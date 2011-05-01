@@ -3,8 +3,9 @@ package no.kvikshaug.gh;
 import no.kvikshaug.gh.listeners.JoinListener;
 import no.kvikshaug.gh.listeners.MessageListener;
 import no.kvikshaug.gh.listeners.NickChangeListener;
-import no.kvikshaug.gh.util.StatsD;
 import no.kvikshaug.gh.modules.*;
+
+import no.kvikshaug.scatsd.client.ScatsD;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -150,7 +151,7 @@ public class ModuleHandler {
     public void onTrigger(final String channel, final String sender, final String login, final String hostname, final String message) {
         for(final TriggerListener listener : triggerListeners) {
             if(listener.trigger(message)) {
-                StatsD.count("gh.bot."+channel+".triggers", 1);
+                ScatsD.count("gh.bot."+channel+".triggers", 1);
                 Thread listenerThread = new Thread(eventThreads, new Runnable() {
                     public void run() {
                         // we trim the trigger and any following whitespace from the message
@@ -172,7 +173,7 @@ public class ModuleHandler {
      * @param message the users complete message
      */
     public void onMessage(final String channel, final String sender, final String login, final String hostname, final String message) {
-        StatsD.count("gh.bot."+channel+".messages", 1, 60);
+        ScatsD.count("gh.bot."+channel+".messages", 1, 60);
         for(final MessageListener listener : messageListeners) {
             Thread listenerThread = new Thread(eventThreads, new Runnable(){
                     public void run() {
@@ -190,7 +191,7 @@ public class ModuleHandler {
      * @param trigger the trigger word/module the user wants help for, empty if none
      */
     public void onHelp(String sender, String trigger) {
-        StatsD.count("gh.bot.helps", 1);
+        ScatsD.count("gh.bot.helps", 1);
         if(trigger.equals("")) {
             // no specific help text was requested
             bot.msg(sender, "Try \"!help <module>\" for one of the following modules:", false);
@@ -219,7 +220,7 @@ public class ModuleHandler {
      * @param hostname The hostname of the user who joined the channel.
      */
     public void onJoin(final String channel, final String sender, final String login, final String hostname) {
-        StatsD.count("gh.bot."+channel+".joins", 1);
+        ScatsD.count("gh.bot."+channel+".joins", 1);
         for(final JoinListener listener : joinListeners) {
             Thread listenerThread = new Thread(eventThreads, new Runnable() {
                     public void run() {
@@ -238,7 +239,7 @@ public class ModuleHandler {
      * @param newNick The new nick
      */
     public void onNickChange(final String oldNick, final String login, final String hostname, final String newNick) {
-        StatsD.count("gh.bot.nickchanges", 1);
+        ScatsD.count("gh.bot.nickchanges", 1);
         for(final NickChangeListener listener : nickChangeListeners) {
             Thread listenerThread = new Thread(eventThreads, new Runnable() {
                     public void run() {

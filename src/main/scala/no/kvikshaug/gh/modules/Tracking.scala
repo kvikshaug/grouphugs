@@ -4,7 +4,9 @@ import no.kvikshaug.gh.{Grouphug, ModuleHandler, Config}
 import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.SQLHandler;
-import no.kvikshaug.gh.util.StatsD;
+
+import no.kvikshaug.scatsd.client.ScatsD;
+
 import org.jdom.JDOMException;
 
 import java.io.{IOException, FileNotFoundException}
@@ -87,7 +89,7 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
         items = items.filterNot(_ == id)
         sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(id).asJava)
         bot.msg(channel, "Ok, stopped tracking package " + id + ".")
-        StatsD.retain(format("gh.bot.modules.tracking.%s.packages", channel), items.size)
+        ScatsD.retain(format("gh.bot.modules.tracking.%s.packages", channel), items.size)
       } catch {
         case e: SQLException =>
           bot.msg(channel, "Removed it from memory but not from SQL. Check my logs for more info.")
@@ -137,7 +139,7 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
           bot.msg(channel, "Oh no, I caught some horrible exception! Please check my logs. SQL/memory may or may not be synchronized.")
           e.printStackTrace
       }
-      StatsD.retain(format("gh.bot.modules.tracking.%s.packages", channel), items.size)
+      ScatsD.retain(format("gh.bot.modules.tracking.%s.packages", channel), items.size)
     }
 
   var failCount = 0
@@ -208,7 +210,7 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
               if(status._2 > 1) {
                 bot.msg(i.channel, "Note: This package has >1 items.")
               }
-            StatsD.retain(format("gh.bot.modules.tracking.%s.packages", i.channel), items.size)
+            ScatsD.retain(format("gh.bot.modules.tracking.%s.packages", i.channel), items.size)
             }
           } catch {
             case e => println("Tracking poller just failed: "); e.printStackTrace; failCount = failCount + 1
