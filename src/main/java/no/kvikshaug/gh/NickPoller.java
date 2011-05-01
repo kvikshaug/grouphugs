@@ -1,7 +1,5 @@
 package no.kvikshaug.gh;
 
-import no.kvikshaug.gh.Config;
-
 /**
  * This class runs a thread which reclaims our main nick if
  * it happens to be taken when we connect to irc.
