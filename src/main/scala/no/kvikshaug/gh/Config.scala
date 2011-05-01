@@ -1,8 +1,8 @@
 package no.kvikshaug.gh
 
 import no.kvikshaug.gh.exceptions.PreferenceNotSetException
-import scalaj.collection.Imports._
-import scala.collection.JavaConversions
+
+import scala.collection.JavaConverters._
 import scala.xml._
 
 object Config {

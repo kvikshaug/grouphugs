@@ -10,9 +10,7 @@ import org.jdom.JDOMException;
 import java.io.{IOException, FileNotFoundException}
 import java.sql.SQLException;
 
-import scalaj.collection.Imports._
-import scala.collection.immutable.List
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 import scala.actors.Actor
 import scala.actors.Actor._
 
@@ -150,7 +148,7 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
       this ! items
       if(failCount >= 5) {
         failCount = 0
-        for(channel <- Config.channels) {
+        for(channel <- Config.channels.asScala) {
           bot.msg(channel, "The package tracking module has now failed 5 times in a row. " +
             "If this continues, you might want to check the logs and your package status manually.")
         }

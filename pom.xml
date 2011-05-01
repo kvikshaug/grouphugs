@@ -83,13 +83,6 @@
       <version>2.8.0</version>
     </dependency>
 
-    <!-- scalaj-collection -->
-    <dependency>
-      <groupId>org.scalaj</groupId>
-      <artifactId>scalaj-collection_2.8.0</artifactId>
-      <version>1.0</version>
-    </dependency>
-
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>

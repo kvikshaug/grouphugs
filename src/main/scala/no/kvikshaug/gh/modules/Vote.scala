@@ -8,8 +8,7 @@ import no.kvikshaug.gh.util.SQLHandler;
 import java.util.regex._
 import java.sql.SQLException
 
-import scalaj.collection.Imports._
-import scala.collection.immutable.List
+import scala.collection.JavaConverters._
 
 case class VoteItem(id: String, creator: String, text: String, multi: Boolean, options: List[VoteOption]) {
   def resultCount = options.foldLeft(0)((c, o) => c + o.voters.size)
