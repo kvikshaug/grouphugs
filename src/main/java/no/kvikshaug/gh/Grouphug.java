@@ -231,6 +231,14 @@ public class Grouphug extends PircBot {
                 }
             });
         moduleHandler = new ModuleHandler(bot);
+        try {
+            bot.setDccInetAddress(java.net.InetAddress.getByName(Config.interfaceHost()));
+            System.out.println("Explicitly setting hostname to " + Config.interfaceHost());
+        } catch(PreferenceNotSetException e) {
+            System.out.println("Using default interface hostname: " + e.getMessage());
+        } catch(UnknownHostException e) {
+            System.out.println("Using default interface hostname: " + e.toString());
+        }
         connect(bot);
         for (String channel : Config.channels()) {
             bot.joinChannel(channel);

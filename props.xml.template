@@ -12,6 +12,7 @@
     <Nick>botnick1</Nick>
     <Nick>botnick2</Nick>
   </Nicks>
+  <InterfaceHost>example.com</InterfaceHost>
   <Servers>
     <Server>server1</Server>
     <Server>server2</Server>
