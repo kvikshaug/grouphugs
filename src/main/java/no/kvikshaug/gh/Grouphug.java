@@ -230,6 +230,7 @@ public class Grouphug extends PircBot {
                     bot.quitServer("Caught signal; quitting.");
                 }
             });
+        new JvmProfiler().start();
         moduleHandler = new ModuleHandler(bot);
         try {
             bot.setDccInetAddress(java.net.InetAddress.getByName(Config.interfaceHost()));
