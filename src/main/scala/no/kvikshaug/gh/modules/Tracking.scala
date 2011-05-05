@@ -10,21 +10,21 @@ import no.kvikshaug.scatsd.client.ScatsD;
 import org.jdom.JDOMException;
 
 import java.io.{IOException, FileNotFoundException}
+import java.util.{Timer => JavaTimer, TimerTask}
 import java.sql.SQLException;
 
 import scala.collection.JavaConverters._
 import scala.actors.Actor
 import scala.actors.Actor._
 
-class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener with Runnable {
+class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListener {
 
     var sqlHandler: SQLHandler = null
     val bot = Grouphug.getInstance
     var items: List[Package] = Nil
     val dbName = "tracking"
     val pollingTime = 30 // minutes
-    new Thread(this).start
-    start
+    new JavaTimer().schedule(this, 30 * 1000, pollingTime * 60 * 1000)
 
     val TRIGGER = "track";
     val TRIGGER_FORCE = "trackpoll";
@@ -62,7 +62,7 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
     }
 
     def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String) = trigger match {
-      case TRIGGER_FORCE => bot.msg(channel, "Forcing updates."); this ! items
+      case TRIGGER_FORCE => bot.msg(channel, "Forcing updates."); run
       case TRIGGER_LIST  => listPackages(channel)
       case TRIGGER_DEL   => removePackage(channel, message)
       case TRIGGER => message match {
@@ -144,78 +144,65 @@ class Tracking(moduleHandler: ModuleHandler) extends Actor with TriggerListener 
 
   var failCount = 0
   def run {
-    // wait until the bot has connected and is ready
-    Thread.sleep(30 * 1000)
-    while(true) {
-      this ! items
-      if(failCount >= 5) {
-        failCount = 0
-        for(channel <- Config.channels.asScala) {
-          bot.msg(channel, "The package tracking module has now failed 5 times in a row. " +
-            "If this continues, you might want to check the logs and your package status manually.")
-        }
-      }
-      Thread.sleep(pollingTime * 60 * 1000)
-    }
-  }
-
-  def act {
-    loop {
-      react {
-        case itemList: List[Package] => itemList foreach { i =>
-          try {
-            val status = TrackingXMLParser.track(i)
-            if(status._1) {
-              i.statusCode match {
-                case "DELIVERED" =>
-                  bot.msg(i.channel, i.owner + " has just picked up " + i.id + ":")
-                  bot.msg(i.channel, i.status)
-                  items = items.filterNot(_ == i)
-                  sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(i.id).asJava)
-                  bot.msg(i.channel, "Removing this one from my list. Now tracking " + items.size + " packages.")
-                case "RETURNED" =>
-                  bot.msg(i.channel, i.owner + ": Package " + i.id + " has been returned to sender.")
-                  bot.msg(i.channel, i.status)
-                  items = items.filterNot(_ == i)
-                  sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(i.id).asJava)
-                  bot.msg(i.channel, "Removing this one from my list. Now tracking " + items.size + " packages.")
-                case "PRE_NOTIFIED" =>
-                  bot.msg(i.channel, i.owner + ": Posten now knows about your package.")
-                  bot.msg(i.channel, i.status)
-                case "INTERNATIONAL" =>
-                  bot.msg(i.channel, i.owner + ": Your package is still far away.")
-                  bot.msg(i.channel, i.status)
-                case "NOTIFICATION_SENT" =>
-                  bot.msg(i.channel, i.owner + ": Notification for package " + i.id + " has been sent!")
-                  bot.msg(i.channel, i.status)
-                case "TRANSPORT_TO_RECIPIENT" =>
-                  bot.msg(i.channel, i.owner + ": Package " + i.id + " is on its way to you right now!")
-                  bot.msg(i.channel, i.status)
-                case "READY_FOR_PICKUP" =>
-                  bot.msg(i.channel, i.owner + ": Package " + i.id + " is ready for pickup!")
-                  bot.msg(i.channel, i.status)
-                case "IN_TRANSIT" =>
-                  bot.msg(i.channel, i.owner + ": Package " + i.id + " has changed:")
-                  bot.msg(i.channel, i.status)
-                case "CUSTOMS" =>
-                  bot.msg(i.channel, i.owner + ": Package " + i.id + " is due for inspection!")
-                  bot.msg(i.channel, i.status)
-                case "NO_PACKAGES" =>
-                  bot.msg(i.channel, i.owner + ": Package " + i.id + " has suddenly lost its contents! You might want to check it manually.")
-                  bot.msg(i.channel, i.status)
-                case x =>
-                  bot.msg(i.channel, i.owner + ": Package " + i.id + " has changed to '" + x + "', which I don't recognize!")
-                  bot.msg(i.channel, i.status)
-              }
-              if(status._2 > 1) {
-                bot.msg(i.channel, "Note: This package has >1 items.")
-              }
-            ScatsD.retain(format("gh.bot.modules.tracking.%s.packages", i.channel), items.size)
-            }
-          } catch {
-            case e => println("Tracking poller just failed: "); e.printStackTrace; failCount = failCount + 1
+    items foreach { i =>
+      try {
+        val status = TrackingXMLParser.track(i)
+        if(status._1) {
+          i.statusCode match {
+            case "DELIVERED" =>
+              bot.msg(i.channel, i.owner + " has just picked up " + i.id + ":")
+              bot.msg(i.channel, i.status)
+              items = items.filterNot(_ == i)
+              sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(i.id).asJava)
+              bot.msg(i.channel, "Removing this one from my list. Now tracking " + items.size + " packages.")
+            case "RETURNED" =>
+              bot.msg(i.channel, i.owner + ": Package " + i.id + " has been returned to sender.")
+              bot.msg(i.channel, i.status)
+              items = items.filterNot(_ == i)
+              sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(i.id).asJava)
+              bot.msg(i.channel, "Removing this one from my list. Now tracking " + items.size + " packages.")
+            case "PRE_NOTIFIED" =>
+              bot.msg(i.channel, i.owner + ": Posten now knows about your package.")
+              bot.msg(i.channel, i.status)
+            case "INTERNATIONAL" =>
+              bot.msg(i.channel, i.owner + ": Your package is still far away.")
+              bot.msg(i.channel, i.status)
+            case "NOTIFICATION_SENT" =>
+              bot.msg(i.channel, i.owner + ": Notification for package " + i.id + " has been sent!")
+              bot.msg(i.channel, i.status)
+            case "TRANSPORT_TO_RECIPIENT" =>
+              bot.msg(i.channel, i.owner + ": Package " + i.id + " is on its way to you right now!")
+              bot.msg(i.channel, i.status)
+            case "READY_FOR_PICKUP" =>
+              bot.msg(i.channel, i.owner + ": Package " + i.id + " is ready for pickup!")
+              bot.msg(i.channel, i.status)
+            case "IN_TRANSIT" =>
+              bot.msg(i.channel, i.owner + ": Package " + i.id + " has changed:")
+              bot.msg(i.channel, i.status)
+            case "CUSTOMS" =>
+              bot.msg(i.channel, i.owner + ": Package " + i.id + " is due for inspection!")
+              bot.msg(i.channel, i.status)
+            case "NO_PACKAGES" =>
+              bot.msg(i.channel, i.owner + ": Package " + i.id + " has suddenly lost its contents! You might want to check it manually.")
+              bot.msg(i.channel, i.status)
+            case x =>
+              bot.msg(i.channel, i.owner + ": Package " + i.id + " has changed to '" + x + "', which I don't recognize!")
+              bot.msg(i.channel, i.status)
           }
+          if(status._2 > 1) {
+            bot.msg(i.channel, "Note: This package has >1 items.")
+          }
+        ScatsD.retain(format("gh.bot.modules.tracking.%s.packages", i.channel), items.size)
         }
+      } catch {
+        case e => println("Tracking poller just failed: "); e.printStackTrace; failCount = failCount + 1
+      }
+    }
+    if(failCount >= 5) {
+      failCount = 0
+      for(channel <- Config.channels.asScala) {
+        bot.msg(channel, "The package tracking module has now failed 5 times in a row. " +
+          "If this continues, you might want to check the logs and your package status manually.")
       }
     }
   }
