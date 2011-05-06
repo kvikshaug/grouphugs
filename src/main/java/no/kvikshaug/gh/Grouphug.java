@@ -227,9 +227,11 @@ public class Grouphug extends PircBot {
                     if (bot.gprs != null) {
                         bot.gprs.stop();
                     }
+                    ScatsD.count("gh.shutdowns", 1);
                     bot.quitServer("Caught signal; quitting.");
                 }
             });
+        ScatsD.count("gh.startups", 1);
         new JvmProfiler().start();
         moduleHandler = new ModuleHandler(bot);
         try {
