@@ -77,6 +77,7 @@ public class ModuleHandler {
         new Time(this);
         new Repl(this);
         new PingAll(this);
+        new Eyebleach(this);
 
         System.out.println();
         System.out.println(helpers.size() + " help responses registered");
