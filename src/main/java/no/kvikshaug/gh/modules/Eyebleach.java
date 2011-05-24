@@ -19,7 +19,7 @@ public class Eyebleach implements TriggerListener {
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
         String output = "http://eyebleach.com/eyebleach/eyebleach_";
-        output += String.format("%03d", (Math.random() * 98.0 + 1.0));
+        output += String.format("%03d", (int)(Math.random() * 98 + 1));
         output += ".jpg";
 
         Grouphug.getInstance().msg(channel, output);
