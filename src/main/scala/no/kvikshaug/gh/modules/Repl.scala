@@ -60,7 +60,7 @@ class Repl(val handler: ModuleHandler) extends TriggerListener {
           }
           val pattern = Pattern.compile("""(?s).*<pre class="code">.*</pre>.*<pre.*>(.*)</pre>.*""").matcher(line)
           if(pattern matches) {
-            bot.msg(message.channel, maxLines(pattern.group(1), message.lineCount), true)
+            bot.msg(message.channel, Web.entitiesToChars(maxLines(pattern.group(1), message.lineCount)), true)
           } else {
             bot.msg(message.channel, "Whoops, looks like the expected output at simplyscala.com has changed. My regex didn't match.")
           }
