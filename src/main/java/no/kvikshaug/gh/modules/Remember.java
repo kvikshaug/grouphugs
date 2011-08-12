@@ -31,8 +31,8 @@ public class Remember implements TriggerListener {
             moduleHandler.addTriggerListener(TRIGGER_REMOVE, this);
             moduleHandler.addTriggerListener(TRIGGER_GET_SENDER, this);
             moduleHandler.addTriggerListener(TRIGGER_GET_TAG, this);
-            moduleHandler.registerHelp(TRIGGER_HELP, "Remember: Add URLS or the like to remember annotated with tags. Only one word can be remembered\n" +
-                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER_ADD +    " message tag1 tag2 ... tagN\n" +
+            moduleHandler.registerHelp(TRIGGER_HELP, "Remember: Add URLS or the like to remember annotated with a tag. Only one tag at a time\n" +
+                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER_ADD +    " message tag\n" +
                     "  "+Grouphug.MAIN_TRIGGER+TRIGGER_REMOVE +    " message\n" +
                     "  "+Grouphug.MAIN_TRIGGER+TRIGGER_GET_SENDER + " nick\n" +
                     "  "+Grouphug.MAIN_TRIGGER+TRIGGER_GET_TAG + " tag\n");
@@ -51,19 +51,18 @@ public class Remember implements TriggerListener {
             // Trying to add a new thing to remember
         	
         	if (messageParts.length == 1) {
-        		bot.msg(channel, "You need to add at least one tag to remember this by " + sender);
+        		bot.msg(channel, "You need to add a tag to remember this by " + sender);
         	
             } else if (messageParts.length == 0 ){
             	bot.msg(channel, "Uhm, I think you forgot something there skipper");
             } else {
-            	for (int i = 1; i < messageParts.length; i++) {
-            		try {
-						sqlHandler.insert("INSERT INTO " + REMEMBER_TABLE + " (`message`, `sender`, `tag`, `channel`) VALUES ('?', '?', '?', '?');", Arrays.asList(new String[] {messageParts[0], sender, messageParts[i], channel}));
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
+        		try {
+					sqlHandler.insert("INSERT INTO " + REMEMBER_TABLE + " (`message`, `sender`, `tag`, `channel`) VALUES ('?', '?', '?', '?');", 
+							Arrays.asList(new String[] {message.substring(0, message.length() - messageParts[messageParts.length-1].length()), sender, messageParts[messageParts.length -1], channel}));
+					bot.msg(channel, "OK, "+sender+".");
+				} catch (SQLException e) {
+					e.printStackTrace();
 				}
-            	bot.msg(channel, "OK, "+sender+".");
             }
         } else if(trigger.equals(TRIGGER_REMOVE)) {
             // First remove it from the SQL db
