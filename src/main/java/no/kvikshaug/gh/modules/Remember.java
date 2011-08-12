@@ -31,7 +31,7 @@ public class Remember implements TriggerListener {
             moduleHandler.addTriggerListener(TRIGGER_REMOVE, this);
             moduleHandler.addTriggerListener(TRIGGER_GET_SENDER, this);
             moduleHandler.addTriggerListener(TRIGGER_GET_TAG, this);
-            moduleHandler.registerHelp(TRIGGER_HELP, "Remember: Add things to remember annotated with tags\n" +
+            moduleHandler.registerHelp(TRIGGER_HELP, "Remember: Add URLS or the like to remember annotated with tags. Only one word can be remembered\n" +
                     "  "+Grouphug.MAIN_TRIGGER+TRIGGER_ADD +    " message tag1 tag2 ... tagN\n" +
                     "  "+Grouphug.MAIN_TRIGGER+TRIGGER_REMOVE +    " message\n" +
                     "  "+Grouphug.MAIN_TRIGGER+TRIGGER_GET_SENDER + " nick\n" +
@@ -82,13 +82,13 @@ public class Remember implements TriggerListener {
         	
         	if(trigger.equals(TRIGGER_GET_SENDER)){
         		try {
-        			rows = sqlHandler.select("SELECT message FROM" + REMEMBER_TABLE + "WHERE channel= '?' AND sender='?'", Arrays.asList(new String[] {channel, messageParts[0]}));
+        			rows = sqlHandler.select("SELECT message FROM" + REMEMBER_TABLE + "WHERE `channel`='?' AND `sender`='?'", Arrays.asList(new String[] {channel, messageParts[0]}));
         		} catch (SQLException e) {
         			e.printStackTrace();
         		}
         	} else if(trigger.equals(TRIGGER_GET_TAG)){
         		try {
-        			rows = sqlHandler.select("SELECT message FROM" + REMEMBER_TABLE + "WHERE channel= '?' AND tag='?'", Arrays.asList(new String[] {channel, messageParts[0]}));
+        			rows = sqlHandler.select("SELECT message FROM" + REMEMBER_TABLE + "WHERE `channel`='?' AND `tag`='?'", Arrays.asList(new String[] {channel, messageParts[0]}));
         		} catch (SQLException e) {
         			e.printStackTrace();
         		}
