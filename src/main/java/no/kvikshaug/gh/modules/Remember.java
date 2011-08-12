@@ -94,8 +94,8 @@ public class Remember implements TriggerListener {
         		}
         	}
         	
-        	for (Object object : rows) {
-				bot.msg(channel, (String)object);
+        	for (Object[] object : rows) {
+				bot.msg(channel, (String)object[0]);
 			}
         }
     }
