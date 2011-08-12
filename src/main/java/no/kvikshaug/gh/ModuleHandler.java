@@ -78,6 +78,7 @@ public class ModuleHandler {
         new Repl(this);
         new PingAll(this);
         new Eyebleach(this);
+        new Remember(this);
 
         System.out.println();
         System.out.println(helpers.size() + " help responses registered");
