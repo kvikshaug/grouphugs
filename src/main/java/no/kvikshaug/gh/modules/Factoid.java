@@ -169,10 +169,6 @@ public class Factoid implements MessageListener, TriggerListener {
             } catch (SQLException e) {
 				e.printStackTrace();
 			}
-        	
-        	bot.msg(channel, "Random is disabled until further notice");
-        	
-            //factoids.get(random.nextInt(factoids.size())).send(sender);
         } else if(trigger.equals(TRIGGER_FOR)) {
             List<FactoidItem> factoids = find(channel, message, true);
             if(factoids.size() == 0) {
