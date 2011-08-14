@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import no.kvikshaug.scatsd.client.ScatsD;
 import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.exceptions.SQLUnavailableException;
