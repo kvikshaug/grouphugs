@@ -1,18 +1,17 @@
 package no.kvikshaug.gh.modules;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+
 import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.listeners.MessageListener;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.SQLHandler;
-
-import no.kvikshaug.scatsd.client.ScatsD;
-
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 /**
  * The Factoid module lets a user save two strings, one which the bot should react upon
@@ -159,7 +158,19 @@ public class Factoid implements MessageListener, TriggerListener {
                 }
             }
         } else if(trigger.equals(TRIGGER_RANDOM)) {
-            bot.msg(channel, "Random is disabled until further notice");
+            try {
+				Object[] row = sqlHandler.selectSingle("SELECT reply FROM " + FACTOID_TABLE + " WHERE channel= '?' ORDER BY RAND() LIMIT 1;", Arrays.asList(new String[] {channel}));
+				if (row.length > 0){
+					bot.msg(channel, (String)((Object[])row[0])[0]);					
+				} else {
+					bot.msg(channel, "No factoids are added");
+				}
+				
+            } catch (SQLException e) {
+				e.printStackTrace();
+			}
+        	
+        	bot.msg(channel, "Random is disabled until further notice");
         	
             //factoids.get(random.nextInt(factoids.size())).send(sender);
         } else if(trigger.equals(TRIGGER_FOR)) {
