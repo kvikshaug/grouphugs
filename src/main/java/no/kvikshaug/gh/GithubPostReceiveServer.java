@@ -15,7 +15,6 @@ import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
