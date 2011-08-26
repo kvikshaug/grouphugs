@@ -7,13 +7,13 @@ import org.jibble.pircbot.User;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import no.kvikshaug.gh.exceptions.PreferenceNotSetException;
+import no.kvikshaug.gh.github.GithubPostReceiveServer;
 import no.kvikshaug.scatsd.client.ScatsD;
 
 /**
