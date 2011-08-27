@@ -21,7 +21,7 @@ function buildbot() {
 }
 
 function testgithubpayload() {
-    java -cp target/grouphug-1.0-SNAPSHOT.jar no.kvikshaug.gh.GithubPostReceiveServer
+    java -cp target/grouphug-1.0-SNAPSHOT.jar no.kvikshaug.gh.github.GithubPostReceiveServer
 }
 
 function pullfrommaster() {

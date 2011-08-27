@@ -54,7 +54,6 @@ public class Quote implements TriggerListener, MessageListener {
 		}
 	}
 
-	@Override
 	public void onMessage(String channel, String sender, String login,
 			String hostname, String message) {
 		if (message.equals("!startquote") || message.equals("!stopquote")){
