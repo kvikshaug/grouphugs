@@ -64,6 +64,24 @@ object Config {
   @throws(classOf[PreferenceNotSetException])
   def githubHookPort = (ifExists (root \ "GithubHookPort")).text.toInt
 
+  @throws(classOf[PreferenceNotSetException])
+  def githubHookUsername(channel: String): String = {
+    var username = ""
+    for(chan <- (root \ "Channels" \ "Channel") if((chan \\ "@chan").text == channel)) {
+      username = (ifExists (chan \ "Modules" \ "GithubHook" \ "Username")).text
+    }
+    username
+  }
+
+  @throws(classOf[PreferenceNotSetException])
+  def githubHookPassword(channel: String): String = {
+    var password = ""
+    for(chan <- (root \ "Channels" \ "Channel") if((chan \\ "@chan").text == channel)) {
+      password = (ifExists (chan \ "Modules" \ "GithubHook" \ "Password")).text
+    }
+    password
+  }
+
   // Interface hostname
   @throws(classOf[PreferenceNotSetException])
   def interfaceHost = (ifExists (root \ "InterfaceHost")) text

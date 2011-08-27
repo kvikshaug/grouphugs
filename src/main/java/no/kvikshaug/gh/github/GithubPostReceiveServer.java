@@ -9,6 +9,7 @@ import no.kvikshaug.gh.github.json.Commit;
 import no.kvikshaug.gh.github.json.DateTimeTypeConverter;
 import no.kvikshaug.gh.github.json.Payload;
 import no.kvikshaug.gh.util.Web;
+import org.apache.bcel.verifier.structurals.ExceptionHandler;
 import org.apache.commons.io.IOUtils;
 import org.jibble.pircbot.Colors;
 import org.joda.time.DateTime;
@@ -63,7 +64,7 @@ public class GithubPostReceiveServer {
 
         List<HttpContext> contexts = new ArrayList<HttpContext>();
         for (String channel : Config.channels()) {
-            HttpContext context = this.server.createContext("/" + channel.substring(1), new GithubPayloadHandler());
+            HttpContext context = this.server.createContext("/" + channel.substring(1), new GithubPayloadHandler(channel));
             contexts.add(context);
         }
 
@@ -81,7 +82,42 @@ public class GithubPostReceiveServer {
     }
 
     private class GithubPayloadHandler implements HttpHandler {
+        private BasicAuthenticator authenticator;
+
+        private GithubPayloadHandler(String channel) {
+            try {
+                String username = Config.githubHookUsername(channel);
+                String password = Config.githubHookPassword(channel);
+                this.authenticator = new GithubBasicAuthenticator(
+                        String.format("Github post-receive hook for %s.", channel),
+                        username, password);
+            } catch (PreferenceNotSetException pnse) {
+                this.authenticator = null;
+            }
+        }
+
+        private boolean hasHttpAuth() {
+            return this.authenticator != null;
+        }
+
         public void handle(HttpExchange exchange) throws IOException {
+            if (this.hasHttpAuth()) {
+                Authenticator.Result result = this.authenticator.authenticate(exchange);
+                if (!(result instanceof Authenticator.Success)) { // Authentication failed
+                    int responseCode = 401;
+                    if (result instanceof Authenticator.Retry) {
+                        responseCode = ((Authenticator.Retry)result).getResponseCode();
+                    } else if (result instanceof Authenticator.Failure) {
+                        responseCode = ((Authenticator.Failure)result).getResponseCode();
+                    }
+                    Headers responseHeaders = exchange.getResponseHeaders();
+                    responseHeaders.set("Content-Type", "text/plain");
+                    exchange.sendResponseHeaders(responseCode, 0);
+                    exchange.close();
+                    return;
+                }
+            }
+
             String requestMethod = exchange.getRequestMethod();
             if (requestMethod.equalsIgnoreCase("POST")) {
                 InputStream payloadStream = exchange.getRequestBody();
