@@ -161,6 +161,9 @@ class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListe
               items = items.filterNot(_ == i)
               sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(i.id).asJava)
               bot.msg(i.channel, "Removing this one from my list. Now tracking " + items.filter(_.channel == i.channel).size + " packages.")
+            case "RETURN" =>
+              bot.msg(i.channel, i.owner + ": Package " + i.id + " is being returned to sender!")
+              bot.msg(i.channel, i.status)
             case "PRE_NOTIFIED" =>
               bot.msg(i.channel, i.owner + ": Posten now knows about your package.")
               bot.msg(i.channel, i.status)
