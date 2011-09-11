@@ -26,7 +26,6 @@ public class Insulter implements TriggerListener {
         moduleHandler.registerHelp(TRIGGER_HELP, "Insult someone you don't like:\n" +
                     "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <person>\n" +
                     "  "+Grouphug.MAIN_TRIGGER+TRIGGER);
-        System.out.println("Insult module loaded.");
     }
 
 

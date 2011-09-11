@@ -32,7 +32,6 @@ class IsUp(val handler: ModuleHandler) extends TriggerListener {
     "!isuprm http://foo.tld     - Stop watching http://foo.tld.\n" +
     "!isupls                    - Show all URLs I'm watching\n" +
     "Note: I'll forget all the URLs I'm watching between restarts.")
-  println("IsUp module loaded.")
 
   val sleepTime = 1 // minutes
   val defaultTimeout = 10 // seconds

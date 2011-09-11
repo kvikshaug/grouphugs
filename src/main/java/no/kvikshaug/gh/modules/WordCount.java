@@ -48,7 +48,6 @@ public class WordCount implements TriggerListener, MessageListener {
                     "Top 5: " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP + "\n" +
                     "Bottom 5: " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM + "\n" +
                     "Remove stats count: " + Grouphug.MAIN_TRIGGER + TRIGGER_REMOVE + " <nick>");
-            System.out.println("Wordcount module loaded.");
         } catch(SQLUnavailableException ex) {
             System.err.println("WordCount startup error: SQL is unavailable!");
         }

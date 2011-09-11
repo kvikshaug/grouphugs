@@ -15,7 +15,6 @@ class Tlf(val handler: ModuleHandler) extends TriggerListener {
   val bot = Grouphug.getInstance
   handler.addTriggerListener("tlf", this)
   handler.registerHelp("tlf", "!tlf - Lookup a name or telephone number at gulesider.no")
-  println("Tlf module loaded.")
 
   def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String): Unit = {
     val query = java.net.URLEncoder.encode(message, "UTF-8")

@@ -14,7 +14,6 @@ class Bash(val handler: ModuleHandler) extends TriggerListener {
   val bot = Grouphug.getInstance
   handler.addTriggerListener("bash", this)
   handler.registerHelp("bash", "!bash - Show a random entry from http://bash.org/?random1")
-  println("Bash module loaded.")
 
   def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String): Unit = {
     val root = XML.withSAXParser(SAXParserImpl.newInstance(null)).load(Web.prepareEncodedBufferedReader(

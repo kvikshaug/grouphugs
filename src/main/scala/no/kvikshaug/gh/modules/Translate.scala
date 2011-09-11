@@ -15,7 +15,6 @@ class Translate(val handler: ModuleHandler) extends TriggerListener {
     "!tcode <language> => Gives langauge code\n" +
     "Default: from english to norwegian\n" +
     "F.ex. '!translate -t hu hello' => From english to hungarian")
-  println("Translate module loaded.")
 
   def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String): Unit = {
     trigger match {

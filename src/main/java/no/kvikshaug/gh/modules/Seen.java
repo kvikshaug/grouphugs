@@ -29,7 +29,6 @@ public class Seen implements TriggerListener, MessageListener {
             moduleHandler.addMessageListener(this);
             moduleHandler.registerHelp(TRIGGER_HELP, "Seen: When someone last said something in this channel\n" +
                     "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<nick>\n");
-            System.out.println("Seen module loaded.");
         } catch(SQLUnavailableException ex) {
             System.err.println("Seen module startup error: SQL is unavailable!");
         }

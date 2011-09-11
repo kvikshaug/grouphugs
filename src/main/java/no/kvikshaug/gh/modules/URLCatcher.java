@@ -30,7 +30,6 @@ public class URLCatcher implements MessageListener, Runnable {
         moduleHandler.registerHelp(HELP_TRIGGER, "URLCatcher tries to catch http:// or https:// URLs in messages to the channel, tries " +
                 "to look up the URL, then parses whatever it finds at the URL, looking for " +
                 "a html <title>, and sends the title back to the channel.");
-        System.out.println("URLCatcher module loaded.");
     }
 
     public void onMessage(String channel, String sender, String login, String hostname, String message) {

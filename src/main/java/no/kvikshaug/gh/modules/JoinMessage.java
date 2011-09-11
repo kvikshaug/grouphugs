@@ -28,7 +28,6 @@ public class JoinMessage implements TriggerListener, JoinListener {
             moduleHandler.addJoinListener(this);
             moduleHandler.registerHelp(TRIGGER, "Join message: say a message every time somebody joins\n" +
                     "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<nick> <message>\n");
-            System.out.println("JoinMessage module loaded.");
         } catch (SQLUnavailableException ex) {
             System.err.println("JoinMessage module startup error: SQL is unavailable!");
         }

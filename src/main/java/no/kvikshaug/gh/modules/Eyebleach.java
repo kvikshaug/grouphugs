@@ -14,7 +14,6 @@ public class Eyebleach implements TriggerListener {
         moduleHandler.registerHelp(TRIGGER_HELP, "Eyebleach: administers a dose of eyebleach.\n" +
                     Grouphug.MAIN_TRIGGER+TRIGGER+ "\n" +
                     Grouphug.MAIN_TRIGGER+TRIGGER+" <message>");
-        System.out.println("Eyebleach module loaded.");
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {

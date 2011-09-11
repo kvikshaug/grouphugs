@@ -29,7 +29,6 @@ public class Google implements TriggerListener {
                 "  !g <searchword(s)>\n" +
                 "  !google -n <result count> <searchword(s)>\n" +
                 "Result count if not specified is 1.");
-        System.out.println("Google module loaded.");
     }
 
 

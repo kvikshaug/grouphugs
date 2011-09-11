@@ -25,7 +25,6 @@ public class GoogleCalc implements TriggerListener {
                     "!gc 25 celsius in fahrenheit\n" +
                     "!gc 4lbs 14oz in kg\n" +
                     "!gc 100 usd in nok");
-        System.out.println("Google calculator module loaded.");
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {

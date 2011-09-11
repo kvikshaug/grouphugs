@@ -27,7 +27,6 @@ public class Pre implements TriggerListener, Runnable {
         handler.addTriggerListener("pre", this);
         handler.registerHelp("pre", "Searches secret topsite pre-db's and displays pretime for <release>\n!pre <release>\n" +
                 "Note: Searches are performed in separate threads");
-        System.out.println("Pre module loaded.");
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {

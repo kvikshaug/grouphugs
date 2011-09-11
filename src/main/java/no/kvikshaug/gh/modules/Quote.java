@@ -36,7 +36,6 @@ public class Quote implements TriggerListener, MessageListener {
 		handler.registerHelp("quote", "Saves lines you say between !startquote and !stopquote as quotes.\n" +
 		"Restarts recording if sending a startquote before sending a stopquote");
 		quotes = new HashMap<String, String>();
-		System.out.println("Pre module loaded.");
 	}
 
 	public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {

@@ -18,7 +18,6 @@ class Repl(val handler: ModuleHandler) extends TriggerListener {
   handler.registerHelp("repl", """!repl <command> - Send a command to simplyscala.com for REPL output
 !repl -l 1 <command> - Show only 1 line (the default is 3 lines)
 !repl -l a <command> - Show all lines""")
-  println("Repl module loaded.")
 
   val defaultLineCount = 3
 

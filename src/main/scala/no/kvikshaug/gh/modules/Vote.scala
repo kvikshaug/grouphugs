@@ -77,7 +77,6 @@ Add -m to !startvote to allow multiple choices from one candidate""")
     case e: SQLException => println("Vote module warning: Existing votes couldn't be loaded because of an SQLException.")
       e.printStackTrace();
   }
-  println("Vote module loaded.")
 
   val random = new java.util.Random
   val idDigits = 4

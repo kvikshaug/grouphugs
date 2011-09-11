@@ -11,8 +11,6 @@ class Operator(handler: ModuleHandler) extends JoinListener with NickChangeListe
   handler.addJoinListener(this)
   handler.addNickChangeListener(this)
 
-  println("Operator module loaded.")
-
   def onJoin(channel: String, sender: String, login: String, hostname: String) {
     Config.reparse // make sure we have the newest operator list
     if(!(hasOp(sender, channel)) && Config.operatorList.get(channel).get.exists(_ == sender)) {

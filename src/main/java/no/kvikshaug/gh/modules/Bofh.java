@@ -28,8 +28,6 @@ public class Bofh implements TriggerListener {
                     "Usage:\n" +
                     Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " returns a random excuse.\n" +
                     Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " " + SPECIFIC_TRIGGER + " returns an excuse by number. (\\d+ means any digit, 1-n times)");
-            System.out.println("BOFH module loaded.");
-
     }
 
     private String formatExcuse(String id, String excuse) {

@@ -25,7 +25,6 @@ public class GoogleFight implements TriggerListener {
         moduleHandler.addTriggerListener(TRIGGER, this);
         moduleHandler.registerHelp(TRIGGER_HELP, "Google fight:\n" +
                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER + " [1st search]" + TRIGGER_VS + "[2nd search]");
-        System.out.println("Googlefight module loaded.");
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {

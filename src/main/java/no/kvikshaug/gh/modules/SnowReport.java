@@ -30,7 +30,6 @@ public class SnowReport implements TriggerListener {
         handler.registerHelp("snowreport", helpText);
         handler.registerHelp("snow", helpText);
         bot = Grouphug.getInstance();
-        System.out.println("SnowReport module loaded.");
     }
 
     @Override

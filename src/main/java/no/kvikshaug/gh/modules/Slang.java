@@ -27,7 +27,6 @@ public class Slang implements TriggerListener {
                    "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + " <expr>\n" +
                    "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + " -n <number> <expr>\n" +
                    "  " + Grouphug.MAIN_TRIGGER + TRIGGER_MAIN + " " + Slang.TRIGGER_EXAMPLE + " <expr>");
-        System.out.println("Slang module loaded.");
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {

@@ -14,7 +14,6 @@ class Mlia(val handler: ModuleHandler) extends TriggerListener {
   val bot = Grouphug.getInstance
   handler.addTriggerListener("mlia", this)
   handler.registerHelp("mlia", "!mlia - Show a random entry from http://mylifeisaverage.com/")
-  println("Mlia module loaded.")
 
   /* At the time of this writing there are 8481 pages at mylifeisaverage.com.
    * We will select one of these randomly and display the top entry.

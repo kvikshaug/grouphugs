@@ -53,8 +53,6 @@ class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListe
           row(2).asInstanceOf[String], row(3).asInstanceOf[String],
           row(4).asInstanceOf[String])
       }.toList
-
-      println("Package tracking module loaded.")
     } catch {
       case e: SQLUnavailableException => println("Package tracking module unable to load because SQL is unavailable.")
       case e: SQLException => println("Package tracking module unable to load because it was unable to load existing package list from SQL!")

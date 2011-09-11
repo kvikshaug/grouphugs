@@ -19,7 +19,6 @@ class Weather(val handler: ModuleHandler) extends TriggerListener {
 !weather -f <place>   - Full forecasts for <place>
 !weather -a <place>   - All available weather data for <place>
 0 = forecast today; longest ahead is 3 days""")
-  println("Weather module registered.")
 
   def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String) {
     val input = parseLine(message)

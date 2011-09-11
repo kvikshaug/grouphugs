@@ -26,7 +26,6 @@ public class IMDb implements TriggerListener {
 		moduleHandler.addTriggerListener(TRIGGER, this);
 		moduleHandler.registerHelp(TRIGGER_HELP, "IMDb: Show IMDb info for a movie\n" +
 				"  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<movie name>");
-		System.out.println("IMDb module loaded.");
 	}
 
 

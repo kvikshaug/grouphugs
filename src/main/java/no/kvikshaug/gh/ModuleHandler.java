@@ -37,7 +37,7 @@ public class ModuleHandler {
         this.eventThreads = new ThreadGroup("ModuleHandler event threads");
 
         // add all the modules here
-        System.out.println("Initializing modules...");
+        System.out.println("Initializing modules...\n");
 
         new Bofh(this);
         new Confession(this);

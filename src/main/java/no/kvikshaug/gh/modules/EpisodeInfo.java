@@ -22,7 +22,6 @@ public class EpisodeInfo implements TriggerListener  {
             moduleHandler.addTriggerListener(TRIGGER, this);
             moduleHandler.registerHelp(TRIGGER_HELP, "Searches for the latests pre of an episode of your favorite TV show\n" +
                     "To search for a show, use " +Grouphug.MAIN_TRIGGER + TRIGGER + " <name>\n");
-            System.out.println("Epinfo module loaded.");
     }
     
     

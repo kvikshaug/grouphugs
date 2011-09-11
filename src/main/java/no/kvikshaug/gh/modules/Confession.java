@@ -24,7 +24,6 @@ public class Confession implements TriggerListener {
                 "  "+Grouphug.MAIN_TRIGGER+TRIGGER+"\n" +
                 "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" -newest\n" +
                 "  "+Grouphug.MAIN_TRIGGER+TRIGGER +" <searchword(s)>");
-        System.out.println("Confession module loaded.");
     }
 
 

@@ -37,7 +37,6 @@ public class Remember implements TriggerListener {
                     "  "+Grouphug.MAIN_TRIGGER+TRIGGER_GET_SENDER + " nick\n" +
                     "  "+Grouphug.MAIN_TRIGGER+TRIGGER_GET_TAG + " tag\n");
             bot = Grouphug.getInstance();
-            System.out.println("Remember module loaded.");
         } catch(SQLUnavailableException ex) {
             System.err.println("Remember startup: SQL is unavailable!");
         }

@@ -35,7 +35,6 @@ public class Timer implements TriggerListener {
     	"Example: !timer 14m grandis\n";
     	handler.registerHelp("timer", helpText);
     	bot = Grouphug.getInstance();
-    	System.out.println("Timer module loaded.");
 
 
     	//Load timers from database, if there were any there when the bot shut down

@@ -38,7 +38,6 @@ public class Karma implements TriggerListener, MessageListener {
                     "  " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP+"\n" +
                     "  " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM+"\n" +
                     "  " + Grouphug.MAIN_TRIGGER + TRIGGER_RESET + " <object>" + " if resetting is enabled");
-            System.out.println("Karma module loaded.");
         } catch(SQLUnavailableException ex) {
             System.err.println("Karma startup error: SQL is unavailable!");
         }

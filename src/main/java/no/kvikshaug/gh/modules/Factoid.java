@@ -73,7 +73,6 @@ public class Factoid implements MessageListener, TriggerListener {
                     " - A star (*) can be any string of characters.\n" +
                     " - Regex can be used, but remember that * is replaced with .*");
             bot = Grouphug.getInstance();
-            System.out.println("Factoid module loaded.");
         } catch(SQLUnavailableException ex) {
             System.err.println("Factoid startup: SQL is unavailable!");
         } catch (SQLException e) {

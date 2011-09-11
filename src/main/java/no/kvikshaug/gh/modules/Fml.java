@@ -23,7 +23,6 @@ public class Fml implements TriggerListener {
         bot = Grouphug.getInstance();
         handler.registerHelp("fml", "Fuck my life\n!fml  -- show a fuck my life story from fmylife.com");
         handler.addTriggerListener("fml", this);
-        System.out.println("FML module loaded.");
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {

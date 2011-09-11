@@ -35,7 +35,6 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener, 
             moduleHandler.addMessageListener(this);
             moduleHandler.registerHelp(TRIGGER_HELP, "Tell: Tell something to someone who's not here when they eventually join\n" +
                     "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<nick> <message>\n");
-            System.out.println("Tell module loaded.");
         } catch (SQLUnavailableException ex) {
             System.err.println("Tell module startup error: SQL is unavailable!");
         }

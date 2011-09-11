@@ -28,7 +28,6 @@ public class EightBall implements TriggerListener {
         moduleHandler.registerHelp(TRIGGER_HELP, "Seek advice from the magic 8-ball fortuneteller!\n" +
                     "  "+ Grouphug.MAIN_TRIGGER+TRIGGER+" <yes/no question>\n" +
                     "  "+Grouphug.MAIN_TRIGGER+TRIGGER+" am I a bad person?");
-        System.out.println("8ball module loaded.");
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {

@@ -20,7 +20,6 @@ public class Define implements TriggerListener {
         moduleHandler.addTriggerListener(TRIGGER, this);
         moduleHandler.registerHelp(TRIGGER_HELP, "Define: Use google to give a proper definition of a word.\n" +
                    "  "+Grouphug.MAIN_TRIGGER+TRIGGER +"<keyword>");
-        System.out.println("Define module loaded.");
     }
 
 
