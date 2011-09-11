@@ -23,11 +23,11 @@ public class Bofh implements TriggerListener {
     public static final String HELP_TRIGGER = RANDOM_TRIGGER;
 
     public Bofh(ModuleHandler moduleHandler) {
-            moduleHandler.addTriggerListener(RANDOM_TRIGGER, this);
-            moduleHandler.registerHelp(HELP_TRIGGER, "BOFH - Fend off lusers with Bastard Operator From Hell excuses for their system \"problems\".\n" +
-                    "Usage:\n" +
-                    Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " returns a random excuse.\n" +
-                    Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " " + SPECIFIC_TRIGGER + " returns an excuse by number. (\\d+ means any digit, 1-n times)");
+        moduleHandler.addTriggerListener(RANDOM_TRIGGER, this);
+        moduleHandler.registerHelp(HELP_TRIGGER, "BOFH - Fend off lusers with Bastard Operator From Hell excuses for their system \"problems\".\n" +
+                "Usage:\n" +
+                Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " returns a random excuse.\n" +
+                Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " " + SPECIFIC_TRIGGER + " returns an excuse by number. (\\d+ means any digit, 1-n times)");
     }
 
     private String formatExcuse(String id, String excuse) {
