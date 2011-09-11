@@ -47,5 +47,6 @@
   </Channels>
   <Database>
     <File>grouphugs.db</File>
+    <Schema>schema.sql</Schema>
   </Database>
 </Bot>

@@ -89,6 +89,8 @@ object Config {
   // Database
   @throws(classOf[PreferenceNotSetException])
   def dbFile = ifExists (root \ "Database") get ((ns) => (ns \ "File")) text
+  @throws(classOf[PreferenceNotSetException])
+  def dbSchema = ifExists (root \ "Database") get ((ns) => (ns \ "Schema")) text
 
   /* Throws a PNSE if the node doesn't exist */
   def ifExists(ns: NodeSeq, message: String = "Missing corresponding option in " + configFile) = {

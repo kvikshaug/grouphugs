@@ -76,6 +76,10 @@ public class SQLHandler {
                 throw new SQLUnavailableException("Unable to find the database file (expected in: " + db.getAbsolutePath() + ")");
             }
             databaseFile = db.getName();
+            if(!SQLSchema.compare(db.getName(), Config.dbSchema(), connectionUrl + databaseFile)) {
+                throw new SQLUnavailableException("The database schema in " + db.getName() +
+                  " doesn't correspond to the one in " + Config.dbSchema() + "! Please update your database.");
+            }
             sql = new SQL();
             this.verbose = verbose;
             setConnection();
