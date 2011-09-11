@@ -56,7 +56,7 @@ public class Grouphug extends PircBot {
 
     // How often to try to reconnect to the server when disconnected, in ms
     private static final int RECONNECT_TIME = 15000;
-    private static boolean spamOK = false;
+    private static boolean spamming = false;
     private static ModuleHandler moduleHandler;
     private static boolean DISCONNECTING = false; // set to true when intentionally disconnecting
 
@@ -83,10 +83,10 @@ public class Grouphug extends PircBot {
 
         // Normal/Spam-trigger
         if(message.startsWith(MAIN_TRIGGER) || message.startsWith(SPAM_TRIGGER)) {
-            spamOK = message.startsWith(SPAM_TRIGGER);
+            spamming = message.startsWith(SPAM_TRIGGER);
 
             // But not for everyone
-            if(spamOK && (sender.contains("icc") || login.contains("icc"))) {
+            if(spamming && (sender.contains("icc") || login.contains("icc"))) {
                 msg(channel, "icc, you are not allowed to use the spam trigger.");
                 return;
             }
@@ -199,7 +199,7 @@ public class Grouphug extends PircBot {
         List<String> lines = java.util.Arrays.asList(message.split("\n"));
 
         // Now check if we are spamming the channel, and stop if the spam-trigger isn't used
-        if(verifySpam && !spamOK && lines.size() > MAX_SPAM_LINES) {
+        if(verifySpam && !spamming && lines.size() > MAX_SPAM_LINES) {
             sendMessage(receiver, "This would spam the channel with "+lines.size()+" lines, replace "+MAIN_TRIGGER+" with "+SPAM_TRIGGER+" if you really want that.");
             return;
         }
