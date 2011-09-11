@@ -45,4 +45,7 @@
       </Modules>
     </Channel>
   </Channels>
+  <Database>
+    <File>grouphugs.db</File>
+  </Database>
 </Bot>

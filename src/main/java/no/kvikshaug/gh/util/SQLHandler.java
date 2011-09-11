@@ -1,6 +1,8 @@
 package no.kvikshaug.gh.util;
 
 import no.kvikshaug.gh.exceptions.SQLUnavailableException;
+import no.kvikshaug.gh.exceptions.PreferenceNotSetException;
+import no.kvikshaug.gh.Config;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -58,7 +60,8 @@ public class SQLHandler {
     private boolean connectionOK = false;
     private boolean verbose;
 
-    private static final String connectionUrl = "jdbc:sqlite:grouphugs.db";
+    private static final String connectionUrl = "jdbc:sqlite:";
+    private static String databaseFile = null;
 
     /**
      * Constructs a new SQLHandler object
@@ -68,15 +71,18 @@ public class SQLHandler {
      */
     private SQLHandler(boolean verbose) throws SQLUnavailableException {
         try {
-            File db = new File("grouphugs.db");
+            File db = new File(Config.dbFile());
             if(!db.exists()) {
                 throw new SQLUnavailableException("Unable to find the database file (expected in: " + db.getAbsolutePath() + ")");
             }
+            databaseFile = db.getName();
             sql = new SQL();
             this.verbose = verbose;
             setConnection();
         } catch (ClassNotFoundException e) {
             throw new SQLUnavailableException("Unable to load the SQL JDBC driver.");
+        } catch (PreferenceNotSetException e) {
+            throw new SQLUnavailableException("Database file not specified in config: " + e.getMessage());
         }
     }
 
@@ -117,7 +123,7 @@ public class SQLHandler {
             }
             throw ex;
         }
-        sql.connect(connectionUrl);
+        sql.connect(connectionUrl + databaseFile);
     }
 
     /**
