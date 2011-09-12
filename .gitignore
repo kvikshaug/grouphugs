@@ -16,3 +16,4 @@ grouphugs.db
 log-current
 props.xml
 gh.log
+gh.pid
