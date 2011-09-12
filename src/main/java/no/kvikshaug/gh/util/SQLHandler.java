@@ -41,17 +41,7 @@ public class SQLHandler {
         if(sqlUnavailableException != null) {
             throw sqlUnavailableException;
         }
-        try {
-            return sqlHandler == null ? sqlHandler = new SQLHandler(true) : sqlHandler;
-        } catch(SQLUnavailableException ex) {
-            // we catch it the first time, so that we're able to display an error message this one time
-            System.err.println("Couldn't load SQL!");
-            System.err.println(ex.getMessage());
-            System.err.println("Modules requiring SQL will be disabled.");
-            System.err.println();
-            sqlUnavailableException = ex;
-            throw ex;
-        }
+        return sqlHandler;
     }
 
     private static SQLHandler sqlHandler;
@@ -63,6 +53,10 @@ public class SQLHandler {
     private static final String connectionUrl = "jdbc:sqlite:";
     private static String databaseFile = null;
 
+    public static void initiate() throws SQLUnavailableException {
+        sqlHandler = new SQLHandler(true);
+    }
+
     /**
      * Constructs a new SQLHandler object
      * @param verbose if true, this class will output information about its actions, and (mostly) error handling,
@@ -73,20 +67,22 @@ public class SQLHandler {
         try {
             File db = new File(Config.dbFile());
             if(!db.exists()) {
-                throw new SQLUnavailableException("Unable to find the database file (expected in: " + db.getAbsolutePath() + ")");
+                throw (sqlUnavailableException = new SQLUnavailableException(
+                  "Unable to find the database file (expected in: " + db.getAbsolutePath() + ")"));
             }
             databaseFile = db.getName();
             if(!SQLSchema.compare(db.getName(), Config.dbSchema(), connectionUrl + databaseFile)) {
-                throw new SQLUnavailableException("The database schema in " + db.getName() +
-                  " doesn't correspond to the one in " + Config.dbSchema() + "! Please update your database.");
+                throw (sqlUnavailableException = new SQLUnavailableException("The database schema in " + db.getName() +
+                  " doesn't correspond to the one in " + Config.dbSchema() + "! Please update your database."));
             }
             sql = new SQL();
             this.verbose = verbose;
             setConnection();
         } catch (ClassNotFoundException e) {
-            throw new SQLUnavailableException("Unable to load the SQL JDBC driver.");
+            throw (sqlUnavailableException = new SQLUnavailableException("Unable to load the SQL JDBC driver."));
         } catch (PreferenceNotSetException e) {
-            throw new SQLUnavailableException("Database file not specified in config: " + e.getMessage());
+            throw (sqlUnavailableException = new SQLUnavailableException("Database file not specified in config: "
+              + e.getMessage()));
         }
     }
 

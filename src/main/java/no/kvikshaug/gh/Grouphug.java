@@ -15,6 +15,7 @@ import java.net.UnknownHostException;
 import no.kvikshaug.gh.exceptions.PreferenceNotSetException;
 import no.kvikshaug.gh.github.GithubPostReceiveServer;
 import no.kvikshaug.scatsd.client.ScatsD;
+import no.kvikshaug.gh.util.SQLHandler;
 
 /**
  * Grouphug
@@ -233,6 +234,15 @@ public class Grouphug extends PircBot {
             });
         ScatsD.count("gh.startups", 1);
         new JvmProfiler().start();
+        // Initiate the SQL handler
+        try {
+            SQLHandler.initiate();
+        } catch(SQLUnavailableException e) {
+            System.err.println("Couldn't load SQL!");
+            System.err.println(ex.getMessage());
+            System.err.println("Modules requiring SQL will be disabled.");
+            System.err.println();
+        }
         moduleHandler = new ModuleHandler(bot);
         try {
             bot.setDccInetAddress(java.net.InetAddress.getByName(Config.interfaceHost()));
