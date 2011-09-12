@@ -22,12 +22,19 @@ public class Bofh implements TriggerListener {
     private static final String SPECIFIC_TRIGGER = "\\d+";
     public static final String HELP_TRIGGER = RANDOM_TRIGGER;
 
+    private SQLHandler sql;
+
     public Bofh(ModuleHandler moduleHandler) {
-        moduleHandler.addTriggerListener(RANDOM_TRIGGER, this);
-        moduleHandler.registerHelp(HELP_TRIGGER, "BOFH - Fend off lusers with Bastard Operator From Hell excuses for their system \"problems\".\n" +
-                "Usage:\n" +
-                Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " returns a random excuse.\n" +
-                Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " " + SPECIFIC_TRIGGER + " returns an excuse by number. (\\d+ means any digit, 1-n times)");
+        try {
+            sql = SQLHandler.getSQLHandler();
+            moduleHandler.addTriggerListener(RANDOM_TRIGGER, this);
+            moduleHandler.registerHelp(HELP_TRIGGER, "BOFH - Fend off lusers with Bastard Operator From Hell excuses for their system \"problems\".\n" +
+                    "Usage:\n" +
+                    Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " returns a random excuse.\n" +
+                    Grouphug.MAIN_TRIGGER + RANDOM_TRIGGER + " " + SPECIFIC_TRIGGER + " returns an excuse by number. (\\d+ means any digit, 1-n times)");
+        } catch (SQLUnavailableException e) {
+            System.err.println("BOFH module disabled: needs to load stored data from SQL.");
+        }
     }
 
     private String formatExcuse(String id, String excuse) {
@@ -37,16 +44,12 @@ public class Bofh implements TriggerListener {
     private String getExcuse(String number) {
         String excuse = null;
         try {
-
-            SQLHandler sql = SQLHandler.getSQLHandler();
             Object[] row = sql.selectSingle("SELECT id, excuse FROM bofh WHERE id='?'", Arrays.asList(number));
             if (row != null) {
                 excuse = formatExcuse(((Integer)row[0]).toString(), (String)row[1]);
             }
         } catch (ClassCastException e) {
             System.err.println("BOFH failed: Yell at the developers!");
-        } catch (SQLUnavailableException e) {
-            System.err.println("BOFH failed: SQL is unavailable!");
         } catch (SQLException e) {
             return "No bofh excuse for that number. Try a lower number.";
         }
