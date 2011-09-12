@@ -12,6 +12,7 @@ import java.util.regex.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.exceptions.PreferenceNotSetException;
 import no.kvikshaug.gh.github.GithubPostReceiveServer;
 import no.kvikshaug.scatsd.client.ScatsD;
@@ -218,11 +219,57 @@ public class Grouphug extends PircBot {
      * @throws UnsupportedEncodingException very rarely since the encoding is almost never changed
      */
     public static void main(String[] args) throws UnsupportedEncodingException {
+        System.out.println("Welcome to GH! Setting up initial configuration...\n");
+        // Add run to statistics
+        try {
+            ScatsD.setHost(InetAddress.getByName(Config.scatsDHost()), Config.scatsDPort());
+        } catch(UnknownHostException e) {
+          System.out.println("ScatsD reporter disabled: " + e.getMessage());
+        } catch(PreferenceNotSetException e) {
+          System.out.println("ScatsD reporter disabled: " + e.getMessage());
+        }
+        ScatsD.count("gh.startups", 1);
+        new JvmProfiler().start();
+
         // Fire her up
         Grouphug.bot = new Grouphug();
         bot.setVerbose(true);
         bot.setEncoding("UTF-8");
-        Runtime.getRuntime().addShutdownHook(new Thread(){
+
+        // Start the GPRS
+        bot.gprs = new GithubPostReceiveServer(bot);
+        bot.gprs.start();
+
+        // Set our hostname explicitly if specified
+        try {
+            bot.setDccInetAddress(java.net.InetAddress.getByName(Config.interfaceHost()));
+            System.out.println("Explicitly setting hostname to " + Config.interfaceHost());
+        } catch(PreferenceNotSetException e) {
+            System.out.println("Using default interface hostname: " + e.getMessage());
+        } catch(UnknownHostException e) {
+            System.out.println("Using default interface hostname: " + e.toString());
+        }
+
+        // Initiate the SQL handler
+        try {
+            SQLHandler.initiate();
+        } catch(SQLUnavailableException e) {
+            System.err.println("SQL is unavailable: " + e.getMessage());
+            System.err.println("Modules requiring SQL will be disabled!");
+        }
+
+        // Load all modules
+        moduleHandler = new ModuleHandler(bot);
+
+        // Connect to the IRC server and join all channels
+        connect(bot);
+        for (String channel : Config.channels()) {
+            bot.joinChannel(channel);
+        }
+
+        // Start listening
+        NickPoller.load(bot);
+        Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
                     DISCONNECTING = true;
                     if (bot.gprs != null) {
@@ -232,40 +279,6 @@ public class Grouphug extends PircBot {
                     bot.quitServer("Caught signal; quitting.");
                 }
             });
-        ScatsD.count("gh.startups", 1);
-        new JvmProfiler().start();
-        // Initiate the SQL handler
-        try {
-            SQLHandler.initiate();
-        } catch(SQLUnavailableException e) {
-            System.err.println("Couldn't load SQL!");
-            System.err.println(ex.getMessage());
-            System.err.println("Modules requiring SQL will be disabled.");
-            System.err.println();
-        }
-        moduleHandler = new ModuleHandler(bot);
-        try {
-            bot.setDccInetAddress(java.net.InetAddress.getByName(Config.interfaceHost()));
-            System.out.println("Explicitly setting hostname to " + Config.interfaceHost());
-        } catch(PreferenceNotSetException e) {
-            System.out.println("Using default interface hostname: " + e.getMessage());
-        } catch(UnknownHostException e) {
-            System.out.println("Using default interface hostname: " + e.toString());
-        }
-        connect(bot);
-        for (String channel : Config.channels()) {
-            bot.joinChannel(channel);
-        }
-        NickPoller.load(bot);
-        bot.gprs = new GithubPostReceiveServer(bot);
-        bot.gprs.start();
-        try {
-            ScatsD.setHost(InetAddress.getByName(Config.scatsDHost()), Config.scatsDPort());
-        } catch(UnknownHostException e) {
-          System.out.println("ScatsD reporter disabled: " + e.getMessage());
-        } catch(PreferenceNotSetException e) {
-          System.out.println("ScatsD reporter disabled: " + e.getMessage());
-        }
     }
 
     private static boolean connect(Grouphug bot) {
