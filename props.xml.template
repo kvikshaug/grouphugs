@@ -20,6 +20,11 @@
   </Servers>
   <Channels>
     <Channel chan="#chan1">
+      <!-- optional: if this tag is not present, no authentication is used -->
+      <GithubHook>
+          <Username>user</Username>
+          <Password>pass</Password>
+      </GithubHook>
       <Modules>
         <Upload>
           <UploadDir>/path/to/uploads/</UploadDir>
