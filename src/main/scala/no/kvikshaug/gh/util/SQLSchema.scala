@@ -32,26 +32,28 @@ object SQLSchema {
   }
 
   private def getSchemaTables(schemaFile: String) = {
-    val content = io.Source.fromFile(schemaFile).mkString
-    """(?i)CREATE TABLE\s*?(\S+)\s*?\(\s*?(.*?)\s*?\)\s*?;\s*?""".r.findAllIn(content).matchData.map { m =>
-      val rows = m.group(2).split(",").map(_.trim).map { column =>
-        // remove all "PRIMARY KEY" entries, because we're unable to know about that from JDBC
-        Row(column.substring(0, column.indexOf(' ')), column.substring(column.indexOf(' ') + 1).replaceAll("(?i)primary key", "").trim)
-      }.toList
-      Table(m.group(1), rows)
-    }.toList
+    parseString(io.Source.fromFile(schemaFile).mkString)
   }
 
   private def getDbTables(jdbcUrl: String) = {
     Class.forName("org.sqlite.JDBC")
     val connection = DriverManager.getConnection(jdbcUrl)
-    val dbmd = connection.getMetaData
-    val tablerows = dbmd.getTables(null, null, null, null) // lol, java and nulls, so funny
-    tablerows.map { table =>
-      val rows = dbmd.getColumns(null, null, table.getObject("TABLE_NAME").toString, null).map { row =>
-        Row(row.getObject("COLUMN_NAME").toString, row.getObject("TYPE_NAME").toString)
+    val statement = connection.prepareStatement("select sql from sqlite_master where type='table';")
+    statement.execute
+    val sb = new StringBuilder
+    statement.getResultSet foreach { r =>
+      sb.append(r.getObject("sql").toString.replaceAll("\n", ""))
+      sb.append(";")
+    }
+    parseString(sb.toString)
+  }
+
+  private def parseString(schema: String) = {
+    """(?i)CREATE TABLE\s*?(\S+)\s*?\(\s*?(.*?)\s*?\)\s*?;\s*?""".r.findAllIn(schema).matchData.map { m =>
+      val rows = m.group(2).split(",").map(_.trim).map { column =>
+        Row(column.substring(0, column.indexOf(' ')), column.substring(column.indexOf(' ') + 1).trim)
       }.toList
-      Table(table.getObject("TABLE_NAME").toString, rows)
+      Table(m.group(1), rows)
     }.toList
   }
 }
