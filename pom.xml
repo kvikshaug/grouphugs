@@ -79,7 +79,7 @@
     <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
-      <version>2.8.1</version>
+      <version>2.9.1</version>
     </dependency>
 
     <dependency>
@@ -93,7 +93,22 @@
       <artifactId>scatsd-client_2.8.1</artifactId>
       <version>1.0</version>
     </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.9</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.9.1</artifactId>
+      <version>1.6.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
+
 
   <!-- source encoding: utf-8 -->
   <properties>
@@ -157,6 +172,7 @@
           <artifactSet>
             <!-- This is an attempt at making the uber jar a bit slimmer. If you get NoClassDefinitionFoundExceptions, try removing some of these... -->
             <excludes>
+              <exclude>org.scalatest:scalatest</exclude>
               <exclude>junit:junit</exclude>
               <exclude>xerces:*</exclude>
               <exclude>org.jdom:saxpath</exclude>
