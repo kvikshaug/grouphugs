@@ -4,16 +4,13 @@ import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.Web;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.net.URL;
-
-import org.apache.commons.io.IOUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.xpath.XPath;
+
+import java.io.IOException;
+import java.net.URL;
 
 public class GoogleFight implements TriggerListener {
 

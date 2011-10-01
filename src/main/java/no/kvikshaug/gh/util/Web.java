@@ -3,7 +3,6 @@ package no.kvikshaug.gh.util;
 import no.kvikshaug.gh.Config;
 import no.kvikshaug.gh.exceptions.NoTitleException;
 import no.kvikshaug.gh.exceptions.PreferenceNotSetException;
-import org.apache.commons.io.IOUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -19,7 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.net.URLEncoder.encode;
-import static org.apache.commons.io.IOUtils.closeQuietly;
+import static no.kvikshaug.gh.util.IO.closeQuietly;
+import static no.kvikshaug.gh.util.IO.copy;
 
 /**
  * Web contains useful methods often performed by modules, like fetching the contents of a website,
@@ -220,7 +220,7 @@ public class Web {
 
             InputStream is = bitly.openStream();
             StringWriter writer = new StringWriter();
-            IOUtils.copy(is, writer);
+            copy(new InputStreamReader(is, "UTF-8"), writer);
             is.close();
             return writer.toString(); // short url
         } catch (MalformedURLException murle) {

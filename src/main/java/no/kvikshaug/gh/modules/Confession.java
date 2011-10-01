@@ -12,7 +12,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
+import static no.kvikshaug.gh.util.IO.closeQuietly;
+
 
 public class Confession implements TriggerListener {
     private static final String TRIGGER = "gh";

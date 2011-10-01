@@ -9,7 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URL;
 
-import org.apache.commons.io.IOUtils;
+import static no.kvikshaug.gh.util.IO.closeQuietly;
 
 public class Define implements TriggerListener {
 
@@ -61,12 +61,12 @@ public class Define implements TriggerListener {
                     throw new IOException("Define search error: Couldn't find ending < in definition");
                 }
             }
-            IOUtils.closeQuietly(google);
+            closeQuietly(google);
             return line.substring(startIndex, i);
         }
 
         // If we get here, we couldn't find the definition, or parsing went wrong - but we can't know which, for sure
-        IOUtils.closeQuietly(google);
+        closeQuietly(google);
         return null;
     }
 }

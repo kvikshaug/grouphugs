@@ -8,9 +8,9 @@ import no.kvikshaug.gh.exceptions.PreferenceNotSetException;
 import no.kvikshaug.gh.github.json.Commit;
 import no.kvikshaug.gh.github.json.DateTimeTypeConverter;
 import no.kvikshaug.gh.github.json.Payload;
+import no.kvikshaug.gh.util.IO;
 import no.kvikshaug.gh.util.Web;
 import org.apache.bcel.verifier.structurals.ExceptionHandler;
-import org.apache.commons.io.IOUtils;
 import org.jibble.pircbot.Colors;
 import org.joda.time.DateTime;
 
@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 import static java.net.URLDecoder.decode;
+import static no.kvikshaug.gh.util.IO.copy;
 
 public class GithubPostReceiveServer {
 
@@ -122,7 +123,7 @@ public class GithubPostReceiveServer {
             if (requestMethod.equalsIgnoreCase("POST")) {
                 InputStream payloadStream = exchange.getRequestBody();
                 StringWriter writer = new StringWriter();
-                IOUtils.copy(payloadStream, writer, "UTF-8");
+                copy(new InputStreamReader(payloadStream, "UTF-8"), writer);
                 String body = decode(writer.toString(), "UTF-8");
                 if (body.startsWith("payload=")) {
                     // There's no free lunch with HttpExchange; hack to get the payload POST argument :3
@@ -203,7 +204,7 @@ public class GithubPostReceiveServer {
         InputStreamReader stdin = new InputStreamReader(System.in);
         StringWriter writer = new StringWriter();
         try {
-            IOUtils.copy(stdin, writer);
+            copy(stdin, writer);
         } catch (IOException e) {
             e.printStackTrace(System.err);
         }

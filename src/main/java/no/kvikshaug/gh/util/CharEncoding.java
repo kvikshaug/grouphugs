@@ -1,13 +1,14 @@
 package no.kvikshaug.gh.util;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
-import static org.apache.commons.io.IOUtils.toByteArray;
 import org.mozilla.intl.chardet.nsDetector;
 import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
 import org.mozilla.intl.chardet.nsPSMDetector;
 
 import java.io.*;
 import java.net.URL;
+
+import static no.kvikshaug.gh.util.IO.closeQuietly;
+import static no.kvikshaug.gh.util.IO.toByteArray;
 
 /**
  * General utility class for handling different character encodings.
@@ -225,7 +226,6 @@ public class CharEncoding {
          * This method is automatically called by the nsDetector when a
          * character encoding is found.
          */
-        @Override
         public void Notify(String s) {
             this.encoding = s;
         }
