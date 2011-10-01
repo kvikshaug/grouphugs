@@ -7,13 +7,13 @@ public class IO {
     private static final char[] charBuffer = new char[BUFFER_SIZE];
     private static final byte[] byteBuffer = new byte[BUFFER_SIZE];
 
-    public static void copy(InputStream in, OutputStream out) throws IOException {
+    public static synchronized void copy(InputStream in, OutputStream out) throws IOException {
         while (in.read(byteBuffer) != -1) {
             out.write(byteBuffer);
         }
     }
 
-    public static void copy(Reader reader, Writer writer) throws IOException {
+    public static synchronized void copy(Reader reader, Writer writer) throws IOException {
         while(reader.read(charBuffer) != -1) {
             writer.write(charBuffer);
         }
