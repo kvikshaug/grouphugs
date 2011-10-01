@@ -87,7 +87,7 @@ class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListe
         items = items.filterNot(_ == id)
         sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(id).asJava)
         bot.msg(channel, "Ok, stopped tracking package " + id + ".")
-        ScatsD.retain(format("gh.bot.modules.tracking.%s.packages", channel), items.size)
+        ScatsD.retain(String.format("gh.bot.modules.tracking.%s.packages", channel), items.size)
       } catch {
         case e: SQLException =>
           bot.msg(channel, "Removed it from memory but not from SQL. Check my logs for more info.")
@@ -137,7 +137,7 @@ class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListe
           bot.msg(channel, "Oh no, I caught some horrible exception! Please check my logs. SQL/memory may or may not be synchronized.")
           e.printStackTrace
       }
-      ScatsD.retain(format("gh.bot.modules.tracking.%s.packages", channel), items.size)
+      ScatsD.retain(String.format("gh.bot.modules.tracking.%s.packages", channel), items.size)
     }
 
   var failCount = 0
@@ -193,7 +193,7 @@ class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListe
           if(status._2 > 1) {
             bot.msg(i.channel, "Note: This package has >1 items.")
           }
-        ScatsD.retain(format("gh.bot.modules.tracking.%s.packages", i.channel), items.size)
+        ScatsD.retain(String.format("gh.bot.modules.tracking.%s.packages", i.channel), items.size)
         }
       } catch {
         case e => println("Tracking poller just failed: "); e.printStackTrace; failCount = failCount + 1
