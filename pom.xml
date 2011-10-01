@@ -90,7 +90,7 @@
 
     <dependency>
       <groupId>kvikshaug</groupId>
-      <artifactId>scatsd-client_2.8.1</artifactId>
+      <artifactId>scatsd-client_2.9.1</artifactId>
       <version>1.0</version>
     </dependency>
 
