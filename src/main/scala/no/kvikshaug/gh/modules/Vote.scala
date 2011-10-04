@@ -200,7 +200,6 @@ Add -m to !startvote to allow multiple choices from one candidate""")
       val optionId = (sqlHandler.selectSingle("select id from " + dbVoteOptions + " where text='" + option.get.text + "' and voteId='" + m.group(2) + "';"))(0).toString
       sqlHandler.insert("insert into " + dbVoteOptionVoters + " (optionId, nick) values ('" + optionId + "', '" + nick + "');")
       bot.msg(channel, nick + " voted for '" + option.get.text + "' in vote " + item.get.id + ": " + item.get.text)
-      outputSortedList(channel, item.get)
     } catch {
       case e: SQLException => bot.msg(channel, "Sorry, I failed to update votecount in SQL!"); e.printStackTrace
     }
