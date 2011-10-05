@@ -16,7 +16,8 @@ import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.exceptions.PreferenceNotSetException;
 import no.kvikshaug.gh.github.GithubPostReceiveServer;
 import no.kvikshaug.scatsd.client.ScatsD;
-import no.kvikshaug.gh.util.SQLHandler;
+import no.kvikshaug.gh.util.SQL;
+import no.kvikshaug.worm.Worm;
 
 /**
  * Grouphug
@@ -250,9 +251,9 @@ public class Grouphug extends PircBot {
             System.out.println("Using default interface hostname: " + e.toString());
         }
 
-        // Initiate the SQL handler
+        // Initiate SQL
         try {
-            SQLHandler.initiate();
+            SQL.initiate();
         } catch(SQLUnavailableException e) {
             System.err.println("SQL is unavailable: " + e.getMessage());
             System.err.println("Modules requiring SQL will be disabled!");
@@ -277,6 +278,7 @@ public class Grouphug extends PircBot {
                     }
                     ScatsD.count("gh.shutdowns", 1);
                     bot.quitServer("Caught signal; quitting.");
+                    Worm.disconnect();
                 }
             });
     }
