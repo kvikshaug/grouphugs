@@ -38,4 +38,21 @@ object SQL {
         throw new SQLUnavailableException("Database file not specified in config: " + e.getMessage());
     }
   }
+
+  /** Prepends a backslash to any ["'`] char that doesn't
+      already have a backslash prepended */
+  def sanitize(input: String) = {
+    def isEvil(c: Char) = c == '"' || c == '\'' || c == '`'
+    val sb = new StringBuilder
+    var i = 0
+    input foreach { c =>
+      if(isEvil(c) && (i == 0 || input(i-1) != '\\')) {
+        sb.append('\\').append(c)
+      } else {
+        sb.append(c)
+      }
+      i += 1
+    }
+    sb.toString
+  }
 }
