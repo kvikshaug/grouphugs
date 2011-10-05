@@ -31,3 +31,16 @@ libraryDependencies ++= Seq(
 
 parallelExecution in Test := false
 
+// Write the classpath and copy the jar to "run/"
+// Paths are hardcoded, feel free to make improvements
+
+TaskKey[File]("mkrunnable") <<= (baseDirectory, fullClasspath in Runtime) map { (base, cp) =>
+  import java.nio.file._
+  val out = base / "run/classpath"
+  IO.write(out, cp.files.absString)
+  val fs = FileSystems.getDefault()
+  val source = fs.getPath("target", "scala-2.9.1.final", "grouphugs_2.9.1-1.0-SNAPSHOT.jar")
+  val dest = fs.getPath("run")
+  Files.copy(source, dest.resolve(source.getFileName()), StandardCopyOption.REPLACE_EXISTING)
+  out
+}

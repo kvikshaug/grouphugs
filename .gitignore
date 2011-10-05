@@ -16,5 +16,7 @@ project/
 grouphugs.db
 log-current
 props.xml
-gh.log
-gh.pid
+run/gh.log
+run/gh.pid
+run/classpath
+run/*jar
