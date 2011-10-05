@@ -2,6 +2,7 @@ out/**
 bin/**
 lib/**
 target/**
+project/
 *.iws
 *.ipr
 *.iml
