@@ -9,6 +9,8 @@ scalacOptions ++= Seq(
   "-unchecked"
 )
 
+mainClass in (Compile, packageBin) := Some("no.kvikshaug.gh.Grouphug")
+
 resolvers ++= Seq(
   "Kvikshaug" at "http://mvn.kvikshaug.no/"
 )
