@@ -1,11 +1,11 @@
 package no.kvikshaug.gh.util
 
-import org.scalatest.junit.AssertionsForJUnit
+import org.scalatest.junit.JUnitSuite
 import org.junit.Test
 import org.junit.Assert._
 import java.io.ByteArrayInputStream
 
-class IOTest extends AssertionsForJUnit {
+class IOSuite extends JUnitSuite {
 
   val str = "æøå¡∑∂∂∑ç˜˜¨√ˆ¨√¡ø£¡¡™¡∑çµ¬˚¥˙∂øˆªˆ¬ÆØÅ"
   val strBytes = str.getBytes("UTF-8")
