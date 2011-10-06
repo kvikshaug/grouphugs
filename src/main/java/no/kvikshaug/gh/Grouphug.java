@@ -268,6 +268,14 @@ public class Grouphug extends PircBot {
             bot.joinChannel(channel);
         }
 
+        // Inform the users in case SQL wasn't properly set up
+        if(!SQL.isAvailable()) {
+            for (String channel : Config.channels()) {
+                bot.msg(channel, "Note: SQL isn't properly set up, so some modules will be crippled " +
+                "and others will be completely disabled.");
+            }
+        }
+
         // Start listening
         NickPoller.load(bot);
         Runtime.getRuntime().addShutdownHook(new Thread() {
