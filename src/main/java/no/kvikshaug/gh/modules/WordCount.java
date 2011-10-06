@@ -97,6 +97,7 @@ public class WordCount implements TriggerListener, MessageListener {
         } else if(trigger.equals(TRIGGER_REMOVE)) {
         	if(true){ //Should be specified in the config, do later :3
         		bot.msg(channel, "Sorry, this functionality has been disabled for now");
+                return;
         	}
             if(!sender.equalsIgnoreCase(message)) {
                 bot.msg(channel, "Sorry, as a safety precaution, this function can only be used " +
