@@ -74,7 +74,6 @@ public class ModuleHandler {
         new Bash(this);
         new Vote(this);
         new Tlf(this);
-        new Time(this);
         new Repl(this);
         new PingAll(this);
         new Eyebleach(this);
