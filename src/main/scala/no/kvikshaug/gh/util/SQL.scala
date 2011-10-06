@@ -47,10 +47,9 @@ object SQL {
     var i = 0
     input foreach { c =>
       if(isEvil(c) && (i == 0 || input(i-1) != '\\')) {
-        sb.append('\\').append(c)
-      } else {
-        sb.append(c)
+        sb.append('\\')
       }
+      sb.append(c)
       i += 1
     }
     sb.toString
