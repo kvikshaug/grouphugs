@@ -1,14 +1,14 @@
 package no.kvikshaug.gh.modules;
 
-import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 
 import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
-import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.listeners.TriggerListener;
-import no.kvikshaug.gh.util.SQLHandler;
+import no.kvikshaug.gh.util.SQL;
+
+import no.kvikshaug.worm.Worm;
+import no.kvikshaug.worm.JWorm;
 
 public class Remember implements TriggerListener {
 
@@ -17,16 +17,13 @@ public class Remember implements TriggerListener {
     private static final String TRIGGER_ADD = "remember";
     private static final String TRIGGER_REMOVE = "remove";
 
-    private static final String REMEMBER_TABLE = "remember";
     private static final String TRIGGER_GET_TAG = "gettag";
     private static final String TRIGGER_GET_SENDER = "getnick";
-    private SQLHandler sqlHandler;
 
     private static Grouphug bot;
 
     public Remember(ModuleHandler moduleHandler) {
-        try {
-            sqlHandler = SQLHandler.getSQLHandler();
+        if(SQL.isAvailable()) {
             moduleHandler.addTriggerListener(TRIGGER_ADD, this);
             moduleHandler.addTriggerListener(TRIGGER_REMOVE, this);
             moduleHandler.addTriggerListener(TRIGGER_GET_SENDER, this);
@@ -37,8 +34,8 @@ public class Remember implements TriggerListener {
                     "  "+Grouphug.MAIN_TRIGGER+TRIGGER_GET_SENDER + " nick\n" +
                     "  "+Grouphug.MAIN_TRIGGER+TRIGGER_GET_TAG + " tag\n");
             bot = Grouphug.getInstance();
-        } catch(SQLUnavailableException ex) {
-            System.err.println("Remember startup: SQL is unavailable!");
+        } else {
+            System.err.println("Remember disabled: SQL is unavailable.");
         }
     }
 
@@ -55,46 +52,66 @@ public class Remember implements TriggerListener {
             } else if (messageParts.length == 0 ){
             	bot.msg(channel, "Uhm, I think you forgot something there skipper");
             } else {
-        		try {
-					sqlHandler.insert("INSERT INTO " + REMEMBER_TABLE + " (`message`, `sender`, `tag`, `channel`) VALUES ('?', '?', '?', '?');", 
-							Arrays.asList(new String[] {message.substring(0, message.length() - messageParts[messageParts.length-1].length()), sender, messageParts[messageParts.length -1], channel}));
-					bot.msg(channel, "OK, "+sender+".");
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
+                RememberItem newItem = new RememberItem(
+                  message.substring(0, message.length() - messageParts[messageParts.length-1].length()),
+                  sender, messageParts[messageParts.length -1], channel);
+                newItem.insert();
+				bot.msg(channel, "OK, "+sender+".");
             }
         } else if(trigger.equals(TRIGGER_REMOVE)) {
             // First remove it from the SQL db
-            try {
-                sqlHandler.delete("DELETE FROM " + REMEMBER_TABLE + "  WHERE `message` = '?' AND `channel` = '?';", 
-                		Arrays.asList(new String[] {messageParts[0], channel}));
+            List<RememberItem> items = JWorm.getWith(RememberItem.class, "where `message` = '" +
+              SQL.sanitize(messageParts[0]) + "' and `channel` = '" + SQL.sanitize(channel) + "'");
+            if(items.size() == 0) {
+                bot.msg(channel, "Couldn't find that item.");
+            } else {
+                items.get(0).delete();
                 bot.msg(channel, "Message deleted!");
-            } catch(SQLException e) {
-                bot.msg(channel, "You should know that I caught an SQL exception.");
-                System.err.println("Remember deletion: SQL Exception!");
-                e.printStackTrace();
             }
-
         } else if(trigger.equals(TRIGGER_GET_SENDER) || trigger.equals(TRIGGER_GET_TAG)) {
-        	List<Object[]> rows = null;
+        	List<RememberItem> rows = null;
         	
         	if(trigger.equals(TRIGGER_GET_SENDER)){
-        		try {
-        			rows = sqlHandler.select("SELECT message FROM " + REMEMBER_TABLE + " WHERE `channel`='?' AND `sender`='?'", Arrays.asList(new String[] {channel, messageParts[0]}));
-        		} catch (SQLException e) {
-        			e.printStackTrace();
-        		}
+                rows = JWorm.getWith(RememberItem.class, "where `channel`='" + SQL.sanitize(channel) +
+                  "' and `sender`='" + SQL.sanitize(messageParts[0]) + "'");
         	} else if(trigger.equals(TRIGGER_GET_TAG)){
-        		try {
-        			rows = sqlHandler.select("SELECT message FROM " + REMEMBER_TABLE + " WHERE `channel`='?' AND `tag`='?'", Arrays.asList(new String[] {channel, messageParts[0]}));
-        		} catch (SQLException e) {
-        			e.printStackTrace();
-        		}
+                rows = JWorm.getWith(RememberItem.class, "where `channel`='" + SQL.sanitize(channel) +
+                  "' and `tag`='" + SQL.sanitize(messageParts[0]) + "'");
         	}
-        	
-        	for (Object[] object : rows) {
-				bot.msg(channel, (String)object[0]);
-			}
+
+            for(RememberItem i : rows) {
+                bot.msg(channel, i.getMessage());
+            }
+        }
+    }
+
+    public static class RememberItem extends Worm {
+        private String message;
+        private String sender;
+        private String tag;
+        private String channel;
+
+        public RememberItem(String message, String sender, String tag, String channel) {
+            this.message = message;
+            this.sender = sender;
+            this.tag = tag;
+            this.channel = channel;
+        }
+
+        public String getMessage() {
+            return this.message;
+        }
+        
+        public String getSender() {
+            return this.sender;
+        }
+        
+        public String getTag() {
+            return this.tag;
+        }
+        
+        public String getChannel() {
+            return this.channel;
         }
     }
 }
