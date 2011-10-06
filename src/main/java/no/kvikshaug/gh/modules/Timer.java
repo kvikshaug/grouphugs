@@ -259,13 +259,13 @@ public class Timer implements TriggerListener {
     	private int id;
         private String nick;
         private int sleepAmount; // ms
-        private String notifyMessage;
+        private String message;
         private String channel;
 
-        private Sleeper(int id, String nick, int sleepAmount, String notifyMessage, String channel) {
+        private Sleeper(int id, String nick, int sleepAmount, String message, String channel) {
             this.nick = nick;
             this.sleepAmount = sleepAmount;
-            this.notifyMessage = notifyMessage;
+            this.message = message;
             this.id = id;
             this.channel = channel;
             new Thread(this).start();
@@ -286,10 +286,10 @@ public class Timer implements TriggerListener {
                 }
                 return;
             }
-            if("".equals(notifyMessage)) {
+            if("".equals(message)) {
                 bot.msg(channel, nick + ": Time's up!");
             } else {
-                bot.msg(channel, nick + ": " + notifyMessage);
+                bot.msg(channel, nick + ": " + message);
             }
             try {
             	if (this.id != -1){
