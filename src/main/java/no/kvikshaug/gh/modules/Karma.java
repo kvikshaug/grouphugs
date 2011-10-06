@@ -23,8 +23,11 @@ public class Karma implements TriggerListener, MessageListener {
 
     private static final int LIMIT = 5; // how many items to show in karmatop/karmabottom
 
+    private Grouphug bot;
+
     public Karma(ModuleHandler moduleHandler) {
         if(SQL.isAvailable()) {
+            bot = Grouphug.getInstance();
             moduleHandler.addTriggerListener(TRIGGER, this);
             moduleHandler.addMessageListener(this);
             moduleHandler.registerHelp(TRIGGER_HELP, "Karma: Increase, decrease, or show an objects karma.\n" +
@@ -72,18 +75,18 @@ public class Karma implements TriggerListener, MessageListener {
         List<KarmaItem> items = JWorm.getWith(KarmaItem.class, "where name like '" +
           SQL.sanitize(sqlName) + "' and channel='" + SQL.sanitize(channel) + "'");
         if(items.size() == 0) {
-            Grouphug.getInstance().msg(channel, name+" has neutral karma.");
+            bot.msg(channel, name+" has neutral karma.");
         } else if(items.size() > 1) {
-            Grouphug.getInstance().msg(channel, name+" must have bad karma, because there are " +
+            bot.msg(channel, name+" must have bad karma, because there are " +
               "several entries in the DB for that item. Please clean this up.");
         } else {
-            Grouphug.getInstance().msg(channel, items.get(0).getName()+" has "+items.get(0).getKarma()+" karma.");
+            bot.msg(channel, items.get(0).getName()+" has "+items.get(0).getKarma()+" karma.");
         }
     }
 
     private void add(String channel, String sender, String name, int karma) {
         if(name.equals(sender)) {
-            Grouphug.getInstance().msg(channel, sender+", self karma is bad karma.");
+            bot.msg(channel, sender+", self karma is bad karma.");
             return;
         }
 
@@ -101,7 +104,7 @@ public class Karma implements TriggerListener, MessageListener {
             KarmaItem newItem = new KarmaItem(sqlName, karma, channel);
             newItem.insert();
         } else if(items.size() > 1) {
-            Grouphug.getInstance().msg(channel, "There are " + items.size() + " entries in the " +
+            bot.msg(channel, "There are " + items.size() + " entries in the " +
             "DB for " + name + ". Please clean this up first.");
         } else {
             items.get(0).addKarma(karma);
@@ -128,7 +131,7 @@ public class Karma implements TriggerListener, MessageListener {
         } else {
             reply += "May they burn forever in the pits of "+ channel+".";
         }
-        Grouphug.getInstance().msg(channel, reply);
+        bot.msg(channel, reply);
     }
 
     public static class KarmaItem extends Worm {
