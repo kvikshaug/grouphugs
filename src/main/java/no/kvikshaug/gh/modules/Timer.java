@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.DateTime;
-import org.joda.time.Duration;
 
 import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.Grouphug;
@@ -57,7 +56,7 @@ public class Timer implements TriggerListener {
     				}
     				sqlHandler.delete("DELETE FROM " + TIMER_TABLE + "  WHERE `id` = '"+id+"';");
     			}else{
-    				new Sleeper(id, nick, (int) (time-System.currentTimeMillis()), message, channel);
+    				new Sleeper(id, nick, time, message, channel);
     			}
     		}
     	} catch(SQLUnavailableException ex) {
@@ -136,24 +135,11 @@ public class Timer implements TriggerListener {
 			}
 		}
 		
-		//We now have the time, now we just have to find out how long it is until that time
-		
-		Duration duration = null;
-		try {
-			duration = new Duration(new DateTime(), timeToHighlight);
-		} catch (IllegalArgumentException e) {
-			System.out.println("Error in timer, trying to get the duration between now, and a datetime that has already been");
-			return;
-		}
-		
+		//We now have the time
 		String notifyMessage = message.substring(timerTime.length()).trim();
-		
-		
 		int id = insertTimerIntoDb(channel, sender, notifyMessage, timeToHighlight.getMillis());
-        
         bot.msg(channel, "Ok, I will highlight you at " + timerTime +".");
-        
-        new Sleeper(id, sender, (int) duration.getMillis(), notifyMessage, channel);
+        new Sleeper(id, sender, (int) timeToHighlight.getMillis(), notifyMessage, channel);
     }
     
 
@@ -183,38 +169,31 @@ public class Timer implements TriggerListener {
             // indexAfterCount is now the index after the count
         }
         int factor;
-        String reply;
         String notifyMessage;
         int count = Integer.parseInt(message.substring(0, indexAfterCount));
         // if there are no chars after the count
         if(indexAfterCount == message.length()) {
             factor = 60;
-            reply = "minutes";
             notifyMessage = "";
         } else {
             switch(message.charAt(indexAfterCount)) {
                 case 's':
                     factor = 1;
-                    reply = "seconds";
                     break;
 
                 case 'm':
                 case ' ':
                     factor = 60;
-                    reply = "minutes";
-
                     break;
 
                 case 'h':
                 case 't':
                     factor = 3600;
-                    reply = "hours";
 
                     break;
 
                 case 'd':
                     factor = 86400;
-                    reply = "days";
                     break;
 
                 default:
@@ -224,20 +203,11 @@ public class Timer implements TriggerListener {
             }
             notifyMessage = message.substring(indexAfterCount + 1).trim();
         }
-        if(count == 1) {
-            // not plural, strip 's'
-            reply = reply.substring(0, reply.length()-1);
-        }
         
-        int sleepTime = count * factor * 1000;
-        
-        long time = System.currentTimeMillis() + sleepTime;
-        
+        long time = System.currentTimeMillis() + (count * factor * 1000);
         int id = insertTimerIntoDb(channel, sender, notifyMessage, time);
-        
-        bot.msg(channel, "Ok, I will highlight you in " + count + " " + reply + ".");
-        
-        new Sleeper(id, sender, sleepTime, notifyMessage, channel);
+        bot.msg(channel, "Ok, I will highlight you at " + new DateTime(time) + ".");
+        new Sleeper(id, sender, time, notifyMessage, channel);
 	}
 
 	private int insertTimerIntoDb(String channel, String sender, String notifyMessage, long time) {
@@ -258,13 +228,13 @@ public class Timer implements TriggerListener {
     private class Sleeper implements Runnable {
     	private int id;
         private String nick;
-        private int sleepAmount; // ms
+        private long time; // time of highlight, in "java unix time" (with ms granularity)
         private String message;
         private String channel;
 
-        private Sleeper(int id, String nick, int sleepAmount, String message, String channel) {
+        private Sleeper(int id, String nick, long time, String message, String channel) {
             this.nick = nick;
-            this.sleepAmount = sleepAmount;
+            this.time = time;
             this.message = message;
             this.id = id;
             this.channel = channel;
@@ -272,18 +242,18 @@ public class Timer implements TriggerListener {
         }
 
         public void run() {
+            long sleepAmount = time - System.currentTimeMillis();
+            if(sleepAmount <= 0) {
+                bot.msg(channel, "I can't notify you about something in the past until someone " +
+                    "implements a time machine in me.");
+                return;
+            }
             try {
                 Thread.sleep(sleepAmount);
             } catch(InterruptedException e) {
-                bot.msg(channel, nick + ": Sorry, I caught an InterruptedException! I was supposed to highlight you " +
-                        "after " + (sleepAmount / 1000) + " seconds, but I don't know how long I've slept.");
-                try {
-                	if (this.id != -1){
-                		sqlHandler.delete("DELETE FROM " + TIMER_TABLE + "  WHERE `id` = '"+this.id+"';");
-                	}
-                } catch(SQLException e2) {
-                    e.printStackTrace();
-                }
+                // We won't be interrupted AFTER the thread is done sleeping, so restart it.
+                // It will just start sleeping again with the correct time
+                new Thread(this).start();
                 return;
             }
             if("".equals(message)) {
