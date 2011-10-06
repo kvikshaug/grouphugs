@@ -40,23 +40,23 @@ public class Remember implements TriggerListener {
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
-    	
-    	String[] messageParts = message.split(" ");
-    	
+        
+        String[] messageParts = message.split(" ");
+        
         if(trigger.equals(TRIGGER_ADD)) {
             // Trying to add a new thing to remember
-        	
-        	if (messageParts.length == 1) {
-        		bot.msg(channel, "You need to add a tag to remember this by " + sender);
-        	
+            
+            if (messageParts.length == 1) {
+                bot.msg(channel, "You need to add a tag to remember this by " + sender);
+            
             } else if (messageParts.length == 0 ){
-            	bot.msg(channel, "Uhm, I think you forgot something there skipper");
+                bot.msg(channel, "Uhm, I think you forgot something there skipper");
             } else {
                 RememberItem newItem = new RememberItem(
                   message.substring(0, message.length() - messageParts[messageParts.length-1].length()),
                   sender, messageParts[messageParts.length -1], channel);
                 newItem.insert();
-				bot.msg(channel, "OK, "+sender+".");
+                bot.msg(channel, "OK, "+sender+".");
             }
         } else if(trigger.equals(TRIGGER_REMOVE)) {
             // First remove it from the SQL db
@@ -69,15 +69,15 @@ public class Remember implements TriggerListener {
                 bot.msg(channel, "Message deleted!");
             }
         } else if(trigger.equals(TRIGGER_GET_SENDER) || trigger.equals(TRIGGER_GET_TAG)) {
-        	List<RememberItem> rows = null;
-        	
-        	if(trigger.equals(TRIGGER_GET_SENDER)){
+            List<RememberItem> rows = null;
+            
+            if(trigger.equals(TRIGGER_GET_SENDER)){
                 rows = JWorm.getWith(RememberItem.class, "where `channel`='" + SQL.sanitize(channel) +
                   "' and `sender`='" + SQL.sanitize(messageParts[0]) + "'");
-        	} else if(trigger.equals(TRIGGER_GET_TAG)){
+            } else if(trigger.equals(TRIGGER_GET_TAG)){
                 rows = JWorm.getWith(RememberItem.class, "where `channel`='" + SQL.sanitize(channel) +
                   "' and `tag`='" + SQL.sanitize(messageParts[0]) + "'");
-        	}
+            }
 
             for(RememberItem i : rows) {
                 bot.msg(channel, i.getMessage());
