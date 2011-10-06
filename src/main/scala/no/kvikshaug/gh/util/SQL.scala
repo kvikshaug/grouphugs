@@ -39,15 +39,14 @@ object SQL {
     }
   }
 
-  /** Prepends a backslash to any ["'`] char that doesn't
+  /** Prepends a backslash to any '-char that doesn't
       already have a backslash prepended */
   def sanitize(input: String) = {
-    def isEvil(c: Char) = c == '"' || c == '\'' || c == '`'
     val sb = new StringBuilder
     var i = 0
     input foreach { c =>
-      if(isEvil(c) && (i == 0 || input(i-1) != '\\')) {
-        sb.append('\\')
+      if(c == '\'' && (i == 0 || input(i-1) != '\\')) {
+        sb.append('\'')
       }
       sb.append(c)
       i += 1
