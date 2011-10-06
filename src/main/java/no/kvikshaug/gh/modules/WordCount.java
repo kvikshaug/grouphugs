@@ -2,20 +2,19 @@ package no.kvikshaug.gh.modules;
 
 import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
-import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.listeners.MessageListener;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.SQL;
-import no.kvikshaug.gh.util.SQLHandler;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 
-import java.sql.SQLException;
+import no.kvikshaug.worm.Worm;
+import no.kvikshaug.worm.JWorm;
+
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -27,17 +26,14 @@ public class WordCount implements TriggerListener, MessageListener {
     private static final String TRIGGER_TOP = "wctop";
     private static final String TRIGGER_BOTTOM = "wcbottom";
     private static final String TRIGGER_REMOVE = "wcrm";
-    private static final String WORDS_DB= "words";
     private static final int LIMIT = 5;
     private static final DateFormat df = new SimpleDateFormat("d. MMMMM yyyy");
 
-    private SQLHandler sqlHandler;
     private Grouphug bot;
 
     public WordCount(ModuleHandler moduleHandler) {
-        try {
+        if(SQL.isAvailable()) {
             bot = Grouphug.getInstance();
-            sqlHandler = SQLHandler.getSQLHandler();
             moduleHandler.addTriggerListener(TRIGGER, this);
             moduleHandler.addTriggerListener(TRIGGER_TOP, this);
             moduleHandler.addTriggerListener(TRIGGER_BOTTOM, this);
@@ -48,36 +44,24 @@ public class WordCount implements TriggerListener, MessageListener {
                     "Top 5: " + Grouphug.MAIN_TRIGGER + TRIGGER_TOP + "\n" +
                     "Bottom 5: " + Grouphug.MAIN_TRIGGER + TRIGGER_BOTTOM + "\n" +
                     "Remove stats count: " + Grouphug.MAIN_TRIGGER + TRIGGER_REMOVE + " <nick>");
-        } catch(SQLUnavailableException ex) {
-            System.err.println("WordCount startup error: SQL is unavailable!");
+        } else {
+            System.err.println("WordCount module disabled: SQL is unavailable.");
         }
     }
     public void addWords(String channel, String sender, String message) {
         // This method to count words should be more or less failsafe:
         int newWords = message.trim().replaceAll(" {2,}+", " ").split(" ").length;
 
-        try{
-        	List<String> params = new ArrayList<String>();
-            params.add(sender);
-            params.add(channel);
-            Object[] row = sqlHandler.selectSingle("SELECT id, words, `lines` FROM "+WORDS_DB+" WHERE nick=? AND channel=?;", params);
-            if(row == null) {
-                params = new ArrayList<String>();
-                params.add(sender);
-                params.add(newWords + "");
-                params.add(SQL.dateToSQLDateTime(new Date()));
-                params.add(channel);
-                sqlHandler.insert("INSERT INTO "+WORDS_DB+" (nick, words, `lines`, since, channel) VALUES (?, ?, '1', ?, ?);", params);
-            } else {
-                long existingWords = ((Integer)row[1]);
-                long existingLines = ((Integer)row[2]);
-                sqlHandler.update("UPDATE "+WORDS_DB+" SET words='"+(existingWords + newWords)+"', `lines`='"+(existingLines + 1)+"' WHERE id='"+row[0]+"';");
-            }
-
-        } catch(SQLException e) {
-            System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            e.printStackTrace();
-            bot.msg(channel, "Sorry, unable to update WordCounter DB; an SQL error occured.");
+        List<Words> items = JWorm.getWith(Words.class, "where `nick`='" + SQL.sanitize(sender) +
+          "' and `channel`='" + SQL.sanitize(channel) + "'");
+        if(items.size() == 0) {
+            Words w = new Words(newWords, 1, sender, new Date().getTime(), channel);
+            w.insert();
+        } else {
+            Words w = items.get(0);
+            w.setWords(w.getWords() + newWords);
+            w.setLines(w.getLines() + 1);
+            w.update();
         }
     }
 
@@ -103,19 +87,13 @@ public class WordCount implements TriggerListener, MessageListener {
                 bot.msg(channel, "Sorry, as a safety precaution, this function can only be used " +
                         "by a user with the same nick as the one that's being removed.");
             } else {
-                try {
-                    List<String> params = new ArrayList<String>();
-                    params.add(message);
-                    params.add(channel);
-                    if(sqlHandler.delete("delete from "+WORDS_DB+" where nick=? AND channel=?;", params) == 0) {
-                        bot.msg(channel, "DB reports that no such nick has been recorded.");
-                    } else {
-                        bot.msg(channel, sender+", you now have no words counted.");
-                    }
-                } catch(SQLException ex) {
-                    bot.msg(channel, "Crap, SQL barfed on me. Check the logs if you wanna know why.");
-                    System.err.println(ex);
-                    ex.printStackTrace(System.err);
+                List<Words> items = JWorm.getWith(Words.class, "where nick='" + SQL.sanitize(message) +
+                    "' and channel='" + SQL.sanitize(channel) + "'");
+                if(items.size() == 0) {
+                    bot.msg(channel, "DB reports that no such nick has been recorded.");
+                } else {
+                    items.get(0).delete();
+                    bot.msg(channel, sender+", you now have no words counted.");
                 }
             }
         }
@@ -128,78 +106,97 @@ public class WordCount implements TriggerListener, MessageListener {
         } else {
             reply = "The laziest idlers are:\n";
         }
-        try {
-        	List<String> params = new ArrayList<String>();
-            params.add(channel);
-            String query = ("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE channel=? ORDER BY words");
-            if(top) {
-                query += " DESC";
-            }
-            query += " LIMIT "+LIMIT+";";
-            List<Object[]> rows = sqlHandler.select(query, params);
-            int place = 1;
-            for(Object[] row : rows) {
-                long words = ((Integer)row[2]);
-                long lines = ((Integer)row[3]);
-                DateTime since = new DateTime(SQL.sqlDateTimeToDate((String)row[4]));
-                System.out.println(row[1] + ": " + since);
-                int days = Days.daysBetween(since, new DateTime()).getDays();
-                double wpl = (double)words / (double)lines;
-                double wpd = (double)words / days;
-                double lpd = (double)lines / days;
-                DecimalFormat sf = new DecimalFormat("0.0");
+        String order = top ? "desc" : "asc";
+        List<Words> items = JWorm.getWith(Words.class, "where channel='" + SQL.sanitize(channel) +
+            "' order by `words` " + order + " limit " + LIMIT);
+        int place = 1;
+        for(Words w : items) {
+            long words = w.getWords();
+            long lines = w.getLines();
+            DateTime since = new DateTime(w.getSince());
+            int days = Days.daysBetween(since, new DateTime()).getDays();
+            double wpl = (double)words / (double)lines;
+            double wpd = (double)words / days;
+            double lpd = (double)lines / days;
+            DecimalFormat sf = new DecimalFormat("0.0");
 
-                reply += (place++)+". "+row[1]+ " ("+words+" words, "+lines+" lines, "+days+" days, "+
-                        sf.format(wpl) + " wpl, " +
-                        sf.format(wpd) + " wpd, " +
-                        sf.format(lpd) + " lpd)\n";
-            }
-            if(top) {
-                reply += "I think they are going to need a new keyboard soon.";
-            } else {
-                reply += "Lazy bastards...";
-            }
-            bot.msg(channel, reply);
-        } catch(SQLException e) {
-            System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.msg(channel, "Sorry, an SQL error occured.");
-        } catch(ParseException e) {
-            System.err.println("Unable to parse the SQL datetime!");
-            bot.msg(channel, "Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
+            reply += (place++)+". "+w.getNick()+ " ("+words+" words, "+lines+" lines, "+days+" days, "+
+                    sf.format(wpl) + " wpl, " +
+                    sf.format(wpd) + " wpd, " +
+                    sf.format(lpd) + " lpd)\n";
         }
+        if(top) {
+            reply += "I think they are going to need a new keyboard soon.";
+        } else {
+            reply += "Lazy bastards...";
+        }
+        bot.msg(channel, reply);
     }
 
     private void print(String channel, String message){
-        try{
-        	List<String> params = new ArrayList<String>();
-        	params.add(message);
-            params.add(channel);
-            Object[] row = sqlHandler.selectSingle("SELECT id, nick, words, `lines`, since FROM "+WORDS_DB+" WHERE nick LIKE ? AND channel=?;", params);
+        List<Words> items = JWorm.getWith(Words.class, "where nick like '" + SQL.sanitize(message) +
+            "' and channel='" + SQL.sanitize(channel) + "'");
+        if(items.size() == 0) {
+            bot.msg(channel, message + " doesn't have any words counted.");
+        } else {
+            Words w = items.get(0);
+            long words = w.getWords();
+            long lines = w.getLines();
+            DateTime since = new DateTime(w.getSince());
+            int days = Days.daysBetween(since, new DateTime()).getDays();
+            double wpl = (double)words / (double)lines;
+            double wpd = (double)words / days;
+            double lpd = (double)lines / days;
+            DecimalFormat sf = new DecimalFormat("0.0");
 
-            if(row == null) {
-                bot.msg(channel, message + " doesn't have any words counted.");
-            } else {
-                long words = ((Integer)row[2]);
-                long lines = ((Integer)row[3]);
-                DateTime since = new DateTime(SQL.sqlDateTimeToDate((String)row[4]));
-                int days = Days.daysBetween(since, new DateTime()).getDays();
-                double wpl = (double)words / (double)lines;
-                double wpd = (double)words / days;
-                double lpd = (double)lines / days;
-                DecimalFormat sf = new DecimalFormat("0.0");
+            bot.msg(channel, message + " has uttered "+words+ " words in "+lines+" lines over " + days + " days ("+
+                    sf.format(wpl) + " wpl, " +
+                    sf.format(wpd) + " wpd, " +
+                    sf.format(lpd) + " lpd)");
+        }
+    }
 
-                bot.msg(channel, message + " has uttered "+words+ " words in "+lines+" lines over " + days + " days ("+
-                        sf.format(wpl) + " wpl, " +
-                        sf.format(wpd) + " wpd, " +
-                        sf.format(lpd) + " lpd)");
-            }
+    public static class Words extends Worm {
+        private long words;
+        private long lines;
+        private String nick;
+        private long since;
+        private String channel;
 
-        } catch(SQLException e) {
-            System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.msg(channel, "Sorry, unable to fetch WordCount data; an SQL error occured.");
-        } catch(ParseException e) {
-            System.err.println("Unable to parse the SQL datetime!");
-            bot.msg(channel, "Sorry, I was unable to parse the date of this wordcount! Patches are welcome.");
+        public Words(long words, long lines, String nick, long since, String channel) {
+            this.words = words;
+            this.lines = lines;
+            this.nick = nick;
+            this.since = since;
+            this.channel = channel;
+        }
+
+        public long getWords() {
+            return this.words;
+        }
+
+        public long getLines() {
+            return this.lines;
+        }
+
+        public String getNick() {
+            return this.nick;
+        }
+
+        public long getSince() {
+            return this.since;
+        }
+
+        public String getChannel() {
+            return this.channel;
+        }
+
+        public void setWords(long words) {
+            this.words = words;
+        }
+
+        public void setLines(long lines) {
+            this.lines = lines;
         }
     }
 }
