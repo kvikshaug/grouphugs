@@ -1,6 +1,5 @@
 package no.kvikshaug.gh.modules;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,30 +11,28 @@ import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.listeners.MessageListener;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.SQL;
-import no.kvikshaug.gh.util.SQLHandler;
+
+import no.kvikshaug.worm.Worm;
+import no.kvikshaug.worm.JWorm;
 
 public class Quote implements TriggerListener, MessageListener {
 
 	private Grouphug bot;
-	private SQLHandler sqlHandler;
 	private HashMap<String, String> quotes; //Hashmap with sender->currentquote
-
-	private static final String QUOTE_DB = "quote";
 
 	public Quote(ModuleHandler handler) {
 		bot = Grouphug.getInstance();
-		try {
-			sqlHandler = SQLHandler.getSQLHandler();
-		} catch (SQLUnavailableException ex) {
+		if(SQL.isAvailable()) {
+			handler.addTriggerListener("startquote", this);
+			handler.addTriggerListener("stopquote", this);
+			handler.addTriggerListener("randomquote", this);
+			handler.addMessageListener(this);
+			handler.registerHelp("quote", "Saves lines you say between !startquote and !stopquote as quotes.\n" +
+			"Restarts recording if sending a startquote before sending a stopquote");
+			quotes = new HashMap<String, String>();
+		} else {
 			System.err.println("Quote module startup error: SQL is unavailable!");
 		}
-		handler.addTriggerListener("startquote", this);
-		handler.addTriggerListener("stopquote", this);
-		handler.addTriggerListener("randomquote", this);
-		handler.addMessageListener(this);
-		handler.registerHelp("quote", "Saves lines you say between !startquote and !stopquote as quotes.\n" +
-		"Restarts recording if sending a startquote before sending a stopquote");
-		quotes = new HashMap<String, String>();
 	}
 
 	public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
@@ -64,29 +61,48 @@ public class Quote implements TriggerListener, MessageListener {
 	}
 
 	private void sayRandomQuote(String channel){
-		try {
-			Object[] row = sqlHandler.selectSingle("SELECT id, sender, date, quote FROM "+QUOTE_DB+" WHERE channel='"+channel+"' ORDER BY RANDOM() LIMIT 1");
-			if (row != null) {
-				bot.msg(channel, (String)row[3]);
-			}
-		} catch (SQLUnavailableException e) {
-			System.err.println("Quote failed: SQL is unavailable!");
-		} catch (SQLException e) {
-			e.printStackTrace();
+		List<QuoteItem> quotes = JWorm.getWith(QuoteItem.class, "where channel='" +
+		  SQL.sanitize(channel) + "' order by random() limit 1");
+		if(quotes.size() == 0) {
+			bot.msg(channel, "SQL managed to randomly pick a quote that doesn't exist! Maybe " +
+			  "there are no quotes stored?");
+		} else {
+			bot.msg(channel, quotes.get(0).getQuote());
 		}
 	}
 
 	private void saveQuote(String channel, String sender, String message){
-		List<String> params = new ArrayList<String>();
-		params.add(channel);
-		params.add(sender);
-		params.add(SQL.dateToSQLDateTime(new Date()));
-		params.add(message);
-		try {
-			sqlHandler.insert("INSERT INTO " + QUOTE_DB + " (channel, sender, date, quote) VALUES (?, ?, ?, ?);", params);
-		} catch (SQLException e) {
-			System.err.println(" > SQL Exception: " + e.getMessage() + "\n" + e.getCause());
-			bot.msg(channel, "Sorry, unable to update Quote DB, an SQL error occured.");
+		QuoteItem newItem = new QuoteItem(sender, message, new Date().getTime(), channel);
+		newItem.insert();
+	}
+
+	public static class QuoteItem extends Worm {
+		private String sender;
+		private String quote;
+		private Long date;
+		private String channel;
+
+		public QuoteItem(String sender, String quote, Long date, String channel) {
+			this.sender = sender;
+			this.quote = quote;
+			this.date = date;
+			this.channel = channel;
+		}
+
+		public String getSender() {
+			return this.sender;
+		}
+
+		public String getQuote() {
+			return this.quote;
+		}
+
+		public Long getDate() {
+			return this.date;
+		}
+
+		public String getChannel() {
+			return this.channel;
 		}
 	}
 }
