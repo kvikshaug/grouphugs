@@ -159,7 +159,7 @@ public class Factoid implements MessageListener, TriggerListener {
             }
         } else if(trigger.equals(TRIGGER_RANDOM)) {
             try {
-				Object[] row = sqlHandler.selectSingle("SELECT reply FROM " + FACTOID_TABLE + " WHERE channel= '?' ORDER BY RAND() LIMIT 1;", Arrays.asList(new String[] {channel}));
+				Object[] row = sqlHandler.selectSingle("SELECT reply FROM " + FACTOID_TABLE + " WHERE channel= '?' ORDER BY RANDOM() LIMIT 1;", Arrays.asList(new String[] {channel}));
 				if (row.length > 0){
 					bot.msg(channel, (String)((Object[])row[0])[0]);					
 				} else {
