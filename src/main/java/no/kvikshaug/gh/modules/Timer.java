@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.Grouphug;
@@ -18,6 +20,7 @@ public class Timer implements TriggerListener {
 
     //CREATE TABLE timer(id INTEGER PRIMARY KEY, nick TEXT, time INTEGER, message TEXT);
     private Grouphug bot;
+    private final DateTimeFormatter f = DateTimeFormat.forPattern("HH:mm dd.MM.yyyy");
 
     private static final String TIMER_TABLE = "timer";
     private SQLHandler sqlHandler;
@@ -136,7 +139,7 @@ public class Timer implements TriggerListener {
         //We now have the time
         String notifyMessage = message.substring(timerTime.length()).trim();
         int id = insertTimerIntoDb(channel, sender, notifyMessage, timeToHighlight.getMillis());
-        bot.msg(channel, "Ok, I will highlight you at " + timeToHighlight +".");
+        bot.msg(channel, "Ok, I will highlight you at " + f.print(timeToHighlight) +".");
         new Sleeper(id, sender, timeToHighlight.getMillis(), notifyMessage, channel);
     }
 
@@ -202,7 +205,7 @@ public class Timer implements TriggerListener {
 
         long time = System.currentTimeMillis() + (count * factor * 1000);
         int id = insertTimerIntoDb(channel, sender, notifyMessage, time);
-        bot.msg(channel, "Ok, I will highlight you at " + new DateTime(time) + ".");
+        bot.msg(channel, "Ok, I will highlight you at " + f.print(new DateTime(time)) + ".");
         new Sleeper(id, sender, time, notifyMessage, channel);
     }
 
