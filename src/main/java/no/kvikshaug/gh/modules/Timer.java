@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.Grouphug;
@@ -17,6 +19,7 @@ import no.kvikshaug.worm.JWorm;
 public class Timer implements TriggerListener {
 
     private Grouphug bot;
+    private final DateTimeFormatter f = DateTimeFormat.forPattern("HH:mm dd.MM.yyyy");
 
     public Timer(ModuleHandler handler) {
         handler.addTriggerListener("timer", this);
@@ -129,7 +132,7 @@ public class Timer implements TriggerListener {
         Sleeper s = new Sleeper(sender, timeToHighlight.getMillis(), notifyMessage, channel);
         s.insert();
         new Thread(s).start();
-        bot.msg(channel, "Ok, I will highlight you at " + timeToHighlight +".");
+        bot.msg(channel, "Ok, I will highlight you at " + f.print(timeToHighlight) +".");
     }
 
     /**
@@ -196,7 +199,7 @@ public class Timer implements TriggerListener {
         Sleeper s = new Sleeper(sender, time, notifyMessage, channel);
         s.insert();
         new Thread(s).start();
-        bot.msg(channel, "Ok, I will highlight you at " + new DateTime(time) + ".");
+        bot.msg(channel, "Ok, I will highlight you at " + f.print(new DateTime(time)) + ".");
     }
 
     public static class Sleeper extends Worm implements Runnable {
