@@ -25,12 +25,11 @@ public class Timer implements TriggerListener {
     public Timer(ModuleHandler handler) {
         handler.addTriggerListener("timer", this);
         String helpText = "Use timer to time stuff, like your pizza.\n" +
-        "!timer count[s/m/h/d] [message]\n" +
+        "!timer count[s/m/h/d] [message] (seconds/minutes/hours/days)\n" +
         "!timer hh:mm [message]\n" +
         "!timer dd/mm [message] \n" +
         "!timer dd/mm-hh:mm [message] \n" +
         "!timer day-hh:mm [message] \n" +
-        "s/m/h/d = seconds/minutes/hours/days (optional, default is minutes)\n" +
         "Example: !timer 14m grandis\n";
         handler.registerHelp("timer", helpText);
         bot = Grouphug.getInstance();
@@ -180,7 +179,6 @@ public class Timer implements TriggerListener {
                     break;
 
                 case 'm':
-                case ' ':
                     factor = 60;
                     break;
 
