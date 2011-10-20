@@ -32,7 +32,7 @@ public class Fml implements TriggerListener {
             xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
             Element element = (Element)xpath.selectSingleNode(doc);
             for(Object childElement : element.getChildren()) {
-                bot.msg(channel, ((Element)childElement).getText());
+                bot.msg(channel, ((Element)childElement).getText().trim());
             }
         } catch (IOException e) {
             bot.msg(channel, "Omg IOException.");

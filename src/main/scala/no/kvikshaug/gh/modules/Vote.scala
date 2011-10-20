@@ -62,7 +62,7 @@ Add -m to !startvote to allow multiple choices from one candidate""")
   def startVote(channel: String, nick: String, message: String): Unit = {
     var multi = false
     var content = message
-    if(message.contains("-m")) {
+    if(message.contains(" -m ")) {
       multi = true
       content = message.replace("-m", "").trim
     }
