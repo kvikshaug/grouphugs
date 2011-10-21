@@ -154,8 +154,8 @@ class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListe
   def run {
     items foreach { i =>
       try {
-        val status = TrackingXMLParser.track(i)
-        if(status._1) {
+        val (changed, packageCount) = TrackingXMLParser.track(i)
+        if(changed) {
           i.statusCode match {
             case "DELIVERED" =>
               bot.msg(i.channel, i.owner + " has just picked up " + i.id + ":")
@@ -200,7 +200,7 @@ class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListe
               bot.msg(i.channel, i.owner + ": Package " + i.id + " has changed to '" + x + "', which I don't recognize!")
               bot.msg(i.channel, i.status)
           }
-          if(status._2 > 1) {
+          if(packageCount > 1) {
             bot.msg(i.channel, "Note: This package has >1 items.")
           }
         ScatsD.retain(String.format("gh.bot.modules.tracking.%s.packages", i.channel), items.size)
