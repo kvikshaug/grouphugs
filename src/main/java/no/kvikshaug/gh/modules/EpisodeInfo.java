@@ -14,7 +14,7 @@ import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.listeners.TriggerListener;
 
 public class EpisodeInfo implements TriggerListener  {
-	
+    
     private static final String TRIGGER_HELP = "ep";
     private static final String TRIGGER = "ep";
 
@@ -33,45 +33,45 @@ public class EpisodeInfo implements TriggerListener  {
     }
 
     private String find(String message){
-    	
-    	message = message.replace(" ", "%20");
-    	String inputLine, showName = "", latestEp = "", nextEp = "";
+        
+        message = message.replace(" ", "%20");
+        String inputLine, showName = "", latestEp = "", nextEp = "";
         try{
-        	URL tvrage = new URL("http://services.tvrage.com/tools/quickinfo.php?show=" + message);
+            URL tvrage = new URL("http://services.tvrage.com/tools/quickinfo.php?show=" + message);
             URLConnection tvrc = tvrage.openConnection();
             BufferedReader in = new BufferedReader( new InputStreamReader(tvrc.getInputStream()));
             
             
             while ((inputLine = in.readLine()) != null)
             {
-            	String[] splitted = inputLine.split("@");
-            	if (splitted[0].equals("Show Name"))
-            	{
-            		showName = splitted[1];
-            	}else if (splitted[0].equals("Latest Episode"))
-            	{
-            		latestEp = splitted[1].replace("^", ", ");
-            	}else if (splitted[0].equals("Next Episode"))
-            	{
-            		nextEp = splitted[1].replace("^" , ", ");
-            		break;
-            	}
+                String[] splitted = inputLine.split("@");
+                if (splitted[0].equals("Show Name"))
+                {
+                    showName = splitted[1];
+                }else if (splitted[0].equals("Latest Episode"))
+                {
+                    latestEp = splitted[1].replace("^", ", ");
+                }else if (splitted[0].equals("Next Episode"))
+                {
+                    nextEp = splitted[1].replace("^" , ", ");
+                    break;
+                }
             }
-            	
-        	in.close();
-        	String reply =  ""+Colors.BOLD + "Show: "+Colors.NORMAL+ showName + 
-        		Colors.BOLD + " Latest episode: "+ Colors.NORMAL+ latestEp + 
-        		Colors.BOLD + " Next episode: " +Colors.NORMAL+ nextEp;
+                
+            in.close();
+            String reply =  ""+Colors.BOLD + "Show: "+Colors.NORMAL+ showName + 
+                Colors.BOLD + " Latest episode: "+ Colors.NORMAL+ latestEp + 
+                Colors.BOLD + " Next episode: " +Colors.NORMAL+ nextEp;
 
-        	return reply;
-        	
+            return reply;
+            
         } catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	
-		return "Something went wrong";
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    
+        return "Something went wrong";
     }
 
 }
