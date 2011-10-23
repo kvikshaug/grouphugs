@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 
 import org.jibble.pircbot.Colors;
 
@@ -34,10 +35,10 @@ public class EpisodeInfo implements TriggerListener  {
 
     private String find(String message){
         
-        message = message.replace(" ", "%20");
         String inputLine, showName = "", latestEp = "", nextEp = "";
         try{
-            URL tvrage = new URL("http://services.tvrage.com/tools/quickinfo.php?show=" + message);
+            URL tvrage = new URL("http://services.tvrage.com/tools/quickinfo.php?show=" +
+              URLEncoder.encode(message, "UTF-8"));
             URLConnection tvrc = tvrage.openConnection();
             BufferedReader in = new BufferedReader( new InputStreamReader(tvrc.getInputStream()));
             
