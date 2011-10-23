@@ -51,10 +51,13 @@ object Config {
 
   // Operator module
   @throws(classOf[PreferenceNotSetException])
-  def operatorList = ifExists (root \ "Channels") get {
-    (ns) => (ns \ "Channel" toList).map {
-      (x) => ((x \ "@chan").text -> (x \ "Modules" \ "Operator" \ "Nick").toList.map(_.text))
-    }.toMap
+  def operatorList = {
+    reparse
+    ifExists(root \ "Channels") get {
+      (ns) => (ns \ "Channel" toList).map {
+        (x) => ((x \ "@chan").text -> (x \ "Modules" \ "Operator" \ "Nick").toList.map(_.text))
+      }.toMap
+    }
   }
 
   // GithubPostReceiveServer

@@ -1,19 +1,22 @@
 package no.kvikshaug.gh.modules
 
-import scala.xml._
-
 import no.kvikshaug.gh.{Grouphug, ModuleHandler, Config}
-import no.kvikshaug.gh.listeners.{JoinListener, NickChangeListener}
+import no.kvikshaug.gh.listeners.{MessageListener, JoinListener, NickChangeListener}
 
-class Operator(handler: ModuleHandler) extends JoinListener with NickChangeListener {
+class Operator(handler: ModuleHandler) extends JoinListener with NickChangeListener with MessageListener {
 
   val bot = Grouphug.getInstance
   handler.addJoinListener(this)
   handler.addNickChangeListener(this)
 
+  private def isOp(channel: String, nick: String) =
+    Config.operatorList.get(channel).get.exists(_ == nick)
+
+  private def hasOp(channel: String, nick: String) =
+    bot.getUsers(channel).exists((x) => x.getNick == nick && x.isOp)
+
   def onJoin(channel: String, sender: String, login: String, hostname: String) {
-    Config.reparse // make sure we have the newest operator list
-    if(!(hasOp(sender, channel)) && Config.operatorList.get(channel).get.exists(_ == sender)) {
+    if(isOp(channel, sender) && !(hasOp(sender, channel))) {
       bot.op(channel, sender)
     }
   }
@@ -26,7 +29,10 @@ class Operator(handler: ModuleHandler) extends JoinListener with NickChangeListe
     }
   }
 
-  def hasOp(nick: String, channel: String) =
-    bot.getUsers(channel).exists((x) => x.getNick == nick && x.isOp)
+  def onMessage(channel: String, sender: String, login: String, hostname: String, message: String) {
+    if (isOp(channel, sender) && !hasOp(channel, sender)) {
+      bot.op(channel, sender);
+    }
+  }
 }
 
