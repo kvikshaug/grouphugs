@@ -8,6 +8,7 @@ class Operator(handler: ModuleHandler) extends JoinListener with NickChangeListe
   val bot = Grouphug.getInstance
   handler.addJoinListener(this)
   handler.addNickChangeListener(this)
+  handler.addMessageListener(this)
 
   private def isOp(channel: String, nick: String) =
     Config.operatorList.get(channel).get.exists(_ == nick)
@@ -31,7 +32,7 @@ class Operator(handler: ModuleHandler) extends JoinListener with NickChangeListe
 
   def onMessage(channel: String, sender: String, login: String, hostname: String, message: String) {
     if (isOp(channel, sender) && !hasOp(channel, sender)) {
-      bot.op(channel, sender);
+      bot.op(channel, sender)
     }
   }
 }
