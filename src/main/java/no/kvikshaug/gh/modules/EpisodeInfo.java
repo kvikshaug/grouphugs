@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.net.ConnectException;
 
 import org.jibble.pircbot.Colors;
 
@@ -68,8 +69,12 @@ public class EpisodeInfo implements TriggerListener  {
             
         } catch (MalformedURLException e) {
             e.printStackTrace();
+        } catch (ConnectException e) {
+            e.printStackTrace();
+            return "The connection to TVRage timed out, try again later.";
         } catch (IOException e) {
             e.printStackTrace();
+            return "Something's clogged up, I caught an IOException.";
         }
     
         return "Something went wrong";
