@@ -38,9 +38,11 @@ class Weather(val handler: ModuleHandler) extends TriggerListener {
       return
     }
 
-    bot.msg(channel,
-      (root \ "forecast_information" \ "city" \ "@data").text + ", " +
-      (root \ "forecast_information" \ "current_date_time" \ "@data").text)
+    val city = (root \ "forecast_information" \ "city" \ "@data").text
+    val date = (root \ "forecast_information" \ "current_date_time" \ "@data").text
+    // XXX: ignore the date if it is in 1970; the api sometimes returns unix time 0
+    val location = if (date.startsWith("1970")) city else date + ", " + city
+    bot.msg(channel, location)
 
     // current conditions
     if(input._2) {
