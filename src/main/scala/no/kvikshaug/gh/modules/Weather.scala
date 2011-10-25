@@ -21,19 +21,22 @@ class Weather(val handler: ModuleHandler) extends TriggerListener {
 0 = forecast today; longest ahead is 3 days""")
 
   def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String) {
-    val input = parseLine(message)
+    // days: List[Int], the days to show forecast for (1 = tomorrow)
+    // current: Boolean, if true, show the current weather
+    // place: Where to show weather for
+    val (days, current, place) = parseLine(message)
 
     val root = XML.load(Web.prepareEncodedBufferedReader(
-      new URL("http://www.google.com/ig/api?weather=" + URLEncoder.encode(input._3, "UTF-8")))) \ "weather"
+      new URL("http://www.google.com/ig/api?weather=" + URLEncoder.encode(place, "UTF-8")))) \ "weather"
 
     // check that the place was found
     if((root \ "problem_cause").size != 0) {
-      bot.msg(channel, "I don't think google tracks the weather in " + input._3 + ".")
+      bot.msg(channel, "I don't think google tracks the weather in " + place + ".")
       return
     }
 
     val maxDays = (root \ "forecast_conditions" size) - 1
-    if(input._1.exists(_ > maxDays)) {
+    if(days.exists(_ > maxDays)) {
       bot.msg(channel, "Google only provides forecast data for " + maxDays + " days ahead.")
       return
     }
@@ -43,7 +46,7 @@ class Weather(val handler: ModuleHandler) extends TriggerListener {
       (root \ "forecast_information" \ "current_date_time" \ "@data").text)
 
     // current conditions
-    if(input._2) {
+    if(current) {
       bot.msg(channel, "Currently: " +
         (root \ "current_conditions" \ "temp_c" \ "@data").text + "°C, " +
         (root \ "current_conditions" \ "condition" \ "@data").text + ". " +
@@ -52,7 +55,7 @@ class Weather(val handler: ModuleHandler) extends TriggerListener {
     }
 
     // forecast
-    for(day <- input._1) {
+    for(day <- days) {
       bot.msg(channel, forecastFor(day, root))
     }
   }
