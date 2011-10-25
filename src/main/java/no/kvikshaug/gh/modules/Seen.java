@@ -2,15 +2,13 @@ package no.kvikshaug.gh.modules;
 
 import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
-import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.listeners.MessageListener;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.SQL;
-import no.kvikshaug.gh.util.SQLHandler;
 
-import java.sql.SQLException;
-import java.text.ParseException;
-import java.util.ArrayList;
+import no.kvikshaug.worm.Worm;
+import no.kvikshaug.worm.JWorm;
+
 import java.util.Date;
 import java.util.List;
 
@@ -18,73 +16,76 @@ public class Seen implements TriggerListener, MessageListener {
 
     private static final String TRIGGER_HELP = "seen";
     private static final String TRIGGER = "seen";
-    private static final String SEEN_DB = "seen";
-
-    private SQLHandler sqlHandler;
 
     public Seen(ModuleHandler moduleHandler) {
-        try {
-            sqlHandler = SQLHandler.getSQLHandler();
+        if(SQL.isAvailable()) {
             moduleHandler.addTriggerListener(TRIGGER, this);
             moduleHandler.addMessageListener(this);
             moduleHandler.registerHelp(TRIGGER_HELP, "Seen: When someone last said something in this channel\n" +
                     "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<nick>\n");
-        } catch(SQLUnavailableException ex) {
-            System.err.println("Seen module startup error: SQL is unavailable!");
+        } else {
+            System.err.println("Seen module disabled: SQL is unavailable.");
         }
     }
 
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
-        try {
-            List<String> params = new ArrayList<String>();
-            params.add(sender);
-            params.add(channel);
-            Object[] row = sqlHandler.selectSingle("SELECT id FROM "+ SEEN_DB +" WHERE nick=? AND channel=?;", params);
-
-            if(row == null) {
-                params.clear();
-                params.add(sender);
-                params.add(SQL.dateToSQLDateTime(new Date()));
-                params.add(message);
-                params.add(channel);
-                sqlHandler.insert("INSERT INTO "+SEEN_DB+" (nick, date, lastwords, channel) VALUES (?, ?, ?, ?);", params);
-            } else {
-                params.clear();
-                params.add(SQL.dateToSQLDateTime(new Date()));
-                params.add(message);
-                params.add(row[0] + "");
-                sqlHandler.update("UPDATE "+SEEN_DB+" SET date='?', lastwords='?' WHERE id='?' ;", params);
-            }
-
-        } catch(SQLException e) {
-            System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().msg(channel, "Sorry, unable to update Seen DB, an SQL error occured.");
+        List<SeenItem> items = JWorm.getWith(SeenItem.class, "where nick='" + SQL.sanitize(sender) +
+          "' and channel='" + SQL.sanitize(channel) + "'");
+        if(items.size() == 0) {
+            SeenItem newItem = new SeenItem(sender, message, new Date().getTime(), channel);
+        } else {
+            items.get(0).setLastWords(message);
+            items.get(0).setDate(new Date().getTime());
+            items.get(0).update();
         }
-
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
-        try {
-            List<String> params = new ArrayList<String>();
-            params.add(message);
-            params.add(channel);
-            Object[] row = sqlHandler.selectSingle("SELECT id, nick, date, lastwords FROM "+SEEN_DB+" WHERE nick=? AND channel=?;", params);
+        List<SeenItem> items = JWorm.getWith(SeenItem.class, "where nick='" + SQL.sanitize(message) +
+          "' and channel='" + SQL.sanitize(channel) + "'");
+        if(items.size() == 0) {
+            Grouphug.getInstance().msg(channel, message + " hasn't said anything yet.");
+        } else {
+            Grouphug.getInstance().msg(channel, message + " uttered \""+ items.get(0).getLastWords() +
+              "\" on " + new Date(items.get(0).getDate()));
+        }
+    }
 
-            if(row == null) {
-                Grouphug.getInstance().msg(channel, message + " hasn't said anything yet.");
-            } else {
-                Date last = SQL.sqlDateTimeToDate((String)row[2]);
-                String lastwords = (String)row[3];
+    public static class SeenItem extends Worm {
+        private String nick;
+        private String lastWords;
+        private long date;
+        private String channel;
 
-                Grouphug.getInstance().msg(channel, message + " uttered \""+ lastwords+ "\" on " +last);
-            }
+        public SeenItem(String nick, String lastWords, long date, String channel) {
+            this.nick = nick;
+            this.lastWords = lastWords;
+            this.date = date;
+            this.channel = channel;
+        }
 
-        } catch(SQLException e) {
-            System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            Grouphug.getInstance().msg(channel, "Sorry, unable to look up the requested data; an SQL error occured.");
-        } catch (ParseException e) {
-            System.err.println(" > Unable to parse the SQL date! This was very unexpected.");
-            e.printStackTrace();
+        public String getNick() {
+            return this.nick;
+        }
+
+        public String getLastWords() {
+            return this.lastWords;
+        }
+
+        public long getDate() {
+            return this.date;
+        }
+
+        public String getChannel() {
+            return this.channel;
+        }
+
+        public void setLastWords(String lastWords) {
+            this.lastWords = lastWords;
+        }
+
+        public void setDate(long date) {
+            this.date = date;
         }
     }
 }

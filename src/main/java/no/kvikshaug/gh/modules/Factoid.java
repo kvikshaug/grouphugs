@@ -1,6 +1,5 @@
 package no.kvikshaug.gh.modules;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -9,10 +8,12 @@ import java.util.Random;
 import no.kvikshaug.scatsd.client.ScatsD;
 import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
-import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.listeners.MessageListener;
 import no.kvikshaug.gh.listeners.TriggerListener;
-import no.kvikshaug.gh.util.SQLHandler;
+import no.kvikshaug.gh.util.SQL;
+
+import no.kvikshaug.worm.Worm;
+import no.kvikshaug.worm.JWorm;
 
 /**
  * The Factoid module lets a user save two strings, one which the bot should react upon
@@ -24,7 +25,7 @@ import no.kvikshaug.gh.util.SQLHandler;
  */
 public class Factoid implements MessageListener, TriggerListener {
 
-    private List<FactoidItem> factoids = new ArrayList<FactoidItem>();
+    private List<FactoidItem> factoids;
 
     private static final String TRIGGER_HELP = "factoid";
 
@@ -42,19 +43,12 @@ public class Factoid implements MessageListener, TriggerListener {
 
     private static Random random = new Random(System.nanoTime());
 
-    private SQLHandler sqlHandler;
-
     private static Grouphug bot;
 
     public Factoid(ModuleHandler moduleHandler) {
         // Load up all existing factoids from sql
-        try {
-            sqlHandler = SQLHandler.getSQLHandler();
-            List<Object[]> rows = sqlHandler.select("SELECT `type`, `trigger`, `reply`, `author`, `channel`  FROM " + FACTOID_TABLE + ";");
-            for(Object[] row : rows) {
-                boolean message = row[0].equals("message");
-                factoids.add(new FactoidItem(message, (String)row[1], (String)row[2], (String)row[3], (String)row[4]));
-            }
+        if(SQL.isAvailable()) {
+            factoids = JWorm.get(FactoidItem.class);
             moduleHandler.addTriggerListener(TRIGGER_MAIN, this);
             moduleHandler.addTriggerListener(TRIGGER_ADD, this);
             moduleHandler.addTriggerListener(TRIGGER_DEL, this);
@@ -73,10 +67,8 @@ public class Factoid implements MessageListener, TriggerListener {
                     " - A star (*) can be any string of characters.\n" +
                     " - Regex can be used, but remember that * is replaced with .*");
             bot = Grouphug.getInstance();
-        } catch(SQLUnavailableException ex) {
-            System.err.println("Factoid startup: SQL is unavailable!");
-        } catch (SQLException e) {
-            System.err.println("Factoid startup: SQL Exception: "+e);
+        } else {
+            System.err.println("Factoid disabled: SQL is unavailable.");
         }
     }
 
@@ -107,15 +99,11 @@ public class Factoid implements MessageListener, TriggerListener {
                 return;
             }
 
-            // First add the new item to the SQL db
-            try {
-                sqlHandler.insert("INSERT INTO " + FACTOID_TABLE + " (`type`, `trigger`, `reply`, `author`, `channel`) VALUES ('"+type+"', '"+factoidTrigger+"', '"+reply+"', '"+sender+"', '"+channel+"');");
-            } catch(SQLException e) {
-                System.err.println("Factoid insertion: SQL Exception: "+e);
-            }
+            // Add the new item to the SQL db and memory
+            FactoidItem item = new FactoidItem(type.equals("message"), factoidTrigger, reply, sender, channel);
+            item.insert();
+            factoids.add(item);
 
-            // Then add it to memory
-            factoids.add(new FactoidItem(type.equals("message"), factoidTrigger, reply, sender, channel));
             bot.msg(channel, "OK, "+sender+".");
         } else if(trigger.equals(TRIGGER_DEL)) {
             // Trying to remove a factoid
@@ -130,21 +118,8 @@ public class Factoid implements MessageListener, TriggerListener {
                     System.err.println(factoid.toString());
                 }
             } else {
-                // First remove it from the SQL db
-                try {
-                    if(sqlHandler.delete("DELETE FROM " + FACTOID_TABLE + "  WHERE `trigger` = '"+message+"' AND `channel` = '"+channel+"';") == 0) {
-                        System.err.println("Factoid deletion warning: Item was found in local arraylist, but not in SQL DB!");
-                        bot.msg(channel, "OMG inconsistency; I have the factoid in memory but not in the SQL db.");
-                        return;
-                    }
-                } catch(SQLException e) {
-                    bot.msg(channel, "You should know that I caught an SQL exception.");
-                    System.err.println("Factoid deletion: SQL Exception!");
-                    e.printStackTrace();
-                }
-
-                // Then remove it from memory
-                this.factoids.remove(factoids.get(0));
+                factoids.get(0).delete();
+                this.factoids.remove(this.factoids.indexOf(factoids.get(0)));
                 bot.msg(channel, "I no longer know of this "+ message +" that you speak of.");
             }
         } else if(trigger.equals(TRIGGER_MAIN)) {
@@ -158,17 +133,13 @@ public class Factoid implements MessageListener, TriggerListener {
                 }
             }
         } else if(trigger.equals(TRIGGER_RANDOM)) {
-            try {
-				Object[] row = sqlHandler.selectSingle("SELECT reply FROM " + FACTOID_TABLE + " WHERE channel= '?' ORDER BY RANDOM() LIMIT 1;", Arrays.asList(new String[] {channel}));
-				if (row.length > 0){
-					bot.msg(channel, (String)((Object[])row[0])[0]);					
-				} else {
-					bot.msg(channel, "No factoids are added");
-				}
-				
-            } catch (SQLException e) {
-				e.printStackTrace();
-			}
+            List<FactoidItem> items = JWorm.getWith(FactoidItem.class, "where channel='" +
+              SQL.sanitize(channel) + "' order by random() limit 1");
+            if(items.size() > 0) {
+                bot.msg(channel, items.get(0).getReply());
+            } else {
+                bot.msg(channel, "No factoids are added");
+            }
         } else if(trigger.equals(TRIGGER_FOR)) {
             List<FactoidItem> factoids = find(channel, message, true);
             if(factoids.size() == 0) {
@@ -223,7 +194,7 @@ public class Factoid implements MessageListener, TriggerListener {
         return items;
     }
 
-    private static class FactoidItem {
+    public static class FactoidItem extends Worm {
 
         private boolean message;
         private String trigger;
@@ -251,7 +222,7 @@ public class Factoid implements MessageListener, TriggerListener {
             return channel;
         }
 
-        private FactoidItem(boolean message, String trigger, String reply, String author, String channel) {
+        public FactoidItem(boolean message, String trigger, String reply, String author, String channel) {
             this.message = message;
             this.trigger = trigger;
             this.reply = reply;

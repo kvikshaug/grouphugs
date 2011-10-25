@@ -1,9 +1,7 @@
 package no.kvikshaug.gh.modules;
 
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -12,18 +10,16 @@ import org.joda.time.format.DateTimeFormatter;
 
 import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.Grouphug;
-import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.listeners.TriggerListener;
-import no.kvikshaug.gh.util.SQLHandler;
+import no.kvikshaug.gh.util.SQL;
+
+import no.kvikshaug.worm.Worm;
+import no.kvikshaug.worm.JWorm;
 
 public class Timer implements TriggerListener {
 
-    //CREATE TABLE timer(id INTEGER PRIMARY KEY, nick TEXT, time INTEGER, message TEXT);
     private Grouphug bot;
     private final DateTimeFormatter f = DateTimeFormat.forPattern("HH:mm dd.MM.yyyy");
-
-    private static final String TIMER_TABLE = "timer";
-    private SQLHandler sqlHandler;
 
     public Timer(ModuleHandler handler) {
         handler.addTriggerListener("timer", this);
@@ -37,33 +33,28 @@ public class Timer implements TriggerListener {
         handler.registerHelp("timer", helpText);
         bot = Grouphug.getInstance();
 
-        //Load timers from database, if there were any there when the bot shut down
-        try {
-            sqlHandler = SQLHandler.getSQLHandler();
-            List<Object[]> rows = sqlHandler.select("SELECT `id`, `nick`, `time`, `message`, `channel` FROM " + TIMER_TABLE + ";");
-            for(Object[] row : rows) {
-                int id = (Integer) row[0];
-                String nick = (String) row[1];
-                long time = (Long) row[2];
-                String message = (String) row[3];
-                String channel = (String) row[4];
-
-                //The timer expired when the bot was down
-                if (time <= System.currentTimeMillis() ){
-                    if("".equals(message)) {
-                        bot.msg(channel, nick + ": Time ran out while I was shut down. I am notifying you anyway!");
+        if(SQL.isAvailable()) {
+            // Load timers from database, if there were any there when the bot shut down
+            List<Sleeper> sleepers = JWorm.get(Sleeper.class);
+            for(Sleeper s : sleepers) {
+                if(s.getTime() <= System.currentTimeMillis()) {
+                    // The timer expired when the bot was down
+                    if("".equals(s.getMessage())) {
+                        bot.msg(s.getChannel(), s.getNick() + ": Time ran out while I was shut down. " +
+                        "I was supposed to nofity you at " + new DateTime(s.getTime()));
                     } else {
-                        bot.msg(channel, nick + ": Time ran out while I was shut down. I was supposed to notify you about: " + message);
+                        bot.msg(s.getChannel(), s.getNick() + ": Time ran out while I was shut down. " +
+                        "I was supposed to tell you: " + s.getMessage() + " at " +
+                        new DateTime(s.getTime()));
                     }
-                    sqlHandler.delete("DELETE FROM " + TIMER_TABLE + "  WHERE `id` = '"+id+"';");
-                }else{
-                    new Sleeper(id, nick, time, message, channel);
+                    s.delete();
+                } else {
+                    new Thread(s).start();
                 }
             }
-        } catch(SQLUnavailableException ex) {
-            System.err.println("Factoid startup: SQL is unavailable!");
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } else {
+            System.err.println("Warning: Timer will start, but not be able to load existing timers, " +
+              "or store new timers, which will be lost upon reboot because SQL is unavailable.");
         }
     }
 
@@ -138,9 +129,10 @@ public class Timer implements TriggerListener {
 
         //We now have the time
         String notifyMessage = message.substring(timerTime.length()).trim();
-        int id = insertTimerIntoDb(channel, sender, notifyMessage, timeToHighlight.getMillis());
+        Sleeper s = new Sleeper(sender, timeToHighlight.getMillis(), notifyMessage, channel);
+        s.insert();
+        new Thread(s).start();
         bot.msg(channel, "Ok, I will highlight you at " + f.print(timeToHighlight) +".");
-        new Sleeper(id, sender, timeToHighlight.getMillis(), notifyMessage, channel);
     }
 
     /**
@@ -204,47 +196,46 @@ public class Timer implements TriggerListener {
         }
 
         long time = System.currentTimeMillis() + (count * factor * 1000);
-        int id = insertTimerIntoDb(channel, sender, notifyMessage, time);
+        Sleeper s = new Sleeper(sender, time, notifyMessage, channel);
+        s.insert();
+        new Thread(s).start();
         bot.msg(channel, "Ok, I will highlight you at " + f.print(new DateTime(time)) + ".");
-        new Sleeper(id, sender, time, notifyMessage, channel);
     }
 
-    private int insertTimerIntoDb(String channel, String sender, String notifyMessage, long time) {
-        int id = -1;
-        try {
-            List<String> params = new ArrayList<String>();
-            params.add(sender);
-            params.add(""+time);
-            params.add(notifyMessage);
-            params.add(channel);
-            id = sqlHandler.insert("INSERT INTO " + TIMER_TABLE + " (`nick`, `time`, `message`, `channel`) VALUES (?, ?, ?, ?);", params);
-        } catch(SQLException e) {
-            System.err.println("Timer insertion: SQL Exception: "+e);
-        }
-        return id;
-    }
-
-    private class Sleeper implements Runnable {
-        private int id;
+    public static class Sleeper extends Worm implements Runnable {
         private String nick;
         private long time; // time of highlight, in "java unix time" (with ms granularity)
         private String message;
         private String channel;
 
-        private Sleeper(int id, String nick, long time, String message, String channel) {
+        public Sleeper(String nick, long time, String message, String channel) {
             this.nick = nick;
             this.time = time;
             this.message = message;
-            this.id = id;
             this.channel = channel;
-            new Thread(this).start();
+        }
+
+        public String getNick() {
+            return this.nick;
+        }
+
+        public long getTime() {
+            return this.time;
+        }
+
+        public String getMessage() {
+            return this.message;
+        }
+
+        public String getChannel() {
+            return this.channel;
         }
 
         public void run() {
             long sleepAmount = time - System.currentTimeMillis();
             if(sleepAmount <= 0) {
-                bot.msg(channel, "I can't notify you about something in the past until someone " +
-                    "implements a time machine in me.");
+                Grouphug.getInstance().msg(channel, "I can't notify you about something in the " +
+                    "past until someone implements a time machine in me.");
                 return;
             }
             try {
@@ -256,18 +247,11 @@ public class Timer implements TriggerListener {
                 return;
             }
             if("".equals(message)) {
-                bot.msg(channel, nick + ": Time's up!");
+                Grouphug.getInstance().msg(channel, nick + ": Time's up!");
             } else {
-                bot.msg(channel, nick + ": " + message);
+                Grouphug.getInstance().msg(channel, nick + ": " + message);
             }
-            try {
-                if (this.id != -1){
-                    sqlHandler.delete("DELETE FROM " + TIMER_TABLE + "  WHERE `id` = '"+this.id+"';");
-                }
-            } catch(SQLException e) {
-                e.printStackTrace();
-            }
-
+            this.delete();
         }
     }
 }

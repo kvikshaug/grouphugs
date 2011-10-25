@@ -2,17 +2,16 @@ package no.kvikshaug.gh.modules;
 
 import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
-import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.listeners.JoinListener;
 import no.kvikshaug.gh.listeners.MessageListener;
 import no.kvikshaug.gh.listeners.NickChangeListener;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.SQL;
-import no.kvikshaug.gh.util.SQLHandler;
 import org.jibble.pircbot.User;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
+import no.kvikshaug.worm.Worm;
+import no.kvikshaug.worm.JWorm;
+
 import java.util.Date;
 import java.util.List;
 
@@ -20,23 +19,20 @@ import java.util.List;
 public class Tell implements JoinListener, TriggerListener, NickChangeListener, MessageListener {
     private static final String TRIGGER_HELP = "tell";
     private static final String TRIGGER = "tell";
-    private static final String TELL_DB = "tell";
 
-    private SQLHandler sqlHandler;
     private Grouphug bot;
 
     public Tell(ModuleHandler moduleHandler) {
-        bot = Grouphug.getInstance();
-        try {
-            sqlHandler = SQLHandler.getSQLHandler();
+        if(SQL.isAvailable()) {
+            bot = Grouphug.getInstance();
             moduleHandler.addTriggerListener(TRIGGER, this);
             moduleHandler.addJoinListener(this);
             moduleHandler.addNickChangeListener(this);
             moduleHandler.addMessageListener(this);
             moduleHandler.registerHelp(TRIGGER_HELP, "Tell: Tell something to someone who's not here when they eventually join\n" +
                     "  " + Grouphug.MAIN_TRIGGER + TRIGGER + "<nick> <message>\n");
-        } catch (SQLUnavailableException ex) {
-            System.err.println("Tell module startup error: SQL is unavailable!");
+        } else {
+            System.err.println("Tell module disabled: SQL is unavailable.");
         }
     }
 
@@ -45,33 +41,14 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener, 
     }
 
     private void tell(String channel, String toNick) {
-        List<String> params = new ArrayList<String>();
-        params.add(toNick);
-        params.add(channel);
-        List<Object[]> rows = null;
-        try {
-            rows = sqlHandler.select("SELECT id, from_nick, date, msg, channel FROM " + TELL_DB + " WHERE to_nick=? AND channel=?;", params);
-        } catch (SQLException e) {
-            System.err.println(" > SQL Exception: " + e.getMessage() + "\n" + e.getCause());
-            bot.msg(channel, "Sorry, couldn't query Tell DB, an SQL error occured.");
-            return;
-        }
-
-        for (Object[] row : rows) {
-            String fromNick = (String) row[1];
-            String msg = (String) row[3];
+        List<TellItem> items = JWorm.getWith(TellItem.class, "where `to`='" + SQL.sanitize(toNick) +
+          "' and `channel`='" + SQL.sanitize(channel) + "'");
+        for(TellItem item : items) {
             StringBuilder message = new StringBuilder();
-            message.append(toNick).append(": ").append(fromNick).append(" told me to tell you this: ").append(msg);
+            message.append(item.getTo()).append(": ").append(item.getFrom())
+              .append(" told me to tell you this: ").append(item.getMessage());
             bot.msg(channel, message.toString());
-
-            params.clear();
-            params.add(row[0].toString());
-            try {
-                sqlHandler.delete("DELETE FROM " + TELL_DB + " WHERE id=?;", params);
-            } catch (SQLException e) {
-                System.err.println(" > SQL Exception: " + e.getMessage() + "\n" + e.getCause());
-                Grouphug.getInstance().msg(channel, "Sorry, couldn't delete Tell, an SQL error occured.");
-            }
+            item.delete();
         }
     }
 
@@ -96,20 +73,8 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener, 
     }
 
     private void saveTell(String channel, String fromNick, String toNick, String msg) {
-        List<String> params = new ArrayList<String>();
-        params.add(fromNick);
-        params.add(toNick);
-        params.add(SQL.dateToSQLDateTime(new Date()));
-        params.add(msg);
-        params.add(channel);
-
-        try {
-            sqlHandler.insert("INSERT INTO " + TELL_DB + " (from_nick, to_nick, date, msg, channel) VALUES (?, ?, ?, ?, ?);", params);
-        } catch (SQLException e) {
-            System.err.println(" > SQL Exception: " + e.getMessage() + "\n" + e.getCause());
-            bot.msg(channel, "Sorry, unable to update Tell DB, an SQL error occured.");
-        }
-
+        TellItem newItem = new TellItem(fromNick, toNick, msg, new Date().getTime(), channel);
+        newItem.insert();
         bot.msg(channel, "I'll tell " + toNick + " this: " + msg);
     }
 
@@ -128,20 +93,12 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener, 
             String toNick = message.substring(0, message.indexOf(':'));
             String msg = message.substring(message.indexOf(':') + 1, message.length());
 
-            List<Object[]> rows = null;
-            try {
-                rows = sqlHandler.select("SELECT nick FROM seen;");
-            } catch (SQLException e) {
-                System.err.println(" > SQL Exception: " + e.getMessage() + "\n" + e.getCause());
-            }
-
+            List<Seen.SeenItem> seens = JWorm.get(Seen.SeenItem.class);
             boolean save = false;
-            if (rows != null) {
-                for (Object[] row : rows) {
-                    if (row[0].equals(toNick)) {
-                        save = true;
-                        break;
-                    }
+            for(Seen.SeenItem s : seens) {
+                if(s.getNick().equals(toNick)) {
+                    save = true;
+                    break;
                 }
             }
 
@@ -154,6 +111,42 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener, 
             if (save) {
                 saveTell(channel, sender, toNick, msg);
             }
+        }
+    }
+
+    public static class TellItem extends Worm {
+        private String from;
+        private String to;
+        private String message;
+        private Long date;
+        private String channel;
+
+        public TellItem(String from, String to, String message, Long date, String channel) {
+            this.from = from;
+            this.to = to;
+            this.message = message;
+            this.date = date;
+            this.channel = channel;
+        }
+
+        public String getFrom() {
+            return this.from;
+        }
+
+        public String getTo() {
+            return this.to;
+        }
+
+        public String getMessage() {
+            return this.message;
+        }
+
+        public Long getDate() {
+            return this.date;
+        }
+
+        public String getChannel() {
+            return this.channel;
         }
     }
 }

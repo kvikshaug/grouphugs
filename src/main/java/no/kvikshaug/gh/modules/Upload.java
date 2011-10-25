@@ -3,43 +3,38 @@ package no.kvikshaug.gh.modules;
 import no.kvikshaug.gh.Grouphug;
 import no.kvikshaug.gh.ModuleHandler;
 import no.kvikshaug.gh.Config;
-import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.exceptions.PreferenceNotSetException;
 import no.kvikshaug.gh.listeners.TriggerListener;
 import no.kvikshaug.gh.util.SQL;
-import no.kvikshaug.gh.util.SQLHandler;
 import no.kvikshaug.gh.util.Web;
+
+import no.kvikshaug.worm.Worm;
+import no.kvikshaug.worm.JWorm;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 public class Upload implements TriggerListener {
 
     private static final String TRIGGER_HELP = "upload";
     private static final String TRIGGER = "upload";
-    private static final String UPLOAD_DB= "uploads";
     private static final String TRIGGER_KEYWORD = "keyword";
 
-    private SQLHandler sqlHandler;
     private Grouphug bot;
 
     public Upload(ModuleHandler moduleHandler) {
-        try {
+        if(SQL.isAvailable()) {
             bot = Grouphug.getInstance();
-            sqlHandler = SQLHandler.getSQLHandler();
             // moduleHandler.addMessageListener(this);
             moduleHandler.addTriggerListener(TRIGGER, this);
             moduleHandler.addTriggerListener(TRIGGER_KEYWORD, this);
             moduleHandler.registerHelp(TRIGGER_HELP, " A module to upload pictures and other things to gh\n" +
                     " To use the module type " +Grouphug.MAIN_TRIGGER + TRIGGER + " <url> <keyword>\n" +
                     " To search for a keyword or image name, use: "+ Grouphug.MAIN_TRIGGER + TRIGGER_KEYWORD+" <searchphrase>");
-        } catch(SQLUnavailableException ex) {
-            System.err.println("Upload module startup error: SQL is unavailable!");
+        } else {
+            System.err.println("Upload module disabled: SQL is unavailable.");
         }
     }
 
@@ -68,33 +63,25 @@ public class Upload implements TriggerListener {
     }
 
     private void showUploads(String channel, String keyword) throws PreferenceNotSetException {
-        try {
-            if(keyword.length() <= 1) {
-                bot.msg(channel, "Please use at least 2 search characters.");
-                return;
-            }
-            List<String> params = new ArrayList<String>();
-            params.add(channel);
-            params.add(keyword);
-            params.add(keyword);
+        if(keyword.length() <= 1) {
+            bot.msg(channel, "Please use at least 2 search characters.");
+            return;
+        }
 
-            List<Object[]> rows = sqlHandler.select("SELECT filename, nick, keyword FROM "+ UPLOAD_DB+" WHERE channel=? AND" +
-                    "(keyword LIKE '%?%' OR filename LIKE '%?%');", params);
+        List<UploadItem> items = JWorm.getWith(UploadItem.class, "where `channel`='" +
+          SQL.sanitize(channel) + "' and (keyword like '%" + SQL.sanitize(keyword) +
+          "%' or filename like '%" + SQL.sanitize(keyword) + "%')");
 
-            if(rows.size() == 0) {
-                bot.msg(channel, "No results for '" + keyword + "'.");
-            } else {
-                StringBuilder allRows = new StringBuilder();
-                for(Object[] row : rows) {
-                    allRows.append(Config.publicUrls().get(channel)).append(row[0]).append(" ('")
-                            .append(row[2]).append("' by ").append(row[1]).append(")\n");
-                }
-                //Prints the URL(s) associated with the keyword
-                bot.msg(channel, allRows.toString(), true);
+        if(items.size() == 0) {
+            bot.msg(channel, "No results for '" + keyword + "'.");
+        } else {
+            StringBuilder allRows = new StringBuilder();
+            for(UploadItem i : items) {
+                allRows.append(Config.publicUrls().get(channel)).append(i.getFileName()).append(" ('")
+                        .append(i.getKeyword()).append("' by ").append(i.getNick()).append(")\n");
             }
-        } catch(SQLException e) {
-            System.err.println(" > SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            bot.msg(channel, "Sorry, an SQL error occured.");
+            //Prints the URL(s) associated with the keyword
+            bot.msg(channel, allRows.toString(), true);
         }
     }
 
@@ -129,27 +116,49 @@ public class Upload implements TriggerListener {
 
         try {
             Web.downloadFile(parts[0], filename, Config.uploadDirs().get(channel));
-            List<String> params = new ArrayList<String>();
-            params.add(parts[1]);
-            params.add(sender);
-            params.add(filename);
-            params.add(SQL.dateToSQLDateTime(new Date()));
-            params.add(channel);
-            sqlHandler.insert("INSERT INTO "+UPLOAD_DB+" (keyword, nick, filename, date, channel) VALUES (?,?,?,?,?);", params);
+            UploadItem i = new UploadItem(parts[1], sender, filename, new Date().getTime(), channel);
+            i.insert();
+            bot.msg(channel, "Saved to " + Config.publicUrls().get(channel) + filename);
         } catch (IOException e) {
             System.err.println("Failed to copy the file to the local filesystem.");
             bot.msg(channel, "Why am I expected to be able to upload anything?");
             e.printStackTrace();
-            return;
-        } catch(SQLException e) {
-            System.err.println("SQL Exception: "+e.getMessage()+"\n"+e.getCause());
-            e.printStackTrace();
-            bot.msg(channel, "An SQL error occured, but the file was probably saved successfully " +
-                    "before that happened. Go check the logs and clean up my database, you fool.");
-            return;
+        }
+    }
+
+    public static class UploadItem extends Worm {
+        private String keyword;
+        private String nick;
+        private String fileName;
+        private long date;
+        private String channel;
+
+        public UploadItem(String keyword, String nick, String fileName, long date, String channel) {
+            this.keyword = keyword;
+            this.nick = nick;
+            this.fileName = fileName;
+            this.date = date;
+            this.channel = channel;
         }
 
-        // Print the URL to the uploaded file to the channel
-        bot.msg(channel, "Saved to " + Config.publicUrls().get(channel) + filename);
+        public String getKeyword() {
+            return this.keyword;
+        }
+
+        public String getNick() {
+            return this.nick;
+        }
+
+        public String getFileName() {
+            return this.fileName;
+        }
+
+        public long getDate() {
+            return this.date;
+        }
+
+        public String getChannel() {
+            return this.channel;
+        }
     }
 }

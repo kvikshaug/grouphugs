@@ -1,17 +1,16 @@
 package no.kvikshaug.gh.modules
 
 import no.kvikshaug.gh.{Grouphug, ModuleHandler, Config}
-import no.kvikshaug.gh.exceptions.SQLUnavailableException;
 import no.kvikshaug.gh.listeners.TriggerListener;
-import no.kvikshaug.gh.util.{SQLHandler, Web};
+import no.kvikshaug.gh.util.{SQL, Web};
 
 import no.kvikshaug.scatsd.client.ScatsD;
+import no.kvikshaug.worm.Worm
 
 import org.jdom.JDOMException;
 
 import java.io.{IOException, FileNotFoundException}
 import java.util.{Timer => JavaTimer, TimerTask}
-import java.sql.SQLException;
 import java.net.URL
 
 import scala.collection.JavaConverters._
@@ -19,20 +18,19 @@ import scala.actors.Actor
 import scala.actors.Actor._
 import scala.xml._
 
-case class Package(id: String, var status: String, var statusCode: String, owner: String, channel: String) {
+case class Package(trackingId: String, owner: String, var status: String,
+                   var statusCode: String, channel: String) extends Worm {
   override def equals(other: Any) = other match {
-    case that: Package => id == that.id
-    case thatId: String => id == thatId
+    case that: Package => trackingId == that.trackingId
+    case thatId: String => trackingId == thatId
     case _ => false
   }
 }
 
 class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListener {
 
-    var sqlHandler: SQLHandler = null
     val bot = Grouphug.getInstance
     var items: List[Package] = Nil
-    val dbName = "tracking"
     val pollingTime = 30 // minutes
     new JavaTimer().schedule(this, 30 * 1000, pollingTime * 60 * 1000)
 
@@ -53,20 +51,12 @@ class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListe
       "  List all:        !" + TRIGGER_LIST + "\n" +
       "  Force an update: !" + TRIGGER_FORCE)
 
-    // load all trackingitems and packages from db
-    try {
-      sqlHandler = SQLHandler.getSQLHandler
-      items = sqlHandler.select(
-        "select trackingId, status, statusCode, owner, channel from " + dbName + ";"
-      ).asScala.map { row => Package(
-          row(0).asInstanceOf[String], row(1).asInstanceOf[String],
-          row(2).asInstanceOf[String], row(3).asInstanceOf[String],
-          row(4).asInstanceOf[String])
-      }.toList
-    } catch {
-      case e: SQLUnavailableException => println("Package tracking module unable to load because SQL is unavailable.")
-      case e: SQLException => println("Package tracking module unable to load because it was unable to load existing package list from SQL!")
-        e.printStackTrace();
+    if(SQL.isAvailable) {
+      // load all trackingitems and packages from db
+      items = Worm.get[Package]
+    } else {
+      println("Warning: Tracking module will start, but will not be able to load existing packages " +
+        "or store new ones to be loaded after reboot, because SQL is unavailable.")
     }
 
     def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String, trigger: String) = trigger match {
@@ -84,24 +74,19 @@ class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListe
         bot.msg(channel, "No packages are being tracked. What's going on, are you all bankrupt?")
       }
       items.filter(_.channel == channel).foreach {
-        item => bot.msg(channel, item.id + " for " + item.owner + ": " + item.status)
+        item => bot.msg(channel, item.trackingId + " for " + item.owner + ": " + item.status)
       }
     }
 
     def removePackage(channel: String, id: String) {
-      try {
-        if(!(items.exists(_ == id))) {
-          bot.msg(channel, "I'm not tracking any package with ID " + id + ". Try !" + TRIGGER_LIST)
-          return
-        }
-        items = items.filterNot(_ == id)
-        sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(id).asJava)
+      val item = items.find(_ == id)
+      if(item.isEmpty) {
+        bot.msg(channel, "I'm not tracking any package with ID " + id + ". Try !" + TRIGGER_LIST)
+      } else {
+        item.get.delete
+        items = items.filterNot(_ == item.get)
         bot.msg(channel, "Ok, stopped tracking package " + id + ".")
         ScatsD.retain(String.format("gh.bot.modules.tracking.%s.packages", channel), items.size)
-      } catch {
-        case e: SQLException =>
-          bot.msg(channel, "Removed it from memory but not from SQL. Check my logs for more info.")
-          e.printStackTrace
       }
     }
 
@@ -130,14 +115,14 @@ class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListe
 
       // track and add it
       try {
-        val newItem = Package(id, "", "", sender, channel)
+        val newItem = Package(id, sender, "", "", channel)
         TrackingXMLParser.track(newItem)
         if(newItem.statusCode == "DELIVERED") {
             bot.msg(channel, "Your package has already been delivered. I will not track it further.")
             bot.msg(channel, newItem.status)
             return
         }
-        sqlHandler.insert("insert into " + dbName + " (trackingId, status, statusCode, owner, channel) VALUES (?, ?, ?, ?, ?);", List(id, newItem.status, newItem.statusCode, sender, channel).asJava)
+        newItem.insert
         items = newItem :: items
 
         bot.msg(channel, "Adding package " + id + " to tracking list.")
@@ -155,22 +140,23 @@ class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListe
     items foreach { i =>
       try {
         val (changed, packageCount) = TrackingXMLParser.track(i)
+        i.update
         if(changed) {
           i.statusCode match {
             case "DELIVERED" =>
-              bot.msg(i.channel, i.owner + " has just picked up " + i.id + ":")
+              bot.msg(i.channel, i.owner + " has just picked up " + i.trackingId + ":")
               bot.msg(i.channel, i.status)
               items = items.filterNot(_ == i)
-              sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(i.id).asJava)
+              i.delete
               bot.msg(i.channel, "Removing this one from my list. Now tracking " + items.filter(_.channel == i.channel).size + " packages.")
             case "RETURNED" =>
-              bot.msg(i.channel, i.owner + ": Package " + i.id + " has been returned to sender.")
+              bot.msg(i.channel, i.owner + ": Package " + i.trackingId + " has been returned to sender.")
               bot.msg(i.channel, i.status)
               items = items.filterNot(_ == i)
-              sqlHandler.delete("delete from " + dbName + " where trackingId=?;", List(i.id).asJava)
+              i.delete
               bot.msg(i.channel, "Removing this one from my list. Now tracking " + items.filter(_.channel == i.channel).size + " packages.")
             case "RETURN" =>
-              bot.msg(i.channel, i.owner + ": Package " + i.id + " is being returned to sender!")
+              bot.msg(i.channel, i.owner + ": Package " + i.trackingId + " is being returned to sender!")
               bot.msg(i.channel, i.status)
             case "PRE_NOTIFIED" =>
               bot.msg(i.channel, i.owner + ": Posten now knows about your package.")
@@ -179,25 +165,25 @@ class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListe
               bot.msg(i.channel, i.owner + ": Your package is still far away.")
               bot.msg(i.channel, i.status)
             case "NOTIFICATION_SENT" =>
-              bot.msg(i.channel, i.owner + ": Notification for package " + i.id + " has been sent!")
+              bot.msg(i.channel, i.owner + ": Notification for package " + i.trackingId + " has been sent!")
               bot.msg(i.channel, i.status)
             case "TRANSPORT_TO_RECIPIENT" =>
-              bot.msg(i.channel, i.owner + ": Package " + i.id + " is on its way to you right now!")
+              bot.msg(i.channel, i.owner + ": Package " + i.trackingId + " is on its way to you right now!")
               bot.msg(i.channel, i.status)
             case "READY_FOR_PICKUP" =>
-              bot.msg(i.channel, i.owner + ": Package " + i.id + " is ready for pickup!")
+              bot.msg(i.channel, i.owner + ": Package " + i.trackingId + " is ready for pickup!")
               bot.msg(i.channel, i.status)
             case "IN_TRANSIT" =>
-              bot.msg(i.channel, i.owner + ": Package " + i.id + " has changed:")
+              bot.msg(i.channel, i.owner + ": Package " + i.trackingId + " has changed:")
               bot.msg(i.channel, i.status)
             case "CUSTOMS" =>
-              bot.msg(i.channel, i.owner + ": Package " + i.id + " is due for inspection!")
+              bot.msg(i.channel, i.owner + ": Package " + i.trackingId + " is due for inspection!")
               bot.msg(i.channel, i.status)
             case "NO_PACKAGES" =>
-              bot.msg(i.channel, i.owner + ": Package " + i.id + " has suddenly lost its contents! You might want to check it manually.")
+              bot.msg(i.channel, i.owner + ": Package " + i.trackingId + " has suddenly lost its contents! You might want to check it manually.")
               bot.msg(i.channel, i.status)
             case x =>
-              bot.msg(i.channel, i.owner + ": Package " + i.id + " has changed to '" + x + "', which I don't recognize!")
+              bot.msg(i.channel, i.owner + ": Package " + i.trackingId + " has changed to '" + x + "', which I don't recognize!")
               bot.msg(i.channel, i.status)
           }
           if(packageCount > 1) {
@@ -221,11 +207,7 @@ class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListe
 
 object TrackingXMLParser {
 
-  val sqlHandler = SQLHandler.getSQLHandler
-  val dbName = "tracking"
-
   @throws(classOf[IOException])
-  @throws(classOf[SQLException])
   // returns a tuple of ("Has the package changed?", "The number of packages in this item")
   def track(item: Package): Tuple2[Boolean, Int] = {
     var newStatus = ""
@@ -235,7 +217,7 @@ object TrackingXMLParser {
     try {
       // load the xml
       val root = XML.load(Web.prepareEncodedBufferedReader(
-        new URL("http://sporing.posten.no/sporing.xml?q=" + item.id)))
+        new URL("http://sporing.posten.no/sporing.xml?q=" + item.trackingId)))
 
       val e = ((root \\ "PackageSet" \ "Package")(0) \ "EventSet" \ "Event")(0)
       newStatus = (e \ "Description").text.replaceAll("<.*?>", "").trim + " " +
@@ -265,7 +247,6 @@ object TrackingXMLParser {
     }
     item.status = newStatus
     item.statusCode = newStatusCode
-    sqlHandler.update("update " + dbName + " set status='" + newStatus + "', statusCode='" + newStatusCode + "' where trackingId='" + item.id + "'")
 
     (changed, packageCount)
   }
