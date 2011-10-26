@@ -45,7 +45,7 @@ object SQL {
     val sb = new StringBuilder
     var i = 0
     input foreach { c =>
-      if(c == '\'' && (i == 0 || input(i-1) != '\\')) {
+      if(c == '\'' && (i == 0 || input(i-1) != '\'')) {
         sb.append('\'')
       }
       sb.append(c)
