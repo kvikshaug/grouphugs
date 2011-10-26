@@ -62,7 +62,7 @@ public class Quote implements TriggerListener, MessageListener {
 
 	private void sayRandomQuote(String channel){
 		List<QuoteItem> quotes = JWorm.getWith(QuoteItem.class, "where channel='" +
-		  SQL.sanitize(channel) + "' order by random() limit 1");
+		  channel + "' order by random() limit 1");
 		if(quotes.size() == 0) {
 			bot.msg(channel, "SQL managed to randomly pick a quote that doesn't exist! Maybe " +
 			  "there are no quotes stored?");

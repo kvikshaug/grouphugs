@@ -38,19 +38,4 @@ object SQL {
         throw new SQLUnavailableException("Database file not specified in config: " + e.getMessage());
     }
   }
-
-  /** Prepends a (sqlite-specific) ' to any '-char that doesn't
-      already have one prepended */
-  def sanitize(input: String) = {
-    val sb = new StringBuilder
-    var i = 0
-    input foreach { c =>
-      if(c == '\'' && (i == 0 || input(i-1) != '\'')) {
-        sb.append('\'')
-      }
-      sb.append(c)
-      i += 1
-    }
-    sb.toString
-  }
 }

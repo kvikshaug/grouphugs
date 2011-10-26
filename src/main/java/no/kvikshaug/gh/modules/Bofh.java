@@ -37,7 +37,7 @@ public class Bofh implements TriggerListener {
     }
 
     private String getExcuse(String number) {
-        List<BofhExcuse> excuses = JWorm.getWith(BofhExcuse.class, "where id='" + SQL.sanitize(number) + "'");
+        List<BofhExcuse> excuses = JWorm.getWith(BofhExcuse.class, "where id='" + number + "'");
         if(excuses.size() == 1) {
             return excuses.get(0).getFormattedExcuse();
         } else {

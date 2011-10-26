@@ -41,8 +41,8 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener, 
     }
 
     private void tell(String channel, String toNick) {
-        List<TellItem> items = JWorm.getWith(TellItem.class, "where `to`='" + SQL.sanitize(toNick) +
-          "' and `channel`='" + SQL.sanitize(channel) + "'");
+        List<TellItem> items = JWorm.getWith(TellItem.class, "where `to`='" + toNick +
+          "' and `channel`='" + channel + "'");
         for(TellItem item : items) {
             StringBuilder message = new StringBuilder();
             message.append(item.getTo()).append(": ").append(item.getFrom())
@@ -93,10 +93,10 @@ public class Tell implements JoinListener, TriggerListener, NickChangeListener, 
             String toNick = message.substring(0, message.indexOf(':'));
             String msg = message.substring(message.indexOf(':') + 1, message.length());
 
-            List<Seen.SeenItem> seens = JWorm.get(Seen.SeenItem.class);
+            List<SeenUser> seens = JWorm.get(SeenUser.class);
             boolean save = false;
-            for(Seen.SeenItem s : seens) {
-                if(s.getNick().equals(toNick)) {
+            for(SeenUser s : seens) {
+                if(s.getNicks().contains(toNick)) {
                     save = true;
                     break;
                 }

@@ -73,7 +73,7 @@ public class Karma implements TriggerListener, MessageListener {
     private void print(String channel, String name) {
         String sqlName = norwegianCharsToHtmlEntities(name);
         List<KarmaItem> items = JWorm.getWith(KarmaItem.class, "where name like '" +
-          SQL.sanitize(sqlName) + "' and channel='" + SQL.sanitize(channel) + "'");
+          sqlName + "' and channel='" + channel + "'");
         if(items.size() == 0) {
             bot.msg(channel, name+" has neutral karma.");
         } else if(items.size() > 1) {
@@ -99,7 +99,7 @@ public class Karma implements TriggerListener, MessageListener {
             // interrupted, ok, just continue
         }
         List<KarmaItem> items = JWorm.getWith(KarmaItem.class, "where name like '" +
-          SQL.sanitize(sqlName) + "' and channel='" + SQL.sanitize(channel) + "'");
+          sqlName + "' and channel='" + channel + "'");
         if(items.size() == 0) {
             KarmaItem newItem = new KarmaItem(sqlName, karma, channel);
             newItem.insert();
@@ -121,7 +121,7 @@ public class Karma implements TriggerListener, MessageListener {
         }
         String query = top ? "desc" : "asc";
         List<KarmaItem> items = JWorm.getWith(KarmaItem.class, "where channel='" +
-          SQL.sanitize(channel) + "' order by `karma` limit " + LIMIT);
+          channel + "' order by `karma` limit " + LIMIT);
         int place = 1;
         for(KarmaItem item : items) {
             reply += (place++)+". "+Web.entitiesToChars(item.getName())+" ("+item.getKarma()+")\n";

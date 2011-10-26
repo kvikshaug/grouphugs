@@ -134,7 +134,7 @@ public class Factoid implements MessageListener, TriggerListener {
             }
         } else if(trigger.equals(TRIGGER_RANDOM)) {
             List<FactoidItem> items = JWorm.getWith(FactoidItem.class, "where channel='" +
-              SQL.sanitize(channel) + "' order by random() limit 1");
+              channel + "' order by random() limit 1");
             if(items.size() > 0) {
                 bot.msg(channel, items.get(0).getReply());
             } else {

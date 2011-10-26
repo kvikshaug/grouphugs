@@ -61,7 +61,7 @@ public class Remember implements TriggerListener {
         } else if(trigger.equals(TRIGGER_REMOVE)) {
             // First remove it from the SQL db
             List<RememberItem> items = JWorm.getWith(RememberItem.class, "where `message` = '" +
-              SQL.sanitize(messageParts[0]) + "' and `channel` = '" + SQL.sanitize(channel) + "'");
+              messageParts[0] + "' and `channel` = '" + channel + "'");
             if(items.size() == 0) {
                 bot.msg(channel, "Couldn't find that item.");
             } else {
@@ -72,11 +72,11 @@ public class Remember implements TriggerListener {
             List<RememberItem> rows = null;
             
             if(trigger.equals(TRIGGER_GET_SENDER)){
-                rows = JWorm.getWith(RememberItem.class, "where `channel`='" + SQL.sanitize(channel) +
-                  "' and `sender`='" + SQL.sanitize(messageParts[0]) + "'");
+                rows = JWorm.getWith(RememberItem.class, "where `channel`='" + channel +
+                  "' and `sender`='" + messageParts[0] + "'");
             } else if(trigger.equals(TRIGGER_GET_TAG)){
-                rows = JWorm.getWith(RememberItem.class, "where `channel`='" + SQL.sanitize(channel) +
-                  "' and `tag`='" + SQL.sanitize(messageParts[0]) + "'");
+                rows = JWorm.getWith(RememberItem.class, "where `channel`='" + channel +
+                  "' and `tag`='" + messageParts[0] + "'");
             }
 
             for(RememberItem i : rows) {

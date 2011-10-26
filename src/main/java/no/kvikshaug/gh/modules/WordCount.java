@@ -52,8 +52,8 @@ public class WordCount implements TriggerListener, MessageListener {
         // This method to count words should be more or less failsafe:
         int newWords = message.trim().replaceAll(" {2,}+", " ").split(" ").length;
 
-        List<Words> items = JWorm.getWith(Words.class, "where `nick`='" + SQL.sanitize(sender) +
-          "' and `channel`='" + SQL.sanitize(channel) + "'");
+        List<Words> items = JWorm.getWith(Words.class, "where `nick`='" + sender +
+          "' and `channel`='" + channel + "'");
         if(items.size() == 0) {
             Words w = new Words(newWords, 1, sender, new Date().getTime(), channel);
             w.insert();
@@ -87,8 +87,8 @@ public class WordCount implements TriggerListener, MessageListener {
                 bot.msg(channel, "Sorry, as a safety precaution, this function can only be used " +
                         "by a user with the same nick as the one that's being removed.");
             } else {
-                List<Words> items = JWorm.getWith(Words.class, "where nick='" + SQL.sanitize(message) +
-                    "' and channel='" + SQL.sanitize(channel) + "'");
+                List<Words> items = JWorm.getWith(Words.class, "where nick='" + message +
+                    "' and channel='" + channel + "'");
                 if(items.size() == 0) {
                     bot.msg(channel, "DB reports that no such nick has been recorded.");
                 } else {
@@ -107,7 +107,7 @@ public class WordCount implements TriggerListener, MessageListener {
             reply = "The laziest idlers are:\n";
         }
         String order = top ? "desc" : "asc";
-        List<Words> items = JWorm.getWith(Words.class, "where channel='" + SQL.sanitize(channel) +
+        List<Words> items = JWorm.getWith(Words.class, "where channel='" + channel +
             "' order by `words` " + order + " limit " + LIMIT);
         int place = 1;
         for(Words w : items) {
@@ -134,8 +134,8 @@ public class WordCount implements TriggerListener, MessageListener {
     }
 
     private void print(String channel, String message){
-        List<Words> items = JWorm.getWith(Words.class, "where nick like '" + SQL.sanitize(message) +
-            "' and channel='" + SQL.sanitize(channel) + "'");
+        List<Words> items = JWorm.getWith(Words.class, "where nick like '" + message +
+            "' and channel='" + channel + "'");
         if(items.size() == 0) {
             bot.msg(channel, message + " doesn't have any words counted.");
         } else {

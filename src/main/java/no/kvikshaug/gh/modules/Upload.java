@@ -69,8 +69,8 @@ public class Upload implements TriggerListener {
         }
 
         List<UploadItem> items = JWorm.getWith(UploadItem.class, "where `channel`='" +
-          SQL.sanitize(channel) + "' and (keyword like '%" + SQL.sanitize(keyword) +
-          "%' or filename like '%" + SQL.sanitize(keyword) + "%')");
+          channel + "' and (keyword like '%" + keyword +
+          "%' or filename like '%" + keyword + "%')");
 
         if(items.size() == 0) {
             bot.msg(channel, "No results for '" + keyword + "'.");
