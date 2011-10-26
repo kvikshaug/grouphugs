@@ -33,6 +33,7 @@ public class Seen implements TriggerListener, MessageListener {
           "' and channel='" + SQL.sanitize(channel) + "'");
         if(items.size() == 0) {
             SeenItem newItem = new SeenItem(sender, message, new Date().getTime(), channel);
+            newItem.insert();
         } else {
             items.get(0).setLastWords(message);
             items.get(0).setDate(new Date().getTime());
