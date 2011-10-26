@@ -4,6 +4,7 @@ import no.kvikshaug.gh.listeners.JoinListener;
 import no.kvikshaug.gh.listeners.MessageListener;
 import no.kvikshaug.gh.listeners.NickChangeListener;
 import no.kvikshaug.gh.listeners.QuitListener;
+import no.kvikshaug.gh.listeners.PartListener;
 import no.kvikshaug.gh.modules.*;
 
 import no.kvikshaug.scatsd.client.ScatsD;
@@ -33,6 +34,7 @@ public class ModuleHandler {
     private List<JoinListener> joinListeners = new ArrayList<JoinListener>();
     private List<NickChangeListener> nickChangeListeners = new ArrayList<NickChangeListener>();
     private List<QuitListener> quitListeners = new ArrayList<QuitListener>();
+    private List<PartListener> partListeners = new ArrayList<PartListener>();
 
     public ModuleHandler(Grouphug bot) {
         this.bot = bot;
@@ -88,6 +90,8 @@ public class ModuleHandler {
         System.out.println(messageListeners.size() + " modules are listening for any message");
         System.out.println(joinListeners.size() + " modules are listening for channel joins");
         System.out.println(nickChangeListeners.size() + " modules are listening for nick changes");
+        System.out.println(quitListeners.size() + " modules are listening for IRC quits");
+        System.out.println(partListeners.size() + " modules are listening for channel parts");
     }
 
     /**
@@ -149,6 +153,16 @@ public class ModuleHandler {
      */
     public void addQuitListener(QuitListener listener) {
         quitListeners.add(listener);
+    }
+
+    /**
+     * Modules that want to react to someone parting a channel should implement the
+     * PartListener interface and then call this method with a reference to themselves.
+     * The onPart method in that interface will be called upon any parts.
+     * @param listener the listener to call
+     */
+    public void addPartListener(PartListener listener) {
+        partListeners.add(listener);
     }
 
     /**
@@ -277,6 +291,24 @@ public class ModuleHandler {
             Thread listenerThread = new Thread(eventThreads, new Runnable() {
                     public void run() {
                         listener.onQuit(sourceNick, sourceLogin, sourceHostname, reason);
+                    }
+                });
+            listenerThread.start();
+        }
+    }
+
+    /**
+     * This method is called whenever someone (possibly us) parts a channel which we are on.
+     * @param channel - The channel which somebody parted from.
+     * @param sender - The nick of the user who parted from the channel.
+     * @param login - The login of the user who parted from the channel.
+     * @param hostname - The hostname of the user who parted from the channel.
+     */
+    public void onPart(final String channel, final String sender, final String login, final String hostname) {
+        for(final PartListener listener : partListeners) {
+            Thread listenerThread = new Thread(eventThreads, new Runnable() {
+                    public void run() {
+                        listener.onPart(channel, sender, login, hostname);
                     }
                 });
             listenerThread.start();
