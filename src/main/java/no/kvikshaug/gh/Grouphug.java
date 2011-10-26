@@ -106,6 +106,7 @@ public class Grouphug extends PircBot {
 
     @Override
     protected void onQuit(String sourceNick, String sourceLogin, String sourceHostname, String reason) {
+        moduleHandler.onQuit(sourceNick, sourceLogin, sourceHostname, reason);
         for(String channel : getChannels()) {
             ScatsD.retain("gh.bot."+channel+".users", getUsers(channel).length);
         }

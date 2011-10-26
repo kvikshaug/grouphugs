@@ -3,6 +3,7 @@ package no.kvikshaug.gh;
 import no.kvikshaug.gh.listeners.JoinListener;
 import no.kvikshaug.gh.listeners.MessageListener;
 import no.kvikshaug.gh.listeners.NickChangeListener;
+import no.kvikshaug.gh.listeners.QuitListener;
 import no.kvikshaug.gh.modules.*;
 
 import no.kvikshaug.scatsd.client.ScatsD;
@@ -31,6 +32,7 @@ public class ModuleHandler {
     private List<MessageListener> messageListeners = new ArrayList<MessageListener>();
     private List<JoinListener> joinListeners = new ArrayList<JoinListener>();
     private List<NickChangeListener> nickChangeListeners = new ArrayList<NickChangeListener>();
+    private List<QuitListener> quitListeners = new ArrayList<QuitListener>();
 
     public ModuleHandler(Grouphug bot) {
         this.bot = bot;
@@ -140,6 +142,16 @@ public class ModuleHandler {
     }
 
     /**
+     * Modules that want to react to someone quitting from IRC should implement the
+     * QuitListener interface and then call this method with a reference to themselves.
+     * The onQuit method in that interface will be called upon any quits.
+     * @param listener the listener to call
+     */
+    public void addQuitListener(QuitListener listener) {
+        quitListeners.add(listener);
+    }
+
+    /**
      * If a modules trigger string is triggered when a user writes something to the channel,
      * this method will send the details of the message to that module.
      * @param channel channel of the event
@@ -246,6 +258,25 @@ public class ModuleHandler {
             Thread listenerThread = new Thread(eventThreads, new Runnable() {
                     public void run() {
                         listener.onNickChange(oldNick, login, hostname, newNick);
+                    }
+                });
+            listenerThread.start();
+        }
+    }
+
+    /**
+     * This method is called whenever someone (possibly us) quits from the server. We will only
+     * observe this if the user was in one of the channels to which we are connected.
+     * @param sourceNick - The nick of the user that quit from the server.
+     * @param sourceLogin - The login of the user that quit from the server.
+     * @param sourceHostname - The hostname of the user that quit from the server.
+     * @param reason - The reason given for quitting the server.
+     */
+    public void onQuit(final String sourceNick, final String sourceLogin, final String sourceHostname, final String reason) {
+        for(final QuitListener listener : quitListeners) {
+            Thread listenerThread = new Thread(eventThreads, new Runnable() {
+                    public void run() {
+                        listener.onQuit(sourceNick, sourceLogin, sourceHostname, reason);
                     }
                 });
             listenerThread.start();
