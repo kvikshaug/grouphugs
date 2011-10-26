@@ -39,8 +39,8 @@ object SQL {
     }
   }
 
-  /** Prepends a backslash to any '-char that doesn't
-      already have a backslash prepended */
+  /** Prepends a (sqlite-specific) ' to any '-char that doesn't
+      already have one prepended */
   def sanitize(input: String) = {
     val sb = new StringBuilder
     var i = 0
