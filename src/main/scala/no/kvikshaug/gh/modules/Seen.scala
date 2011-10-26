@@ -10,6 +10,8 @@ import no.kvikshaug.worm.Worm
 import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 
+import java.util.concurrent.locks.ReentrantLock
+
 import scala.collection.JavaConverters._
 
 case class SeenUser(var nicks: List[String], var lastAction: String, var activeNick: String,
@@ -20,6 +22,7 @@ case class SeenUser(var nicks: List[String], var lastAction: String, var activeN
 class Seen(val moduleHandler: ModuleHandler) extends TriggerListener with MessageListener with
   NickChangeListener with JoinListener with QuitListener with PartListener {
   
+  val lock = new ReentrantLock
   val f = DateTimeFormat.forPattern("HH:mm dd.MM.yyyy")
   val bot = Grouphug.getInstance
   if(SQL.isAvailable) {
@@ -54,6 +57,7 @@ class Seen(val moduleHandler: ModuleHandler) extends TriggerListener with Messag
     registerAction(sender, String.format("saying '%s'", message), sender, channel)
 
   def onNickChange(oldNick: String, login: String, hostname: String, newNick: String) {
+    lock.lock
     val user = Worm.get[SeenUser].find(_.nicks.contains(oldNick))
     if(user isDefined) {
       user.get.nicks = newNick +: user.get.nicks
@@ -66,6 +70,7 @@ class Seen(val moduleHandler: ModuleHandler) extends TriggerListener with Messag
         "changing nick from %s to %s", oldNick, newNick), "", new DateTime().getMillis, "")
       newUser.insert
     }
+    lock.unlock
   }
 
   def onJoin(channel: String, sender: String, login: String, hostname: String) =
@@ -78,6 +83,7 @@ class Seen(val moduleHandler: ModuleHandler) extends TriggerListener with Messag
     registerAction(sender, "leaving the channel", sender, channel)
 
   private def registerAction(nick: String, action: String, activeNick: String = "", channel: String = "") {
+    lock.lock
     val list = Worm.get[SeenUser]
     val user = list.find(_.nicks.contains(nick))
     if(user isDefined) {
@@ -90,5 +96,6 @@ class Seen(val moduleHandler: ModuleHandler) extends TriggerListener with Messag
       val newUser = SeenUser(List(nick), action, activeNick, new DateTime().getMillis, channel)
       newUser.insert
     }
+    lock.unlock
   }
 }
