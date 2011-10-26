@@ -4,7 +4,8 @@ CREATE TABLE JoinMessageItem (`id` INTEGER PRIMARY KEY, `nick` TEXT, `message` T
 CREATE TABLE KarmaItem (`id` INTEGER PRIMARY KEY, `name` TEXT, `karma` NUMERIC, `channel` TEXT);
 CREATE TABLE QuoteItem (`id` INTEGER PRIMARY KEY, `sender` TEXT, `quote` TEXT, `date` NUMERIC, `channel` TEXT);
 CREATE TABLE RememberItem (`id` INTEGER PRIMARY KEY, `message` TEXT, `sender` TEXT, `tag` TEXT, `channel` TEXT);
-CREATE TABLE SeenItem (`id` INTEGER PRIMARY KEY, `nick` TEXT, `lastWords` TEXT, `date` NUMERIC, `channel` TEXT);
+CREATE TABLE SeenUser (`id` INTEGER PRIMARY KEY, `lastAction` TEXT, `activeNick` TEXT, `date` NUMERIC, `channel` TEXT);
+CREATE TABLE SeenUserString (`id` INTEGER PRIMARY KEY, `order` NUMERIC, `seenUser` INTEGER, `nicks` TEXT);
 CREATE TABLE TellItem (`id` INTEGER PRIMARY KEY, `from` TEXT, `to` TEXT, `message` TEXT, `date` NUMERIC, `channel` TEXT);
 CREATE TABLE Sleeper (`id` INTEGER PRIMARY KEY, `nick` TEXT, `time` NUMERIC, `message` TEXT, `channel` TEXT);
 CREATE TABLE Package (`id` INTEGER PRIMARY KEY, `trackingId` TEXT, `owner` TEXT, `status` TEXT, `statusCode` TEXT, `channel` TEXT);
