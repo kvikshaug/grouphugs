@@ -51,9 +51,9 @@ class Slang(val handler: ModuleHandler) extends TriggerListener {
               val definition = ((trs(i + 1) \ "td")(1) \ "div")(0).text.trim
               val example = ((trs(i + 1) \ "td")(1) \ "div")(1).text.trim
               if(showExample) {
-                bot.msg(channel, example)
+                bot.msg(channel, example, true)
               } else {
-                bot.msg(channel, word + ": " + definition)
+                bot.msg(channel, word + ": " + definition, true)
               }
             }
           }
