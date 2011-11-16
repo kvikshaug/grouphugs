@@ -33,7 +33,7 @@ class Confession(val handler: ModuleHandler) extends TriggerListener {
       for(p <- (div.get \ "div")(0) \ "p") {
         confession += p.text + '\n'
       }
-      bot.msg(channel, confession)
+      bot.msg(channel, confession, true)
     } catch {
       case e =>
         bot.msg(channel, "I confess that I threw an exception today. :(")
