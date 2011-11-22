@@ -25,6 +25,7 @@ public class Quote implements TriggerListener, MessageListener {
 		if(SQL.isAvailable()) {
 			handler.addTriggerListener("startquote", this);
 			handler.addTriggerListener("stopquote", this);
+			handler.addTriggerListener("endquote", this);
 			handler.addTriggerListener("randomquote", this);
 			handler.addMessageListener(this);
 			handler.registerHelp("quote", "Saves lines you say between !startquote and !stopquote as quotes.\n" +
@@ -39,7 +40,7 @@ public class Quote implements TriggerListener, MessageListener {
 		if (trigger.equals("startquote")){
 			bot.msg(channel, "Starting recording of quote");
 			quotes.put(sender, "");
-		} else if (trigger.equals("stopquote")){
+		} else if (trigger.equals("stopquote") || trigger.equals("endquote")){
 			bot.msg(channel, "Stopped recording of quote");
 			String quote = quotes.get(sender);
 			quote = quote.substring(0, quote.length()-1); //remove last \n
@@ -52,7 +53,7 @@ public class Quote implements TriggerListener, MessageListener {
 
 	public void onMessage(String channel, String sender, String login,
 			String hostname, String message) {
-		if (message.equals("!startquote") || message.equals("!stopquote")){
+		if (message.equals("!startquote") || message.equals("!stopquote") || message.equals("!endquote")){
 			return;
 		}
 		if (quotes.containsKey(sender)){ //Currently recording a quote
