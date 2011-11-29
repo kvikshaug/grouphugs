@@ -121,7 +121,7 @@ public class Karma implements TriggerListener, MessageListener {
         }
         String query = top ? "desc" : "asc";
         List<KarmaItem> items = JWorm.getWith(KarmaItem.class, "where channel='" +
-          channel + "' order by `karma` limit " + LIMIT);
+          channel + "' order by `karma` " + query + " limit " + LIMIT);
         int place = 1;
         for(KarmaItem item : items) {
             reply += (place++)+". "+Web.entitiesToChars(item.getName())+" ("+item.getKarma()+")\n";
