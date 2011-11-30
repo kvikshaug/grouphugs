@@ -195,9 +195,6 @@ public class GithubPostReceiveServer {
             message.append((additionalCommits >= 2) ? " more commits" : " more commit");
         }
         message.append(" — ").append(Web.getBitlyURL(payload.getCompare()));
-//        if(head.getShortMessage().length() > 50) {
-//            message.append("\n").append(head.getAuthor().getName()).append(" should take a look at http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html");
-//        }
 
         return message.toString();
     }
