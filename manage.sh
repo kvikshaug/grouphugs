@@ -83,6 +83,13 @@ do
             startbot
             ;;
 
+        "upgradeproper")
+            pullfrommaster
+            buildbot
+            stopbot
+            startbot
+            ;;
+
         *)
             usage
             exit 1
