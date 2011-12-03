@@ -79,7 +79,7 @@ public class Timer implements TriggerListener {
         DateTime now = new DateTime();
         try {
             parseHighlight = new DateTime(hour_min_format.parse(timerTime));
-            timeToHighlight = new DateTime(now.getYear(), now.getMonthOfYear(), now.getDayOfMonth(), 
+            timeToHighlight = new DateTime(now.getYear(), now.getMonthOfYear(), now.getDayOfMonth(),
                     parseHighlight.getHourOfDay(), parseHighlight.getMinuteOfHour(), 0, 0);
 
             if (timeToHighlight.isBefore(now)){ //Aka a timestamp that already has been today
@@ -90,18 +90,18 @@ public class Timer implements TriggerListener {
             //Not of this type, try another one
             try {
                 parseHighlight = new DateTime(date_hour_min_format.parse(timerTime));
-                timeToHighlight = new DateTime(now.getYear(), parseHighlight.getMonthOfYear(), parseHighlight.getDayOfMonth(), 
+                timeToHighlight = new DateTime(now.getYear(), parseHighlight.getMonthOfYear(), parseHighlight.getDayOfMonth(),
                         parseHighlight.getHourOfDay(), parseHighlight.getMinuteOfHour(), 0, 0);
 
                 if (timeToHighlight.isBefore(now)){ //Aka a date and time that has been this year
-                    timeToHighlight = timeToHighlight.plusYears(1);                     
+                    timeToHighlight = timeToHighlight.plusYears(1);
                 }
 
             } catch (ParseException e2) {
                 //Not this one either, try the last one
                 try {
                     parseHighlight = new DateTime(date_format.parse(timerTime));
-                    timeToHighlight = new DateTime(now.getYear(), parseHighlight.getMonthOfYear(), parseHighlight.getDayOfMonth(), 
+                    timeToHighlight = new DateTime(now.getYear(), parseHighlight.getMonthOfYear(), parseHighlight.getDayOfMonth(),
                             0, 0, 0, 0);
 
                     if (timeToHighlight.isBefore(now)){ //A date that has already been this year
