@@ -3,6 +3,7 @@ package no.kvikshaug.gh.modules;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.regex.*;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -25,6 +26,7 @@ public class Timer implements TriggerListener {
         handler.addTriggerListener("timer", this);
         String helpText = "Use timer to time stuff, like your pizza.\n" +
         "!timer count[s/m/h/d] [message] (seconds/minutes/hours/days)\n" +
+        "!timer -for foo 10m Call me (highlights foo instead of yourself)\n" +
         "!timer hh:mm [message]\n" +
         "!timer dd/mm [message] \n" +
         "!timer dd/mm-hh:mm [message] \n" +
@@ -59,11 +61,19 @@ public class Timer implements TriggerListener {
     }
 
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
+        String receiver = sender;
+        Matcher m = Pattern.compile("(?i)^(-for (\\S+)).+").matcher(message);
+        if(m.matches()) {
+            receiver = m.group(2);
+            System.out.println("Message before: " + message);
+            message = message.replaceFirst("(?i)-for \\S+\\s+", "");
+            System.out.println("Message after: " + message);
+        }
 
         String timerTime = message.split(" ")[0]; //getting the 14d, 23:59 part from the message
 
         if (timerTime.matches(".*[a-zA-Z]")){ //Has a letter in it, aka the 14d kind of timer
-            countdownTimer(channel, sender, message);
+            countdownTimer(channel, sender, receiver, message);
             return;
         }
 
@@ -129,10 +139,11 @@ public class Timer implements TriggerListener {
 
         //We now have the time
         String notifyMessage = message.substring(timerTime.length()).trim();
-        Sleeper s = new Sleeper(sender, timeToHighlight.getMillis(), notifyMessage, channel);
+        Sleeper s = new Sleeper(receiver, timeToHighlight.getMillis(), notifyMessage, channel);
         s.insert();
         new Thread(s).start();
-        bot.msg(channel, "Ok, I will highlight you at " + f.print(timeToHighlight) +".");
+        String who = receiver.equals(sender) ? "you" : receiver;
+        bot.msg(channel, String.format("Ok, I will highlight %s at %s.", who, f.print(timeToHighlight)));
     }
 
     /**
@@ -141,7 +152,7 @@ public class Timer implements TriggerListener {
      * @param sender
      * @param message
      */
-    private void countdownTimer(String channel, String sender, String message) {
+    private void countdownTimer(String channel, String sender, String receiver, String message) {
         int indexAfterCount = 0;
         try {
             while(true) {
@@ -196,10 +207,11 @@ public class Timer implements TriggerListener {
         }
 
         long time = System.currentTimeMillis() + (count * factor * 1000);
-        Sleeper s = new Sleeper(sender, time, notifyMessage, channel);
+        Sleeper s = new Sleeper(receiver, time, notifyMessage, channel);
         s.insert();
         new Thread(s).start();
-        bot.msg(channel, "Ok, I will highlight you at " + f.print(new DateTime(time)) + ".");
+        String who = receiver.equals(sender) ? "you" : receiver;
+        bot.msg(channel, String.format("Ok, I will highlight %s at %s.", who, f.print(new DateTime(time))));
     }
 
     public static class Sleeper extends Worm implements Runnable {
