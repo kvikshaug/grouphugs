@@ -65,9 +65,7 @@ public class Timer implements TriggerListener {
         Matcher m = Pattern.compile("(?i)^(-for (\\S+)).+").matcher(message);
         if(m.matches()) {
             receiver = m.group(2);
-            System.out.println("Message before: " + message);
             message = message.replaceFirst("(?i)-for \\S+\\s+", "");
-            System.out.println("Message after: " + message);
         }
 
         String timerTime = message.split(" ")[0]; //getting the 14d, 23:59 part from the message
