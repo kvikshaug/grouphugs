@@ -41,7 +41,7 @@ public class SnowReport implements TriggerListener {
             List<URL> reportSites = Web.googleSearch(message + " site:skiinfo.no intitle:\"Snørapport fra\"");
             boolean found = false;
             for(URL snowReportSite : reportSites) {
-                if(snowReportSite.toString().contains("/Snorapport/")) {
+                if(snowReportSite.toString().contains("/snorapport/")) {
                     System.out.println(snowReportSite.toString());
                     Document snowReportDocument = Web.getJDOMDocument(snowReportSite);
                     finalReply.append(parseSnowReport(snowReportDocument));
@@ -54,6 +54,7 @@ public class SnowReport implements TriggerListener {
                 bot.msg(channel, "Sorry, I couldn't find any location named '"+ message +"' on skiinfo.");
                 return;
             }
+            bot.msg(channel, finalReply.toString());
         } catch (IOException e) {
             e.printStackTrace();
             bot.sendAction(channel, "barfs up an IOException.");
@@ -64,8 +65,6 @@ public class SnowReport implements TriggerListener {
             e.printStackTrace();
             bot.msg(channel, "Sorry, I couldn't parse vital information for the report.");
         }
-
-        bot.msg(channel, finalReply.toString());
     }
 
     private String parseSnowReport(Document document)
@@ -78,7 +77,6 @@ public class SnowReport implements TriggerListener {
         String lifts = parseLifts(document);
         String pists = parsePists(document);
         String conditions = parseConditions(document);
-        String price = parsePrice(document);
         String lastUpdate = parseLastUpdate(document);
 
         // cleaning
@@ -86,11 +84,6 @@ public class SnowReport implements TriggerListener {
             snowType = "";
         } else {
             snowType = " (" + snowType + ")";
-        }
-        if("-".equals(price)) {
-            price = "";
-        } else {
-            price = " - " + price;
         }
         if("?".equals(conditions)) {
             conditions = "";
@@ -105,40 +98,8 @@ public class SnowReport implements TriggerListener {
 
         // and put it all together
         return title + ": " + snowDepth + snowType + lastSnowFall + "\n" +
-                lifts + " heiser, " + pists + " løyper"+conditions+price+"\n" +
+                lifts + " heiser, " + pists + " løyper"+conditions+"\n" +
                 "Sist oppdatert: " + lastUpdate + ".";
-    }
-
-    private String parsePrice(Document document) throws JDOMException, IOException {
-        // first we need to find a link to the lift price page on the current page (so we know it's the same location)
-        XPath xpath = XPath.newInstance("//h:ul[@id='destMenu']/h:li/h:a");
-        xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
-        for(Object element : xpath.selectNodes(document)) {
-            if(element instanceof Element) {
-                if(((Element)element).getText().equals("Heiskortpriser")) {
-                    Element priceElement = (Element) element;
-                    return parsePriceSite(Web.getJDOMDocument(new URL("http://www.skiinfo.no/" + priceElement.getAttribute("href").getValue())));
-                }
-            }
-        }
-        return "-";
-    }
-
-    private String parsePriceSite(Document priceDocument) throws JDOMException {
-        XPath xpath = XPath.newInstance("//h:div[@id='siId1']/h:div[@class='portlet table']/h:table/h:tr[4]/h:td[4]");
-        xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
-        Element element = (Element)xpath.selectSingleNode(priceDocument);
-
-        if(element == null) {
-            return "-";
-        } else {
-            String priceText = element.getText().replace(",00", "").trim();
-            if("-".equals(priceText)) {
-                return priceText;
-            } else {
-                return "Dagskort: " + priceText + "kr";
-            }
-        }
     }
 
     private String parsePists(Document document) throws JDOMException {
@@ -219,19 +180,19 @@ public class SnowReport implements TriggerListener {
 
     private String parseTitle(Document document) throws JDOMException, UnableToParseException {
         // assume that the title is the first h1 element
-        XPath xpath = XPath.newInstance("//h:h1[1]");
+        XPath xpath = XPath.newInstance("//h:div[@class='portlet mainHeaderTitle']/h:h1");
         xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
         Element header = (Element)xpath.selectSingleNode(document);
         if(header == null) {
-            throw new UnableToParseException("Could not find first header element.");
+            throw new UnableToParseException("Could not find second header element.");
         } else {
-            return header.getText().replace(" - Snørapport", "").trim();
+            return header.getText().replaceAll("Snørapport\\s*-\\s*", "").trim();
         }
     }
 
 
     private String parseLastSnowFall(Document document) throws JDOMException {
-        XPath xpath = XPath.newInstance("//h:div[@id='siId1']/h:div[@class='portlet table']/h:table/h:tr[2]/h:td[2]");
+        XPath xpath = XPath.newInstance("//h:div[@id='siId1']/h:div[@class='portlet table hellyHansenBgPart2']/h:table/h:tr[2]/h:td[2]");
         xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
         Element element = (Element)xpath.selectSingleNode(document);
         if(element == null) {
@@ -352,7 +313,7 @@ public class SnowReport implements TriggerListener {
 
     private Integer getSnowDepth(Document document, int column, int row) throws JDOMException {
         String snowDepthString;
-        XPath xpath = XPath.newInstance("//h:div[@class='portlet table snowreportBasic snowreport']/h:table/h:tr[" + column + "]/h:td[" +row + "]");
+        XPath xpath = XPath.newInstance("//h:div[@class='portlet table snowreportBasic hellyHansenBg snowreport']/h:table/h:tr[" + column + "]/h:td[" +row + "]");
         xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
         snowDepthString = ((Element)xpath.selectSingleNode(document)).getText();
         // important: the following space character is NOT a standard space character.
@@ -369,7 +330,7 @@ public class SnowReport implements TriggerListener {
 
     private String parseSnowType(Document document) throws JDOMException {
         // note: checks only top value
-        XPath xpath = XPath.newInstance("//h:div[@class='portlet table snowreportBasic snowreport']/h:table/h:tr[2]/h:td[4]");
+        XPath xpath = XPath.newInstance("//h:div[@class='portlet table snowreportBasic hellyHansenBg snowreport']/h:table/h:tr[2]/h:td[4]");
         xpath.addNamespace("h", "http://www.w3.org/1999/xhtml");
         return ((Element)xpath.selectSingleNode(document)).getText().trim();
     }
