@@ -246,6 +246,7 @@ public class Timer implements TriggerListener {
             if(sleepAmount <= 0) {
                 Grouphug.getInstance().msg(channel, "I can't notify you about something in the " +
                     "past until someone implements a time machine in me.");
+                this.delete();
                 return;
             }
             try {
