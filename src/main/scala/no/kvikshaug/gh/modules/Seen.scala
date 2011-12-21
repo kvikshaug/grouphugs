@@ -46,14 +46,8 @@ class Seen(val moduleHandler: ModuleHandler) extends TriggerListener with Messag
                           else String.format("(in %s) ", user.get.channel)
       val nickInform = if(message == user.get.activeNick || user.get.activeNick.isEmpty) ""
                        else String.format("(as %s) ", user.get.activeNick)
-      
-      if (channel.equals(user.get.channel)) {
-        bot.msg(channel, String.format("%s was last seen %s%s%s at %s", message, channelInform,
+      bot.msg(channel, String.format("%s was last seen %s%s%s at %s", message, channelInform,
         nickInform, user.get.lastAction, f.print(user.get.date)))
-      } else {
-        bot.msg(channel, String.format("%s was last seen %s%s at %s", message, channelInform,
-        nickInform, f.print(user.get.date)))
-      }
     } else {
       bot.msg(channel, String.format("%s hasn't done anything yet.", message))
     }
