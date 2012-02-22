@@ -13,24 +13,32 @@ import no.kvikshaug.gh.{Grouphug, ModuleHandler}
 class SpotifyLookup(val handler: ModuleHandler) extends MessageListener {
 
   handler.addMessageListener(this)
-//  handler.registerHelp("spotify", "")
+  handler.registerHelp("spotify", "The spotify URI catcher attemps lookup of spotify URIs and posts " + 
+    "the name of the artist/song in the channel.")
   
   def onMessage(channel: String, sender: String, login: String, hostname: String, message: String) {
 
     val baseURL = "http://ws.spotify.com/lookup/1/.xml?uri="
 
-    // should this preferably be done async in its own thread ... ?
     for(uri <- Web.findURIs("spotify:", message)) {
       try {
 	val x = XML.load(new URL(baseURL + uri))
 	
-	val title = (x \ "name").text.trim
-	val artist = (x \ "artist").text.trim
+	// artist lookup
+	if(uri.indexOf("spotify:artist:") != -1) {
+	  Grouphug.getInstance.msg(channel, "Spotify: " + x.text.trim)
+	}
+
+	// album/track lookup
+	else {
+	  val title = (x \ "name").text.trim
+	  val artist = (x \ "artist").map(_.text.trim).mkString(", ")
 	
-	Grouphug.getInstance.msg(channel, "Spotify track lookup: %s - %s".format(artist, title))
+	  Grouphug.getInstance.msg(channel, "Spotify: %s - %s".format(artist, title))
+	}
       } catch {
 	case e: Exception =>
-	  // unable to lookup track
+	  System.err.println("Spotify URI lookup failed: " + e.toString)
       }	
     }
   }
