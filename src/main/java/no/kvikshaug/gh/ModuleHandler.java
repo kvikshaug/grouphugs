@@ -84,6 +84,7 @@ public class ModuleHandler {
         new Remember(this);
         new JoinMessage(this);
         new SpotifyLookup(this);
+        new Dinner(this);
 
         System.out.println();
         System.out.println(helpers.size() + " help responses registered");
