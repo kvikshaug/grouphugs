@@ -21,7 +21,7 @@ class IsUp(val handler: ModuleHandler) extends TriggerListener {
   val bot = Grouphug.getInstance
   handler.addTriggerListener("isup", this)
   handler.addTriggerListener("isupls", this)
-  handler.addTriggerListener("isuprm", this)
+  handler.addTriggerListener("whenuprm", this)
   handler.addTriggerListener("whenup", this)
   handler.registerHelp("isup", "isup - Checks if a web site is down, or if it's just your connection that sucks somehow.\n" +
     "Usage:\n" +
@@ -50,7 +50,7 @@ class IsUp(val handler: ModuleHandler) extends TriggerListener {
         if(sites isEmpty) {
           bot.msg(channel, "I'm not watching any URLs.")
         }
-      case "isuprm" =>
+      case "whenuprm" =>
         if(sites.exists(_.url.toString == message.urlify)) {
           sites = sites.filterNot(_.url.toString == message.urlify)
           bot.msg(channel, "Removed '" + message.urlify + "' from watchlist.")
