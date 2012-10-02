@@ -29,7 +29,7 @@ class IsUp(val handler: ModuleHandler) extends TriggerListener {
     "!isup -p http://foo.tld    - Checks if http://foo.tld responds to ping.\n" +
     "!isup -t 20 http://foo.tld - Specify a 20 second timeout value. Default is " + defaultTimeout + ".\n" +
     "!whenup http://foo.tld     - Watch http://foo.tld and notify me when it comes back up.\n" +
-    "!isuprm http://foo.tld     - Stop watching http://foo.tld.\n" +
+    "!whenuprm http://foo.tld     - Stop watching http://foo.tld.\n" +
     "!isupls                    - Show all URLs I'm watching\n" +
     "Note: I'll forget all the URLs I'm watching between restarts.")
 
