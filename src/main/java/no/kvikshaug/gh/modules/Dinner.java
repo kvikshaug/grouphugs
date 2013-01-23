@@ -44,41 +44,41 @@ public class Dinner implements TriggerListener {
     public void onTrigger(String channel, String sender, String login, String hostname, String message, String trigger) {
 
         URL hangarenUrl = null;
-		try {
-			hangarenUrl = new URL("http://www.sit.no/dagensmiddag_json/?campus=hangaren");
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
+        try {
+            hangarenUrl = new URL("http://www.sit.no/dagensmiddag_json/?campus=hangaren");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
         BufferedReader in;
         String hangaren = "";
         String inputLine = "";
         try {
-        	in = new BufferedReader(new InputStreamReader(hangarenUrl.openStream(), CharEncoding.guessEncoding(hangarenUrl, "ISO-8859-1")));
-			while ((inputLine = in.readLine()) != null) {
-			    hangaren += inputLine;
-			}
-			in.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+            in = new BufferedReader(new InputStreamReader(hangarenUrl.openStream(), CharEncoding.guessEncoding(hangarenUrl, "ISO-8859-1")));
+            while ((inputLine = in.readLine()) != null) {
+                hangaren += inputLine;
+            }
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         URL realfagUrl = null;
-		try {
-			realfagUrl = new URL("http://www.sit.no/dagensmiddag_json/?campus=realfag");
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-        String realfag = "";        
+        try {
+            realfagUrl = new URL("http://www.sit.no/dagensmiddag_json/?campus=realfag");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        String realfag = "";
         inputLine = "";
         try {
-        	in = new BufferedReader(new InputStreamReader(realfagUrl.openStream(), CharEncoding.guessEncoding(realfagUrl, "ISO-8859-1")));
-			while ((inputLine = in.readLine()) != null) {
-			    realfag += inputLine;
-			}
-			in.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+            in = new BufferedReader(new InputStreamReader(realfagUrl.openStream(), CharEncoding.guessEncoding(realfagUrl, "ISO-8859-1")));
+            while ((inputLine = in.readLine()) != null) {
+                realfag += inputLine;
+            }
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         String dayToFind = "mandag"; //monday default, why not
 
@@ -98,7 +98,6 @@ public class Dinner implements TriggerListener {
         String realfagOutput = "";
 
         String regexp = dayToFind +"\":\"(.*?)\\\\n\"";
-        
 
         Pattern p = Pattern.compile(regexp);
         Matcher matcher = p.matcher(hangaren);
@@ -115,7 +114,6 @@ public class Dinner implements TriggerListener {
         realfagOutput = realfagOutput.replace("\\n", " | ");
 
         String output = "Hangaren: " + hangarenOutput + "\n" + "Realfag: " + realfagOutput;
-
 
         Grouphug.getInstance().msg(channel, output);
     }
