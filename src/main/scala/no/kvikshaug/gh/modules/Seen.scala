@@ -1,6 +1,6 @@
 package no.kvikshaug.gh.modules
 
-import no.kvikshaug.gh.{Grouphug, ModuleHandler}
+import no.kvikshaug.gh.{Config, Grouphug, ModuleHandler}
 import no.kvikshaug.gh.listeners.{TriggerListener, MessageListener,
   NickChangeListener, JoinListener, QuitListener, PartListener}
 import no.kvikshaug.gh.util.SQL
@@ -21,7 +21,7 @@ case class SeenUser(var nicks: List[String], var lastAction: String, var activeN
 
 class Seen(val moduleHandler: ModuleHandler) extends TriggerListener with MessageListener with
   NickChangeListener with JoinListener with QuitListener with PartListener {
-  
+
   val lock = new ReentrantLock
   val f = DateTimeFormat.forPattern("HH:mm dd.MM.yyyy")
   val bot = Grouphug.getInstance
@@ -40,13 +40,21 @@ class Seen(val moduleHandler: ModuleHandler) extends TriggerListener with Messag
 
   def onTrigger(channel: String, sender: String, login: String, hostname: String, message: String,
     trigger: String) {
-    val user = Worm.get[SeenUser].find(_.nicks.contains(message))
+    def userPredicate(user: SeenUser) = {
+      if (Config.seenIsGlobal) {
+        user.nicks.contains(message)
+      } else {
+        user.nicks.contains(message) && user.channel == channel
+      }
+    }
+
+    val user = Worm.get[SeenUser].find(user => userPredicate(user))
     if(user isDefined) {
       val channelInform = if(channel == user.get.channel || user.get.channel.isEmpty) ""
                           else String.format("(in %s) ", user.get.channel)
       val nickInform = if(message == user.get.activeNick || user.get.activeNick.isEmpty) ""
                        else String.format("(as %s) ", user.get.activeNick)
-      
+
       if (channel.equals(user.get.channel)) {
         bot.msg(channel, String.format("%s was last seen %s%s%s at %s", message, channelInform,
         nickInform, user.get.lastAction, f.print(user.get.date)))

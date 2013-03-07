@@ -95,6 +95,15 @@ object Config {
   @throws(classOf[PreferenceNotSetException])
   def dbSchema = ifExists (root \ "Database") get ((ns) => (ns \ "Schema")) text
 
+
+  def seenIsGlobal: Boolean = {
+    try {
+      ifExists(root \ "SeenIsGlobal").text.toBoolean
+    } catch {
+      case e: PreferenceNotSetException => false
+    }
+  }
+
   /* Throws a PNSE if the node doesn't exist */
   def ifExists(ns: NodeSeq, message: String = "Missing corresponding option in " + configFile) = {
     if(ns.isEmpty || ns.text.isEmpty) { throw new PreferenceNotSetException(message) }
