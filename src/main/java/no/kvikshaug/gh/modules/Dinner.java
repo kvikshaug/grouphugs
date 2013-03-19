@@ -53,7 +53,7 @@ public class Dinner implements TriggerListener {
         String hangaren = "";
         String inputLine = "";
         try {
-            in = new BufferedReader(new InputStreamReader(hangarenUrl.openStream(), CharEncoding.guessEncoding(hangarenUrl, "ISO-8859-1")));
+            in = new BufferedReader(new InputStreamReader(hangarenUrl.openStream(), CharEncoding.guessEncoding(hangarenUrl, "UTF-8")));
             while ((inputLine = in.readLine()) != null) {
                 hangaren += inputLine;
             }
@@ -71,7 +71,7 @@ public class Dinner implements TriggerListener {
         String realfag = "";
         inputLine = "";
         try {
-            in = new BufferedReader(new InputStreamReader(realfagUrl.openStream(), CharEncoding.guessEncoding(realfagUrl, "ISO-8859-1")));
+            in = new BufferedReader(new InputStreamReader(realfagUrl.openStream(), CharEncoding.guessEncoding(realfagUrl, "UTF-8")));
             while ((inputLine = in.readLine()) != null) {
                 realfag += inputLine;
             }
