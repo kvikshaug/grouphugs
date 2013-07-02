@@ -80,8 +80,8 @@ public class Web {
             urlConn.setInstanceFollowRedirects(false);
         }
 
-        // Pretend we're using a proper browser and OS :)
-        urlConn.setRequestProperty("User-Agent", "Opera/9.80 (X11; Linux i686; U; en) Presto/2.2.15 Version/10.01");
+        // Pretend we are an old shitty browser so that google calculator uses the old layout
+        urlConn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)");
         // alternative:
         // "MSIE 4.01; Digital AlphaServer 1000A 4/233; Windows NT; Powered By 64-Bit Alpha Processor"
         // (just saying)
