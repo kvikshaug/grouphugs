@@ -191,7 +191,7 @@ class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListe
         ScatsD.retain(String.format("gh.bot.modules.tracking.%s.packages", i.channel), items.size)
         }
       } catch {
-        case e => println("Tracking poller just failed: "); e.printStackTrace; failCount = failCount + 1
+        case e => println("Tracking poller just failed: "); e.printStackTrace;
       }
     }
   }
