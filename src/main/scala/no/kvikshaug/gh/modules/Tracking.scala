@@ -135,7 +135,6 @@ class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListe
       ScatsD.retain(String.format("gh.bot.modules.tracking.%s.packages", channel), items.size)
     }
 
-  var failCount = 0
   def run {
     items foreach { i =>
       try {
@@ -193,13 +192,6 @@ class Tracking(moduleHandler: ModuleHandler) extends TimerTask with TriggerListe
         }
       } catch {
         case e => println("Tracking poller just failed: "); e.printStackTrace; failCount = failCount + 1
-      }
-    }
-    if(failCount >= 5) {
-      failCount = 0
-      for(channel <- Config.channels.asScala) {
-        bot.msg(channel, "The package tracking module has now failed 5 times in a row. " +
-          "If this continues, you might want to check the logs and your package status manually.")
       }
     }
   }
